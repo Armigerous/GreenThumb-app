@@ -45,7 +45,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           >
             <View
               className={`items-center justify-center p-2 ${
-                isFocused ? "border-2 border-brand-500/30 rounded-md" : ""
+                isFocused ? "border-2 border-brand-800/50 rounded-md" : ""
               }`}
               style={{
                 width: 50,
