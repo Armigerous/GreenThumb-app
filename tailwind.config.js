@@ -48,7 +48,7 @@ module.exports = {
         foreground: "#2e2c29", // Cream 800
         primary: {
           DEFAULT: "#5E994B", // Brand 600
-          foreground: "#fffefa", // Cream 800
+          foreground: "#fffefa", // Cream 200
         },
         destructive: {
           DEFAULT: "#E50000", // RED
