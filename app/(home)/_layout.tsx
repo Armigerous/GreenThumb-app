@@ -82,22 +82,6 @@ export default function HomeLayout() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarItemStyle: {
-          width: "100%",
-          height: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        tabBarStyle: {
-          borderRadius: 50,
-          marginHorizontal: 20,
-          marginBottom: 20,
-          height: 52,
-          position: "absolute",
-          overflow: "hidden",
-          borderWidth: 1,
-          borderColor: "#ded8ca",
-        },
       }}
     >
       <Tabs.Screen
