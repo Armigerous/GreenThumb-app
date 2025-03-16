@@ -1,43 +1,37 @@
-import React, { useEffect, useState } from "react";
+import { usePlantDetails } from "@/lib/queries";
+import { PlantData } from "@/types/plant";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
   Image,
   ScrollView,
-  ActivityIndicator,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { getPlantDetails } from "@/lib/api";
-import { PlantData } from "@/types/plant";
+import { addPlantToStoredList } from "@/lib/backgroundService";
 
 export default function PlantDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const [plant, setPlant] = useState<PlantData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
+  // Use our new query hook instead of direct API call
+  const {
+    data: plant,
+    isLoading: loading,
+    error: queryError,
+  } = usePlantDetails(slug);
+
+  // Add this plant to the stored list for background updates
   useEffect(() => {
-    async function loadPlantDetails() {
-      if (!slug) return;
-
-      try {
-        setLoading(true);
-        const plantData = await getPlantDetails(slug);
-        setPlant(plantData);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to load plant details:", err);
-        setError("Failed to load plant details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
+    if (slug && typeof slug === "string") {
+      addPlantToStoredList(slug).catch((err) => {
+        console.error("Failed to add plant to stored list:", err);
+      });
     }
-
-    loadPlantDetails();
   }, [slug]);
 
   useEffect(() => {
@@ -50,24 +44,27 @@ export default function PlantDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
+      <SafeAreaView className="flex-1 justify-center items-center bg-cream-50">
         <ActivityIndicator size="large" color="#047857" />
-        <Text className="mt-3 text-base text-gray-600">
+        <Text className="mt-3 text-base text-cream-600">
           Loading plant details...
         </Text>
       </SafeAreaView>
     );
   }
 
-  if (error || !plant) {
+  if (queryError || !plant) {
+    const errorMessage =
+      queryError instanceof Error ? queryError.message : "Plant not found";
+
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50 p-5">
+      <SafeAreaView className="flex-1 justify-center items-center bg-cream-50 p-5">
         <Ionicons name="leaf" size={64} color="#d1d5db" />
         <Text className="text-xl font-bold text-red-500 mt-4">
           Oops! Something went wrong
         </Text>
-        <Text className="text-sm text-gray-500 text-center mt-2">
-          {error || "Plant not found"}
+        <Text className="text-sm text-cream-500 text-center mt-2">
+          {errorMessage}
         </Text>
         <TouchableOpacity
           className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
@@ -80,7 +77,7 @@ export default function PlantDetailScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-cream-50">
       <ScrollView>
         {/* Plant Image */}
         <View className="w-full h-[300px]">
@@ -88,7 +85,7 @@ export default function PlantDetailScreen() {
             source={{
               uri:
                 plant.first_image ||
-                "https://theofficialgreenthumb.com/no-plant-image.png",
+                "https://theofficialbrandthumb.com/no-plant-image.png",
             }}
             className="w-full h-full"
             resizeMode="cover"
@@ -97,16 +94,16 @@ export default function PlantDetailScreen() {
 
         {/* Plant Information */}
         <View className="p-4 bg-white rounded-t-3xl -mt-5">
-          <Text className="text-2xl font-bold text-gray-800 mb-1">
+          <Text className="text-2xl font-bold text-cream-800 mb-1">
             {plant.common_name || plant.scientific_name}
           </Text>
-          <Text className="text-base italic text-gray-500 mb-3">
+          <Text className="text-base italic text-cream-500 mb-3">
             {plant.scientific_name}
           </Text>
 
           {plant.first_tag && (
-            <View className="bg-green-100 px-3 py-1.5 rounded-2xl self-start mb-4">
-              <Text className="text-xs text-green-700 font-medium">
+            <View className="bg-brand-100 px-3 py-1.5 rounded-2xl self-start mb-4">
+              <Text className="text-xs text-brand-700 font-medium">
                 {plant.first_tag}
               </Text>
             </View>
@@ -114,10 +111,10 @@ export default function PlantDetailScreen() {
 
           {plant.description && (
             <View className="mt-6">
-              <Text className="text-lg font-bold text-gray-800 mb-3">
+              <Text className="text-lg font-bold text-cream-800 mb-3">
                 Description
               </Text>
-              <Text className="text-sm leading-relaxed text-gray-600">
+              <Text className="text-sm leading-relaxed text-cream-600">
                 {plant.description.replace(/<[^>]*>/g, "")}
               </Text>
             </View>
@@ -125,16 +122,16 @@ export default function PlantDetailScreen() {
 
           {/* Care Information */}
           <View className="mt-6">
-            <Text className="text-lg font-bold text-gray-800 mb-3">
+            <Text className="text-lg font-bold text-cream-800 mb-3">
               Plant Care
             </Text>
 
             {plant.care_level && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Care Level:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.care_level}
                 </Text>
               </View>
@@ -142,10 +139,10 @@ export default function PlantDetailScreen() {
 
             {plant.light_requirements && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Light:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.light_requirements}
                 </Text>
               </View>
@@ -153,10 +150,10 @@ export default function PlantDetailScreen() {
 
             {plant.water_requirements && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Water:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.water_requirements}
                 </Text>
               </View>
@@ -164,10 +161,10 @@ export default function PlantDetailScreen() {
 
             {plant.temperature_range && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Temperature:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.temperature_range}
                 </Text>
               </View>
@@ -175,10 +172,10 @@ export default function PlantDetailScreen() {
 
             {plant.humidity_requirements && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Humidity:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.humidity_requirements}
                 </Text>
               </View>
@@ -186,10 +183,10 @@ export default function PlantDetailScreen() {
 
             {plant.soil_type && (
               <View className="flex-row mb-2">
-                <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                   Soil:
                 </Text>
-                <Text className="text-sm text-gray-500 flex-1">
+                <Text className="text-sm text-cream-500 flex-1">
                   {plant.soil_type}
                 </Text>
               </View>
@@ -199,16 +196,16 @@ export default function PlantDetailScreen() {
           {/* Additional Information */}
           {(plant.family || plant.genus || plant.species) && (
             <View className="mt-6">
-              <Text className="text-lg font-bold text-gray-800 mb-3">
+              <Text className="text-lg font-bold text-cream-800 mb-3">
                 Taxonomy
               </Text>
 
               {plant.family && (
                 <View className="flex-row mb-2">
-                  <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                  <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                     Family:
                   </Text>
-                  <Text className="text-sm text-gray-500 flex-1">
+                  <Text className="text-sm text-cream-500 flex-1">
                     {plant.family}
                   </Text>
                 </View>
@@ -216,10 +213,10 @@ export default function PlantDetailScreen() {
 
               {plant.genus && (
                 <View className="flex-row mb-2">
-                  <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                  <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                     Genus:
                   </Text>
-                  <Text className="text-sm text-gray-500 flex-1">
+                  <Text className="text-sm text-cream-500 flex-1">
                     {plant.genus}
                   </Text>
                 </View>
@@ -227,10 +224,10 @@ export default function PlantDetailScreen() {
 
               {plant.species && (
                 <View className="flex-row mb-2">
-                  <Text className="text-sm font-semibold text-gray-600 w-[100px]">
+                  <Text className="text-sm font-semibold text-cream-600 w-[100px]">
                     Species:
                   </Text>
-                  <Text className="text-sm text-gray-500 flex-1">
+                  <Text className="text-sm text-cream-500 flex-1">
                     {plant.species}
                   </Text>
                 </View>

@@ -3,7 +3,6 @@ export interface PlantCardData {
   slug: string;
   scientific_name: string;
   common_name?: string;
-  category?: string;
   first_image?: string;
   first_tag?: string;
   description?: string;

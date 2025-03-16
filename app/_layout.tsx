@@ -1,8 +1,23 @@
 import { tokenCache } from "@/cache";
 import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
 import { Slot, useRouter, useSegments } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { SWRConfig } from "swr";
 import "./globals.css";
+import { Platform, Text, View } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { configureBackgroundFetch } from "@/lib/backgroundService";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Default settings for all queries
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // This component handles authentication routing
 function InitialLayout() {
@@ -24,20 +39,64 @@ function InitialLayout() {
     }
   }, [isSignedIn, isLoaded, segments]);
 
+  // Initialize background service when user is signed in
+  useEffect(() => {
+    if (isSignedIn && Platform.OS !== "web") {
+      // Configure background fetch for plant data updates
+      configureBackgroundFetch();
+    }
+  }, [isSignedIn]);
+
   return <Slot />;
 }
 
 export default function RootLayout() {
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+  const [isClerkReady, setIsClerkReady] = useState(true);
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-  if (!publishableKey) {
-    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env");
+  // Check if we have a publishable key
+  useEffect(() => {
+    if (!publishableKey) {
+      console.error("Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in .env");
+      setIsClerkReady(false);
+    }
+  }, [publishableKey]);
+
+  // If Clerk is not ready, show a fallback UI
+  if (!isClerkReady) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
+        <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20 }}>
+          Authentication configuration is missing.
+        </Text>
+        <Text style={{ fontSize: 14, textAlign: "center", color: "#666" }}>
+          Please add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file.
+        </Text>
+      </View>
+    );
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
       <ClerkLoaded>
-        <InitialLayout />
+        <QueryClientProvider client={queryClient}>
+          <SWRConfig
+            value={{
+              provider: () => new Map(),
+              revalidateOnFocus: false,
+              revalidateOnReconnect: true,
+            }}
+          >
+            <InitialLayout />
+          </SWRConfig>
+        </QueryClientProvider>
       </ClerkLoaded>
     </ClerkProvider>
   );

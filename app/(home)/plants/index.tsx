@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Text,
   View,
   SafeAreaView,
-  ScrollView,
   ActivityIndicator,
-  FlatList,
+  StatusBar,
 } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import SearchBar from "@/components/Plants/SearchBar";
-import CategoryFilter from "@/components/Plants/CategoryFilter";
-import PlantCard from "@/components/Plants/PlantCard";
+import FilterSelector from "@/components/Plants/FilterSelector";
 import NameToggle from "@/components/Plants/NameToggle";
-import { searchPlants } from "@/lib/api";
-import { PlantData } from "@/types/plant";
+import SearchResults from "@/components/Plants/SearchResults";
 
 export default function PlantDatabaseScreen() {
   const { user } = useUser();
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [plants, setPlants] = useState<PlantData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Categories for filter buttons
-  const categories = [
+  // Filters for filter buttons
+  const filterOptions = [
     "All",
     "Houseplant",
     "Succulent",
@@ -39,7 +30,7 @@ export default function PlantDatabaseScreen() {
     "Tree",
     "Shrub",
   ];
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [useCommonNames, setUseCommonNames] = useState(false);
 
   // Debounce search query
@@ -52,60 +43,24 @@ export default function PlantDatabaseScreen() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch plants when query, category, or page changes
-  useEffect(() => {
-    async function fetchPlants() {
-      try {
-        setLoading(true);
-        setError(null);
+  // Handle filter change
+  const handleFilterChange = useCallback((filter: string) => {
+    setActiveFilter(filter);
+    setPage(1); // Reset to first page on filter change
+  }, []);
 
-        // Convert category filter to API format
-        const filters =
-          activeCategory !== "All" ? activeCategory.toLowerCase() : "";
+  // Handle name type toggle
+  const handleNameTypeToggle = useCallback((useCommon: boolean) => {
+    setUseCommonNames(useCommon);
+    setPage(1); // Reset to first page on name type change
+  }, []);
 
-        // Set name type based on toggle
-        const nameType = useCommonNames ? "common" : "scientific";
-
-        const response = await searchPlants(
-          debouncedQuery,
-          page,
-          filters,
-          nameType
-        );
-
-        setPlants(response.results);
-        setTotalCount(response.count);
-      } catch (err) {
-        console.error("Failed to fetch plants:", err);
-        setError("Failed to load plants. Please try again.");
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    }
-
-    fetchPlants();
-  }, [debouncedQuery, activeCategory, page, useCommonNames]);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setPage(1);
-  };
-
-  const handleLoadMore = () => {
-    if (plants.length < totalCount && !loading) {
-      setPage((prevPage) => prevPage + 1);
-    }
-  };
-
-  const renderEmptyState = () => (
-    <View className="items-center justify-center py-8">
-      <Ionicons name="leaf" size={48} color="#d1d5db" />
-      <Text className="text-gray-400 mt-2 text-center">
-        No plants found. Try a different search.
-      </Text>
-    </View>
-  );
+  // Handle page change
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+    // Scroll to top of the screen when changing pages
+    StatusBar.currentHeight && window.scrollTo(0, StatusBar.currentHeight);
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -124,52 +79,25 @@ export default function PlantDatabaseScreen() {
         {/* Name Toggle */}
         <NameToggle
           useCommonNames={useCommonNames}
-          onToggle={setUseCommonNames}
+          onToggle={handleNameTypeToggle}
         />
 
-        {/* Category Filter */}
-        <CategoryFilter
-          categories={categories}
-          activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
+        {/* Filter Selector */}
+        <FilterSelector
+          filters={filterOptions}
+          activeFilter={activeFilter}
+          onSelectFilter={handleFilterChange}
         />
       </View>
 
-      {loading && page === 1 ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#047857" />
-          <Text className="mt-4 text-gray-600">Loading plants...</Text>
-        </View>
-      ) : error ? (
-        <View className="flex-1 justify-center items-center px-5">
-          <Ionicons name="alert-circle" size={48} color="#ef4444" />
-          <Text className="text-red-500 font-bold text-lg mt-4">
-            Oops! Something went wrong
-          </Text>
-          <Text className="text-gray-500 text-center mt-2">{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={plants}
-          keyExtractor={(item) => `${item.id}-${item.slug}`}
-          contentContainerStyle={{ padding: 20 }}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          renderItem={({ item }) => <PlantCard plant={item} />}
-          ListEmptyComponent={renderEmptyState}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loading && page > 1 ? (
-              <View className="py-4 items-center">
-                <ActivityIndicator size="small" color="#047857" />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      {/* Search Results */}
+      <SearchResults
+        query={debouncedQuery}
+        page={page}
+        filters={activeFilter !== "All" ? activeFilter.toLowerCase() : ""}
+        nameType={useCommonNames ? "common" : "scientific"}
+        onPageChange={handlePageChange}
+      />
     </SafeAreaView>
   );
 }
