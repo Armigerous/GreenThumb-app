@@ -33,7 +33,7 @@ export default function ProfileScreen() {
               className="w-20 h-20 rounded-full mr-4"
             />
           ) : (
-            <View className="w-20 h-20 rounded-full bg-gray-200 items-center justify-center mr-4">
+            <View className="w-20 h-20 rounded-full bg-cream-200 items-center justify-center mr-4">
               <Ionicons name="person" size={40} color="#6b7280" />
             </View>
           )}
@@ -48,9 +48,9 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View className="border-t border-gray-200 pt-6">
+        <View className="border-t border-cream-200 pt-6">
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-gray-100"
+            className="flex-row items-center py-4 border-b border-cream-100"
             onPress={() => {}}
           >
             <Ionicons
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-gray-100"
+            className="flex-row items-center py-4 border-b border-cream-100"
             onPress={() => {}}
           >
             <Ionicons

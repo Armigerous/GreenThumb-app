@@ -35,7 +35,7 @@ export default function WelcomeScreen() {
 
         <View className="items-center mb-8">
           <Text className="text-2xl font-bold text-foreground mb-2">
-            The GreenThumb
+            The brandThumb
           </Text>
           <Text className="text-base text-foreground text-center opacity-80">
             Discover and care{"\n"}for plants

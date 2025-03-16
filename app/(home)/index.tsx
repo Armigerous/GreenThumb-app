@@ -53,18 +53,18 @@ export default function Page() {
               Hello, {user?.firstName}
             </Text>
             <Text className="text-base text-foreground opacity-70 mb-4">
-              Welcome to The GreenThumb!
+              Welcome to The brandThumb!
             </Text>
 
             {/* Garden Stats */}
-            <View className="flex-row bg-gray-50 rounded-xl p-4 mb-6">
-              <View className="flex-1 items-center border-r border-gray-200">
+            <View className="flex-row bg-cream-50 rounded-xl p-4 mb-6">
+              <View className="flex-1 items-center border-r border-cream-200">
                 <Text className="text-2xl font-bold text-emerald-600">3</Text>
-                <Text className="text-xs text-gray-500">Gardens</Text>
+                <Text className="text-xs text-cream-500">Gardens</Text>
               </View>
               <View className="flex-1 items-center">
                 <Text className="text-2xl font-bold text-emerald-600">12</Text>
-                <Text className="text-xs text-gray-500">Plants</Text>
+                <Text className="text-xs text-cream-500">Plants</Text>
               </View>
             </View>
           </View>
@@ -89,7 +89,7 @@ export default function Page() {
                     key={reminder.id}
                     className={`p-4 flex-row items-center justify-between ${
                       index < reminders.length - 1
-                        ? "border-b border-gray-100"
+                        ? "border-b border-cream-100"
                         : ""
                     }`}
                   >
@@ -107,7 +107,7 @@ export default function Page() {
                         <Text className="text-base font-medium text-foreground">
                           {reminder.task} {reminder.plantName}
                         </Text>
-                        <Text className="text-xs text-gray-500">
+                        <Text className="text-xs text-cream-500">
                           {reminder.dueDate}
                         </Text>
                       </View>
@@ -122,8 +122,8 @@ export default function Page() {
                 ))}
               </View>
             ) : (
-              <View className="bg-gray-50 rounded-xl p-4 items-center">
-                <Text className="text-base text-gray-500">
+              <View className="bg-cream-50 rounded-xl p-4 items-center">
+                <Text className="text-base text-cream-500">
                   No reminders for today!
                 </Text>
               </View>
@@ -163,7 +163,7 @@ export default function Page() {
             <Text className="text-lg font-semibold text-foreground mb-4">
               Plant Care Tips
             </Text>
-            <View className="bg-gray-50 rounded-xl p-4 mb-4">
+            <View className="bg-cream-50 rounded-xl p-4 mb-4">
               <Text className="text-base font-medium text-foreground mb-2">
                 Watering Basics
               </Text>
@@ -172,7 +172,7 @@ export default function Page() {
                 feels dry to the touch.
               </Text>
             </View>
-            <View className="bg-gray-50 rounded-xl p-4">
+            <View className="bg-cream-50 rounded-xl p-4">
               <Text className="text-base font-medium text-foreground mb-2">
                 Light Requirements
               </Text>
