@@ -9,11 +9,24 @@ const BACKGROUND_FETCH_TASK_ID = "com.greenthumb.plantupdate";
 const STORED_PLANT_SLUGS_KEY = "greenthumb_stored_plant_slugs";
 
 // Check if BackgroundFetch is available
-let BackgroundFetch: any;
+let BackgroundFetch: any = null;
 try {
-  BackgroundFetch = require("react-native-background-fetch");
+  // Use dynamic import to avoid the error when the module is not available
+  if (Platform.OS !== "web") {
+    // We need to wrap this in a function to avoid immediate execution
+    const getBackgroundFetch = () => {
+      try {
+        return require("react-native-background-fetch");
+      } catch (e) {
+        console.log("BackgroundFetch module not available:", e);
+        return null;
+      }
+    };
+
+    BackgroundFetch = getBackgroundFetch();
+  }
 } catch (error) {
-  console.log("BackgroundFetch not available in this environment");
+  console.log("Error importing BackgroundFetch:", error);
 }
 
 /**
@@ -26,30 +39,34 @@ export function configureBackgroundFetch(): void {
     return;
   }
 
-  // Configure background fetch
-  BackgroundFetch.configure(
-    {
-      minimumFetchInterval: 15, // Fetch interval in minutes (minimum is 15 minutes)
-      stopOnTerminate: false,
-      startOnBoot: true,
-      enableHeadless: true,
-      requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
-    },
-    async (taskId: string) => {
-      if (taskId === BACKGROUND_FETCH_TASK_ID) {
-        await performPlantDataUpdate();
+  try {
+    // Configure background fetch
+    BackgroundFetch.configure(
+      {
+        minimumFetchInterval: 15, // Fetch interval in minutes (minimum is 15 minutes)
+        stopOnTerminate: false,
+        startOnBoot: true,
+        enableHeadless: true,
+        requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+      },
+      async (taskId: string) => {
+        if (taskId === BACKGROUND_FETCH_TASK_ID) {
+          await performPlantDataUpdate();
+        }
+
+        // Required: Signal completion of your task
+        BackgroundFetch.finish(taskId);
+      },
+      (error: any) => {
+        console.error("Background fetch failed to start:", error);
       }
+    );
 
-      // Required: Signal completion of your task
-      BackgroundFetch.finish(taskId);
-    },
-    (error: any) => {
-      console.error("Background fetch failed to start:", error);
-    }
-  );
-
-  // Schedule the task to run at night (around 2 AM)
-  scheduleNightlyUpdate();
+    // Schedule the task to run at night (around 2 AM)
+    scheduleNightlyUpdate();
+  } catch (error) {
+    console.error("Error configuring BackgroundFetch:", error);
+  }
 }
 
 /**
@@ -59,32 +76,36 @@ function scheduleNightlyUpdate(): void {
   // Skip if BackgroundFetch is not available
   if (!BackgroundFetch) return;
 
-  // Calculate time until 2 AM
-  const now = new Date();
-  const nightTime = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    2, // 2 AM
-    0,
-    0
-  );
+  try {
+    // Calculate time until 2 AM
+    const now = new Date();
+    const nightTime = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      2, // 2 AM
+      0,
+      0
+    );
 
-  // If it's already past 2 AM, schedule for the next day
-  if (now.getHours() >= 2) {
-    nightTime.setDate(nightTime.getDate() + 1);
+    // If it's already past 2 AM, schedule for the next day
+    if (now.getHours() >= 2) {
+      nightTime.setDate(nightTime.getDate() + 1);
+    }
+
+    const timeUntilNight = nightTime.getTime() - now.getTime();
+    const minutesUntilNight = Math.floor(timeUntilNight / (1000 * 60));
+
+    // Schedule the task
+    BackgroundFetch.scheduleTask({
+      taskId: BACKGROUND_FETCH_TASK_ID,
+      delay: minutesUntilNight * 60 * 1000, // Convert minutes to milliseconds
+      periodic: true,
+      forceAlarmManager: true,
+    });
+  } catch (error) {
+    console.error("Error scheduling nightly update:", error);
   }
-
-  const timeUntilNight = nightTime.getTime() - now.getTime();
-  const minutesUntilNight = Math.floor(timeUntilNight / (1000 * 60));
-
-  // Schedule the task
-  BackgroundFetch.scheduleTask({
-    taskId: BACKGROUND_FETCH_TASK_ID,
-    delay: minutesUntilNight * 60 * 1000, // Convert minutes to milliseconds
-    periodic: true,
-    forceAlarmManager: true,
-  });
 }
 
 /**
