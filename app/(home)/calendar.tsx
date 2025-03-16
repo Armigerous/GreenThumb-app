@@ -137,7 +137,7 @@ export default function CalendarScreen() {
                   ? "bg-emerald-500"
                   : isToday(day)
                   ? "bg-emerald-100"
-                  : "bg-gray-50"
+                  : "bg-cream-50"
               }`}
               onPress={() => setSelectedDay(day)}
             >
@@ -147,7 +147,7 @@ export default function CalendarScreen() {
                     ? "text-white"
                     : isToday(day)
                     ? "text-emerald-600"
-                    : "text-gray-500"
+                    : "text-cream-500"
                 }`}
               >
                 {formatWeekday(day)}
@@ -190,7 +190,9 @@ export default function CalendarScreen() {
               <View
                 key={reminder.id}
                 className={`p-4 flex-row items-center justify-between ${
-                  index < reminders.length - 1 ? "border-b border-gray-100" : ""
+                  index < reminders.length - 1
+                    ? "border-b border-cream-100"
+                    : ""
                 }`}
               >
                 <View className="flex-row items-center flex-1">
@@ -198,7 +200,7 @@ export default function CalendarScreen() {
                     className={`w-6 h-6 rounded-full border-2 mr-3 items-center justify-center ${
                       reminder.completed
                         ? "bg-emerald-500 border-emerald-500"
-                        : "border-gray-300"
+                        : "border-cream-300"
                     }`}
                     onPress={() => handleToggleComplete(reminder.id)}
                   >
@@ -210,14 +212,14 @@ export default function CalendarScreen() {
                     <Text
                       className={`text-base font-medium ${
                         reminder.completed
-                          ? "text-gray-400 line-through"
+                          ? "text-cream-400 line-through"
                           : "text-foreground"
                       }`}
                     >
                       {reminder.task} {reminder.plantName}
                     </Text>
                     <View className="flex-row items-center">
-                      <Text className="text-xs text-gray-500">
+                      <Text className="text-xs text-cream-500">
                         {reminder.time} • {reminder.gardenName}
                       </Text>
                     </View>
@@ -234,9 +236,9 @@ export default function CalendarScreen() {
             ))}
           </View>
         ) : (
-          <View className="bg-gray-50 rounded-xl p-8 items-center justify-center">
+          <View className="bg-cream-50 rounded-xl p-8 items-center justify-center">
             <Ionicons name="calendar-outline" size={48} color="#d1d5db" />
-            <Text className="text-base text-gray-500 mt-4 text-center">
+            <Text className="text-base text-cream-500 mt-4 text-center">
               No care reminders for this day
             </Text>
             <TouchableOpacity className="mt-4 bg-emerald-500 px-4 py-2 rounded-lg">

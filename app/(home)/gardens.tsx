@@ -73,7 +73,7 @@ export default function GardensScreen() {
               <Text className="text-lg font-bold text-foreground mb-1">
                 {garden.name}
               </Text>
-              <Text className="text-sm text-gray-500 mb-2">
+              <Text className="text-sm text-cream-500 mb-2">
                 {garden.location} • {garden.conditions}
               </Text>
               <View className="flex-row items-center">
@@ -87,11 +87,11 @@ export default function GardensScreen() {
         ))}
 
         <TouchableOpacity
-          className="bg-gray-50 rounded-xl p-4 items-center justify-center mb-8 border border-dashed border-gray-300"
+          className="bg-cream-50 rounded-xl p-4 items-center justify-center mb-8 border border-dashed border-cream-300"
           onPress={() => {}}
         >
           <Ionicons name="add-circle-outline" size={32} color="#6b7280" />
-          <Text className="text-base text-gray-500 mt-2">Add New Garden</Text>
+          <Text className="text-base text-cream-500 mt-2">Add New Garden</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
