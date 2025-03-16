@@ -42,8 +42,12 @@ function InitialLayout() {
   // Initialize background service when user is signed in
   useEffect(() => {
     if (isSignedIn && Platform.OS !== "web") {
-      // Configure background fetch for plant data updates
-      configureBackgroundFetch();
+      try {
+        // Configure background fetch for plant data updates
+        configureBackgroundFetch();
+      } catch (error) {
+        console.error("Error setting up background fetch:", error);
+      }
     }
   }, [isSignedIn]);
 
