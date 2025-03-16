@@ -13,12 +13,12 @@ const NameToggle: React.FC<NameToggleProps> = ({
 }) => {
   return (
     <View className="flex-row items-center mb-4">
-      <Text className="text-sm text-gray-600 mr-2">
+      <Text className="text-sm text-cream-600 mr-2">
         {useCommonNames ? "Using Common Names" : "Using Scientific Names"}
       </Text>
       <TouchableOpacity
         className={`w-12 h-6 rounded-full p-0.5 ${
-          useCommonNames ? "bg-green-100" : "bg-gray-200"
+          useCommonNames ? "bg-brand-100" : "bg-cream-200"
         }`}
         onPress={() => onToggle(!useCommonNames)}
         activeOpacity={0.7}
