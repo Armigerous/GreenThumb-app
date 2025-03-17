@@ -13,7 +13,7 @@ export default function PlantsLayout() {
       <Stack.Screen
         name="[slug]"
         options={{
-          headerShown: true,
+          headerShown: false,
           headerBackTitle: "Plants",
           presentation: "card",
           headerLeft: ({ tintColor }) => (
