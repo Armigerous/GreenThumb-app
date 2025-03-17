@@ -36,3 +36,11 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Cursor MCP configuration
+.cursor/mcp.json

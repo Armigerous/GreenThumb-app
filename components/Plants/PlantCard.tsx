@@ -11,9 +11,6 @@ interface PlantCardProps {
 const PlantCard: React.FC<PlantCardProps> = memo(({ plant }) => {
   const router = useRouter();
 
-  // Debug the plant data
-  console.log("Plant data in PlantCard:", JSON.stringify(plant, null, 2));
-
   // Ensure we have the required properties
   if (!plant || !plant.slug) {
     console.error("Invalid plant data:", plant);

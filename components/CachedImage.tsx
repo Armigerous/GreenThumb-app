@@ -31,7 +31,7 @@ const isExpoImageAvailable = () => {
 
 const CachedImage: React.FC<CachedImageProps> = ({
   uri,
-  fallbackUri = "https://theofficialbrandthumb.com/no-plant-image.png",
+  fallbackUri = "https://theofficialgreenthumb.com/no-plant-image.png",
   style,
   resizeMode = "cover",
 }) => {
