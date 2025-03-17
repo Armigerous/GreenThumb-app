@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
 import type { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
+import type { Garden } from "@/types/garden";
 import { useEffect } from "react";
 import {
   shouldUpdateCache,
@@ -9,6 +10,7 @@ import {
   STORAGE_KEYS,
   getPlantDetailKey,
 } from "./storage";
+import { supabase } from "./supabaseClient";
 
 // Constants for caching
 const ONE_DAY_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -202,4 +204,78 @@ export function usePrefetchPlantDetails() {
       }
     }
   };
+}
+
+// Garden queries
+export function useUserGardens(userId?: string) {
+  const queryClient = useQueryClient();
+
+  return useQuery<Garden[], Error>({
+    queryKey: ["userGardens", userId],
+    queryFn: async () => {
+      if (!userId) throw new Error("User ID is required");
+
+      console.log("Fetching gardens for user:", userId);
+
+      const { data, error } = await supabase
+        .from("user_gardens")
+        .select(
+          `
+          *,
+          user_plants (
+            id,
+            custom_name,
+            botanical_name,
+            status,
+            images
+          )
+        `
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Supabase error fetching gardens:", error);
+        throw new Error(error.message);
+      }
+
+      console.log("Fetched gardens:", data);
+      return data;
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+}
+
+export function useGardenDetails(gardenId: number) {
+  const queryClient = useQueryClient();
+
+  return useQuery<Garden, Error>({
+    queryKey: ["garden", gardenId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_gardens")
+        .select(
+          `
+          *,
+          user_plants (
+            id,
+            custom_name,
+            botanical_name,
+            status,
+            images,
+            care_logs,
+            location_tags
+          )
+        `
+        )
+        .eq("id", gardenId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!gardenId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 }
