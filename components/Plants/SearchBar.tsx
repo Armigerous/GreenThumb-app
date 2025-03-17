@@ -14,18 +14,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Search plants...",
 }) => {
   return (
-    <View className="flex-row items-center bg-cream-100 rounded-xl px-3 py-2.5 mb-4">
-      <Ionicons name="search" size={20} color="#6b7280" />
+    <View className="flex-row items-center bg-cream-100 rounded-xl px-3 py-2.5 mb-4 border border-cream-300">
+      <Ionicons name="search" size={20} color="#161513" />
       <TextInput
-        className="flex-1 ml-2 text-base text-cream-800"
+        className="flex-1 ml-2 text-cream-800"
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor="#161513"
+        cursorColor="#5E994B"
       />
       {value.length > 0 && (
         <TouchableOpacity onPress={() => onChangeText("")}>
-          <Ionicons name="close-circle" size={20} color="#6b7280" />
+          <Ionicons name="close-circle" size={20} color="#161513" />
         </TouchableOpacity>
       )}
     </View>
