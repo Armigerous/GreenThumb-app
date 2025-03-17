@@ -85,7 +85,7 @@ export default function PlantDetailScreen() {
             source={{
               uri:
                 plant.first_image ||
-                "https://theofficialbrandthumb.com/no-plant-image.png",
+                "https://theofficialgreenthumb.com/no-plant-image.png",
             }}
             className="w-full h-full"
             resizeMode="cover"

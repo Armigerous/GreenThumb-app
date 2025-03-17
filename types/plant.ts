@@ -6,6 +6,7 @@ export interface PlantCardData {
   first_image?: string;
   first_tag?: string;
   description?: string;
+  first_image_alt_text?: string;
 }
 
 export interface PlantData extends PlantCardData {

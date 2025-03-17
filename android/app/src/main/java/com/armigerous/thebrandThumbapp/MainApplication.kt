@@ -1,4 +1,4 @@
-package com.armigerous.thebrandThumbapp
+package com.armigerous.TheGreenThumbapp
 
 import android.app.Application
 import android.content.res.Configuration

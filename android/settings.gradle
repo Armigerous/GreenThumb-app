@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'thebrandThumb-app'
+rootProject.name = 'TheGreenThumb-app'
 
 dependencyResolutionManagement {
   versionCatalogs {

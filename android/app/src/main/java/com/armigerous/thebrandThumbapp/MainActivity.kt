@@ -1,4 +1,4 @@
-package com.armigerous.thebrandThumbapp
+package com.armigerous.TheGreenThumbapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

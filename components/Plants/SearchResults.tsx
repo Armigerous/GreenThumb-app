@@ -17,154 +17,28 @@ import {
   Image,
   ScrollView,
   LayoutChangeEvent,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { LinearGradient } from "expo-linear-gradient";
 
 import PlantCard from "./PlantCard";
 import { ApiResponse, PlantCardData } from "@/types/plant";
 import { fetchPlantCards, testSupabaseConnection } from "@/lib/supabaseApi";
 import { prefetchImages } from "@/lib/services/imagePrefetcher";
 import { usePlantCards } from "@/lib/queries";
-
-// Pagination component for mobile
-const PaginationComponent = memo(
-  ({
-    currentPage,
-    totalPages,
-    onPageChange,
-  }: {
-    currentPage: number;
-    totalPages: number;
-    onPageChange: (page: number) => void;
-  }) => {
-    if (totalPages <= 1) return null;
-
-    const isFirstPage = currentPage === 1;
-    const isLastPage = currentPage === totalPages;
-
-    // Generate page numbers to display
-    const getPageNumbers = () => {
-      const pages = [];
-
-      // Always show first page
-      if (currentPage > 3) {
-        pages.push(1);
-      }
-
-      // Show ellipsis if needed
-      if (currentPage > 4) {
-        pages.push(-1); // -1 represents ellipsis
-      }
-
-      // Show pages around current page
-      for (
-        let i = Math.max(2, currentPage - 1);
-        i <= Math.min(totalPages - 1, currentPage + 1);
-        i++
-      ) {
-        pages.push(i);
-      }
-
-      // Show ellipsis if needed
-      if (currentPage < totalPages - 3) {
-        pages.push(-2); // -2 represents ellipsis
-      }
-
-      // Always show last page
-      if (currentPage < totalPages - 2) {
-        pages.push(totalPages);
-      }
-
-      return pages;
-    };
-
-    const pageNumbers = getPageNumbers();
-
-    return (
-      <View className="py-4 px-4 bg-white shadow-sm">
-        <View className="flex-row items-center justify-center">
-          {/* Previous button */}
-          <TouchableOpacity
-            onPress={() => !isFirstPage && onPageChange(currentPage - 1)}
-            disabled={isFirstPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isFirstPage ? "opacity-50" : ""
-            }`}
-            accessibilityLabel="Previous page"
-          >
-            <Ionicons name="chevron-back" size={18} color="#047857" />
-            <Text className="text-brand-700 ml-1">Prev</Text>
-          </TouchableOpacity>
-
-          {/* Page numbers */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-            className="flex-row mx-2"
-          >
-            {pageNumbers.map((page, index) => {
-              if (page < 0) {
-                // Render ellipsis
-                return (
-                  <View key={`ellipsis-${index}`} className="px-2 py-1">
-                    <Text className="text-cream-500">...</Text>
-                  </View>
-                );
-              }
-
-              const isActive = page === currentPage;
-
-              return (
-                <TouchableOpacity
-                  key={`page-${page}`}
-                  onPress={() => onPageChange(page)}
-                  className={`mx-1 px-3 py-1 rounded-lg ${
-                    isActive ? "bg-brand-100" : ""
-                  }`}
-                  accessibilityLabel={`Page ${page}`}
-                >
-                  <Text
-                    className={`${
-                      isActive ? "text-brand-800 font-medium" : "text-cream-600"
-                    }`}
-                  >
-                    {page}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* Next button */}
-          <TouchableOpacity
-            onPress={() => !isLastPage && onPageChange(currentPage + 1)}
-            disabled={isLastPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isLastPage ? "opacity-50" : ""
-            }`}
-            accessibilityLabel="Next page"
-          >
-            <Text className="text-brand-700 mr-1">Next</Text>
-            <Ionicons name="chevron-forward" size={18} color="#047857" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-);
-
-PaginationComponent.displayName = "PaginationComponent";
+import Pagination from "../UI/Pagination";
 
 // Error state component
 const ErrorState = memo(
   ({ message, onRetry }: { message?: string; onRetry: () => void }) => (
     <View className="flex-1 items-center justify-center py-8 px-4">
       <Image
-        source={{ uri: "https://theofficialbrandthumb.com/sad-plant.png" }}
+        source={{ uri: "https://theofficialgreenthumb.com/sad-plant.png" }}
         className="w-40 h-40 rounded-lg mb-4"
       />
       <Text className="text-xl font-bold text-destructive mb-2">
@@ -190,7 +64,7 @@ ErrorState.displayName = "ErrorState";
 const NoResults = memo(() => (
   <View className="flex-1 items-center justify-center py-8 px-4">
     <Image
-      source={{ uri: "https://theofficialbrandthumb.com/sad-plant.png" }}
+      source={{ uri: "https://theofficialgreenthumb.com/sad-plant.png" }}
       className="w-40 h-40 rounded-lg mb-4"
     />
     <Text className="text-xl font-bold text-cream-800 mb-2">
@@ -220,6 +94,52 @@ const PlantCardSkeleton = memo(() => (
 
 PlantCardSkeleton.displayName = "PlantCardSkeleton";
 
+// Scroll fade component to indicate more content
+const ScrollFade = memo(
+  ({
+    showTopFade,
+    showBottomFade,
+  }: {
+    showTopFade: boolean;
+    showBottomFade: boolean;
+  }) => {
+    return (
+      <>
+        {showTopFade && (
+          <LinearGradient
+            colors={["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"]}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        {showBottomFade && (
+          <LinearGradient
+            colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.9)"]}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+      </>
+    );
+  }
+);
+
+ScrollFade.displayName = "ScrollFade";
+
 // Main SearchResults component
 const SearchResults = memo(
   ({
@@ -238,15 +158,22 @@ const SearchResults = memo(
     const limit = 28;
     const flatListRef = useRef<FlatList>(null);
     const [columnCount, setColumnCount] = useState(2);
+    const [showTopFade, setShowTopFade] = useState(false);
+    const [showBottomFade, setShowBottomFade] = useState(true);
 
-    // Use our new query hook instead of custom hook
+    // Use our query hook with the filters parameter
     const { data, isLoading, error, refetch } = usePlantCards(
       page,
       limit,
       query || "",
-      filters || "all",
+      filters || "",
       nameType || "scientific"
     );
+
+    // Log filter information for debugging
+    useEffect(() => {
+      console.log("SearchResults - Applied filters:", filters);
+    }, [filters]);
 
     // Prefetch images when data is loaded
     useEffect(() => {
@@ -288,6 +215,23 @@ const SearchResults = memo(
     const handleRefresh = () => {
       refetch();
     };
+
+    // Handle scroll events to show/hide fades
+    const handleScroll = useCallback(
+      (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        const contentHeight = event.nativeEvent.contentSize.height;
+        const layoutHeight = event.nativeEvent.layoutMeasurement.height;
+
+        // Show top fade if scrolled down
+        setShowTopFade(offsetY > 10);
+
+        // Show bottom fade if not at the bottom
+        const isAtBottom = offsetY + layoutHeight >= contentHeight - 10;
+        setShowBottomFade(!isAtBottom);
+      },
+      []
+    );
 
     // Filter out invalid results
     const validResults = useMemo(() => {
@@ -363,24 +307,31 @@ const SearchResults = memo(
           </Text>
         </View>
 
-        <FlatList
-          ref={flatListRef}
-          data={validResults}
-          keyExtractor={(item) => item.slug}
-          renderItem={({ item }) => <PlantCard plant={item} />}
-          numColumns={columnCount}
-          contentContainerStyle={{ padding: 12 }}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          refreshControl={
-            <RefreshControl refreshing={false} onRefresh={handleRefresh} />
-          }
-          ListFooterComponent={
-            <PaginationComponent
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          }
+        <View className="flex-1 relative">
+          <FlatList
+            ref={flatListRef}
+            data={validResults}
+            keyExtractor={(item) => item.slug}
+            renderItem={({ item }) => <PlantCard plant={item} />}
+            numColumns={columnCount}
+            contentContainerStyle={{ padding: 12 }}
+            columnWrapperStyle={{ justifyContent: "space-between" }}
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={handleRefresh} />
+            }
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          />
+          <ScrollFade
+            showTopFade={showTopFade}
+            showBottomFade={showBottomFade}
+          />
+        </View>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          variant={columnCount > 2 ? "default" : "compact"}
         />
       </View>
     );
