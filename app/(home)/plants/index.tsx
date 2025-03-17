@@ -1,16 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Text,
-  View,
-  SafeAreaView,
-  ActivityIndicator,
-  StatusBar,
-} from "react-native";
-import { useUser } from "@clerk/clerk-expo";
-import SearchBar from "@/components/Plants/SearchBar";
 import FilterSelector from "@/components/Plants/FilterSelector";
 import NameToggle from "@/components/Plants/NameToggle";
+import SearchBar from "@/components/Plants/SearchBar";
 import SearchResults from "@/components/Plants/SearchResults";
+import { useUser } from "@clerk/clerk-expo";
+import { useCallback, useEffect, useState } from "react";
+import { SafeAreaView, StatusBar, Text, View } from "react-native";
 
 export default function PlantDatabaseScreen() {
   const { user } = useUser();
@@ -21,15 +15,6 @@ export default function PlantDatabaseScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Filters for filter buttons
-  const filterOptions = [
-    "All",
-    "Houseplant",
-    "Succulent",
-    "Vine",
-    "Herb",
-    "Tree",
-    "Shrub",
-  ];
   const [activeFilter, setActiveFilter] = useState("All");
   const [useCommonNames, setUseCommonNames] = useState(false);
 
@@ -76,25 +61,25 @@ export default function PlantDatabaseScreen() {
           placeholder="Search plants..."
         />
 
-        {/* Name Toggle */}
-        <NameToggle
-          useCommonNames={useCommonNames}
-          onToggle={handleNameTypeToggle}
-        />
-
-        {/* Filter Selector */}
-        <FilterSelector
-          filters={filterOptions}
-          activeFilter={activeFilter}
-          onSelectFilter={handleFilterChange}
-        />
+        {/* Name Toggle and Filter Selector in a row */}
+        <View className="flex-row items-center justify-between">
+          <NameToggle
+            useCommonNames={useCommonNames}
+            onToggle={handleNameTypeToggle}
+          />
+          <FilterSelector
+            filters={["All", "Indoor", "Outdoor", "Succulents", "Herbs"]}
+            activeFilter={activeFilter}
+            onSelectFilter={handleFilterChange}
+          />
+        </View>
       </View>
 
       {/* Search Results */}
       <SearchResults
         query={debouncedQuery}
         page={page}
-        filters={activeFilter !== "All" ? activeFilter.toLowerCase() : ""}
+        filters={activeFilter !== "All" ? activeFilter : ""}
         nameType={useCommonNames ? "common" : "scientific"}
         onPageChange={handlePageChange}
       />

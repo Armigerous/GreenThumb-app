@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "thebrandThumb-app",
-    "slug": "thebrandThumb-app",
+    "name": "theGreenThumb-app",
+    "slug": "theGreenThumb-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ThebrandThumb",
+    "scheme": "TheGreenThumb",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.armigerous.thebrandThumbapp"
+      "bundleIdentifier": "com.armigerous.TheGreenThumbapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.armigerous.thebrandThumbapp"
+      "package": "com.armigerous.TheGreenThumbapp"
     },
     "web": {
       "bundler": "metro",

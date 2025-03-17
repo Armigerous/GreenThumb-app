@@ -13,7 +13,7 @@ interface OptimizedImageProps {
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   uri,
-  fallbackUri = "https://theofficialbrandthumb.com/no-plant-image.png",
+  fallbackUri = "https://theofficialgreenthumb.com/no-plant-image.png",
   width,
   height,
   style,
