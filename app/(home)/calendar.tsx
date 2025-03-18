@@ -134,9 +134,9 @@ export default function CalendarScreen() {
               key={index}
               className={`items-center justify-center mx-2 w-12 h-16 rounded-full ${
                 isSelected(day)
-                  ? "bg-emerald-500"
+                  ? "bg-brand-500"
                   : isToday(day)
-                  ? "bg-emerald-100"
+                  ? "bg-brand-100"
                   : "bg-cream-50"
               }`}
               onPress={() => setSelectedDay(day)}
@@ -146,7 +146,7 @@ export default function CalendarScreen() {
                   isSelected(day)
                     ? "text-white"
                     : isToday(day)
-                    ? "text-emerald-600"
+                    ? "text-brand-600"
                     : "text-cream-500"
                 }`}
               >
@@ -157,7 +157,7 @@ export default function CalendarScreen() {
                   isSelected(day)
                     ? "text-white"
                     : isToday(day)
-                    ? "text-emerald-600"
+                    ? "text-brand-600"
                     : "text-foreground"
                 }`}
               >
@@ -176,9 +176,7 @@ export default function CalendarScreen() {
           </Text>
           <TouchableOpacity className="flex-row items-center">
             <Ionicons name="add-circle-outline" size={20} color="#10b981" />
-            <Text className="text-sm text-emerald-600 font-medium ml-1">
-              Add
-            </Text>
+            <Text className="text-sm text-brand-600 font-medium ml-1">Add</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -199,7 +197,7 @@ export default function CalendarScreen() {
                   <TouchableOpacity
                     className={`w-6 h-6 rounded-full border-2 mr-3 items-center justify-center ${
                       reminder.completed
-                        ? "bg-emerald-500 border-emerald-500"
+                        ? "bg-brand-500 border-brand-500"
                         : "border-cream-300"
                     }`}
                     onPress={() => handleToggleComplete(reminder.id)}
@@ -241,7 +239,7 @@ export default function CalendarScreen() {
             <Text className="text-base text-cream-500 mt-4 text-center">
               No care reminders for this day
             </Text>
-            <TouchableOpacity className="mt-4 bg-emerald-500 px-4 py-2 rounded-lg">
+            <TouchableOpacity className="mt-4 bg-brand-500 px-4 py-2 rounded-lg">
               <Text className="text-white font-medium">Add Reminder</Text>
             </TouchableOpacity>
           </View>
