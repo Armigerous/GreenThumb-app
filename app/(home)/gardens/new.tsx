@@ -68,7 +68,7 @@ export default function NewGarden() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`bg-emerald-500 px-4 py-2 rounded-full ${
+          className={`bg-brand-500 px-4 py-2 rounded-full ${
             !name.trim() || isSubmitting ? "opacity-50" : ""
           }`}
           onPress={handleSubmit}
