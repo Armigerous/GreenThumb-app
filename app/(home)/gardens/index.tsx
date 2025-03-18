@@ -61,7 +61,7 @@ export default function GardensScreen() {
       <View className="px-5 pt-5 flex-row justify-between items-center">
         <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
         <TouchableOpacity
-          className="bg-emerald-500 p-2 rounded-full"
+          className="bg-brand-500 p-2 rounded-full"
           onPress={() => router.push("/(home)/gardens/new")}
         >
           <Ionicons name="add" size={24} color="white" />

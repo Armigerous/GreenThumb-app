@@ -59,11 +59,11 @@ export default function Page() {
             {/* Garden Stats */}
             <View className="flex-row bg-cream-50 rounded-xl p-4 mb-6">
               <View className="flex-1 items-center border-r border-cream-200">
-                <Text className="text-2xl font-bold text-emerald-600">3</Text>
+                <Text className="text-2xl font-bold text-brand-600">3</Text>
                 <Text className="text-xs text-cream-500">Gardens</Text>
               </View>
               <View className="flex-1 items-center">
-                <Text className="text-2xl font-bold text-emerald-600">12</Text>
+                <Text className="text-2xl font-bold text-brand-600">12</Text>
                 <Text className="text-xs text-cream-500">Plants</Text>
               </View>
             </View>
@@ -76,7 +76,7 @@ export default function Page() {
                 Today's Reminders
               </Text>
               <TouchableOpacity onPress={() => router.push("/(home)/calendar")}>
-                <Text className="text-sm text-emerald-600 font-medium">
+                <Text className="text-sm text-brand-600 font-medium">
                   See All
                 </Text>
               </TouchableOpacity>
@@ -113,7 +113,7 @@ export default function Page() {
                       </View>
                     </View>
                     <TouchableOpacity
-                      className="bg-emerald-50 p-2 rounded-full"
+                      className="bg-brand-50 p-2 rounded-full"
                       onPress={() => handleCompleteReminder(reminder.id)}
                     >
                       <Ionicons name="checkmark" size={18} color="#10b981" />
@@ -137,11 +137,11 @@ export default function Page() {
             </Text>
             <View className="flex-row justify-between">
               <TouchableOpacity
-                className="bg-emerald-50 rounded-xl p-4 items-center justify-center w-[48%]"
+                className="bg-brand-50 rounded-xl p-4 items-center justify-center w-[48%]"
                 onPress={() => router.push("/(home)/plants")}
               >
                 <Ionicons name="add-circle-outline" size={28} color="#10b981" />
-                <Text className="text-sm font-medium text-emerald-700 mt-2">
+                <Text className="text-sm font-medium text-brand-700 mt-2">
                   Add Plant
                 </Text>
               </TouchableOpacity>

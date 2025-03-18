@@ -46,7 +46,7 @@ const GardenDetails = () => {
           <Ionicons name="arrow-back" size={24} color="#2e2c29" />
           <Text className="text-lg font-medium text-foreground ml-2">Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="bg-emerald-500 p-2 rounded-full">
+        <TouchableOpacity className="bg-brand-500 p-2 rounded-full">
           <Ionicons name="create-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -82,7 +82,7 @@ const GardenDetails = () => {
             <Text className="text-lg font-semibold text-foreground">
               Plants
             </Text>
-            <TouchableOpacity className="bg-emerald-500 px-3 py-1.5 rounded-full">
+            <TouchableOpacity className="bg-brand-500 px-3 py-1.5 rounded-full">
               <Text className="text-white font-medium">Add Plant</Text>
             </TouchableOpacity>
           </View>
@@ -104,7 +104,7 @@ const GardenDetails = () => {
                 <View
                   className={`px-2 py-1 rounded ${
                     plant.status === "healthy"
-                      ? "bg-emerald-100"
+                      ? "bg-brand-100"
                       : plant.status === "needs_attention"
                       ? "bg-yellow-100"
                       : "bg-red-100"
@@ -113,7 +113,7 @@ const GardenDetails = () => {
                   <Text
                     className={`text-xs font-medium ${
                       plant.status === "healthy"
-                        ? "text-emerald-700"
+                        ? "text-brand-700"
                         : plant.status === "needs_attention"
                         ? "text-yellow-700"
                         : "text-red-700"
