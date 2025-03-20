@@ -218,8 +218,19 @@ export function useUserGardens(userId?: string) {
       console.log("Fetching gardens for user:", userId);
 
       const { data, error } = await supabase
-        .from("user_gardens_full_data")
-        .select(`*`)
+        .from("user_gardens")
+        .select(
+          `
+          *,
+          user_plants (
+            id,
+            custom_name,
+            botanical_name,
+            status,
+            images
+          )
+        `
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
@@ -243,8 +254,21 @@ export function useGardenDetails(gardenId: number) {
     queryKey: ["garden", gardenId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("user_gardens_full_data")
-        .select(`*`)
+        .from("user_gardens")
+        .select(
+          `
+          *,
+          user_plants (
+            id,
+            custom_name,
+            botanical_name,
+            status,
+            images,
+            care_logs,
+            location_tags
+          )
+        `
+        )
         .eq("id", gardenId)
         .single();
 
