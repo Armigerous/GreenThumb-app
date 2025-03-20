@@ -4,15 +4,33 @@ import { format, isValid, parseISO } from "date-fns";
 import type { UserPlant as BaseUserPlant } from "@/types/garden";
 import { ReactNode } from "react";
 
+/**
+ * Extended version of UserPlant that includes planting date
+ *
+ * This interface extends the base UserPlant interface to include
+ * planting date information useful for displaying in the garden plants list.
+ */
 interface ExtendedUserPlant extends BaseUserPlant {
+  /** Date when the plant was planted in the garden */
   planting_date?: string;
 }
 
+/**
+ * Props for the GardenPlantsList component
+ *
+ * This type defines the properties that can be passed to the GardenPlantsList
+ * component for rendering a list of plants in a garden.
+ */
 type GardenPlantsListProps = {
+  /** Array of plants to display in the list */
   plants?: ExtendedUserPlant[];
+  /** Callback function for when the user wants to add a new plant */
   onAddPlant: () => void;
+  /** Callback function for when a plant is pressed, receives the plant data */
   onPlantPress: (plant: ExtendedUserPlant) => void;
+  /** Optional component to render at the top of the list */
   HeaderComponent?: ReactNode;
+  /** Optional component to render at the bottom of the list */
   FooterComponent?: ReactNode;
 };
 
@@ -110,11 +128,11 @@ export default function GardenPlantsList({
         <View className="flex-row justify-between items-center mb-2">
           <View className="flex-1 mr-2">
             <Text className="text-base text-foreground font-medium">
-              {item.custom_name || item.botanical_name}
+              {item.nickname || (item.plantData?.scientific_name ?? "")}
             </Text>
-            {item.custom_name && (
+            {item.nickname && item.plantData?.scientific_name && (
               <Text className="text-cream-500 text-xs">
-                {item.botanical_name}
+                {item.plantData.scientific_name}
               </Text>
             )}
           </View>
