@@ -1,134 +1,77 @@
 import {
   View,
   SafeAreaView,
+  ScrollView,
   ActivityIndicator,
   Text,
-  TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useGardenDetails } from "@/lib/queries";
 import GardenDetailHeader from "@/components/Gardens/GardenDetailHeader";
 import GardenPlantsList from "@/components/Gardens/GardenPlantsList";
 import GardenConditions from "@/components/Gardens/GardenConditions";
-import { Garden, UserPlant } from "@/types/garden";
-import { Ionicons } from "@expo/vector-icons";
+import type { UserPlant } from "@/types/garden";
 
-export default function GardenDetails() {
+// Extend UserPlant to include planting_date
+interface ExtendedUserPlant extends UserPlant {
+  planting_date?: string;
+}
+
+const GardenDetails = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { data: garden, isLoading, error } = useGardenDetails(Number(id));
 
-  // Get garden details with the materialized view
-  const {
-    data: garden,
-    isLoading,
-    isError,
-    error,
-  } = useGardenDetails(typeof id === "string" ? parseInt(id, 10) : 0);
-
-  const handleAddPlant = () => {
-    if (garden) {
-      router.push({
-        pathname: "/plants",
-        params: { gardenId: garden.id.toString(), action: "addToGarden" },
-      });
-    }
+  const handleEditPress = () => {
+    // TODO: Navigate to edit garden screen
+    console.log("Edit garden pressed");
   };
 
-  const handlePlantPress = (plant: UserPlant) => {
+  const handleAddPlant = () => {
+    // TODO: Navigate to add plant screen
+    console.log("Add plant pressed");
+  };
+
+  const handlePlantPress = (plant: ExtendedUserPlant) => {
     // TODO: Navigate to plant detail screen
     console.log("Plant pressed:", plant);
   };
 
-  const handleEditPress = () => {
-    if (garden) {
-      router.push({
-        pathname: "/gardens/new",
-        params: { editId: garden.id.toString() },
-      });
-    }
-  };
-
-  // Loading state
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-cream-100">
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#5E994B" />
-          <Text className="text-base text-foreground mt-4">
-            Loading garden details...
-          </Text>
-        </View>
+      <SafeAreaView className="flex-1 bg-background justify-center items-center">
+        <ActivityIndicator size="large" color="#5E994B" />
       </SafeAreaView>
     );
   }
 
-  // Error state
-  if (isError || !garden) {
+  if (error || !garden) {
     return (
-      <SafeAreaView className="flex-1 bg-cream-100">
-        <View className="flex-1 justify-center p-4 items-center">
-          <Ionicons name="alert-circle-outline" size={60} color="#d97706" />
-          <Text className="text-center text-xl font-bold mt-4">
-            {isError ? "Failed to load garden details" : "Garden not found"}
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="pt-5 px-5">
+          <Text className="text-destructive text-lg">
+            Error loading garden details. Please try again.
           </Text>
-          <Text className="text-base text-center mb-6 mt-2">
-            {isError
-              ? error?.message || "Please try again later"
-              : "This garden does not exist or has been removed"}
-          </Text>
-          <TouchableOpacity
-            className="bg-green-600 rounded-full px-6 py-3"
-            onPress={() =>
-              isError ? router.back() : router.replace("/gardens")
-            }
-          >
-            <Text className="text-white font-medium">
-              {isError ? "Go Back" : "View All Gardens"}
-            </Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-cream-100">
-      {/* Main Content - Use SectionList via GardenPlantsList */}
-      <View className="flex-1">
-        {/* Garden Header with Health Summary */}
-        <GardenDetailHeader
-          garden={garden}
-          onEditPress={handleEditPress}
-          onAddPlant={handleAddPlant}
-        />
+    <SafeAreaView className="flex-1 bg-background">
+      <GardenDetailHeader garden={garden} onEditPress={handleEditPress} />
 
-        {/* Plant List with SectionList - Will handle scrolling for whole page */}
+      <ScrollView className="flex-1 px-5">
         <GardenPlantsList
-          plants={garden.plants as UserPlant[]}
+          plants={garden.user_plants as ExtendedUserPlant[]}
           onAddPlant={handleAddPlant}
           onPlantPress={handlePlantPress}
-          HeaderComponent={
-            <View className="px-4">
-              {/* Add Plant Button */}
-              <TouchableOpacity
-                className="flex-row bg-cream-100 border border-green-600 justify-center rounded-xl items-center mb-6 py-3"
-                onPress={handleAddPlant}
-              >
-                <Ionicons name="add-circle-outline" size={20} color="#5E994B" />
-                <Text className="text-green-700 font-medium ml-2">
-                  Add Plants to Garden
-                </Text>
-              </TouchableOpacity>
-            </View>
-          }
-          FooterComponent={
-            <View className="mb-6 px-4">
-              {/* Collapsible Garden Conditions */}
-              <GardenConditions garden={garden} onEditPress={handleEditPress} />
-            </View>
-          }
         />
-      </View>
+
+        <GardenConditions garden={garden} />
+      </ScrollView>
     </SafeAreaView>
   );
-}
+};
+
+export default GardenDetails;
