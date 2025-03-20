@@ -1,15 +1,18 @@
 import { Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { format } from "date-fns";
 
 type GardenCardProps = {
   garden: {
     id: number;
     name: string;
-    nc_regions?: string[];
+    nc_regions_ids?: string | string[];
+    sunlight_ids?: string | string[];
+    soil_texture_ids?: string | string[];
+    soil_ph_ids?: string | string[];
+    soil_drainage_ids?: string | string[];
+    user_plants?: any[];
     created_at?: string;
-    plants?: any[];
   };
 };
 
@@ -17,15 +20,15 @@ export default function GardenCard({ garden }: GardenCardProps) {
   const router = useRouter();
 
   const getPlantHealthSummary = () => {
-    if (!garden.plants || garden.plants.length === 0) return null;
+    if (!garden.user_plants || garden.user_plants.length === 0) return null;
 
-    const healthyCount = garden.plants.filter(
+    const healthyCount = garden.user_plants.filter(
       (p) => p.status === "healthy"
     ).length;
-    const needsAttentionCount = garden.plants.filter(
+    const needsAttentionCount = garden.user_plants.filter(
       (p) => p.status === "needs_attention"
     ).length;
-    const criticalCount = garden.plants.filter(
+    const criticalCount = garden.user_plants.filter(
       (p) => p.status === "critical"
     ).length;
 
@@ -33,13 +36,6 @@ export default function GardenCard({ garden }: GardenCardProps) {
   };
 
   const healthSummary = getPlantHealthSummary();
-  const createdDate = garden.created_at ? new Date(garden.created_at) : null;
-
-  // Get the region display name
-  const regionName =
-    garden.nc_regions && garden.nc_regions.length > 0
-      ? garden.nc_regions[0]
-      : "Unknown Region";
 
   return (
     <TouchableOpacity
@@ -52,151 +48,81 @@ export default function GardenCard({ garden }: GardenCardProps) {
       }
     >
       <View className="p-4">
-        <Text className="text-foreground text-xl font-bold mb-1">
+        <Text className="text-foreground text-lg font-bold mb-2">
           {garden.name}
         </Text>
 
-        {regionName && (
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="location-outline" size={14} color="#78350f" />
-            <Text className="text-cream-700 text-sm ml-1">{regionName}</Text>
-            {createdDate && (
-              <Text className="text-cream-500 text-xs ml-auto">
-                Created {format(createdDate, "MMM d, yyyy")}
+        <View className="flex-row flex-wrap gap-2 mb-3">
+          {garden.nc_regions_ids && (
+            <View className="bg-cream-100 rounded px-2 py-1">
+              <Text className="text-cream-800 text-xs">
+                {Array.isArray(garden.nc_regions_ids)
+                  ? garden.nc_regions_ids.join(", ")
+                  : garden.nc_regions_ids}
               </Text>
-            )}
-          </View>
-        )}
-
-        <View className="bg-brand-50 p-3 rounded-lg mb-3">
-          {garden.plants && garden.plants.length > 0 ? (
-            <View>
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-brand-900 font-medium">
-                  Plant Health Status
-                </Text>
-                <Text className="text-brand-600 font-medium">
-                  {garden.plants.length} Plants
-                </Text>
-              </View>
-
-              <View className="bg-cream-200 h-2 rounded-full w-full overflow-hidden">
-                {healthSummary && (
-                  <View className="flex-row h-full">
-                    {healthSummary.healthyCount > 0 && (
-                      <View
-                        className="bg-brand-500 h-full"
-                        style={{
-                          width: `${
-                            (healthSummary.healthyCount /
-                              garden.plants.length) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    )}
-                    {healthSummary.needsAttentionCount > 0 && (
-                      <View
-                        className="bg-yellow-500 h-full"
-                        style={{
-                          width: `${
-                            (healthSummary.needsAttentionCount /
-                              garden.plants.length) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    )}
-                    {healthSummary.criticalCount > 0 && (
-                      <View
-                        className="bg-red-500 h-full"
-                        style={{
-                          width: `${
-                            (healthSummary.criticalCount /
-                              garden.plants.length) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    )}
-                  </View>
-                )}
-              </View>
-
-              <View className="flex-row justify-between mt-2">
-                <View className="flex-row items-center">
-                  <View className="bg-brand-500 h-3 rounded-full w-3 mr-1" />
-                  <Text className="text-brand-700 text-xs">
-                    {healthSummary?.healthyCount || 0} Healthy
-                  </Text>
-                </View>
-                <View className="flex-row items-center">
-                  <View className="bg-yellow-500 h-3 rounded-full w-3 mr-1" />
-                  <Text className="text-xs text-yellow-700">
-                    {healthSummary?.needsAttentionCount || 0} Needs Care
-                  </Text>
-                </View>
-                <View className="flex-row items-center">
-                  <View className="bg-red-500 h-3 rounded-full w-3 mr-1" />
-                  <Text className="text-red-700 text-xs">
-                    {healthSummary?.criticalCount || 0} Critical
-                  </Text>
-                </View>
-              </View>
             </View>
-          ) : (
-            <View className="items-center py-1">
-              <Text className="text-cream-700 text-sm">
-                No plants added yet
+          )}
+          {garden.sunlight_ids && (
+            <View className="bg-yellow-100 rounded px-2 py-1">
+              <Text className="text-xs text-yellow-800">
+                <Ionicons name="sunny-outline" size={12} color="#b45309" />
+                {Array.isArray(garden.sunlight_ids)
+                  ? garden.sunlight_ids.join(", ")
+                  : garden.sunlight_ids}
+              </Text>
+            </View>
+          )}
+          {garden.soil_texture_ids && (
+            <View className="bg-brown-100 rounded px-2 py-1">
+              <Text className="text-brown-800 text-xs">
+                <Ionicons name="layers-outline" size={12} color="#78350f" />
+                {Array.isArray(garden.soil_texture_ids)
+                  ? garden.soil_texture_ids.join(", ")
+                  : garden.soil_texture_ids}
               </Text>
             </View>
           )}
         </View>
 
-        {healthSummary && healthSummary.criticalCount > 0 && (
-          <View className="bg-red-50 border border-red-200 p-3 rounded-lg mb-1">
-            <View className="flex-row items-center">
-              <Ionicons name="alert-circle" size={18} color="#b91c1c" />
-              <Text className="text-red-700 text-sm font-medium ml-1">
-                {healthSummary.criticalCount}{" "}
-                {healthSummary.criticalCount === 1
-                  ? "plant needs"
-                  : "plants need"}{" "}
-                urgent attention
-              </Text>
-            </View>
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center">
+            <Ionicons name="leaf" size={16} color="#10b981" />
+            <Text className="text-brand-600 text-sm font-medium ml-1">
+              {garden.user_plants?.length || 0} Plants
+            </Text>
           </View>
-        )}
 
-        {healthSummary &&
-          healthSummary.needsAttentionCount > 0 &&
-          healthSummary.criticalCount === 0 && (
-            <View className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-1">
-              <View className="flex-row items-center">
-                <Ionicons name="water" size={18} color="#b45309" />
-                <Text className="text-sm text-yellow-700 font-medium ml-1">
-                  {healthSummary.needsAttentionCount}{" "}
-                  {healthSummary.needsAttentionCount === 1
-                    ? "plant needs"
-                    : "plants need"}{" "}
-                  care soon
-                </Text>
+          {healthSummary &&
+            garden.user_plants &&
+            garden.user_plants.length > 0 && (
+              <View className="flex-row">
+                {healthSummary.healthyCount > 0 && (
+                  <View className="flex-row items-center mr-2">
+                    <View className="bg-brand-500 h-2 rounded-full w-2 mr-1" />
+                    <Text className="text-brand-700 text-xs">
+                      {healthSummary.healthyCount}
+                    </Text>
+                  </View>
+                )}
+                {healthSummary.needsAttentionCount > 0 && (
+                  <View className="flex-row items-center mr-2">
+                    <View className="bg-yellow-500 h-2 rounded-full w-2 mr-1" />
+                    <Text className="text-xs text-yellow-700">
+                      {healthSummary.needsAttentionCount}
+                    </Text>
+                  </View>
+                )}
+                {healthSummary.criticalCount > 0 && (
+                  <View className="flex-row items-center">
+                    <View className="bg-red-500 h-2 rounded-full w-2 mr-1" />
+                    <Text className="text-red-700 text-xs">
+                      {healthSummary.criticalCount}
+                    </Text>
+                  </View>
+                )}
               </View>
-            </View>
-          )}
-
-        {healthSummary &&
-          healthSummary.healthyCount === garden.plants?.length &&
-          garden.plants?.length > 0 && (
-            <View className="bg-green-50 border border-green-200 p-3 rounded-lg mb-1">
-              <View className="flex-row items-center">
-                <Ionicons name="checkmark-circle" size={18} color="#10b981" />
-                <Text className="text-green-700 text-sm font-medium ml-1">
-                  All plants healthy
-                </Text>
-              </View>
-            </View>
-          )}
+            )}
+        </View>
       </View>
     </TouchableOpacity>
   );

@@ -201,21 +201,25 @@ export default function GardenPlantsList({
     </View>
   );
 
-  const ListHeader = () => (
-    <>
-      <View className="flex-row justify-between items-center mb-4 mx-4">
-        <Text className="text-foreground text-xl font-semibold">My Plants</Text>
-        <TouchableOpacity
-          className="flex-row bg-brand-500 rounded-full items-center px-3 py-2"
-          onPress={onAddPlant}
-        >
-          <Ionicons name="add" size={18} color="white" />
-          <Text className="text-white font-medium ml-1">Add Plant</Text>
-        </TouchableOpacity>
-      </View>
-      {HeaderComponent}
-    </>
-  );
+  const ListHeader = () => {
+    return (
+      <>
+        <View className="flex-row justify-between items-center mb-4 mx-4">
+          <Text className="text-foreground text-xl font-semibold">
+            My Plants
+          </Text>
+          <TouchableOpacity
+            className="flex-row bg-brand-500 rounded-full items-center px-3 py-2"
+            onPress={onAddPlant}
+          >
+            <Ionicons name="add" size={18} color="white" />
+            <Text className="text-white font-medium ml-1">Add Plant</Text>
+          </TouchableOpacity>
+        </View>
+        {HeaderComponent}
+      </>
+    );
+  };
 
   if (!plants || plants.length === 0) {
     return (
@@ -248,14 +252,6 @@ export default function GardenPlantsList({
             <Text className="text-center text-cream-500 mb-4">
               Add your first plant to get started with tracking your garden!
             </Text>
-            <TouchableOpacity
-              className="bg-brand-500 rounded-full px-5 py-2.5"
-              onPress={onAddPlant}
-            >
-              <Text className="text-white font-medium">
-                Add Your First Plant
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
         {FooterComponent}
@@ -264,20 +260,17 @@ export default function GardenPlantsList({
   }
 
   return (
-    <SectionList
-      sections={groupedPlants}
-      keyExtractor={(item) => item.id}
-      renderItem={renderPlantCard}
-      renderSectionHeader={renderSectionHeader}
-      stickySectionHeadersEnabled={false}
-      ListHeaderComponent={<ListHeader />}
-      ListFooterComponent={
-        <>
-          <View className="h-4" />
-          {FooterComponent}
-        </>
-      }
-      contentContainerStyle={{ flexGrow: 1 }}
-    />
+    <View className="flex-1">
+      <SectionList
+        sections={groupedPlants}
+        keyExtractor={(item) => item.id}
+        renderItem={renderPlantCard}
+        renderSectionHeader={renderSectionHeader}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={FooterComponent ?? null}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        stickySectionHeadersEnabled={false}
+      />
+    </View>
   );
 }
