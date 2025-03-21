@@ -1,7 +1,7 @@
-import FilterSelector from "@/components/Plants/FilterSelector";
-import NameToggle from "@/components/Plants/NameToggle";
-import SearchBar from "@/components/Plants/SearchBar";
-import SearchResults from "@/components/Plants/SearchResults";
+import FilterSelector from "@/components/Database/FilterSelector";
+import NameToggle from "@/components/Database/NameToggle";
+import SearchBar from "@/components/Database/SearchBar";
+import SearchResults from "@/components/Database/SearchResults";
 import { useUser } from "@clerk/clerk-expo";
 import { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StatusBar, Text, View } from "react-native";
@@ -49,8 +49,8 @@ export default function PlantDatabaseScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="px-5 pt-5">
-        <Text className="text-2xl font-bold text-foreground mb-4">
+      <View className="pt-5 px-5">
+        <Text className="text-2xl text-foreground font-bold mb-4">
           Plant Database
         </Text>
 
@@ -62,7 +62,7 @@ export default function PlantDatabaseScreen() {
         />
 
         {/* Name Toggle and Filter Selector in a row */}
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row justify-between items-center">
           <NameToggle
             useCommonNames={useCommonNames}
             onToggle={handleNameTypeToggle}
