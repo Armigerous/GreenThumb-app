@@ -1,19 +1,23 @@
-import { View, Text, TouchableOpacity, SectionList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  SectionList,
+  Image,
+  SectionListData,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { format, isValid, parseISO } from "date-fns";
-import type { UserPlant as BaseUserPlant } from "@/types/garden";
+import { format, isValid, parseISO, differenceInDays } from "date-fns";
+import type { UserPlant } from "@/types/garden";
 import { ReactNode } from "react";
 
-/**
- * Extended version of UserPlant that includes planting date
- *
- * This interface extends the base UserPlant interface to include
- * planting date information useful for displaying in the garden plants list.
- */
-interface ExtendedUserPlant extends BaseUserPlant {
-  /** Date when the plant was planted in the garden */
-  planting_date?: string;
-}
+type PlantSection = {
+  title: string;
+  status: string;
+  data: UserPlant[];
+  icon: "alert-circle" | "water" | "checkmark-circle" | "moon";
+  color: string;
+};
 
 /**
  * Props for the GardenPlantsList component
@@ -23,11 +27,15 @@ interface ExtendedUserPlant extends BaseUserPlant {
  */
 type GardenPlantsListProps = {
   /** Array of plants to display in the list */
-  plants?: ExtendedUserPlant[];
+  plants?: UserPlant[];
   /** Callback function for when the user wants to add a new plant */
   onAddPlant: () => void;
   /** Callback function for when a plant is pressed, receives the plant data */
-  onPlantPress: (plant: ExtendedUserPlant) => void;
+  onPlantPress: (plant: UserPlant) => void;
+  /** Callback function for when a plant is watered, receives the plant data */
+  onWaterPlant?: (plant: UserPlant) => void;
+  /** Callback function for when a plant is edited, receives the plant data */
+  onEditPlant?: (plant: UserPlant) => void;
   /** Optional component to render at the top of the list */
   HeaderComponent?: ReactNode;
   /** Optional component to render at the bottom of the list */
@@ -38,6 +46,8 @@ export default function GardenPlantsList({
   plants,
   onAddPlant,
   onPlantPress,
+  onWaterPlant,
+  onEditPlant,
   HeaderComponent,
   FooterComponent,
 }: GardenPlantsListProps) {
@@ -45,18 +55,22 @@ export default function GardenPlantsList({
   const getGroupedPlants = () => {
     if (!plants || plants.length === 0) return [];
 
-    const criticalPlants = plants.filter((p) => p.status === "critical");
-    const needsAttentionPlants = plants.filter(
-      (p) => p.status === "needs_attention"
+    const criticalPlants: UserPlant[] = plants.filter(
+      (p) => p.status === "Dead" || p.status === "Wilting"
     );
-    const healthyPlants = plants.filter((p) => p.status === "healthy");
+    const needsAttentionPlants: UserPlant[] = plants.filter(
+      (p) => p.status === "Needs Water" || p.status === "Dormant"
+    );
+    const healthyPlants: UserPlant[] = plants.filter(
+      (p) => p.status === "Healthy"
+    );
 
     const sections = [];
 
     if (criticalPlants.length > 0) {
       sections.push({
-        title: "Critical",
-        status: "critical",
+        title: "Needs Immediate Care",
+        status: "Dead",
         data: criticalPlants,
         icon: "alert-circle" as const,
         color: "#dc2626", // red-600
@@ -65,8 +79,8 @@ export default function GardenPlantsList({
 
     if (needsAttentionPlants.length > 0) {
       sections.push({
-        title: "Needs Attention",
-        status: "needs_attention",
+        title: "Due for Care",
+        status: "Needs Water",
         data: needsAttentionPlants,
         icon: "water" as const,
         color: "#d97706", // yellow-600
@@ -75,8 +89,8 @@ export default function GardenPlantsList({
 
     if (healthyPlants.length > 0) {
       sections.push({
-        title: "Healthy",
-        status: "healthy",
+        title: "Looking Good",
+        status: "Healthy",
         data: healthyPlants,
         icon: "checkmark-circle" as const,
         color: "#059669", // green-600
@@ -95,103 +109,156 @@ export default function GardenPlantsList({
     const date = parseISO(dateString);
     if (!isValid(date)) return null;
 
-    return format(date, "MMM d, yyyy");
+    const daysAgo = differenceInDays(new Date(), date);
+    if (daysAgo === 0) return "Today";
+    if (daysAgo === 1) return "Yesterday";
+    if (daysAgo < 7) return `${daysAgo} days ago`;
+    return format(date, "MMM d");
   };
 
-  const renderPlantCard = ({ item }: { item: ExtendedUserPlant }) => {
-    const plantingDate = formatDate(item.planting_date);
+  const getLastWateringDate = (plant: UserPlant) => {
+    if (!plant.care_logs || plant.care_logs.length === 0) return null;
+    const lastLog = plant.care_logs[plant.care_logs.length - 1];
+    return formatDate(lastLog.taken_care_at);
+  };
+
+  const renderPlantCard = ({ item }: { item: UserPlant }) => {
     const statusColors = {
-      healthy: {
+      Healthy: {
         bg: "bg-green-100",
         text: "text-green-700",
         icon: "checkmark-circle" as const,
       },
-      needs_attention: {
+      "Needs Water": {
         bg: "bg-yellow-100",
         text: "text-yellow-700",
         icon: "water" as const,
       },
-      critical: {
+      Wilting: {
         bg: "bg-red-100",
         text: "text-red-700",
         icon: "alert-circle" as const,
       },
-    };
+      Dormant: {
+        bg: "bg-yellow-100",
+        text: "text-yellow-700",
+        icon: "moon" as const,
+      },
+      Dead: {
+        bg: "bg-red-100",
+        text: "text-red-700",
+        icon: "alert-circle" as const,
+      },
+    } as const;
 
-    const statusStyle = statusColors[item.status];
+    const statusStyle = statusColors[item.status as keyof typeof statusColors];
+    const lastWatered = getLastWateringDate(item);
 
     return (
       <TouchableOpacity
         className="bg-white border border-cream-100 p-3 rounded-lg shadow-sm mb-3 mx-4"
         onPress={() => onPlantPress(item)}
       >
-        <View className="flex-row justify-between items-center mb-2">
-          <View className="flex-1 mr-2">
-            <Text className="text-base text-foreground font-medium">
-              {item.nickname || (item.plantData?.scientific_name ?? "")}
-            </Text>
-            {item.nickname && item.plantData?.scientific_name && (
-              <Text className="text-cream-500 text-xs">
-                {item.plantData.scientific_name}
-              </Text>
-            )}
-          </View>
-
-          <View
-            className={`rounded-full px-3 py-1 flex-row items-center ${statusStyle.bg}`}
-          >
-            <Ionicons
-              name={statusStyle.icon}
-              size={14}
-              color={
-                item.status === "healthy"
-                  ? "#059669"
-                  : item.status === "needs_attention"
-                  ? "#d97706"
-                  : "#dc2626"
-              }
+        <View className="flex-row items-start mb-2">
+          {item.images?.[0] && (
+            <Image
+              source={{ uri: item.images[0] }}
+              className="h-16 rounded-lg w-16 mr-3"
             />
-            <Text className={`text-xs font-medium ml-1 ${statusStyle.text}`}>
-              {item.status === "healthy"
-                ? "Healthy"
-                : item.status === "needs_attention"
-                ? "Needs Care"
-                : "Critical"}
-            </Text>
+          )}
+          <View className="flex-1">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1 mr-2">
+                <Text className="text-base text-foreground font-medium">
+                  {item.nickname}
+                </Text>
+              </View>
+              <View
+                className={`rounded-full px-3 py-1 flex-row items-center ${statusStyle.bg}`}
+              >
+                <Ionicons
+                  name={statusStyle.icon}
+                  size={14}
+                  color={
+                    item.status === "Healthy"
+                      ? "#059669"
+                      : item.status === "Needs Water" ||
+                        item.status === "Dormant"
+                      ? "#d97706"
+                      : "#dc2626"
+                  }
+                />
+                <Text
+                  className={`text-xs font-medium ml-1 ${statusStyle.text}`}
+                >
+                  {item.status === "Healthy"
+                    ? "Healthy"
+                    : item.status === "Needs Water"
+                    ? "Needs Water"
+                    : item.status === "Dormant"
+                    ? "Dormant"
+                    : item.status === "Wilting"
+                    ? "Wilting"
+                    : "Dead"}
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex-row items-center mt-2">
+              {lastWatered && (
+                <View className="flex-row items-center mr-4">
+                  <Ionicons name="water-outline" size={14} color="#0891b2" />
+                  <Text className="text-blue-600 text-xs ml-1">
+                    Watered {lastWatered}
+                  </Text>
+                </View>
+              )}
+              {item.care_logs && item.care_logs.length > 0 && (
+                <View className="flex-row items-center">
+                  <Ionicons name="calendar-outline" size={14} color="#9ca3af" />
+                  <Text className="text-cream-500 text-xs ml-1">
+                    {item.care_logs.length} Care{" "}
+                    {item.care_logs.length === 1 ? "Log" : "Logs"}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
-        <View className="flex-row justify-between items-center mt-1">
-          {plantingDate && (
-            <Text className="text-cream-500 text-xs">
-              Planted: {plantingDate}
-            </Text>
-          )}
-
-          {item.care_logs && item.care_logs.length > 0 && (
-            <View className="flex-row items-center">
-              <Ionicons name="calendar" size={12} color="#9ca3af" />
-              <Text className="text-cream-500 text-xs ml-1">
-                {item.care_logs.length} Care{" "}
-                {item.care_logs.length === 1 ? "Log" : "Logs"}
+        <View className="flex-row border-cream-100 border-t justify-end pt-2">
+          {onWaterPlant && (
+            <TouchableOpacity
+              className="flex-row bg-blue-50 rounded-full items-center mr-2 px-3 py-1.5"
+              onPress={() => onWaterPlant(item)}
+            >
+              <Ionicons name="water" size={14} color="#0891b2" />
+              <Text className="text-blue-600 text-xs font-medium ml-1">
+                Water
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
-
-          <View className="flex-row">
-            <TouchableOpacity className="mr-2">
-              <Ionicons name="water" size={18} color="#0ea5e9" />
+          {onEditPlant && (
+            <TouchableOpacity
+              className="flex-row bg-cream-50 rounded-full items-center px-3 py-1.5"
+              onPress={() => onEditPlant(item)}
+            >
+              <Ionicons name="create-outline" size={14} color="#6b7280" />
+              <Text className="text-cream-600 text-xs font-medium ml-1">
+                Edit
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Ionicons name="create-outline" size={18} color="#6b7280" />
-            </TouchableOpacity>
-          </View>
+          )}
         </View>
       </TouchableOpacity>
     );
   };
 
-  const renderSectionHeader = ({ section }: any) => (
+  const renderSectionHeader = ({
+    section,
+  }: {
+    section: SectionListData<UserPlant, PlantSection>;
+  }) => (
     <View className="flex-row items-center mb-2 mt-4 mx-4">
       <Ionicons name={section.icon} size={20} color={section.color} />
       <Text className="text-foreground text-lg font-semibold ml-2">
@@ -249,9 +316,18 @@ export default function GardenPlantsList({
             <Text className="text-center text-foreground text-lg font-medium mb-2">
               No plants added yet
             </Text>
-            <Text className="text-center text-cream-500 mb-4">
-              Add your first plant to get started with tracking your garden!
+            <Text className="text-center text-cream-500 mb-6">
+              Add your first plant to start tracking its care
             </Text>
+            <TouchableOpacity
+              className="flex-row bg-brand-500 rounded-full items-center px-4 py-2"
+              onPress={onAddPlant}
+            >
+              <Ionicons name="add" size={18} color="white" />
+              <Text className="text-white font-medium ml-1">
+                Add First Plant
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         {FooterComponent}
@@ -260,17 +336,16 @@ export default function GardenPlantsList({
   }
 
   return (
-    <View className="flex-1">
-      <SectionList
-        sections={groupedPlants}
-        keyExtractor={(item) => item.id}
-        renderItem={renderPlantCard}
-        renderSectionHeader={renderSectionHeader}
-        ListHeaderComponent={ListHeader}
-        ListFooterComponent={FooterComponent ?? null}
-        contentContainerStyle={{ paddingBottom: 16 }}
-        stickySectionHeadersEnabled={false}
-      />
-    </View>
+    <SectionList<UserPlant, PlantSection>
+      sections={groupedPlants}
+      renderItem={renderPlantCard}
+      renderSectionHeader={renderSectionHeader}
+      ListHeaderComponent={<ListHeader />}
+      ListFooterComponent={
+        FooterComponent ? () => <>{FooterComponent}</> : undefined
+      }
+      stickySectionHeadersEnabled={false}
+      contentContainerStyle={{ paddingBottom: 20 }}
+    />
   );
 }

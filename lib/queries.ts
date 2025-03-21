@@ -215,31 +215,17 @@ export function useUserGardens(userId?: string) {
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
 
-      console.log("Fetching gardens for user:", userId);
-
       const { data, error } = await supabase
-        .from("user_gardens")
-        .select(
-          `
-          *,
-          user_plants (
-            id,
-            custom_name,
-            botanical_name,
-            status,
-            images
-          )
-        `
-        )
+        .from("user_gardens_dashboard_v2")
+        .select("*")
         .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (error) {
         console.error("Supabase error fetching gardens:", error);
         throw new Error(error.message);
       }
 
-      console.log("Fetched gardens:", data);
       return data;
     },
     enabled: !!userId,
@@ -251,31 +237,52 @@ export function useGardenDetails(gardenId: number) {
   const queryClient = useQueryClient();
 
   return useQuery<Garden, Error>({
-    queryKey: ["garden", gardenId],
+    queryKey: ["gardenDetails", gardenId],
     queryFn: async () => {
+      if (!gardenId) throw new Error("Garden ID is required");
+
       const { data, error } = await supabase
-        .from("user_gardens")
-        .select(
-          `
-          *,
-          user_plants (
-            id,
-            custom_name,
-            botanical_name,
-            status,
-            images,
-            care_logs,
-            location_tags
-          )
-        `
-        )
+        .from("user_gardens_dashboard_v2")
+        .select("*")
         .eq("id", gardenId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error fetching garden details:", error);
+        throw new Error(error.message);
+      }
+
       return data;
     },
     enabled: !!gardenId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+}
+
+// Fetch plant data by ID
+export function usePlantDataById(plantId?: string) {
+  const queryClient = useQueryClient();
+
+  return useQuery<PlantData, Error>({
+    queryKey: ["plantData", plantId],
+    queryFn: async () => {
+      if (!plantId) throw new Error("Plant ID is required");
+
+      const { data, error } = await supabase
+        .from("plant_full_data")
+        .select("*")
+        .eq("id", plantId)
+        .single();
+
+      if (error) {
+        console.error("Supabase error fetching plant data:", error);
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    enabled: !!plantId,
+    staleTime: ONE_DAY_MS, // Cache for a full day
+    gcTime: ONE_DAY_MS * 7, // Keep in cache for a week
   });
 }

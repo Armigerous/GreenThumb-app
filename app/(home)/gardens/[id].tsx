@@ -10,12 +10,7 @@ import { useGardenDetails } from "@/lib/queries";
 import GardenDetailHeader from "@/components/Gardens/GardenDetailHeader";
 import GardenPlantsList from "@/components/Gardens/GardenPlantsList";
 import GardenConditions from "@/components/Gardens/GardenConditions";
-import type { UserPlant } from "@/types/garden";
-
-// Extend UserPlant to include planting_date
-interface ExtendedUserPlant extends UserPlant {
-  planting_date?: string;
-}
+import type { Garden, UserPlant } from "@/types/garden";
 
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
@@ -23,18 +18,40 @@ const GardenDetails = () => {
   const { data: garden, isLoading, error } = useGardenDetails(Number(id));
 
   const handleEditPress = () => {
-    // TODO: Navigate to edit garden screen
-    console.log("Edit garden pressed");
+    if (garden?.id) {
+      router.push({
+        pathname: "/(home)/gardens/[id]",
+        params: { id: garden.id.toString(), edit: "true" },
+      });
+    }
   };
 
   const handleAddPlant = () => {
-    // TODO: Navigate to add plant screen
-    console.log("Add plant pressed");
+    if (garden?.id) {
+      router.push({
+        pathname: "/(home)/plants",
+        params: { gardenId: garden.id.toString(), action: "add" },
+      });
+    }
   };
 
-  const handlePlantPress = (plant: ExtendedUserPlant) => {
-    // TODO: Navigate to plant detail screen
-    console.log("Plant pressed:", plant);
+  const handlePlantPress = (plant: UserPlant) => {
+    router.push({
+      pathname: "/(home)/plants",
+      params: { id: plant.id.toString() },
+    });
+  };
+
+  const handleWaterPlant = async (plant: UserPlant) => {
+    // TODO: Implement water plant functionality
+    console.log("Water plant:", plant.id);
+  };
+
+  const handleEditPlant = (plant: UserPlant) => {
+    router.push({
+      pathname: "/(home)/plants",
+      params: { id: plant.id.toString(), edit: "true" },
+    });
   };
 
   if (isLoading) {
@@ -59,16 +76,23 @@ const GardenDetails = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <GardenDetailHeader garden={garden} onEditPress={handleEditPress} />
+      <GardenDetailHeader
+        garden={garden}
+        onEditPress={handleEditPress}
+        onAddPlant={handleAddPlant}
+      />
 
-      <ScrollView className="flex-1 px-5">
+      <ScrollView className="flex-1">
         <GardenPlantsList
-          plants={garden.user_plants as ExtendedUserPlant[]}
+          plants={garden.user_plants}
           onAddPlant={handleAddPlant}
           onPlantPress={handlePlantPress}
+          onWaterPlant={handleWaterPlant}
+          onEditPlant={handleEditPlant}
+          HeaderComponent={
+            <GardenConditions garden={garden} onEditPress={handleEditPress} />
+          }
         />
-
-        <GardenConditions garden={garden} />
       </ScrollView>
     </SafeAreaView>
   );
