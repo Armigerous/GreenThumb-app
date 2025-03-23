@@ -215,18 +215,61 @@ export function useUserGardens(userId?: string) {
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
 
-      const { data, error } = await supabase
-        .from("user_gardens_dashboard_v2")
+      // Fetch the gardens first
+      const { data: gardens, error: gardensError } = await supabase
+        .from("user_gardens_dashboard")
         .select("*")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false });
 
-      if (error) {
-        console.error("Supabase error fetching gardens:", error);
-        throw new Error(error.message);
+      if (gardensError) {
+        console.error("Supabase error fetching gardens:", gardensError);
+        throw new Error(gardensError.message);
       }
 
-      return data;
+      if (!gardens || gardens.length === 0) {
+        return [];
+      }
+
+      // Get garden IDs for additional queries
+      const gardenIds = gardens.map((garden) => garden.id);
+
+      // Fetch garden health stats
+      const { data: healthStats, error: healthError } = await supabase
+        .from("garden_health_stats")
+        .select("*")
+        .in("garden_id", gardenIds);
+
+      if (healthError) {
+        console.error("Supabase error fetching health stats:", healthError);
+        // Continue without health stats rather than failing the entire query
+      }
+
+      // Fetch pending tasks for each garden
+      const { data: taskSummaries, error: tasksError } = await supabase
+        .from("garden_tasks_summary")
+        .select("*")
+        .in("garden_id", gardenIds)
+        .eq("completed", false)
+        .order("due_date", { ascending: true });
+
+      if (tasksError) {
+        console.error("Supabase error fetching task summaries:", tasksError);
+        // Continue without task summaries rather than failing the entire query
+      }
+
+      // Combine the data
+      return gardens.map((garden) => {
+        return {
+          ...garden,
+          health_stats: healthStats?.find(
+            (stat) => stat.garden_id === garden.id
+          ),
+          pending_tasks: taskSummaries?.filter(
+            (task) => task.garden_id === garden.id
+          ),
+        };
+      });
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -241,18 +284,49 @@ export function useGardenDetails(gardenId: number) {
     queryFn: async () => {
       if (!gardenId) throw new Error("Garden ID is required");
 
-      const { data, error } = await supabase
-        .from("user_gardens_dashboard_v2")
+      // Fetch the garden details
+      const { data: garden, error: gardenError } = await supabase
+        .from("user_gardens_dashboard")
         .select("*")
         .eq("id", gardenId)
         .single();
 
-      if (error) {
-        console.error("Supabase error fetching garden details:", error);
-        throw new Error(error.message);
+      if (gardenError) {
+        console.error("Supabase error fetching garden details:", gardenError);
+        throw new Error(gardenError.message);
       }
 
-      return data;
+      // Fetch garden health stats
+      const { data: healthStats, error: healthError } = await supabase
+        .from("garden_health_stats")
+        .select("*")
+        .eq("garden_id", gardenId)
+        .maybeSingle();
+
+      if (healthError) {
+        console.error("Supabase error fetching health stats:", healthError);
+        // Continue without health stats rather than failing the entire query
+      }
+
+      // Fetch pending tasks for this garden
+      const { data: taskSummaries, error: tasksError } = await supabase
+        .from("garden_tasks_summary")
+        .select("*")
+        .eq("garden_id", gardenId)
+        .eq("completed", false)
+        .order("due_date", { ascending: true });
+
+      if (tasksError) {
+        console.error("Supabase error fetching task summaries:", tasksError);
+        // Continue without task summaries rather than failing the entire query
+      }
+
+      // Combine the data
+      return {
+        ...garden,
+        health_stats: healthStats || undefined,
+        pending_tasks: taskSummaries || [],
+      };
     },
     enabled: !!gardenId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
