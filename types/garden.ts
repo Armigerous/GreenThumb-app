@@ -176,4 +176,7 @@ export interface Garden {
   health_stats?: GardenHealthStats;
   /** Pending tasks for plants in the garden from garden_tasks_summary view */
   pending_tasks?: GardenTaskSummary[];
+
+  /** Total number of plants in the garden from user_gardens_dashboard view */
+  total_plants?: number;
 }

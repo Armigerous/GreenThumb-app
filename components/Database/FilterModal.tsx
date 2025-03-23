@@ -599,7 +599,7 @@ export default function FilterModal({
                       {filter.name}
                     </Text>
                     {isPartiallyApplied && (
-                      <View className="absolute top-1 right-1 w-3 h-3 bg-yellow-500 rounded-full" />
+                      <View className="absolute top-1 right-1 w-3 h-3 bg-accent-400 rounded-full" />
                     )}
                   </TouchableOpacity>
 
