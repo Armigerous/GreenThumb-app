@@ -97,8 +97,8 @@ export default function GardenDetailHeader({
                 </Text>
               </TouchableOpacity>
             ) : (
-              <View className="bg-green-100 rounded-lg px-3 py-1.5">
-                <Text className="text-green-700 text-sm font-medium">
+              <View className="bg-brand-100 rounded-lg px-3 py-1.5">
+                <Text className="text-brand-700 text-sm font-medium">
                   All plants healthy
                 </Text>
               </View>
