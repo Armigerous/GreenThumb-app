@@ -40,7 +40,7 @@ const TabBar = ({
   ];
 
   return (
-    <View className="flex-row bg-white border-b border-cream-100">
+    <View className="flex-row bg-cream-50 border-b border-t border-cream-300">
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab.id}
@@ -82,12 +82,12 @@ const QuickActions = ({ plant }: { plant: PlantData }) => {
   };
 
   return (
-    <View className="flex-column justify-center px-5 py-2">
+    <View className="flex-column justify-center py-2 my-2">
       <TouchableOpacity
-        className="bg-primary rounded-xl py-3 px-6 items-center w-full flex-row justify-center shadow-md"
+        className="bg-primary rounded-xl py-3 px-6 items-center w-full flex-row justify-center"
         onPress={handleAddToGarden}
       >
-        <Ionicons name="add-circle-outline" size={20} color="white" />
+        <Ionicons name="add-circle-outline" size={20} color="#fffefa" />
         <Text className="text-cream-50 font-medium ml-2">Add to Garden</Text>
       </TouchableOpacity>
     </View>
@@ -281,16 +281,16 @@ export default function PlantDetailScreen() {
                 </View>
               )}
 
+              {/* Quick Actions - Add to Garden */}
+              <QuickActions plant={plant} />
+
               {/* Tabs for content sections */}
               <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
-
-              {/* Quick Actions - Moved to be directly under TabBar with no gap */}
-              <QuickActions plant={plant} />
 
               {/* Tab Content - Reduced margin top from mt-6 to mt-2 to reduce the gap */}
               <View className="mt-2 mb-4">
                 {activeTab === "overview" && (
-                  <View className="px-4 pb-16">
+                  <View className="pb-16">
                     {/* Description */}
                     {plant.description && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
@@ -358,7 +358,7 @@ export default function PlantDetailScreen() {
                       plant.edibility ||
                       plant.attracts?.length ||
                       plant.design_features?.length) && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+                      <View className="bg-white rounded-2xl py-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
                           <Text className="text-lg font-bold text-foreground">
                             Uses and Value
@@ -421,7 +421,7 @@ export default function PlantDetailScreen() {
                 )}
 
                 {activeTab === "care" && (
-                  <View className="px-4 pb-16">
+                  <View className="pb-16">
                     <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                       <View className="border-b border-cream-100 pb-3 mb-4">
                         <Text className="text-lg font-bold text-foreground">
@@ -495,7 +495,7 @@ export default function PlantDetailScreen() {
                 )}
 
                 {activeTab === "features" && (
-                  <View className="px-4 pb-16">
+                  <View className="pb-16">
                     {/* Flower Features */}
                     {(plant.flower_description ||
                       plant.flower_color ||
@@ -637,7 +637,7 @@ export default function PlantDetailScreen() {
                 )}
 
                 {activeTab === "taxonomy" && (
-                  <View className="px-4 pb-16">
+                  <View className="pb-16">
                     <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                       <View className="border-b border-cream-100 pb-3 mb-4">
                         <Text className="text-lg font-bold text-foreground">
@@ -685,7 +685,7 @@ export default function PlantDetailScreen() {
                 )}
 
                 {activeTab === "problems" && (
-                  <View className="px-4 pb-16">
+                  <View className="pb-16">
                     {(plant.poison_symptoms ||
                       plant.poison_toxic_principle ||
                       plant.poison_severity) && (
