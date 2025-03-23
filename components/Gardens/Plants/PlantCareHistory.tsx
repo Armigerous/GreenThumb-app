@@ -46,13 +46,11 @@ export default function PlantCareHistory({ careLogs }: PlantCareHistoryProps) {
                 log.care_type === "Watered"
                   ? "bg-blue-50"
                   : log.care_type === "Fertilized"
-                  ? "bg-green-50"
-                  : log.care_type === "Pruned"
-                  ? "bg-yellow-50"
-                  : log.care_type === "Repotted"
+                  ? "bg-brand-50"
+                  : log.care_type === "Harvested"
+                  ? "bg-accent-50"
+                  : log.care_type === "Other"
                   ? "bg-purple-50"
-                  : log.care_type === "Pesticide"
-                  ? "bg-red-50"
                   : "bg-cream-50"
               }`}
             >

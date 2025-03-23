@@ -65,8 +65,8 @@ export default function PlantTasksList({
               task.task_type === "Water"
                 ? "bg-blue-50"
                 : task.task_type === "Fertilize"
-                ? "bg-green-50"
-                : "bg-yellow-50"
+                ? "bg-brand-50"
+                : "bg-accent-50"
             }`}
           >
             <Ionicons

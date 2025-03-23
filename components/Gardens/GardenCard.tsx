@@ -91,6 +91,36 @@ export default function GardenCard({ garden }: { garden: Garden }) {
     }
   };
 
+  /**
+   * Check if the garden has any plants by examining both user_plants and health_stats
+   * This ensures we accurately determine if the garden is empty regardless of data source
+   * @returns boolean indicating if the garden has plants
+   */
+  const hasPlants = (): boolean => {
+    // Check if the garden has a total_plants property from user_gardens_dashboard view
+    if (garden.total_plants && garden.total_plants > 0) {
+      return true;
+    }
+
+    // If we have health_stats and it shows plants, we know there are plants
+    if (garden.health_stats && garden.health_stats.total_plants > 0) {
+      return true;
+    }
+
+    // If we have user_plants array and it's not empty, we know there are plants
+    if (garden.user_plants && garden.user_plants.length > 0) {
+      return true;
+    }
+
+    // If insights were calculated and total plants > 0, we know there are plants
+    if (insights && insights.totalPlants > 0) {
+      return true;
+    }
+
+    // Default: no plants detected
+    return false;
+  };
+
   return (
     <TouchableOpacity
       className="bg-white border border-cream-100 rounded-xl shadow-sm mb-4 overflow-hidden"
@@ -107,8 +137,8 @@ export default function GardenCard({ garden }: { garden: Garden }) {
             {garden.name}
           </Text>
           {insights && insights.plantsNeedingCare > 0 && (
-            <View className="bg-yellow-100 rounded-full px-3 py-1">
-              <Text className="text-xs text-yellow-700 font-medium">
+            <View className="bg-accent-100 rounded-full px-3 py-1">
+              <Text className="text-xs text-accent-700 font-medium">
                 {insights.plantsNeedingCare}{" "}
                 {insights.plantsNeedingCare === 1 ? "plant" : "plants"} need
                 care
@@ -153,7 +183,12 @@ export default function GardenCard({ garden }: { garden: Garden }) {
           <View className="flex-row items-center">
             <Ionicons name="leaf" size={16} color="#10b981" />
             <Text className="text-brand-600 text-sm font-medium ml-1">
-              {insights?.totalPlants || garden.user_plants?.length || 0} Plants
+              {insights?.totalPlants ||
+                garden.total_plants ||
+                garden.health_stats?.total_plants ||
+                garden.user_plants?.length ||
+                0}{" "}
+              Plants
             </Text>
           </View>
 
@@ -169,8 +204,8 @@ export default function GardenCard({ garden }: { garden: Garden }) {
               )}
               {insights.needsAttentionCount > 0 && (
                 <View className="flex-row items-center mr-2">
-                  <View className="bg-yellow-500 h-2 rounded-full w-2 mr-1" />
-                  <Text className="text-xs text-yellow-700">
+                  <View className="bg-accent-500 h-2 rounded-full w-2 mr-1" />
+                  <Text className="text-xs text-accent-700">
                     {insights.needsAttentionCount}
                   </Text>
                 </View>
@@ -217,51 +252,52 @@ export default function GardenCard({ garden }: { garden: Garden }) {
           </View>
         )}
 
-        {garden.user_plants && garden.user_plants.length > 0 ? (
+        {hasPlants() ? (
           <View>
             {/* Preview of plants needing attention first */}
-            {garden.user_plants
-              .filter((p) => p.status !== "Healthy")
-              .slice(0, 2)
-              .map((plant) => (
-                <View
-                  key={plant.id}
-                  className="flex-row bg-cream-50 p-2 rounded-lg items-center mb-2"
-                >
-                  {plant.images?.[0] && (
-                    <Image
-                      source={{ uri: plant.images[0] }}
-                      className="h-8 rounded-full w-8 mr-2"
+            {garden.user_plants &&
+              garden.user_plants
+                .filter((p) => p.status !== "Healthy")
+                .slice(0, 2)
+                .map((plant) => (
+                  <View
+                    key={plant.id}
+                    className="flex-row bg-cream-50 p-2 rounded-lg items-center mb-2"
+                  >
+                    {plant.images?.[0] && (
+                      <Image
+                        source={{ uri: plant.images[0] }}
+                        className="h-8 rounded-full w-8 mr-2"
+                      />
+                    )}
+                    <View className="flex-1">
+                      <Text className="text-cream-800 text-sm font-medium">
+                        {plant.nickname}
+                      </Text>
+                      <Text className="text-cream-600 text-xs">
+                        Needs attention
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name={
+                        plant.status === "Dead" || plant.status === "Wilting"
+                          ? "alert-circle"
+                          : "water"
+                      }
+                      size={16}
+                      color={
+                        plant.status === "Dead" || plant.status === "Wilting"
+                          ? "#dc2626"
+                          : "#d97706"
+                      }
                     />
-                  )}
-                  <View className="flex-1">
-                    <Text className="text-cream-800 text-sm font-medium">
-                      {plant.nickname}
-                    </Text>
-                    <Text className="text-cream-600 text-xs">
-                      Needs attention
-                    </Text>
                   </View>
-                  <Ionicons
-                    name={
-                      plant.status === "Dead" || plant.status === "Wilting"
-                        ? "alert-circle"
-                        : "water"
-                    }
-                    size={16}
-                    color={
-                      plant.status === "Dead" || plant.status === "Wilting"
-                        ? "#dc2626"
-                        : "#d97706"
-                    }
-                  />
-                </View>
-              ))}
+                ))}
 
             {/* Show remaining healthy plants count if any */}
             {insights && insights.healthyCount > 0 && (
-              <View className="flex-row bg-green-50 justify-between p-2 rounded-lg items-center">
-                <Text className="text-green-700 text-sm">
+              <View className="flex-row bg-brand-50 justify-between p-2 rounded-lg items-center">
+                <Text className="text-brand-700 text-sm">
                   {insights.healthyCount} healthy{" "}
                   {insights.healthyCount === 1 ? "plant" : "plants"}
                 </Text>
