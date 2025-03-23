@@ -70,6 +70,52 @@ export interface UserPlant {
 }
 
 /**
+ * Represents plant health statistics for a garden.
+ *
+ * This interface maps to the `garden_health_stats` view in the database,
+ * which provides aggregate statistics on plant health within a garden.
+ */
+export interface GardenHealthStats {
+  /** Foreign key referencing the garden these stats apply to */
+  garden_id: number;
+  /** Total number of plants in the garden */
+  total_plants: number;
+  /** Number of plants with 'Healthy' status */
+  healthy_plants: number;
+  /** Number of plants needing care (not 'Healthy') */
+  plants_needing_care: number;
+  /** Percentage of healthy plants (0-100) */
+  health_percentage: number;
+}
+
+/**
+ * Represents a summary of pending tasks for a garden.
+ *
+ * This interface maps to the `garden_tasks_summary` view in the database,
+ * which provides information about incomplete tasks for plants in a garden.
+ */
+export interface GardenTaskSummary {
+  /** Foreign key referencing the garden this task belongs to */
+  garden_id: number;
+  /** Unique identifier for the task */
+  task_id: number;
+  /** Type of task to be performed */
+  task_type: string;
+  /** The due date for the task */
+  due_date: string;
+  /** Whether the task has been completed */
+  completed: boolean;
+  /** ID of the plant this task is for */
+  plant_id: string;
+  /** Nickname of the plant this task is for */
+  plant_nickname: string;
+  /** Current health status of the plant */
+  plant_status: string;
+  /** Name of the garden this task belongs to (added for UI display) */
+  garden_name?: string;
+}
+
+/**
  * Represents a user's garden.
  *
  * This interface maps to the `user_gardens_full_data` materialized view,
@@ -125,4 +171,9 @@ export interface Garden {
   usda_zones?: string[];
   /** Array of plants in this garden */
   user_plants?: UserPlant[];
+
+  /** Health statistics for the garden from garden_health_stats view */
+  health_stats?: GardenHealthStats;
+  /** Pending tasks for plants in the garden from garden_tasks_summary view */
+  pending_tasks?: GardenTaskSummary[];
 }

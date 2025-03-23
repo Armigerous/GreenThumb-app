@@ -9,7 +9,7 @@ export interface PlantCardData {
   first_image_alt_text?: string;
 }
 
-export interface PlantData extends PlantCardData {
+export interface PlantData {
   id: number;
   slug: string;
   genus?: string | null;

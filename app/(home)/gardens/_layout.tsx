@@ -23,6 +23,12 @@ export default function GardensLayout() {
           presentation: "modal",
         }}
       />
+      <Stack.Screen
+        name="plant"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
