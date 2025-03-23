@@ -36,7 +36,14 @@
         }
       ],
       "expo-updates",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you add images of your plants.",
+          "cameraPermission": "The app needs access to your camera to let you take photos of your plants."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
