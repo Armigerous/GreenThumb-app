@@ -339,6 +339,7 @@ export default function AddPlantToGardenScreen() {
         {/* Step 1: Garden Selection */}
         {step === 1 && (
           <GardenSelectionStep
+            plantSlug={plantSlug}
             gardens={gardens}
             selectedGarden={selectedGarden}
             onSelectGarden={setSelectedGarden}

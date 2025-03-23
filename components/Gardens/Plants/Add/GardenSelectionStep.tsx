@@ -14,11 +14,101 @@ import SubmitButton from "./SubmitButton";
 import { useMemo, useRef, useEffect, useState } from "react";
 
 /**
- * Simple skeleton loading component for UI elements
+ * Advanced skeleton loading component for UI elements with pulse animation
+ * Uses React Native's Animated API to create a smooth, subtle pulse effect
+ * that mimics content loading in a visually pleasing way
  */
-const Skeleton = ({ className }: { className: string }) => (
-  <View className={`bg-cream-100 rounded-md animate-pulse ${className}`} />
-);
+const Skeleton = ({ className }: { className: string }) => {
+  const pulseAnim = useRef(new Animated.Value(0.3)).current;
+
+  // Setup the pulse animation sequence
+  useEffect(() => {
+    const animatePulse = () => {
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start(() => animatePulse());
+    };
+
+    animatePulse();
+
+    // Cleanup animation when component unmounts
+    return () => {
+      pulseAnim.stopAnimation();
+    };
+  }, [pulseAnim]);
+
+  return (
+    <Animated.View
+      style={{ opacity: pulseAnim }}
+      className={`bg-cream-100 rounded-md ${className}`}
+    />
+  );
+};
+
+/**
+ * Staggered animation skeleton component to provide visual feedback during loading
+ * Creates a more natural feeling loading state with staggered animations
+ */
+const StaggeredSkeletonLoader = () => {
+  // Staggered animation values for each skeleton item
+  const animations = [
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+  ];
+
+  // Start staggered animations when component mounts
+  useEffect(() => {
+    // Create a staggered animation sequence for each item
+    animations.forEach((anim, index) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 150, // Stagger the animations
+        useNativeDriver: true,
+      }).start();
+    });
+
+    // Cleanup animations when component unmounts
+    return () => {
+      animations.forEach((anim) => anim.stopAnimation());
+    };
+  }, []);
+
+  return (
+    <View className="mb-6">
+      {[0, 1, 2].map((index) => (
+        <Animated.View
+          key={index}
+          style={{ opacity: animations[index] }}
+          className="mb-3"
+        >
+          <View className="p-4 rounded-xl border border-cream-200 bg-white">
+            <Skeleton className="w-36 h-6 mb-2" />
+            <View className="flex-row items-center">
+              <View className="w-4 h-4 mr-2 bg-cream-100 rounded-full" />
+              <Skeleton className="w-20 h-4" />
+            </View>
+          </View>
+        </Animated.View>
+      ))}
+
+      {/* Loading search bar skeleton */}
+      <Animated.View style={{ opacity: animations[0] }} className="mb-4 mt-2">
+        <View className="h-10 bg-cream-50 rounded-xl border border-cream-200" />
+      </Animated.View>
+    </View>
+  );
+};
 
 /**
  * GardenSelectionStep component for selecting a garden to add a plant to
@@ -32,6 +122,7 @@ const Skeleton = ({ className }: { className: string }) => (
  * @param onSelectGarden - Callback for when a garden is selected
  * @param onNext - Callback for moving to the next step
  * @param plantName - Name of the plant being added (for display purposes)
+ * @param plantSlug - Slug of the plant being added (for display purposes)
  * @param isLoading - Whether garden data is being loaded
  * @param error - Error message if garden fetch failed
  */
@@ -41,6 +132,7 @@ interface GardenSelectionStepProps {
   onSelectGarden: (garden: Garden) => void;
   onNext: () => void;
   plantName: string;
+  plantSlug: string;
   isLoading?: boolean;
   error?: string;
 }
@@ -51,6 +143,7 @@ export default function GardenSelectionStep({
   onSelectGarden,
   onNext,
   plantName,
+  plantSlug,
   isLoading = false,
   error,
 }: GardenSelectionStepProps) {
@@ -96,23 +189,6 @@ export default function GardenSelectionStep({
   );
 
   /**
-   * Render loading skeleton UI for gardens
-   */
-  const renderLoadingSkeleton = () => (
-    <View className="mb-6">
-      {[1, 2, 3].map((index) => (
-        <View
-          key={index}
-          className="mb-3 p-4 rounded-xl border border-cream-200 bg-white"
-        >
-          <Skeleton className="w-36 h-6 mb-2" />
-          <Skeleton className="w-20 h-4" />
-        </View>
-      ))}
-    </View>
-  );
-
-  /**
    * Render error state with retry option
    */
   if (error) {
@@ -142,19 +218,27 @@ export default function GardenSelectionStep({
   }
 
   /**
-   * Render loading state
+   * Render enhanced loading state with animated skeletons
+   * Maintains the same overall structure as the loaded content for a smoother transition
    */
   if (isLoading) {
     return (
-      <View className="px-4">
-        <Text className="text-xl font-bold mb-4">Select a Garden</Text>
-        <View className="mb-6">
+      <View className="px-4 py-2 flex-1">
+        <Text className="text-xl font-bold mb-3">Select a Garden</Text>
+        <View className="mb-4">
           <Text className="text-cream-600">
             Choose which garden you want to add your{" "}
             <Text className="text-foreground font-medium">{plantName}</Text> to:
           </Text>
         </View>
-        {renderLoadingSkeleton()}
+
+        <StaggeredSkeletonLoader />
+
+        {/* Bottom navigation skeleton for visual consistency */}
+        <View className="flex-row justify-between items-center py-4 px-4">
+          <Skeleton className="w-24 h-10 rounded-xl" />
+          <Skeleton className="w-32 h-10 rounded-xl" />
+        </View>
       </View>
     );
   }
@@ -268,7 +352,7 @@ export default function GardenSelectionStep({
                         style={{ marginRight: 4 }}
                       />
                       <Text className="text-sm text-cream-500">
-                        {garden.user_plants?.length || 0} plants
+                        {garden.total_plants || 0} plants
                       </Text>
                     </View>
                   </View>
@@ -296,9 +380,9 @@ export default function GardenSelectionStep({
       <View className="flex-row justify-between items-center py-4 px-4">
         <TouchableOpacity
           className="flex-row items-center justify-center py-3 px-5 rounded-xl border border-cream-400 bg-cream-200"
-          onPress={() => router.push("/(home)/gardens")}
+          onPress={() => router.push(`/(home)/plants/${plantSlug}`)}
           accessibilityRole="button"
-          accessibilityLabel="Cancel and return to gardens"
+          accessibilityLabel="Cancel and return to the plant page"
         >
           <Ionicons
             name="arrow-back-outline"
