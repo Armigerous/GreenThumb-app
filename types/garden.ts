@@ -1,5 +1,3 @@
-import { PlantData } from "./plant";
-
 /**
  * Represents a log entry for plant care activities.
  *
