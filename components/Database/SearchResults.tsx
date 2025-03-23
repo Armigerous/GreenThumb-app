@@ -1,38 +1,24 @@
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  memo,
-  useEffect,
-  useMemo,
-} from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ActivityIndicator,
-  Dimensions,
-  RefreshControl,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  LayoutChangeEvent,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import PlantCard from "./PlantCard";
-import { ApiResponse, PlantCardData } from "@/types/plant";
-import { fetchPlantCards, testSupabaseConnection } from "@/lib/supabaseApi";
-import { prefetchImages } from "@/lib/services/imagePrefetcher";
 import { usePlantCards } from "@/lib/queries";
+import { prefetchImages } from "@/lib/services/imagePrefetcher";
 import Pagination from "../UI/Pagination";
-
+import PlantCard from "./PlantCard";
+import { PlantCardData } from "@/types/plant";
 // Error state component
 const ErrorState = memo(
   ({ message, onRetry }: { message?: string; onRetry: () => void }) => (
@@ -108,29 +94,13 @@ const ScrollFade = memo(
         {showTopFade && (
           <LinearGradient
             colors={["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"]}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 40,
-              zIndex: 10,
-              pointerEvents: "none",
-            }}
+            className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none"
           />
         )}
         {showBottomFade && (
           <LinearGradient
             colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.9)"]}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 40,
-              zIndex: 10,
-              pointerEvents: "none",
-            }}
+            className="absolute bottom-0 left-0 right-0 h-40 z-10 pointer-events-none"
           />
         )}
       </>
@@ -179,8 +149,10 @@ const SearchResults = memo(
     useEffect(() => {
       if (data?.results && data.results.length > 0) {
         // Extract image URIs from the plant data
-        const imageUris = data.results
-          .filter((plant) => plant && plant.first_image)
+        const imageUris = (data.results as PlantCardData[])
+          .filter(
+            (plant): plant is PlantCardData => !!plant && !!plant.first_image
+          )
           .map((plant) => plant.first_image as string);
 
         // Prefetch the images
@@ -312,7 +284,12 @@ const SearchResults = memo(
             ref={flatListRef}
             data={validResults}
             keyExtractor={(item) => item.slug}
-            renderItem={({ item }) => <PlantCard plant={item} />}
+            renderItem={({ item }) => (
+              <PlantCard
+                plant={item}
+                displayMode={nameType as "scientific" | "common"}
+              />
+            )}
             numColumns={columnCount}
             contentContainerStyle={{ padding: 12 }}
             columnWrapperStyle={{ justifyContent: "space-between" }}
