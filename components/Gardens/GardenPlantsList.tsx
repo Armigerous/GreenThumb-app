@@ -93,7 +93,7 @@ export default function GardenPlantsList({
         status: "Healthy",
         data: healthyPlants,
         icon: "checkmark-circle" as const,
-        color: "#059669", // green-600
+        color: "#77B860", // brand-600
       });
     }
 
@@ -125,8 +125,8 @@ export default function GardenPlantsList({
   const renderPlantCard = ({ item }: { item: UserPlant }) => {
     const statusColors = {
       Healthy: {
-        bg: "bg-green-100",
-        text: "text-green-700",
+        bg: "bg-brand-100",
+        text: "text-brand-700",
         icon: "checkmark-circle" as const,
       },
       "Needs Water": {
