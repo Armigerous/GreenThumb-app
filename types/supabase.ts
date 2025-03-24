@@ -38,7 +38,7 @@ export interface Database {
           /** JSON array of location IDs associated with this garden */
           location_ids: Json;
           /** JSON array of space availability IDs for this garden */
-          space_available_ids: Json;
+          available_space_to_plant_ids: Json;
           /** JSON array of sunlight condition IDs for this garden */
           sunlight_ids: Json;
           /** JSON array of soil texture IDs for this garden */
@@ -48,33 +48,33 @@ export interface Database {
           /** JSON array of soil pH IDs for this garden */
           soil_ph_ids: Json;
           /** JSON array of garden theme IDs for this garden */
-          garden_theme_ids: Json;
+          landscape_theme_ids: Json;
           /** JSON array of wildlife attraction IDs for this garden */
-          wildlife_attraction_ids: Json;
+          attracts_ids: Json;
           /** JSON array of resistance challenge IDs for this garden */
-          resistance_challenge_ids: Json;
+          resistance_to_challenges_ids: Json;
           /** JSON array of problem IDs to exclude from this garden */
-          problems_to_exclude_ids: Json;
+          problems_ids: Json;
           /** Growth rate preference ID */
           growth_rate_id: number | null;
           /** Maintenance level preference ID */
-          maintenance_level_id: number | null;
+          maintenance_id: number | null;
           /** Texture preference ID */
-          texture_preference_id: number | null;
+          texture_id: number | null;
           /** JSON array of plant IDs in this garden */
           user_plants_id: Json;
           /** Whether the user wants recommendations for this garden */
           wants_recommendations: boolean | null;
           /** JSON array of North Carolina region IDs for this garden */
-          nc_regions_ids: Json;
+          nc_gegion_ids: Json;
           /** JSON array of USDA zone IDs for this garden */
-          usda_zones_ids: Json;
+          usda_zone_ids: Json;
           /** JSON array of flower color IDs for this garden */
           flower_color_ids: Json;
           /** JSON array of flower bloom time IDs for this garden */
           flower_bloom_time_ids: Json;
           /** JSON array of flower value IDs for this garden */
-          flower_value_ids: Json;
+          flower_value_to_gardener_ids: Json;
           /** JSON array of leaf color IDs for this garden */
           leaf_color_ids: Json;
           /** JSON array of leaf feel IDs for this garden */
@@ -107,7 +107,7 @@ export interface Database {
           /** Optional: JSON array of location IDs */
           location_ids?: Json;
           /** Optional: JSON array of space availability IDs */
-          space_available_ids?: Json;
+          available_space_to_plant_ids?: Json;
           /** Optional: JSON array of sunlight condition IDs */
           sunlight_ids?: Json;
           /** Optional: JSON array of soil texture IDs */
@@ -117,33 +117,33 @@ export interface Database {
           /** Optional: JSON array of soil pH IDs */
           soil_ph_ids?: Json;
           /** Optional: JSON array of garden theme IDs */
-          garden_theme_ids?: Json;
+          landscape_theme_ids?: Json;
           /** Optional: JSON array of wildlife attraction IDs */
-          wildlife_attraction_ids?: Json;
+          attracts_ids?: Json;
           /** Optional: JSON array of resistance challenge IDs */
-          resistance_challenge_ids?: Json;
+          resistance_to_challenges_ids?: Json;
           /** Optional: JSON array of problem IDs to exclude */
-          problems_to_exclude_ids?: Json;
+          problems_ids?: Json;
           /** Optional: Growth rate preference ID */
           growth_rate_id?: number | null;
           /** Optional: Maintenance level preference ID */
-          maintenance_level_id?: number | null;
+          maintenance_id?: number | null;
           /** Optional: Texture preference ID */
-          texture_preference_id?: number | null;
+          texture_id?: number | null;
           /** Optional: JSON array of plant IDs */
           user_plants_id?: Json;
           /** Optional: Whether to provide plant recommendations */
           wants_recommendations?: boolean | null;
           /** Optional: JSON array of NC region IDs */
-          nc_regions_ids?: Json;
+          nc_gegion_ids?: Json;
           /** Optional: JSON array of USDA zone IDs */
-          usda_zones_ids?: Json;
+          usda_zone_ids?: Json;
           /** Optional: JSON array of flower color IDs */
           flower_color_ids?: Json;
           /** Optional: JSON array of flower bloom time IDs */
           flower_bloom_time_ids?: Json;
           /** Optional: JSON array of flower value IDs */
-          flower_value_ids?: Json;
+          flower_value_to_gardener_ids?: Json;
           /** Optional: JSON array of leaf color IDs */
           leaf_color_ids?: Json;
           /** Optional: JSON array of leaf feel IDs */
@@ -171,25 +171,25 @@ export interface Database {
           user_id?: string;
           name?: string;
           location_ids?: Json;
-          space_available_ids?: Json;
+          available_space_to_plant_ids?: Json;
           sunlight_ids?: Json;
           soil_texture_ids?: Json;
           soil_drainage_ids?: Json;
           soil_ph_ids?: Json;
-          garden_theme_ids?: Json;
-          wildlife_attraction_ids?: Json;
-          resistance_challenge_ids?: Json;
-          problems_to_exclude_ids?: Json;
+          landscape_theme_ids?: Json;
+          attracts_ids?: Json;
+          resistance_to_challenges_ids?: Json;
+          problems_ids?: Json;
           growth_rate_id?: number | null;
-          maintenance_level_id?: number | null;
-          texture_preference_id?: number | null;
+          maintenance_id?: number | null;
+          texture_id?: number | null;
           user_plants_id?: Json;
           wants_recommendations?: boolean | null;
-          nc_regions_ids?: Json;
-          usda_zones_ids?: Json;
+          nc_gegion_ids?: Json;
+          usda_zone_ids?: Json;
           flower_color_ids?: Json;
           flower_bloom_time_ids?: Json;
-          flower_value_ids?: Json;
+          flower_value_to_gardener_ids?: Json;
           leaf_color_ids?: Json;
           leaf_feel_ids?: Json;
           leaf_value_ids?: Json;
