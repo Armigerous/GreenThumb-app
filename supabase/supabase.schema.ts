@@ -91,7 +91,7 @@ export type Database = {
           life_cycle: Json | null;
           light_requirements: Json | null;
           maintenance: Json | null;
-          nc_regions: Json | null;
+          nc_region: Json | null;
           origin: string | null;
           phonetic_spelling: string | null;
           plant_habit: Json | null;
