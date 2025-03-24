@@ -128,7 +128,7 @@ export const allFilters: FilterSection[] = [
       {
         id: "nc-regions",
         name: "NC Regions",
-        dbColumn: "nc_regions", // JSONB
+        dbColumn: "nc_region", // JSONB
         options: ["Coastal", "Mountains", "Piedmont"],
         icon: "triangle",
       },

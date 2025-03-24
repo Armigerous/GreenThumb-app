@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
 import type { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
-import type { Garden } from "@/types/garden";
+import type { Garden, GardenDashboard } from "@/types/garden";
 import { useEffect } from "react";
 import {
   shouldUpdateCache,
@@ -206,7 +206,49 @@ export function usePrefetchPlantDetails() {
   };
 }
 
-// Garden queries
+// Garden Dashboard query
+export function useGardenDashboard(userId?: string) {
+  const queryClient = useQueryClient();
+
+  return useQuery<GardenDashboard[], Error>({
+    queryKey: ["gardenDashboard", userId],
+    queryFn: async () => {
+      if (!userId) throw new Error("User ID is required");
+
+      // Fetch from the dashboard materialized view
+      const { data: dashboards, error } = await supabase
+        .from("user_gardens_dashboard")
+        .select(
+          `
+          garden_id,
+          user_id,
+          name,
+          updated_at,
+          total_plants,
+          healthy_plants,
+          plants_needing_care,
+          health_percentage,
+          upcoming_tasks,
+          upcoming_tasks_count,
+          plants
+        `
+        )
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false });
+
+      if (error) {
+        console.error("Supabase error fetching garden dashboard:", error);
+        throw new Error(error.message);
+      }
+
+      return dashboards || [];
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
+}
+
+// Update existing garden queries to use proper types
 export function useUserGardens(userId?: string) {
   const queryClient = useQueryClient();
 
@@ -215,61 +257,18 @@ export function useUserGardens(userId?: string) {
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
 
-      // Fetch the gardens first
-      const { data: gardens, error: gardensError } = await supabase
-        .from("user_gardens_dashboard")
+      const { data: gardens, error } = await supabase
+        .from("user_gardens_full_data")
         .select("*")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false });
 
-      if (gardensError) {
-        console.error("Supabase error fetching gardens:", gardensError);
-        throw new Error(gardensError.message);
+      if (error) {
+        console.error("Supabase error fetching gardens:", error);
+        throw new Error(error.message);
       }
 
-      if (!gardens || gardens.length === 0) {
-        return [];
-      }
-
-      // Get garden IDs for additional queries
-      const gardenIds = gardens.map((garden) => garden.id);
-
-      // Fetch garden health stats
-      const { data: healthStats, error: healthError } = await supabase
-        .from("garden_health_stats")
-        .select("*")
-        .in("garden_id", gardenIds);
-
-      if (healthError) {
-        console.error("Supabase error fetching health stats:", healthError);
-        // Continue without health stats rather than failing the entire query
-      }
-
-      // Fetch pending tasks for each garden
-      const { data: taskSummaries, error: tasksError } = await supabase
-        .from("garden_tasks_summary")
-        .select("*")
-        .in("garden_id", gardenIds)
-        .eq("completed", false)
-        .order("due_date", { ascending: true });
-
-      if (tasksError) {
-        console.error("Supabase error fetching task summaries:", tasksError);
-        // Continue without task summaries rather than failing the entire query
-      }
-
-      // Combine the data
-      return gardens.map((garden) => {
-        return {
-          ...garden,
-          health_stats: healthStats?.find(
-            (stat) => stat.garden_id === garden.id
-          ),
-          pending_tasks: taskSummaries?.filter(
-            (task) => task.garden_id === garden.id
-          ),
-        };
-      });
+      return gardens || [];
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -279,53 +278,37 @@ export function useUserGardens(userId?: string) {
 export function useGardenDetails(gardenId: number) {
   const queryClient = useQueryClient();
 
-  return useQuery<Garden, Error>({
+  return useQuery<Garden & { dashboard?: GardenDashboard }, Error>({
     queryKey: ["gardenDetails", gardenId],
     queryFn: async () => {
       if (!gardenId) throw new Error("Garden ID is required");
 
-      // Fetch the garden details
-      const { data: garden, error: gardenError } = await supabase
-        .from("user_gardens_dashboard")
-        .select("*")
-        .eq("id", gardenId)
-        .single();
+      // Fetch both full data and dashboard data
+      const [
+        { data: garden, error: gardenError },
+        { data: dashboard, error: dashboardError },
+      ] = await Promise.all([
+        supabase
+          .from("user_gardens_full_data")
+          .select("*")
+          .eq("id", gardenId)
+          .single(),
+        supabase
+          .from("user_gardens_dashboard")
+          .select("*")
+          .eq("garden_id", gardenId)
+          .single(),
+      ]);
 
       if (gardenError) {
         console.error("Supabase error fetching garden details:", gardenError);
         throw new Error(gardenError.message);
       }
 
-      // Fetch garden health stats
-      const { data: healthStats, error: healthError } = await supabase
-        .from("garden_health_stats")
-        .select("*")
-        .eq("garden_id", gardenId)
-        .maybeSingle();
-
-      if (healthError) {
-        console.error("Supabase error fetching health stats:", healthError);
-        // Continue without health stats rather than failing the entire query
-      }
-
-      // Fetch pending tasks for this garden
-      const { data: taskSummaries, error: tasksError } = await supabase
-        .from("garden_tasks_summary")
-        .select("*")
-        .eq("garden_id", gardenId)
-        .eq("completed", false)
-        .order("due_date", { ascending: true });
-
-      if (tasksError) {
-        console.error("Supabase error fetching task summaries:", tasksError);
-        // Continue without task summaries rather than failing the entire query
-      }
-
       // Combine the data
       return {
         ...garden,
-        health_stats: healthStats || undefined,
-        pending_tasks: taskSummaries || [],
+        dashboard: dashboard || undefined,
       };
     },
     enabled: !!gardenId,

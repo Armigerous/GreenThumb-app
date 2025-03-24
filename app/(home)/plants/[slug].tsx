@@ -358,7 +358,7 @@ export default function PlantDetailScreen() {
                       plant.edibility ||
                       plant.attracts?.length ||
                       plant.design_features?.length) && (
-                      <View className="bg-white rounded-2xl py-5 mb-4 shadow-sm">
+                      <View className="bg-white rounded-2xl py-5 mb-4 shadow-sm px-5">
                         <View className="border-b border-cream-100 pb-3 mb-4">
                           <Text className="text-lg font-bold text-foreground">
                             Uses and Value

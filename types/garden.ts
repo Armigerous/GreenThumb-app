@@ -1,4 +1,9 @@
 /**
+ * Type alias for UUID strings to make the intent clearer
+ */
+export type UUID = string;
+
+/**
  * Represents a log entry for plant care activities.
  *
  * This interface maps to the `plant_care_logs` table, which stores structured logs
@@ -8,7 +13,7 @@ export interface PlantCareLog {
   /** Unique identifier for the care log (primary key) */
   id: number;
   /** Foreign key referencing the specific plant instance (user_plants) */
-  user_plant_id: string;
+  user_plant_id: UUID;
   /** Type of care activity performed */
   care_type: "Watered" | "Fertilized" | "Harvested" | "Other";
   /** Optional notes about the care activity */
@@ -28,10 +33,10 @@ export interface PlantTask {
   /** Unique identifier for the plant task (primary key) */
   id: number;
   /** Foreign key referencing the specific plant instance in `user_plants` */
-  user_plant_id: string;
-  /** Type of task to be performed (MVP version only supports core tasks) */
+  user_plant_id: UUID;
+  /** Type of task to be performed */
   task_type: "Water" | "Fertilize" | "Harvest";
-  /** The due date for the task, based on plant care recommendations */
+  /** The due date for the task */
   due_date: string;
   /** Whether the task has been completed */
   completed: boolean;
@@ -46,7 +51,7 @@ export interface PlantTask {
  */
 export interface UserPlant {
   /** Unique identifier for the user plant (primary key) */
-  id: string;
+  id: UUID;
   /** Foreign key referencing the garden this plant belongs to */
   garden_id: number;
   /** Foreign key referencing the plant in main_plant_data */
@@ -87,38 +92,81 @@ export interface GardenHealthStats {
 }
 
 /**
- * Represents a summary of pending tasks for a garden.
- *
- * This interface maps to the `garden_tasks_summary` view in the database,
- * which provides information about incomplete tasks for plants in a garden.
+ * Represents a plant summary from the user_gardens_dashboard view
  */
-export interface GardenTaskSummary {
-  /** Foreign key referencing the garden this task belongs to */
-  garden_id: number;
+interface DashboardPlantSummary {
+  /** Unique identifier for the plant */
+  id: UUID;
+  /** User-defined name for this specific plant */
+  nickname: string;
+  /** Current health status of the plant */
+  status: string;
+  /** Array of image URLs or references for this plant */
+  images: string[];
+  /** Foreign key referencing the plant in main_plant_data */
+  plant_id: number;
+  /** Scientific name of the plant */
+  scientific_name: string;
+  /** Common names of the plant */
+  common_names: string[];
+}
+
+/**
+ * Represents an upcoming task from the dashboard view
+ */
+export interface UpcomingTask {
   /** Unique identifier for the task */
   task_id: number;
+  /** ID of the plant this task is for */
+  plant_id: UUID;
+  /** Nickname of the plant this task is for */
+  plant_nickname: string;
   /** Type of task to be performed */
   task_type: string;
   /** The due date for the task */
   due_date: string;
   /** Whether the task has been completed */
   completed: boolean;
-  /** ID of the plant this task is for */
-  plant_id: string;
-  /** Nickname of the plant this task is for */
-  plant_nickname: string;
-  /** Current health status of the plant */
-  plant_status: string;
-  /** Name of the garden this task belongs to (added for UI display) */
-  garden_name?: string;
 }
 
 /**
- * Represents a user's garden.
+ * Represents a garden from the user_gardens_dashboard materialized view.
+ *
+ * This interface maps to the `user_gardens_dashboard` materialized view,
+ * which provides aggregated information about a garden's health, plants,
+ * and upcoming tasks.
+ */
+export interface GardenDashboard {
+  /** Unique identifier for the garden */
+  garden_id: number;
+  /** Foreign key referencing the user who owns this garden */
+  user_id: string;
+  /** Name of the garden */
+  name: string;
+  /** Timestamp when this garden was last updated */
+  updated_at: string;
+  /** Total number of plants in the garden */
+  total_plants: number;
+  /** Number of plants with 'Healthy' status */
+  healthy_plants: number;
+  /** Number of plants needing care (not 'Healthy') */
+  plants_needing_care: number;
+  /** Percentage of healthy plants (0-100) */
+  health_percentage: number;
+  /** Array of upcoming tasks for plants in this garden */
+  upcoming_tasks: UpcomingTask[] | null;
+  /** Count of upcoming tasks */
+  upcoming_tasks_count: number;
+  /** Array of plants in this garden with their details */
+  plants: DashboardPlantSummary[] | null;
+}
+
+/**
+ * Represents a garden from the user_gardens_full_data materialized view.
  *
  * This interface maps to the `user_gardens_full_data` materialized view,
- * which stores aggregated information about a user's garden including
- * its name, preferences, conditions, and associated plants.
+ * which provides the garden data with all IDs resolved to their human-readable values
+ * from their respective lookup tables.
  */
 export interface Garden {
   /** Unique identifier for the garden (primary key) */
@@ -127,54 +175,135 @@ export interface Garden {
   user_id: string;
   /** Name of the garden */
   name: string;
-  /** Whether the user wants plant recommendations for this garden */
-  wants_recommendations?: boolean;
-  /** Whether the user wants plants that provide interest throughout the year */
-  year_round_interest?: boolean;
+  /** Whether the user wants plant recommendations */
+  wants_recommendations: boolean | null;
+  /** Whether the garden should have plants with year-round interest */
+  year_round_interest: boolean | null;
+  /** Growth rate preference */
+  growth_rate: string | null;
+  /** Maintenance level preference */
+  maintenance: string | null;
+  /** Texture preference */
+  texture: string | null;
+  /** Array of location names */
+  landscape_locations: string[];
+  /** Array of space availability options */
+  available_space_to_plant: string[];
+  /** Array of sunlight condition descriptions */
+  sunlight_conditions: string[];
+  /** Array of soil texture types */
+  soil_textures: string[];
+  /** Array of soil drainage descriptions */
+  soil_drainage: string[];
+  /** Array of soil pH ranges */
+  soil_ph_ranges: string[];
+  /** Array of garden theme names */
+  garden_themes: string[];
+  /** Array of wildlife attraction descriptions */
+  wildlife_attractions: string[];
+  /** Array of resistance challenge descriptions */
+  resistance_challenges: string[];
+  /** Array of problem descriptions to exclude */
+  problems: string[];
+  /** Array of NC region names */
+  nc_region: string[];
+  /** Array of USDA zone descriptions */
+  usda_zones: string[];
+  /** Array of flower colors */
+  flower_colors: string[];
+  /** Array of flower bloom time descriptions */
+  flower_bloom_times: string[];
+  /** Array of flower value descriptions */
+  flower_values: string[];
+  /** Array of leaf colors */
+  leaf_colors: string[];
+  /** Array of leaf feel descriptions */
+  leaf_feels: string[];
+  /** Array of leaf value descriptions */
+  leaf_values: string[];
+  /** Array of fall colors */
+  fall_colors: string[];
+  /** Array of habit/form descriptions */
+  habit_forms: string[];
+  /** Array of plant type descriptions */
+  plant_types: string[];
+  /** Array of design feature descriptions */
+  design_features: string[];
   /** Timestamp when this garden was created */
   created_at: string;
   /** Timestamp when this garden was last updated */
   updated_at: string;
+}
 
-  // Values instead of IDs
-  /** Growth rate preference for plants in this garden */
-  growth_rate?: string;
-  /** Maintenance level preference for plants in this garden */
-  maintenance_level?: string;
-  /** Texture preference for plants in this garden */
-  texture_preference?: string;
-
-  // Arrays of values instead of ID arrays
-  /** Locations where the garden is situated */
-  locations?: string[];
-  /** Available space sizes in the garden */
-  available_space?: string[];
-  /** Sunlight conditions in the garden */
-  sunlight?: string[];
-  /** Soil texture types in the garden */
-  soil_texture?: string[];
-  /** Soil drainage conditions in the garden */
-  soil_drainage?: string[];
-  /** Soil pH levels in the garden */
-  soil_ph?: string[];
-  /** Garden themes or styles */
-  garden_themes?: string[];
-  /** Wildlife the garden should attract */
-  wildlife_attractions?: string[];
-  /** Environmental challenges plants should resist */
-  resistance_challenges?: string[];
-  /** Plant problems to avoid in this garden */
-  problems_to_exclude?: string[];
-  /** USDA hardiness zones of the garden */
-  usda_zones?: string[];
-  /** Array of plants in this garden */
-  user_plants?: UserPlant[];
-
-  /** Health statistics for the garden from garden_health_stats view */
-  health_stats?: GardenHealthStats;
-  /** Pending tasks for plants in the garden from garden_tasks_summary view */
-  pending_tasks?: GardenTaskSummary[];
-
-  /** Total number of plants in the garden from user_gardens_dashboard view */
-  total_plants?: number;
+/**
+ * Represents a user's garden from the user_gardens table.
+ *
+ * This interface maps directly to the `user_gardens` table in the database,
+ * storing the raw garden data including preference IDs and settings.
+ */
+export interface GardenDatabase {
+  /** Unique identifier for the garden (primary key) */
+  id: number;
+  /** Foreign key referencing the user who owns this garden */
+  user_id: string;
+  /** Name of the garden */
+  name: string;
+  /** JSON array of location IDs */
+  landscape_location_ids: number[];
+  /** JSON array of space availability IDs */
+  available_space_to_plant_ids: number[];
+  /** JSON array of sunlight condition IDs */
+  light_ids: number[];
+  /** JSON array of soil texture IDs */
+  soil_texture_ids: number[];
+  /** JSON array of soil drainage IDs */
+  soil_drainage_ids: number[];
+  /** JSON array of soil pH IDs */
+  soil_ph_ids: number[];
+  /** JSON array of garden theme IDs */
+  landscape_theme_ids: number[];
+  /** JSON array of wildlife attraction IDs */
+  attracts_ids: number[];
+  /** JSON array of resistance challenge IDs */
+  resistance_to_challenges_ids: number[];
+  /** JSON array of problem IDs to exclude */
+  problems_ids: number[];
+  /** Growth rate preference ID */
+  growth_rate_id: number | null;
+  /** Maintenance level preference ID */
+  maintenance_id: number | null;
+  /** Texture preference ID */
+  texture_id: number | null;
+  /** Whether the user wants plant recommendations */
+  wants_recommendations: boolean | null;
+  /** Whether the garden should have plants with year-round interest */
+  year_round_interest: boolean | null;
+  /** JSON array of NC region IDs */
+  nc_region_ids: number[];
+  /** JSON array of USDA zone IDs */
+  usda_zone_ids: number[];
+  /** JSON array of flower color IDs */
+  flower_color_ids: number[];
+  /** JSON array of flower bloom time IDs */
+  flower_bloom_time_ids: number[];
+  /** JSON array of flower value IDs */
+  flower_value_to_gardener_ids: number[];
+  /** JSON array of leaf color IDs */
+  leaf_color_ids: number[];
+  /** JSON array of leaf feel IDs */
+  leaf_feel_ids: number[];
+  /** JSON array of leaf value IDs */
+  leaf_value_ids: number[];
+  /** JSON array of fall color IDs */
+  fall_color_ids: number[];
+  /** JSON array of plant habit/form IDs */
+  habit_form_ids: number[];
+  /** JSON array of plant type IDs */
+  plant_type_ids: number[];
+  /** JSON array of design feature IDs */
+  design_feature_ids: number[];
+  /** Timestamp when this garden was created */
+  created_at: string;
+  /** Timestamp when this garden was last updated */
+  updated_at: string;
 }

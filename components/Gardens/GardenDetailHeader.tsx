@@ -2,49 +2,22 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
-import type { Garden } from "@/types/garden";
+import type { Garden, GardenDashboard } from "@/types/garden";
 
 type GardenDetailHeaderProps = {
   garden: Garden;
+  dashboardData?: GardenDashboard;
   onEditPress: () => void;
   onAddPlant: () => void;
 };
 
 export default function GardenDetailHeader({
   garden,
+  dashboardData,
   onEditPress,
   onAddPlant,
 }: GardenDetailHeaderProps) {
   const router = useRouter();
-
-  const getGardenStatus = () => {
-    if (!garden.user_plants || garden.user_plants.length === 0) return null;
-
-    const healthyCount = garden.user_plants.filter(
-      (p) => p.status === "Healthy"
-    ).length;
-    const needsAttentionCount = garden.user_plants.filter(
-      (p) => p.status === "Needs Water" || p.status === "Dormant"
-    ).length;
-    const criticalCount = garden.user_plants.filter(
-      (p) => p.status === "Dead" || p.status === "Wilting"
-    ).length;
-
-    const plantsNeedingCare = needsAttentionCount + criticalCount;
-    const totalPlants = garden.user_plants.length;
-    const healthPercentage = Math.round((healthyCount / totalPlants) * 100);
-
-    return {
-      healthyCount,
-      needsAttentionCount,
-      criticalCount,
-      plantsNeedingCare,
-      totalPlants,
-      healthPercentage,
-    };
-  };
-
-  const gardenStatus = getGardenStatus();
 
   return (
     <View className="pt-5 px-5">
@@ -76,24 +49,24 @@ export default function GardenDetailHeader({
         {garden.name}
       </Text>
 
-      {gardenStatus ? (
+      {dashboardData ? (
         <View className="space-y-4">
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center">
               <View className="flex-row bg-brand-50 rounded-lg items-center px-3 py-1.5">
                 <Ionicons name="leaf" size={16} color="#10b981" />
                 <Text className="text-brand-600 text-sm font-medium ml-1">
-                  {gardenStatus.totalPlants}{" "}
-                  {gardenStatus.totalPlants === 1 ? "Plant" : "Plants"}
+                  {dashboardData.total_plants}{" "}
+                  {dashboardData.total_plants === 1 ? "Plant" : "Plants"}
                 </Text>
               </View>
             </View>
 
-            {gardenStatus.plantsNeedingCare > 0 ? (
+            {dashboardData.plants_needing_care > 0 ? (
               <TouchableOpacity className="bg-yellow-100 rounded-lg px-3 py-1.5">
                 <Text className="text-sm text-yellow-700 font-medium">
-                  {gardenStatus.plantsNeedingCare} need
-                  {gardenStatus.plantsNeedingCare === 1 ? "s" : ""} care
+                  {dashboardData.plants_needing_care} need
+                  {dashboardData.plants_needing_care === 1 ? "s" : ""} care
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -109,13 +82,13 @@ export default function GardenDetailHeader({
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-cream-700 font-medium">Garden Health</Text>
               <Text className="text-cream-600 text-sm">
-                {gardenStatus.healthPercentage}% Healthy
+                {dashboardData.health_percentage}% Healthy
               </Text>
             </View>
             <View className="bg-cream-200 h-2 rounded-full overflow-hidden">
               <View
                 className="bg-brand-500 h-full rounded-full"
-                style={{ width: `${gardenStatus.healthPercentage}%` }}
+                style={{ width: `${dashboardData.health_percentage}%` }}
               />
             </View>
           </View>
