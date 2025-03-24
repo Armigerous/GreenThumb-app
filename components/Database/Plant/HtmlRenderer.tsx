@@ -1,4 +1,6 @@
 import React, { Fragment } from "react";
+import { Text } from "react-native";
+import { useRouter } from "expo-router";
 import {
   P,
   Article,
@@ -117,6 +119,8 @@ const normalizeTextFormatting = (text: string): string => {
  * @param content - The markdown or HTML formatted string to render
  */
 export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
+  const router = useRouter();
+
   if (!content) return null;
 
   // Normalize text and decode HTML entities
@@ -133,6 +137,19 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
   const parseHtmlContent = (): React.ReactNode => {
     // Clean up any double line breaks or excessive whitespace
     let cleanContent = decodedContent.trim().replace(/\n\s*\n/g, "\n\n");
+
+    // First handle lists (before paragraphs to prevent incorrect paragraph wrapping)
+    const listRegex = /<ul>([\s\S]*?)<\/ul>/g;
+    const listItems: string[] = [];
+    let listMatch;
+
+    // Extract all lists and replace them with placeholders
+    while ((listMatch = listRegex.exec(cleanContent)) !== null) {
+      const listContent = listMatch[1].trim();
+      const placeholder = `__LIST_${listItems.length}__`;
+      listItems.push(listContent);
+      cleanContent = cleanContent.replace(listMatch[0], placeholder);
+    }
 
     // First handle paragraph tags
     let hasExplicitParagraphs = cleanContent.includes("<p>");
@@ -170,17 +187,68 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
           .substring(lastIndex, match.index)
           .trim();
         if (untaggedContent) {
-          blocks.push(
-            <P key={`p-${blocks.length}`} className="text-cream-800 mb-3">
-              {parseInlineHtml(untaggedContent)}
-            </P>
-          );
+          // Check if this is a list placeholder
+          if (untaggedContent.startsWith("__LIST_")) {
+            const listIndex = parseInt(
+              untaggedContent.replace("__LIST_", "").replace("__", "")
+            );
+            if (!isNaN(listIndex) && listItems[listIndex]) {
+              blocks.push(
+                <UL key={`ul-${blocks.length}`} className="mb-3 ml-4">
+                  {listItems[listIndex]
+                    .split(/<li>|<\/li>/)
+                    .filter((item) => item.trim())
+                    .map((item, itemIndex) => (
+                      <LI
+                        key={`li-${blocks.length}-${itemIndex}`}
+                        className="text-cream-800 mb-1 flex-row"
+                      >
+                        <Text className="text-cream-800 mr-2">•</Text>
+                        <Text className="text-cream-800 flex-1">
+                          {parseInlineHtml(item.trim())}
+                        </Text>
+                      </LI>
+                    ))}
+                </UL>
+              );
+            }
+          } else {
+            blocks.push(
+              <P key={`p-${blocks.length}`} className="text-cream-800 mb-3">
+                {parseInlineHtml(untaggedContent)}
+              </P>
+            );
+          }
         }
       }
 
-      // Add the paragraph
+      // Check if paragraph content contains a list placeholder
       const paragraphContent = match[1].trim();
-      if (paragraphContent) {
+      if (paragraphContent.startsWith("__LIST_")) {
+        const listIndex = parseInt(
+          paragraphContent.replace("__LIST_", "").replace("__", "")
+        );
+        if (!isNaN(listIndex) && listItems[listIndex]) {
+          blocks.push(
+            <UL key={`ul-${blocks.length}`} className="mb-3 ml-4">
+              {listItems[listIndex]
+                .split(/<li>|<\/li>/)
+                .filter((item) => item.trim())
+                .map((item, itemIndex) => (
+                  <LI
+                    key={`li-${blocks.length}-${itemIndex}`}
+                    className="text-cream-800 mb-1 flex-row"
+                  >
+                    <Text className="text-cream-800 mr-2">•</Text>
+                    <Text className="text-cream-800 flex-1">
+                      {parseInlineHtml(item.trim())}
+                    </Text>
+                  </LI>
+                ))}
+            </UL>
+          );
+        }
+      } else if (paragraphContent) {
         blocks.push(
           <P key={`p-${blocks.length}`} className="text-cream-800 mb-3">
             {parseInlineHtml(paragraphContent)}
@@ -195,11 +263,38 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
     if (lastIndex < cleanContent.length) {
       const remainingContent = cleanContent.substring(lastIndex).trim();
       if (remainingContent) {
-        blocks.push(
-          <P key={`p-${blocks.length}`} className="text-cream-800 mb-3">
-            {parseInlineHtml(remainingContent)}
-          </P>
-        );
+        // Check if remaining content is a list placeholder
+        if (remainingContent.startsWith("__LIST_")) {
+          const listIndex = parseInt(
+            remainingContent.replace("__LIST_", "").replace("__", "")
+          );
+          if (!isNaN(listIndex) && listItems[listIndex]) {
+            blocks.push(
+              <UL key={`ul-${blocks.length}`} className="mb-3 ml-4">
+                {listItems[listIndex]
+                  .split(/<li>|<\/li>/)
+                  .filter((item) => item.trim())
+                  .map((item, itemIndex) => (
+                    <LI
+                      key={`li-${blocks.length}-${itemIndex}`}
+                      className="text-cream-800 mb-1 flex-row"
+                    >
+                      <Text className="text-cream-800 mr-2">•</Text>
+                      <Text className="text-cream-800 flex-1">
+                        {parseInlineHtml(item.trim())}
+                      </Text>
+                    </LI>
+                  ))}
+              </UL>
+            );
+          }
+        } else {
+          blocks.push(
+            <P key={`p-${blocks.length}`} className="text-cream-800 mb-3">
+              {parseInlineHtml(remainingContent)}
+            </P>
+          );
+        }
       }
     }
 
@@ -214,73 +309,117 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
    * Parse inline HTML tags like <strong>, <em>, <a>
    * @param text - The HTML text to parse
    */
-  const parseInlineHtml = (text: string): React.ReactNode[] => {
+  const parseInlineHtml = (
+    text: string,
+    isNested: boolean = false
+  ): React.ReactNode[] => {
     // Normalize whitespace first
     const normalizedText = text.replace(/\s+/g, " ").trim();
     let segments: React.ReactNode[] = [normalizedText];
 
-    // Process <b> and <strong> tags (both are common in HTML)
-    segments = processHtmlTag(
-      segments,
-      /<(strong|b)>(.*?)<\/\1>/g,
-      (content) => <Strong>{content}</Strong>
-    );
-
-    // Process <i> and <em> tags
-    segments = processHtmlTag(segments, /<(em|i)>(.*?)<\/\1>/g, (content) => (
-      <EM>{content}</EM>
-    ));
-
-    // Process <a> tags with href
+    // Process <a> tags with href first (since they can contain other inline elements)
     segments = processHtmlTag(
       segments,
       /<a href="(.*?)".*?>(.*?)<\/a>/g,
-      (content, url) => (
-        <A href={url} className="text-brand-600 underline">
-          {content}
-        </A>
-      ),
+      (content, url = "") => {
+        // Process nested tags within the link content
+        const processedContent = isNested
+          ? content
+          : parseInlineHtml(content, true);
+
+        // Check if this is an internal plant link
+        const isPlantLink = url.startsWith("/plants/");
+        if (isPlantLink) {
+          return (
+            <A
+              href={url}
+              className="text-primary underline"
+              onPress={(e) => {
+                e.preventDefault();
+                const slug = url.split("/plants/")[1].replace(/\/$/, "");
+                router.push(`/(home)/plants/${slug}`);
+              }}
+            >
+              {processedContent}
+            </A>
+          );
+        }
+        return (
+          <A href={url} className="text-primary underline">
+            {processedContent}
+          </A>
+        );
+      },
       true
     );
 
-    // Process <a> tags without href but with other attributes
-    segments = processHtmlTag(segments, /<a [^>]*?>(.*?)<\/a>/g, (content) => (
-      <A className="text-brand-600 underline">{content}</A>
-    ));
+    // Don't process other tags if we're in a nested call
+    if (!isNested) {
+      // Process <b> and <strong> tags
+      segments = processHtmlTag(
+        segments,
+        /<(strong|b)>(.*?)<\/\1>/g,
+        (content) => <Strong>{content}</Strong>
+      );
 
-    // Process basic <a> tags without attributes
-    segments = processHtmlTag(segments, /<a>(.*?)<\/a>/g, (content) => (
-      <A className="text-brand-600 underline">{content}</A>
-    ));
+      // Process <i> and <em> tags
+      segments = processHtmlTag(segments, /<(em|i)>(.*?)<\/\1>/g, (content) => (
+        <EM>{content}</EM>
+      ));
 
-    // Process <br> tags (convert to spaces)
-    segments = segments.map((segment) => {
+      // Process <a> tags without href but with other attributes
+      segments = processHtmlTag(
+        segments,
+        /<a [^>]*?>(.*?)<\/a>/g,
+        (content) => <A className="text-primary underline">{content}</A>
+      );
+
+      // Process basic <a> tags without attributes
+      segments = processHtmlTag(segments, /<a>(.*?)<\/a>/g, (content) => (
+        <A className="text-primary underline">{content}</A>
+      ));
+
+      // Process <br> tags (convert to spaces)
+      segments = segments.map((segment) => {
+        if (typeof segment === "string") {
+          return segment.replace(/<br\s*\/?>/gi, " ");
+        }
+        return segment;
+      });
+
+      // Also process markdown since some content might mix formats
+      segments = processFormattedText(segments, /\*\*(.*?)\*\*/g, (content) => (
+        <Strong>{content}</Strong>
+      ));
+
+      segments = processFormattedText(segments, /\*(.*?)\*/g, (content) => (
+        <EM>{content}</EM>
+      ));
+
+      segments = processFormattedText(
+        segments,
+        /\[(.*?)\]\((.*?)\)/g,
+        (linkText, linkUrl = "") => (
+          <A href={linkUrl} className="text-primary underline">
+            {linkText}
+          </A>
+        )
+      );
+    }
+
+    // Wrap any remaining plain text segments in Text components
+    return segments.map((segment, index) => {
       if (typeof segment === "string") {
-        return segment.replace(/<br\s*\/?>/gi, " ");
+        return (
+          <Text key={`text-${index}`} className="text-cream-800">
+            {segment}
+          </Text>
+        );
       }
-      return segment;
+      return React.cloneElement(segment as React.ReactElement, {
+        key: `element-${index}`,
+      });
     });
-
-    // Also process markdown since some content might mix formats
-    segments = processFormattedText(segments, /\*\*(.*?)\*\*/g, (content) => (
-      <Strong>{content}</Strong>
-    ));
-
-    segments = processFormattedText(segments, /\*(.*?)\*/g, (content) => (
-      <EM>{content}</EM>
-    ));
-
-    segments = processFormattedText(
-      segments,
-      /\[(.*?)\]\((.*?)\)/g,
-      (linkText, linkUrl) => (
-        <A href={linkUrl} className="text-brand-600 underline">
-          {linkText}
-        </A>
-      )
-    );
-
-    return segments;
   };
 
   /**
@@ -385,8 +524,11 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
         return (
           <UL key={blockIndex} className="mb-3 ml-4">
             {items.map((item, itemIndex) => (
-              <LI key={itemIndex} className="text-cream-800 mb-1">
-                {processInlineMarkdown(item.substring(2))}
+              <LI key={itemIndex} className="text-cream-800 mb-1 flex-row">
+                <Text className="text-cream-800 mr-2">•</Text>
+                <Text className="text-cream-800 flex-1">
+                  {processInlineMarkdown(item.substring(2))}
+                </Text>
               </LI>
             ))}
           </UL>

@@ -4,7 +4,7 @@ import { allFilters } from "@/types/filterData";
 
 /**
  * Build a Map from each filter category's "id" (like "nc-regions")
- * to its actual Postgres column name ("nc_regions").
+ * to its actual Postgres column name ("nc_region").
  */
 function buildFilterIdToDbColumnMap() {
   const map = new Map<string, string>();
