@@ -35,6 +35,10 @@ export interface Database {
           user_id: string;
           /** Name of the garden */
           name: string;
+          /** Optional latitude coordinate of the garden location */
+          latitude: number | null;
+          /** Optional longitude coordinate of the garden location */
+          longitude: number | null;
           /** JSON array of location IDs associated with this garden */
           location_ids: Json;
           /** JSON array of space availability IDs for this garden */
@@ -104,6 +108,10 @@ export interface Database {
           user_id: string;
           /** Required: Name of the garden */
           name: string;
+          /** Optional: Latitude coordinate of the garden location */
+          latitude?: number | null;
+          /** Optional: Longitude coordinate of the garden location */
+          longitude?: number | null;
           /** Optional: JSON array of location IDs */
           location_ids?: Json;
           /** Optional: JSON array of space availability IDs */
@@ -170,6 +178,8 @@ export interface Database {
           id?: number;
           user_id?: string;
           name?: string;
+          latitude?: number | null;
+          longitude?: number | null;
           location_ids?: Json;
           available_space_to_plant_ids?: Json;
           sunlight_ids?: Json;

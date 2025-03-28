@@ -101,7 +101,7 @@ export async function fetchPlantCards(
     if (nameType === "common") {
       orderColumn = "common_name";
       selectColumns =
-        "id, slug, common_name, description, scientific_name, first_tag, first_image, first_image_alt_text";
+        "id, slug, scientific_slug, common_name, description, scientific_name, first_tag, first_image, first_image_alt_text";
     } else {
       orderColumn = "scientific_name";
       selectColumns =
@@ -169,7 +169,9 @@ export async function searchPlants(
     const { data, error } = await supabase
       .from(tableName)
       .select(
-        "id, slug, scientific_name, common_name, description, first_tag, first_image"
+        nameType === "common"
+          ? "id, slug, scientific_slug, scientific_name, common_name, description, first_tag, first_image"
+          : "id, slug, scientific_name, common_name, description, first_tag, first_image"
       )
       .ilike(searchColumn, `%${query}%`)
       .order(searchColumn, { ascending: true })
@@ -227,6 +229,7 @@ function processPlantData(
     .map((item) => ({
       id: item.id || 0,
       slug: item.slug,
+      scientific_slug: nameType === "common" ? item.scientific_slug : undefined,
       scientific_name: item.scientific_name || "",
       common_name: item.common_name || "",
       description: item.description || "",

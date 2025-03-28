@@ -35,8 +35,12 @@ const PlantCard: React.FC<PlantCardProps> = memo(
       router.push({
         pathname: "/(home)/plants/[slug]",
         params: {
-          slug: plant.slug,
-          title: plant.common_name || plant.scientific_name,
+          // In common name mode, use the scientific_slug (which is the original slug)
+          slug:
+            displayMode === "common"
+              ? plant.scientific_slug || plant.slug
+              : plant.slug,
+          title: displayName,
         },
       });
     };

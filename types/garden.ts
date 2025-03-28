@@ -42,6 +42,16 @@ export interface PlantTask {
   completed: boolean;
 }
 
+export interface TaskWithDetails extends PlantTask {
+  plant: {
+    nickname: string;
+    garden: {
+      name: string;
+    };
+  };
+}
+
+
 /**
  * Represents a plant in a user's garden.
  *
@@ -233,6 +243,10 @@ export interface Garden {
   created_at: string;
   /** Timestamp when this garden was last updated */
   updated_at: string;
+  /** Optional latitude coordinate of the garden location */
+  latitude?: number;
+  /** Optional longitude coordinate of the garden location */
+  longitude?: number;
 }
 
 /**
@@ -306,4 +320,8 @@ export interface GardenDatabase {
   created_at: string;
   /** Timestamp when this garden was last updated */
   updated_at: string;
+  /** Optional latitude coordinate of the garden location */
+  latitude?: number;
+  /** Optional longitude coordinate of the garden location */
+  longitude?: number;
 }
