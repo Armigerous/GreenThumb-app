@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, View, Animated, Easing } from "react-native";
 import { useRef, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { CompactSpinner } from "@/components/UI/LoadingSpinner";
 
 /**
  * Custom animated loading spinner component that replaces the standard ActivityIndicator
@@ -61,34 +62,35 @@ const LoadingSpinner = ({
 };
 
 /**
- * SubmitButton component for form submissions
- *
  * A consistent button component for form submissions with loading state support,
  * featuring a custom animated spinner for loading state rather than the default ActivityIndicator
  *
- * @param onPress - Function to call when the button is pressed
- * @param label - Button text to display
+ * @param children - Button label/content
+ * @param onPress - Button press handler
+ * @param isDisabled - Whether the button should be disabled
  * @param loadingLabel - Button text when isLoading is true
  * @param isLoading - Whether the button should show a loading state
- * @param isDisabled - Whether the button should be disabled
- * @param variant - Button style variant ('primary', 'secondary', or 'danger')
+ * @param color - Button color theme (primary, secondary, destructive)
+ * @param type - Button type (solid, outline)
  */
 interface SubmitButtonProps {
+  children: React.ReactNode;
   onPress: () => void;
-  label: string;
+  isDisabled?: boolean;
   loadingLabel?: string;
   isLoading?: boolean;
-  isDisabled?: boolean;
-  variant?: "primary" | "secondary" | "danger";
+  color?: "primary" | "secondary" | "destructive";
+  type?: "solid" | "outline";
 }
 
 export default function SubmitButton({
+  children,
   onPress,
-  label,
+  isDisabled = false,
   loadingLabel = "Submitting...",
   isLoading = false,
-  isDisabled = false,
-  variant = "primary",
+  color = "primary",
+  type = "solid",
 }: SubmitButtonProps) {
   // Determine button styles based on variant and states
   let buttonClass = "";
@@ -98,19 +100,19 @@ export default function SubmitButton({
   const isButtonDisabled = isDisabled || isLoading;
 
   // Apply appropriate styles based on variant and disabled state
-  if (variant === "primary") {
+  if (color === "primary") {
     buttonClass = isButtonDisabled
       ? "bg-brand-300 border border-brand-400 opacity-70"
       : "bg-brand-500 border border-brand-600";
     textClass = "text-white";
     spinnerColor = "white";
-  } else if (variant === "secondary") {
+  } else if (color === "secondary") {
     buttonClass = isButtonDisabled
       ? "border border-cream-400 bg-cream-300 opacity-70"
       : "border border-cream-400 bg-cream-200";
     textClass = isButtonDisabled ? "text-cream-500" : "text-foreground";
     spinnerColor = "#5E994B"; // Brand color for better visibility on light background
-  } else if (variant === "danger") {
+  } else if (color === "destructive") {
     buttonClass = isButtonDisabled ? "bg-red-300 opacity-70" : "bg-red-500";
     textClass = "text-white";
     spinnerColor = "white";
@@ -126,16 +128,20 @@ export default function SubmitButton({
       accessibilityState={{ disabled: isButtonDisabled, busy: isLoading }}
       accessibilityHint={isLoading ? "Processing, please wait" : undefined}
     >
-      {isLoading ? (
-        <View className="flex-row items-center justify-center">
-          <LoadingSpinner color={spinnerColor} size={18} />
-          <Text className={`font-medium ${textClass} ml-2`}>
-            {loadingLabel}
+      <View className="flex-row items-center justify-center">
+        {isLoading ? (
+          <View className="flex-row items-center space-x-2">
+            <CompactSpinner size={18} color={spinnerColor} />
+            <Text className={`font-medium ${textClass} ml-2`}>
+              {loadingLabel}
+            </Text>
+          </View>
+        ) : (
+          <Text className={`font-medium ${textClass} text-center`}>
+            {children}
           </Text>
-        </View>
-      ) : (
-        <Text className={`font-medium ${textClass} text-center`}>{label}</Text>
-      )}
+        )}
+      </View>
     </TouchableOpacity>
   );
 }

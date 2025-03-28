@@ -1,26 +1,23 @@
-import React, { useState, useCallback, useRef } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  getCompletionColor,
+  getIdsFromNames,
+  LOOKUP_TABLES,
+} from "@/lib/gardenHelpers";
+import { supabase } from "@/lib/supabaseClient";
+import type { Garden } from "@/types/garden";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
   ScrollView,
   Switch,
+  Text,
   TextInput,
-  ActivityIndicator,
-  Modal,
-  FlatList,
-  Pressable,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import DropDownPicker from "react-native-dropdown-picker";
-import type { Garden } from "../../types/garden";
-import { supabase } from "../../lib/supabaseClient";
-import {
-  getIdsFromNames,
-  getNamesFromIds,
-  LOOKUP_TABLES,
-  getCompletionColor,
-} from "../../lib/gardenHelpers";
 
 type GardenConditionsEditorProps = {
   garden: Garden;
@@ -90,7 +87,7 @@ function SelectionItem({
   return (
     <TouchableOpacity
       className={`flex-row items-center p-3 border-b border-cream-100 ${
-        isSelected ? "bg-green-50" : "bg-white"
+        isSelected ? "bg-brand-50" : "bg-white"
       }`}
       onPress={onToggle}
     >
@@ -105,12 +102,12 @@ function SelectionItem({
             : "radio-button-off"
         }
         size={22}
-        color={isSelected ? "#10b981" : "#9ca3af"}
+        color={isSelected ? "#77B860" : "#9ca3af"}
         className="mr-2"
       />
       <Text
         className={`ml-2 text-base ${
-          isSelected ? "text-green-800 font-medium" : "text-gray-700"
+          isSelected ? "text-brand-800 font-medium" : "text-gray-700"
         }`}
       >
         {label}
@@ -299,7 +296,7 @@ export default function GardenConditionsEditor({
     // Environment settings
     sunlight_ids: getIdsFromNames(
       garden.sunlight_conditions,
-      LOOKUP_TABLES.sunlight
+      LOOKUP_TABLES.light
     ),
     soil_texture_ids: getIdsFromNames(
       garden.soil_textures,
@@ -311,7 +308,10 @@ export default function GardenConditionsEditor({
     ),
     soil_ph_ids: getIdsFromNames(garden.soil_ph_ranges, LOOKUP_TABLES.soil_ph),
     location_ids:
-      getIdsFromNames(garden.locations, LOOKUP_TABLES.location) || [],
+      getIdsFromNames(
+        garden.landscape_locations,
+        LOOKUP_TABLES.landscape_location
+      ) || [],
 
     // Maintenance and preferences
     maintenance_id: garden.maintenance
@@ -515,7 +515,7 @@ export default function GardenConditionsEditor({
               <BetterSelector
                 label="Select the amount of sunlight your garden receives"
                 placeholder="Select sunlight conditions"
-                items={LOOKUP_TABLES.sunlight}
+                items={LOOKUP_TABLES.light}
                 value={formValues.sunlight_ids}
                 onChange={(value) => updateFormValues("sunlight_ids", value)}
               />
@@ -559,7 +559,7 @@ export default function GardenConditionsEditor({
               <BetterSelector
                 label="Garden Location"
                 placeholder="Select locations"
-                items={LOOKUP_TABLES.location}
+                items={LOOKUP_TABLES.landscape_location}
                 value={formValues.location_ids}
                 onChange={(value) => updateFormValues("location_ids", value)}
               />
@@ -706,7 +706,7 @@ export default function GardenConditionsEditor({
                     }
                     trackColor={{ false: "#d1d5db", true: "#a7f3d0" }}
                     thumbColor={
-                      formValues.wants_recommendations ? "#10b981" : "#f4f4f5"
+                      formValues.wants_recommendations ? "#77B860" : "#f4f4f5"
                     }
                   />
                 </View>
@@ -727,7 +727,7 @@ export default function GardenConditionsEditor({
                     }
                     trackColor={{ false: "#d1d5db", true: "#a7f3d0" }}
                     thumbColor={
-                      formValues.year_round_interest ? "#10b981" : "#f4f4f5"
+                      formValues.year_round_interest ? "#77B860" : "#f4f4f5"
                     }
                   />
                 </View>

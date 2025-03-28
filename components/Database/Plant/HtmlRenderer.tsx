@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Text } from "react-native";
+import { Text, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import {
   P,
@@ -323,31 +323,38 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
       /<a href="(.*?)".*?>(.*?)<\/a>/g,
       (content, url = "") => {
         // Process nested tags within the link content
-        const processedContent = isNested
-          ? content
-          : parseInlineHtml(content, true);
+        const processedContent = isNested ? (
+          <Text className="text-primary">{content}</Text>
+        ) : (
+          parseInlineHtml(content, true)
+        );
 
         // Check if this is an internal plant link
         const isPlantLink = url.startsWith("/plants/");
         if (isPlantLink) {
           return (
-            <A
-              href={url}
+            <Text
               className="text-primary underline"
-              onPress={(e) => {
-                e.preventDefault();
+              onPress={() => {
                 const slug = url.split("/plants/")[1].replace(/\/$/, "");
                 router.push(`/(home)/plants/${slug}`);
               }}
             >
               {processedContent}
-            </A>
+            </Text>
           );
         }
         return (
-          <A href={url} className="text-primary underline">
+          <Text
+            className="text-primary underline"
+            onPress={() => {
+              if (url.startsWith("http")) {
+                Linking.openURL(url);
+              }
+            }}
+          >
             {processedContent}
-          </A>
+          </Text>
         );
       },
       true
@@ -359,24 +366,24 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
       segments = processHtmlTag(
         segments,
         /<(strong|b)>(.*?)<\/\1>/g,
-        (content) => <Strong>{content}</Strong>
+        (content) => <Text className="font-bold text-cream-800">{content}</Text>
       );
 
       // Process <i> and <em> tags
       segments = processHtmlTag(segments, /<(em|i)>(.*?)<\/\1>/g, (content) => (
-        <EM>{content}</EM>
+        <Text className="italic text-cream-800">{content}</Text>
       ));
 
       // Process <a> tags without href but with other attributes
       segments = processHtmlTag(
         segments,
         /<a [^>]*?>(.*?)<\/a>/g,
-        (content) => <A className="text-primary underline">{content}</A>
+        (content) => <Text className="text-primary underline">{content}</Text>
       );
 
       // Process basic <a> tags without attributes
       segments = processHtmlTag(segments, /<a>(.*?)<\/a>/g, (content) => (
-        <A className="text-primary underline">{content}</A>
+        <Text className="text-primary underline">{content}</Text>
       ));
 
       // Process <br> tags (convert to spaces)
@@ -389,20 +396,27 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
 
       // Also process markdown since some content might mix formats
       segments = processFormattedText(segments, /\*\*(.*?)\*\*/g, (content) => (
-        <Strong>{content}</Strong>
+        <Text className="font-bold text-cream-800">{content}</Text>
       ));
 
       segments = processFormattedText(segments, /\*(.*?)\*/g, (content) => (
-        <EM>{content}</EM>
+        <Text className="italic text-cream-800">{content}</Text>
       ));
 
       segments = processFormattedText(
         segments,
         /\[(.*?)\]\((.*?)\)/g,
         (linkText, linkUrl = "") => (
-          <A href={linkUrl} className="text-primary underline">
+          <Text
+            className="text-primary underline"
+            onPress={() => {
+              if (linkUrl.startsWith("http")) {
+                Linking.openURL(linkUrl);
+              }
+            }}
+          >
             {linkText}
-          </A>
+          </Text>
         )
       );
     }

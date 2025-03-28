@@ -4,6 +4,7 @@ import { PlantData } from "@/types/plant";
 import PlantImageSelector from "./PlantImageSelector";
 import PlantStatusSelector from "./PlantStatusSelector";
 import SubmitButton from "./SubmitButton";
+import { useEffect } from "react";
 
 /**
  * PlantDetailsStep component for customizing plant details
@@ -35,6 +36,51 @@ interface PlantDetailsStepProps {
   onNext: () => void;
 }
 
+// List of cute human names for random selection
+const cuteNames = [
+  "Milo",
+  "Daisy",
+  "Oliver",
+  "Lily",
+  "Charlie",
+  "Sophie",
+  "Max",
+  "Ruby",
+  "Bella",
+  "Toby",
+  "Emma",
+  "Lucy",
+  "Finn",
+  "Rosie",
+  "Lola",
+  "Zoe",
+  "Tommy",
+  "Chloe",
+  "Leo",
+  "Ellie",
+  "Felix",
+  "Poppy",
+  "Buddy",
+  "Molly",
+  "Oscar",
+  "Teddy",
+  "Penny",
+  "Jasper",
+  "Chorizo",
+  "Monday",
+  "Colby",
+  "Brie",
+  "Cheddar",
+  "Gracie Moon",
+  "Moonpie",
+  "Pumpkin",
+];
+
+const getRandomCuteName = () => {
+  const randomIndex = Math.floor(Math.random() * cuteNames.length);
+  return cuteNames[randomIndex];
+};
+
 export default function PlantDetailsStep({
   plant,
   nickname,
@@ -51,6 +97,11 @@ export default function PlantDetailsStep({
     plant?.images && plant.images.length > 0 && plant.images[0]?.img
       ? plant.images[0]?.img
       : null;
+
+  // Set a random cute name when component mounts
+  useEffect(() => {
+    setNickname(getRandomCuteName());
+  }, []);
 
   return (
     <View className="px-4">
@@ -84,12 +135,12 @@ export default function PlantDetailsStep({
 
       {/* Navigation buttons */}
       <View className="flex-row justify-between py-4">
-        <SubmitButton label="Back" onPress={onBack} variant="secondary" />
-        <SubmitButton
-          label="Next"
-          onPress={onNext}
-          isDisabled={!nickname.trim()}
-        />
+        <SubmitButton onPress={onBack} color="secondary">
+          Back
+        </SubmitButton>
+        <SubmitButton onPress={onNext} isDisabled={!nickname.trim()}>
+          Next
+        </SubmitButton>
       </View>
     </View>
   );
