@@ -8,7 +8,13 @@ import { Stack } from "expo-router";
  */
 export default function PlantLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        presentation: "modal",
+        animation: "slide_from_bottom",
+      }}
+    >
       <Stack.Screen
         name="[id]"
         options={{
@@ -19,6 +25,8 @@ export default function PlantLayout() {
         name="add"
         options={{
           headerShown: false,
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
     </Stack>

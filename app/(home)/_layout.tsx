@@ -30,7 +30,12 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
+            // Special case for gardens tab - always navigate to index
+            if (route.name === "gardens") {
+              navigation.navigate("gardens", { screen: "index" });
+            } else {
+              navigation.navigate(route.name);
+            }
           }
         };
 

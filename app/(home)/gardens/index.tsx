@@ -6,13 +6,13 @@ import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-  ActivityIndicator,
   SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 export default function GardensScreen() {
   const { user } = useUser();
@@ -58,11 +58,7 @@ export default function GardensScreen() {
   const overallHealth = calculateOverallHealth(gardens);
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingSpinner message="Loading your gardens..." />;
   }
 
   return (
@@ -72,7 +68,7 @@ export default function GardensScreen() {
         <View className="flex-row justify-between items-center mb-6">
           <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
           <TouchableOpacity
-            className="bg-brand-500 rounded-full p-2"
+            className="bg-brand-500 rounded-lg p-2"
             onPress={() => router.push("/(home)/gardens/new")}
           >
             <Ionicons name="add" size={24} color="white" />
@@ -81,35 +77,36 @@ export default function GardensScreen() {
 
         {/* Overall Health Summary */}
         {overallHealth && (
-          <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-            <Text className="text-lg font-semibold mb-2">Overall Health</Text>
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-cream-700">
-                {overallHealth.totalPlantsCount} Total Plants
-              </Text>
-              <Text
-                className={`font-medium ${
-                  overallHealth.healthPercentage >= 80
-                    ? "text-brand-600"
-                    : overallHealth.healthPercentage >= 50
-                    ? "text-accent-600"
-                    : "text-destructive"
-                }`}
-              >
-                {overallHealth.healthPercentage}% Healthy
+          <View className="flex-row justify-between mb-6">
+            <View className="flex-1 bg-white rounded-lg p-3 mr-2 shadow-sm">
+              <Text className="text-xs text-cream-600 mb-1">Total Plants</Text>
+              <Text className="text-xl font-bold text-foreground">
+                {overallHealth.totalPlantsCount}
               </Text>
             </View>
-            <View className="h-2 bg-cream-100 rounded-full overflow-hidden">
-              <View
-                className={`h-full rounded-full ${
-                  overallHealth.healthPercentage >= 80
-                    ? "bg-brand-500"
-                    : overallHealth.healthPercentage >= 50
-                    ? "bg-accent-500"
-                    : "bg-destructive"
-                }`}
-                style={{ width: `${overallHealth.healthPercentage}%` }}
-              />
+
+            <View className="flex-1 bg-white rounded-lg p-3 mx-2 shadow-sm">
+              <Text className="text-xs text-cream-600 mb-1">Need Care</Text>
+              <Text className="text-xl font-bold text-destructive">
+                {overallHealth.plantsNeedingCare}
+              </Text>
+            </View>
+
+            <View className="flex-1 bg-white rounded-lg p-3 ml-2 shadow-sm">
+              <Text className="text-xs text-cream-600 mb-1">Health Score</Text>
+              <View className="flex-row items-center">
+                <Text
+                  className={`text-xl font-bold ${
+                    overallHealth.healthPercentage >= 80
+                      ? "text-brand-600"
+                      : overallHealth.healthPercentage >= 50
+                      ? "text-accent-600"
+                      : "text-destructive"
+                  }`}
+                >
+                  {overallHealth.healthPercentage}%
+                </Text>
+              </View>
             </View>
           </View>
         )}

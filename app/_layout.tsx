@@ -7,6 +7,10 @@ import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { configureBackgroundFetch } from "@/lib/backgroundService";
+import {
+  checkSupabaseStorage,
+  checkRequestingUserIdFunction,
+} from "@/utils/initSupabase";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -39,14 +43,58 @@ function InitialLayout() {
     }
   }, [isSignedIn, isLoaded, segments]);
 
-  // Initialize background service when user is signed in
+  // Initialize background service and check Supabase storage when user is signed in
   useEffect(() => {
     if (isSignedIn && Platform.OS !== "web") {
       try {
         // Configure background fetch for plant data updates
         configureBackgroundFetch();
+
+        // Check Supabase storage buckets and RLS function - add delay to ensure auth is ready
+        let storageChecked = false;
+        let rlsFunctionChecked = false;
+
+        // Session variable to disable developer notices for this session
+        const storageNoticesDisabled = { current: false };
+
+        // First check the requesting_user_id function
+        setTimeout(() => {
+          if (!rlsFunctionChecked) {
+            checkRequestingUserIdFunction()
+              .then((userId) => {
+                rlsFunctionChecked = true;
+                console.log("RLS function check complete, user ID:", userId);
+              })
+              .catch((error) => {
+                console.error("Failed to check RLS function:", error);
+              });
+          }
+        }, 2000);
+
+        // Then check storage buckets
+        setTimeout(() => {
+          if (!storageChecked && !storageNoticesDisabled.current) {
+            checkSupabaseStorage()
+              .then((isReady) => {
+                storageChecked = true;
+                console.log("Storage check complete, bucket ready:", isReady);
+
+                // If the check says the bucket is ready (or might be), disable future alerts
+                if (isReady) {
+                  storageNoticesDisabled.current = true;
+                  console.log("Storage notices disabled for this session");
+                }
+              })
+              .catch((error) => {
+                console.error("Failed to check Supabase storage:", error);
+              });
+          }
+        }, 4000); // Increase delay to ensure RLS function check completes first
       } catch (error) {
-        console.error("Error setting up background fetch:", error);
+        console.error(
+          "Error setting up background and storage services:",
+          error
+        );
       }
     }
   }, [isSignedIn]);

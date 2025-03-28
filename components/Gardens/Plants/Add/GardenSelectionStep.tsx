@@ -1,17 +1,16 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Animated,
-  TextInput,
-} from "react-native";
+import { GardenDashboard } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Garden } from "@/types/garden";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import SubmitButton from "./SubmitButton";
-import { useMemo, useRef, useEffect, useState } from "react";
 
 /**
  * Advanced skeleton loading component for UI elements with pulse animation
@@ -127,9 +126,9 @@ const StaggeredSkeletonLoader = () => {
  * @param error - Error message if garden fetch failed
  */
 interface GardenSelectionStepProps {
-  gardens: Garden[] | undefined;
-  selectedGarden: Garden | null;
-  onSelectGarden: (garden: Garden) => void;
+  gardens: GardenDashboard[] | undefined;
+  selectedGarden: GardenDashboard | null;
+  onSelectGarden: (garden: GardenDashboard) => void;
   onNext: () => void;
   plantName: string;
   plantSlug: string;
@@ -182,7 +181,7 @@ export default function GardenSelectionStep({
    * Handler for garden selection with memo to avoid unnecessary rerenders
    */
   const handleSelectGarden = useMemo(
-    () => (garden: Garden) => {
+    () => (garden: GardenDashboard) => {
       onSelectGarden(garden);
     },
     [onSelectGarden]
@@ -228,7 +227,10 @@ export default function GardenSelectionStep({
         <View className="mb-4">
           <Text className="text-cream-600">
             Choose which garden you want to add your{" "}
-            <Text className="text-foreground font-medium">{plantName}</Text> to:
+            <Text className="text-foreground font-medium">
+              {plantName.replace(/'/g, "'")}
+            </Text>{" "}
+            to:
           </Text>
         </View>
 
@@ -285,12 +287,15 @@ export default function GardenSelectionStep({
       <View className="mb-4">
         <Text className="text-cream-600">
           Choose which garden you want to add your{" "}
-          <Text className="text-foreground font-medium">{plantName}</Text> to:
+          <Text className="text-foreground font-medium">
+            {plantName.replace(/'/g, "'")}
+          </Text>{" "}
+          to:
         </Text>
       </View>
 
       {/* Garden search - for when users have many gardens */}
-      {gardens.length > 3 && (
+      {gardens && gardens.length > 3 && (
         <View className="mb-4 bg-cream-50 rounded-xl p-2 flex-row items-center border border-cream-200">
           <Ionicons name="search" size={20} color="#9CA3AF" className="ml-2" />
           <TextInput
@@ -321,19 +326,19 @@ export default function GardenSelectionStep({
           {filteredGardens.length > 0 ? (
             filteredGardens.map((garden) => (
               <TouchableOpacity
-                key={garden.id}
+                key={garden.garden_id}
                 className={`mb-3 p-4 rounded-xl border ${
-                  selectedGarden?.id === garden.id
+                  selectedGarden?.garden_id === garden.garden_id
                     ? "border-brand-500 bg-brand-50"
                     : "border-cream-200 bg-white"
                 }`}
                 onPress={() => handleSelectGarden(garden)}
                 accessibilityRole="radio"
                 accessibilityState={{
-                  checked: selectedGarden?.id === garden.id,
+                  checked: selectedGarden?.garden_id === garden.garden_id,
                 }}
                 accessibilityLabel={`Select garden ${garden.name} with ${
-                  garden.user_plants?.length || 0
+                  garden.total_plants || 0
                 } plants`}
               >
                 <View className="flex-row justify-between items-center">
@@ -356,7 +361,7 @@ export default function GardenSelectionStep({
                       </Text>
                     </View>
                   </View>
-                  {selectedGarden?.id === garden.id && (
+                  {selectedGarden?.garden_id === garden.garden_id && (
                     <Ionicons
                       name="checkmark-circle"
                       size={24}
@@ -376,7 +381,7 @@ export default function GardenSelectionStep({
         </Animated.View>
       </ScrollView>
 
-      {/* Navigation buttons with fixed position */}
+      {/* Navigation buttons */}
       <View className="flex-row justify-between items-center py-4 px-4">
         <TouchableOpacity
           className="flex-row items-center justify-center py-3 px-5 rounded-xl border border-cream-400 bg-cream-200"
@@ -408,12 +413,13 @@ export default function GardenSelectionStep({
             </View>
           )}
           <SubmitButton
-            label="Continue"
             onPress={onNext}
             isDisabled={!selectedGarden}
-            variant={selectedGarden ? "primary" : "secondary"}
+            color={selectedGarden ? "primary" : "secondary"}
             loadingLabel="Processing..."
-          />
+          >
+            Continue
+          </SubmitButton>
         </View>
       </View>
     </View>

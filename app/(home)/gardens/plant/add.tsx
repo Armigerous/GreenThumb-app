@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { View, SafeAreaView, ScrollView, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { usePlantDetails, useUserGardens } from "@/lib/queries";
+import { usePlantDetails, useGardenDashboard } from "@/lib/queries";
 import { useUser } from "@clerk/clerk-expo";
-import { Garden, UserPlant } from "@/types/garden";
+import { UserPlant, GardenDashboard } from "@/types/garden";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
+import {
+  generatePlantTasks,
+  storePlantTasks,
+} from "@/lib/services/taskGeneration";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 /**
  * Generate a UUID that is compatible with React Native
@@ -23,7 +28,6 @@ function generateUUID(): string {
 import {
   Header,
   ProgressIndicator,
-  LoadingState,
   GardenSelectionStep,
   PlantDetailsStep,
   ConfirmationStep,
@@ -54,12 +58,16 @@ export default function AddPlantToGardenScreen() {
     plantSlug as string
   );
 
-  // Fetch user's gardens
-  const { data: gardens, isLoading: loadingGardens } = useUserGardens(user?.id);
+  // Fetch user's gardens using the dashboard view
+  const { data: gardens, isLoading: loadingGardens } = useGardenDashboard(
+    user?.id
+  );
 
   // States to track the multi-step flow
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedGarden, setSelectedGarden] = useState<Garden | null>(null);
+  const [selectedGarden, setSelectedGarden] = useState<GardenDashboard | null>(
+    null
+  );
   const [nickname, setNickname] = useState("");
   const [status, setStatus] = useState<UserPlant["status"]>("Healthy");
   const [image, setImage] = useState<string | null>(null);
@@ -76,40 +84,172 @@ export default function AddPlantToGardenScreen() {
   }, [plant]);
 
   /**
+   * Debug function to check authentication status
+   * This helps diagnose why storage bucket access might be failing
+   */
+  const debugAuthStatus = async () => {
+    console.log("---------------- AUTH DEBUG ----------------");
+    // Log Clerk user ID
+    console.log("Clerk user ID:", user?.id || "Not signed in");
+
+    // Check Supabase session
+    const { data: session, error: sessionError } =
+      await supabase.auth.getSession();
+    console.log("Supabase session present:", session?.session ? "Yes" : "No");
+    if (sessionError) {
+      console.error("Session error:", sessionError.message);
+    }
+
+    // Try to get user ID from JWT claims via RPC
+    try {
+      const { data: userId, error: userIdError } = await supabase.rpc(
+        "requesting_user_id"
+      );
+      console.log("User ID from JWT claims:", userId || "Not found");
+      if (userIdError) {
+        console.error("Error getting user ID from JWT:", userIdError.message);
+      }
+    } catch (error) {
+      console.error("Error calling requesting_user_id():", error);
+    }
+
+    console.log("-------------------------------------------");
+  };
+
+  /**
    * Uploads an image to storage and returns the public URL
+   * Ensures proper handling of file content
    */
   const uploadImage = async (uri: string): Promise<string | null> => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
+    // Debug auth status before attempting upload
+    await debugAuthStatus();
 
-      // Create a unique file path for the image
-      const fileExt = uri.split(".").pop();
-      const filePath = `plant-images/${user?.id}/${generateUUID()}.${fileExt}`;
+    const MAX_RETRIES = 2;
+    let retryCount = 0;
 
-      // Upload the image to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from("user-uploads")
-        .upload(filePath, blob, {
-          contentType: `image/${fileExt}`,
-          upsert: false,
+    while (retryCount < MAX_RETRIES) {
+      try {
+        console.log(`Fetching image data from URI: ${uri}`);
+
+        // More robust fetch with timeout and explicit response handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const response = await fetch(uri, {
+          method: "GET",
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
-      if (uploadError) {
-        console.error("Error uploading image:", uploadError);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch image: ${response.status} ${response.statusText}`
+          );
+        }
+
+        // Log response details for debugging
+        console.log(
+          `Response status: ${response.status}, type: ${response.headers.get(
+            "content-type"
+          )}`
+        );
+
+        // Create blob properly ensuring content type is preserved
+        const contentType =
+          response.headers.get("content-type") || "image/jpeg";
+        const blob = await response.blob();
+
+        // Verify blob has content
+        console.log(
+          `Created blob of size: ${blob.size} bytes, type: ${blob.type}`
+        );
+
+        if (blob.size === 0) {
+          throw new Error(
+            "Image blob has 0 bytes - source image may be invalid"
+          );
+        }
+
+        // Create a unique file path for the image with user_id to enforce ownership
+        if (!user?.id) {
+          console.error("No user ID available for upload");
+          throw new Error("User ID is required for upload");
+        }
+
+        // Extract file extension from content type if not available in URI
+        let fileExt = uri.split(".").pop()?.toLowerCase();
+        if (!fileExt || fileExt.length > 5 || !fileExt.match(/^[a-z0-9]+$/)) {
+          // Extract from mime type as fallback
+          fileExt = contentType.split("/")[1] || "jpg";
+        }
+
+        const fileName = `${generateUUID()}.${fileExt}`;
+        const userId = user.id;
+        const filePath = `plant-images/${userId}/${fileName}`;
+
+        console.log(`Uploading image to: ${filePath}`);
+        console.log(`Content type: ${contentType}, Size: ${blob.size} bytes`);
+
+        // Upload with explicit content type from the response
+        const { data, error: uploadError } = await supabase.storage
+          .from("user-uploads")
+          .upload(filePath, blob, {
+            contentType: contentType,
+            upsert: true, // Use upsert in case of conflicts
+          });
+
+        if (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          throw uploadError;
+        }
+
+        console.log(`Upload successful! Path: ${filePath}`);
+
+        // Get the URL for the uploaded image
+        const { data: signedUrlData, error: signedUrlError } =
+          await supabase.storage
+            .from("user-uploads")
+            .createSignedUrl(filePath, 315360000); // ~10 years in seconds
+
+        if (signedUrlError) {
+          console.error("Error creating signed URL:", signedUrlError);
+          throw signedUrlError;
+        }
+
+        // Verify URL was created
+        console.log(
+          `Signed URL created: ${signedUrlData?.signedUrl ? "Yes" : "No"}`
+        );
+
+        return signedUrlData?.signedUrl || null;
+      } catch (error) {
+        console.error(
+          `Error in uploadImage (attempt ${retryCount + 1}/${MAX_RETRIES}):`,
+          error
+        );
+
+        if (retryCount < MAX_RETRIES - 1) {
+          retryCount++;
+          console.log(
+            `Retrying image upload (attempt ${
+              retryCount + 1
+            }/${MAX_RETRIES})...`
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * retryCount)
+          );
+          continue;
+        }
+
+        // Handle the error in a user-friendly way
+        setError(
+          "Unable to upload your image. Using the default plant image instead."
+        );
         return null;
       }
-
-      // Get the public URL for the uploaded image
-      const { data: publicUrlData } = supabase.storage
-        .from("user-uploads")
-        .getPublicUrl(filePath);
-
-      return publicUrlData.publicUrl;
-    } catch (error) {
-      console.error("Error in uploadImage:", error);
-      return null;
     }
+
+    return null;
   };
 
   /**
@@ -168,14 +308,34 @@ export default function AddPlantToGardenScreen() {
       // If a custom image was selected, upload it
       if (image) {
         setUploadProgress(30);
-        plantImageUrl = await uploadImage(image);
-        setUploadProgress(70);
+        try {
+          plantImageUrl = await uploadImage(image);
 
-        if (!plantImageUrl) {
+          // If upload failed but we want to continue with default image
+          if (!plantImageUrl && error && error.includes("Using the default")) {
+            // Clear the error since we're handling it by using the default image
+            setError(null);
+            console.log("Using default plant image instead of custom image");
+
+            // Use the default image from plant data
+            plantImageUrl =
+              plant.images && plant.images.length > 0
+                ? plant.images[0]?.img || null
+                : null;
+          } else if (!plantImageUrl) {
+            // Unhandled upload failure
+            setError("Failed to upload plant image. Please try again.");
+            setIsSubmitting(false);
+            return;
+          }
+        } catch (uploadError) {
+          console.error("Error uploading image:", uploadError);
           setError("Failed to upload plant image. Please try again.");
           setIsSubmitting(false);
           return;
         }
+
+        setUploadProgress(70);
       } else {
         // Use the default image from plant data
         plantImageUrl =
@@ -199,17 +359,20 @@ export default function AddPlantToGardenScreen() {
       }
 
       // Prepare plant data for insertion
-      const plantData = {
-        id: generateUUID(), // Generate a unique UUID for the plant compatible with React Native
-        garden_id: selectedGarden.id, // This links to user_gardens which has the user_id, enabling RLS policies to work correctly
+      const now = new Date().toISOString();
+      const plantData: UserPlant = {
+        id: generateUUID(),
+        garden_id: selectedGarden.garden_id,
         plant_id: parseInt(plantId as string),
         nickname: nickname.trim(),
         status: status,
         images: plantImageUrl ? [plantImageUrl] : [],
-        care_logs: [], // Empty array initially
+        care_logs: [],
+        created_at: now,
+        updated_at: now,
       };
 
-      setUploadProgress(90);
+      setUploadProgress(85);
 
       try {
         console.log("Attempting to insert plant data...");
@@ -231,16 +394,18 @@ export default function AddPlantToGardenScreen() {
           throw new Error(`Database function error: ${rpcError.message}`);
         }
 
-        setUploadProgress(100);
+        setUploadProgress(90);
         console.log(
           "Plant added successfully via RPC:",
           data ? JSON.stringify(data) : "No data returned"
         );
 
-        // Success! Show alert and navigate after user confirms
+        setUploadProgress(100);
+
+        // Show success alert and navigate immediately
         Alert.alert(
           "Plant Added",
-          "Your plant has been added to your garden!",
+          "Your plant has been added to your garden! Care tasks will be generated in the background.",
           [
             {
               text: "View Garden",
@@ -248,7 +413,7 @@ export default function AddPlantToGardenScreen() {
                 // Use setTimeout to ensure the alert is dismissed before navigation
                 setTimeout(() => {
                   router.push(
-                    `/(home)/gardens/${selectedGarden.id.toString()}`
+                    `/(home)/gardens/${selectedGarden.garden_id.toString()}`
                   );
                 }, 100);
               },
@@ -256,6 +421,24 @@ export default function AddPlantToGardenScreen() {
           ],
           { cancelable: false }
         );
+
+        // Generate and store tasks in the background
+        try {
+          console.log("Generating tasks for new plant in background...");
+          generatePlantTasks(plantData as UserPlant)
+            .then((tasks) => storePlantTasks(tasks))
+            .then(() =>
+              console.log("Background tasks generated and stored successfully")
+            )
+            .catch((taskError) =>
+              console.error("Error in background task generation:", taskError)
+            );
+        } catch (taskError) {
+          console.error(
+            "Error initiating background task generation:",
+            taskError
+          );
+        }
       } catch (insertErr) {
         console.error("Error during insert:", insertErr);
         setError("Failed to add plant to garden. Please try again.");
@@ -286,13 +469,13 @@ export default function AddPlantToGardenScreen() {
     if (step > 1) {
       handlePreviousStep();
     } else {
-      router.push("/(home)/gardens");
+      router.push(`/(home)/gardens`);
     }
   };
 
   // Render loading state
   if (loadingPlant || loadingGardens) {
-    return <LoadingState />;
+    return <LoadingSpinner message="Loading data..." />;
   }
 
   // Render error state if plant is not found

@@ -30,7 +30,7 @@ export default function ProgressIndicator({
   stepLabels,
   animate = true,
   accentColor = "primary",
-  inactiveColor = "cream-200",
+  inactiveColor = "cream-50",
 }: ProgressIndicatorProps) {
   // Animation value for progress bar width
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -65,7 +65,9 @@ export default function ProgressIndicator({
       {/* Progress container - contains both the bar and indicators */}
       <View className="mb-3 relative">
         {/* Base progress bar (inactive) */}
-        <View className={`h-1.5 w-full bg-${inactiveColor} rounded-full`} />
+        <View
+          className={`h-1.5 w-full bg-${inactiveColor} rounded-full border border-${accentColor}`}
+        />
 
         {/* Animated progress overlay */}
         <Animated.View
@@ -98,10 +100,8 @@ export default function ProgressIndicator({
             return (
               <View
                 key={index}
-                className={`absolute h-3 w-3 rounded-full border-2 ${
-                  isActive
-                    ? `bg-${accentColor} border-${accentColor}`
-                    : `bg-white border-${inactiveColor}`
+                className={`absolute h-3 w-3 rounded-full border border-${accentColor}  ${
+                  isActive ? `bg-${accentColor}` : `bg-${inactiveColor}`
                 }`}
                 style={{
                   left: `${position}%`,

@@ -1,6 +1,7 @@
 export interface PlantCardData {
   id: number;
   slug: string;
+  scientific_slug?: string; // Add this field for common name view navigation
   scientific_name: string;
   common_name?: string;
   first_image?: string;

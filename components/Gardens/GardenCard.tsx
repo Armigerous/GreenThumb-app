@@ -9,12 +9,12 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
   // Determine the garden health status color
   const getHealthStatusColor = () => {
-    if (!garden.total_plants) return "#9ca3af"; // Default gray
+    if (!garden.total_plants) return "#161513"; // Default gray
 
     const healthPercentage = Number(garden.health_percentage);
-    if (healthPercentage >= 80) return "#10b981"; // Green for healthy
-    if (healthPercentage >= 50) return "#f59e0b"; // Yellow/amber for needs attention
-    return "#ef4444"; // Red for critical
+    if (healthPercentage >= 80) return "#77B860"; // Green for healthy
+    if (healthPercentage >= 50) return "#bea100"; // Yellow/amber for needs attention
+    return "#E50000"; // Red for critical
   };
 
   const formatDate = (dateString: string) => {
@@ -88,7 +88,7 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
         <View className="flex-row items-center mb-3">
           <View className="flex-row items-center">
-            <Ionicons name="leaf" size={16} color="#10b981" />
+            <Ionicons name="leaf" size={16} color="#77B860" />
             <Text className="text-brand-600 text-sm font-medium ml-1">
               {garden.total_plants} Plants
             </Text>
