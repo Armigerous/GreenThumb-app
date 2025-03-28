@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
 import type { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
-import type { Garden, GardenDashboard } from "@/types/garden";
+import type { Garden, GardenDashboard, PlantTask, TaskWithDetails } from "@/types/garden";
 import { useEffect } from "react";
 import {
   shouldUpdateCache,
@@ -341,5 +341,121 @@ export function usePlantDataById(plantId?: string) {
     enabled: !!plantId,
     staleTime: ONE_DAY_MS, // Cache for a full day
     gcTime: ONE_DAY_MS * 7, // Keep in cache for a week
+  });
+}
+
+// Tasks query hook
+export async function getTasksForDate(date: Date, userId?: string) {
+  try {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date provided:', date);
+      return [];
+    }
+
+    if (!userId) {
+      console.error('User ID is required for fetching tasks');
+      return [];
+    }
+    
+    // Format the date as YYYY-MM-DD - make sure timezone doesn't affect the date
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    console.log(`Fetching tasks for date: ${formattedDate} for user: ${userId}`);
+
+    // Try using the RPC function directly with the user ID
+    // The updated function will filter tasks by user ID
+    const { data, error } = await supabase
+      .rpc('get_tasks_for_date', { 
+        target_date: formattedDate,
+        requesting_user_id: userId  // Pass the Clerk user ID to filter tasks
+      });
+
+    if (error) {
+      console.error(`Error fetching tasks for ${formattedDate}:`, error);
+      
+      // Fall back to direct query with user ID filter
+      console.log('Falling back to direct query with user ID filter');
+      const { data: directData, error: directError } = await supabase
+        .from('plant_tasks')
+        .select(`
+          id,
+          user_plant_id,
+          task_type,
+          due_date,
+          completed,
+          user_plant:user_plants!inner(
+            nickname,
+            garden:user_gardens!inner(
+              name,
+              user_id
+            )
+          )
+        `)
+        .eq('due_date::date', formattedDate)
+        .eq('user_plant.garden.user_id', userId);
+      
+      if (directError) {
+        console.error('Direct query error:', directError);
+        throw new Error(`Error fetching tasks: ${directError.message}`);
+      }
+      
+      if (!directData || directData.length === 0) {
+        console.log(`No tasks found for ${formattedDate} for user ${userId}`);
+        return [];
+      }
+      
+      // Format the direct query results to match our TaskWithDetails structure
+      const formattedTasks = directData.map(task => {
+        // Type assertion to help TypeScript understand the structure
+        const userPlant = task.user_plant as any; 
+        
+        return {
+          id: task.id,
+          user_plant_id: task.user_plant_id,
+          task_type: task.task_type,
+          due_date: task.due_date,
+          completed: task.completed,
+          plant: {
+            nickname: userPlant?.nickname || 'Unknown Plant',
+            garden: {
+              name: userPlant?.garden?.name || 'Unknown Garden'
+            }
+          }
+        };
+      });
+      
+      console.log(`Found ${formattedTasks.length} tasks via direct query for ${formattedDate}`);
+      return formattedTasks as TaskWithDetails[];
+    }
+
+    if (!data || data.length === 0) {
+      console.log(`No tasks found for ${formattedDate} for user ${userId}`);
+      return [];
+    }
+
+    console.log(`Found ${data.length} tasks via RPC for ${formattedDate}`);
+    return data as TaskWithDetails[];
+  } catch (error) {
+    console.error('Unexpected error fetching tasks:', error);
+    throw error;
+  }
+}
+
+// Hook to use tasks for a date
+export function useTasksForDate(date: Date, userId?: string) {
+  // Use the same date formatting logic as getTasksForDate
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const formattedDate = `${year}-${month}-${day}`;
+  
+  return useQuery<TaskWithDetails[], Error>({
+    queryKey: ['tasks', formattedDate, userId],
+    queryFn: () => getTasksForDate(date, userId),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!userId, // Only run the query if we have a user ID
   });
 }

@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Garden, UserPlant } from "@/types/garden";
+import { UserPlant, GardenDashboard } from "@/types/garden";
 import { PlantData } from "@/types/plant";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
@@ -27,7 +27,7 @@ interface ConfirmationStepProps {
   nickname: string;
   status: UserPlant["status"];
   image: string | null;
-  selectedGarden: Garden;
+  selectedGarden: GardenDashboard;
   isSubmitting: boolean;
   uploadProgress: number;
   error: string | null;
@@ -151,17 +151,19 @@ export default function ConfirmationStep({
       {/* Navigation buttons */}
       <View className="flex-row justify-between py-4">
         <SubmitButton
-          label="Back"
           onPress={onBack}
           isDisabled={isSubmitting}
-          variant="secondary"
-        />
+          color="secondary"
+        >
+          Back
+        </SubmitButton>
         <SubmitButton
-          label="Add to Garden"
           loadingLabel="Adding..."
           onPress={onSubmit}
           isLoading={isSubmitting}
-        />
+        >
+          Add to Garden
+        </SubmitButton>
       </View>
     </View>
   );

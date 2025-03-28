@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 // Tab bar component
 const TabBar = ({
@@ -149,14 +150,7 @@ export default function PlantDetailScreen() {
   const bottomPadding = 60; // Approximate height of bottom tabs
 
   if (loading) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-cream-50">
-        <ActivityIndicator size="large" color="#5E994B" />
-        <Text className="mt-3 text-base text-cream-600">
-          Loading plant details...
-        </Text>
-      </SafeAreaView>
-    );
+    return <LoadingSpinner message="Loading plant details..." />;
   }
 
   if (queryError || !plant) {
@@ -212,8 +206,11 @@ export default function PlantDetailScreen() {
                 {commonName || plant.scientific_name}
               </Text>
               <View className="flex-row items-center mb-3">
-                <Text className="text-base italic text-cream-500 flex-1">
-                  {plant.scientific_name}
+                <Text
+                  className="text-base italic text-cream-500 flex-1"
+                  numberOfLines={2}
+                >
+                  {plant.scientific_name?.replace(/'/g, "'")}
                 </Text>
                 {plant.sound_file && (
                   <TouchableOpacity

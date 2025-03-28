@@ -107,7 +107,7 @@ export default function GardenConditions({
               garden.soil_ph_ranges?.length > 0 ||
               garden.soil_drainage?.length > 0) && (
               <View className="mb-4">
-                <Text className="text-green-800 font-semibold mb-2 text-sm uppercase tracking-wider">
+                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
                   Environment
                 </Text>
 
@@ -154,7 +154,7 @@ export default function GardenConditions({
                 <ConditionCard
                   icon="location-outline"
                   title="Locations"
-                  value={formatConditionValues(garden.locations)}
+                  value={formatConditionValues(garden.landscape_locations)}
                   bgColor="bg-blue-50"
                   textColor="text-blue-700"
                   valueColor="text-blue-600"
@@ -170,7 +170,7 @@ export default function GardenConditions({
               garden.resistance_challenges?.length > 0 ||
               garden.problems?.length > 0) && (
               <View className="mb-4">
-                <Text className="text-green-800 font-semibold mb-2 text-sm uppercase tracking-wider">
+                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
                   Maintenance & Growth
                 </Text>
 
@@ -178,9 +178,9 @@ export default function GardenConditions({
                   icon="construct-outline"
                   title="Maintenance Level"
                   value={garden.maintenance || ""}
-                  bgColor="bg-green-50"
-                  textColor="text-green-700"
-                  valueColor="text-green-600"
+                  bgColor="bg-brand-50"
+                  textColor="text-brand-700"
+                  valueColor="text-brand-600"
                   iconColor="#059669"
                 />
 
@@ -188,9 +188,9 @@ export default function GardenConditions({
                   icon="trending-up-outline"
                   title="Growth Rate"
                   value={garden.growth_rate || ""}
-                  bgColor="bg-green-50"
-                  textColor="text-green-700"
-                  valueColor="text-green-600"
+                  bgColor="bg-brand-50"
+                  textColor="text-brand-700"
+                  valueColor="text-brand-600"
                   iconColor="#059669"
                 />
 
@@ -198,9 +198,9 @@ export default function GardenConditions({
                   icon="resize-outline"
                   title="Space Available"
                   value={formatConditionValues(garden.available_space_to_plant)}
-                  bgColor="bg-green-50"
-                  textColor="text-green-700"
-                  valueColor="text-green-600"
+                  bgColor="bg-brand-50"
+                  textColor="text-brand-700"
+                  valueColor="text-brand-600"
                   iconColor="#059669"
                 />
 
@@ -208,9 +208,9 @@ export default function GardenConditions({
                   icon="shield-outline"
                   title="Resistance Challenges"
                   value={formatConditionValues(garden.resistance_challenges)}
-                  bgColor="bg-green-50"
-                  textColor="text-green-700"
-                  valueColor="text-green-600"
+                  bgColor="bg-brand-50"
+                  textColor="text-brand-700"
+                  valueColor="text-brand-600"
                   iconColor="#059669"
                 />
 
@@ -233,7 +233,7 @@ export default function GardenConditions({
               garden.texture ||
               garden.wildlife_attractions?.length > 0) && (
               <View className="mb-4">
-                <Text className="text-green-800 font-semibold mb-2 text-sm uppercase tracking-wider">
+                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
                   Aesthetics & Design
                 </Text>
 
@@ -261,9 +261,9 @@ export default function GardenConditions({
                   icon="leaf-outline"
                   title="Leaf Colors"
                   value={formatConditionValues(garden.leaf_colors)}
-                  bgColor="bg-green-50"
-                  textColor="text-green-700"
-                  valueColor="text-green-600"
+                  bgColor="bg-brand-50"
+                  textColor="text-brand-700"
+                  valueColor="text-brand-600"
                   iconColor="#059669"
                 />
 
@@ -292,7 +292,7 @@ export default function GardenConditions({
             {/* Preferences */}
             {(garden.wants_recommendations || garden.year_round_interest) && (
               <View className="mb-4">
-                <Text className="text-green-800 font-semibold mb-2 text-sm uppercase tracking-wider">
+                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
                   Preferences
                 </Text>
 
@@ -303,7 +303,7 @@ export default function GardenConditions({
                       size={18}
                       color="#047857"
                     />
-                    <Text className="text-green-700 font-medium ml-2">
+                    <Text className="text-brand-700 font-medium ml-2">
                       Settings
                     </Text>
                   </View>
@@ -313,9 +313,9 @@ export default function GardenConditions({
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color="#10b981"
+                        color="#77B860"
                       />
-                      <Text className="text-green-600 text-sm ml-2">
+                      <Text className="text-brand-600 text-sm ml-2">
                         Plant Recommendations Enabled
                       </Text>
                     </View>
@@ -326,9 +326,9 @@ export default function GardenConditions({
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color="#10b981"
+                        color="#77B860"
                       />
-                      <Text className="text-green-600 text-sm ml-2">
+                      <Text className="text-brand-600 text-sm ml-2">
                         Year-round Interest
                       </Text>
                     </View>

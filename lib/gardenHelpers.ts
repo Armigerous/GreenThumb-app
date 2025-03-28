@@ -3,7 +3,7 @@
  * Maps display names to database IDs
  */
 export const LOOKUP_TABLES = {
-  sunlight: [
+  light: [
     { label: "Full Sun (6 or more hours of direct sunlight a day)", value: 1 },
     { label: "Part Sun (4-6 hours of direct sunlight a day)", value: 2 },
     { label: "Part Shade (2-4 hours of direct sunlight a day)", value: 3 },
@@ -42,7 +42,7 @@ export const LOOKUP_TABLES = {
     { label: "6 feet-9 feet", value: 2 },
     { label: "Greater than 9 feet", value: 3 },
   ],
-  location: [
+  landscape_location: [
     { label: "Coastal", value: 3 },
     { label: "Pool/Hardscape", value: 16 },
   ],
@@ -171,5 +171,5 @@ export const formatConditionValues = (values: string[] | undefined): string => {
 export const getCompletionColor = (percent: number): string => {
   if (percent < 30) return "#ef4444"; // red-500
   if (percent < 70) return "#f59e0b"; // amber-500
-  return "#10b981"; // emerald-500
+  return "#77B860"; // brand-500
 };

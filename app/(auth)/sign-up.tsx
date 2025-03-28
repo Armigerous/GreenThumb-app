@@ -14,6 +14,7 @@ import { useRouter, Link } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { GoogleIcon, AppleIcon, FacebookIcon } from "@/components/icons";
+import { CompactSpinner } from "@/components/UI/LoadingSpinner";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -431,7 +432,11 @@ export default function SignUpScreen() {
           </View>
         )}
 
-        {isLoading && <ActivityIndicator className="mt-4" color="#4CAF50" />}
+        {isLoading && (
+          <View className="mt-4 items-center">
+            <CompactSpinner size={32} color="#4CAF50" />
+          </View>
+        )}
 
         <View className="flex-row justify-center mt-6 mb-8">
           <Text className="text-foreground">Already have an account? </Text>

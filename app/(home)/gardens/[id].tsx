@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
@@ -69,11 +70,7 @@ const GardenDetails = () => {
   };
 
   if (isLoading) {
-    return (
-      <SafeAreaView className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#77B860" />
-      </SafeAreaView>
-    );
+    return <LoadingSpinner message="Loading garden details..." />;
   }
 
   if (error || !gardenData) {

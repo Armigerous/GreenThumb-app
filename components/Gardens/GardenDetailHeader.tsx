@@ -54,7 +54,7 @@ export default function GardenDetailHeader({
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center">
               <View className="flex-row bg-brand-50 rounded-lg items-center px-3 py-1.5">
-                <Ionicons name="leaf" size={16} color="#10b981" />
+                <Ionicons name="leaf" size={16} color="#77B860" />
                 <Text className="text-brand-600 text-sm font-medium ml-1">
                   {dashboardData.total_plants}{" "}
                   {dashboardData.total_plants === 1 ? "Plant" : "Plants"}

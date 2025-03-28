@@ -70,14 +70,32 @@ export default function PlantImageSelector({
 
     try {
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
+        base64: false, // Don't need base64 as we'll use blob
+        exif: false, // Skip EXIF data to reduce size
+        allowsMultipleSelection: false,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        onImageChange(result.assets[0].uri);
+        console.log(`Camera image selected: ${result.assets[0].uri}`);
+        console.log(
+          `Image type: ${result.assets[0].type || "unknown"}, fileSize: ${
+            result.assets[0].fileSize || "unknown"
+          } bytes`
+        );
+
+        // Verify the image has content
+        if (result.assets[0].fileSize && result.assets[0].fileSize > 0) {
+          onImageChange(result.assets[0].uri);
+        } else {
+          Alert.alert(
+            "Error",
+            "The captured photo appears to be empty or invalid. Please try again."
+          );
+        }
       }
     } catch (err) {
       console.error("Error taking photo:", err);
@@ -93,14 +111,32 @@ export default function PlantImageSelector({
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
+        base64: false, // Don't need base64 as we'll use blob
+        exif: false, // Skip EXIF data to reduce size
+        allowsMultipleSelection: false,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        onImageChange(result.assets[0].uri);
+        console.log(`Gallery image selected: ${result.assets[0].uri}`);
+        console.log(
+          `Image type: ${result.assets[0].type || "unknown"}, fileSize: ${
+            result.assets[0].fileSize || "unknown"
+          } bytes`
+        );
+
+        // Verify the image has content
+        if (result.assets[0].fileSize && result.assets[0].fileSize > 0) {
+          onImageChange(result.assets[0].uri);
+        } else {
+          Alert.alert(
+            "Error",
+            "The selected image appears to be empty or invalid. Please select another image."
+          );
+        }
       }
     } catch (err) {
       console.error("Error picking image:", err);
