@@ -213,97 +213,123 @@ const SearchResults = memo(
       );
     }, [data]);
 
-    if (isLoading) {
-      return (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#047857" />
-          <Text className="mt-3 text-base text-cream-600">
-            Loading plants...
-          </Text>
-        </View>
-      );
-    }
+    // Render content based on state
+    const renderContent = () => {
+      if (isLoading) {
+        return (
+          <>
+            <View className="px-4 py-2">
+              <Text className="text-xl font-bold text-cream-800">
+                {query ? `Results for "${query}"` : "All Plants"}
+              </Text>
+              <Text className="text-cream-600">
+                Loading plants... • Page {page} of {totalPages}
+              </Text>
+            </View>
+            <View className="flex-1 relative">
+              <FlatList
+                data={Array(6).fill(null)}
+                keyExtractor={(_, index) => `skeleton-${index}`}
+                renderItem={() => <PlantCardSkeleton />}
+                numColumns={columnCount}
+                contentContainerStyle={{ padding: 12 }}
+                columnWrapperStyle={{ justifyContent: "space-between" }}
+                scrollEnabled={false}
+              />
+            </View>
+          </>
+        );
+      }
 
-    if (error) {
-      return (
-        <View className="flex-1 justify-center items-center p-5">
-          <Ionicons name="leaf" size={64} color="#d1d5db" />
-          <Text className="text-xl font-bold text-red-500 mt-4">
-            Oops! Something went wrong
-          </Text>
-          <Text className="text-sm text-cream-500 text-center mt-2">
-            {error.message || "Failed to load plants. Please try again later."}
-          </Text>
-          <TouchableOpacity
-            className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
-            onPress={() => refetch()}
-          >
-            <Text className="text-white font-semibold">Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    if (!data || !data.results || data.results.length === 0) {
-      return (
-        <View className="flex-1 justify-center items-center p-5">
-          <Ionicons name="search" size={64} color="#d1d5db" />
-          <Text className="text-xl font-bold text-cream-800 mt-4">
-            No plants found
-          </Text>
-          <Text className="text-sm text-cream-500 text-center mt-2">
-            {query
-              ? `We couldn't find any plants matching "${query}"`
-              : "No plants available at the moment"}
-          </Text>
-          {query && (
+      if (error) {
+        return (
+          <View className="flex-1 justify-center items-center p-5">
+            <Ionicons name="leaf" size={64} color="#d1d5db" />
+            <Text className="text-xl font-bold text-red-500 mt-4">
+              Oops! Something went wrong
+            </Text>
+            <Text className="text-sm text-cream-500 text-center mt-2">
+              {error.message ||
+                "Failed to load plants. Please try again later."}
+            </Text>
             <TouchableOpacity
               className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
-              onPress={() => onPageChange(1)}
+              onPress={() => refetch()}
             >
-              <Text className="text-white font-semibold">View All Plants</Text>
+              <Text className="text-white font-semibold">Try Again</Text>
             </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        );
+      }
+
+      if (!data || !data.results || data.results.length === 0) {
+        return (
+          <View className="flex-1 justify-center items-center p-5">
+            <Ionicons name="search" size={64} color="#d1d5db" />
+            <Text className="text-xl font-bold text-cream-800 mt-4">
+              No plants found
+            </Text>
+            <Text className="text-sm text-cream-500 text-center mt-2">
+              {query
+                ? `We couldn't find any plants matching "${query}"`
+                : "No plants available at the moment"}
+            </Text>
+            {query && (
+              <TouchableOpacity
+                className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
+                onPress={() => onPageChange(1)}
+              >
+                <Text className="text-white font-semibold">
+                  View All Plants
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+      }
+
+      return (
+        <>
+          <View className="px-4 py-2">
+            <Text className="text-xl font-bold text-cream-800">
+              {query ? `Results for "${query}"` : "All Plants"}
+            </Text>
+            <Text className="text-cream-600">
+              {data.count} plants found • Page {page} of {totalPages}
+            </Text>
+          </View>
+          <View className="flex-1 relative">
+            <FlatList
+              ref={flatListRef}
+              data={validResults}
+              keyExtractor={(item) => item.slug}
+              renderItem={({ item }) => (
+                <PlantCard
+                  plant={item}
+                  displayMode={nameType as "scientific" | "common"}
+                />
+              )}
+              numColumns={columnCount}
+              contentContainerStyle={{ padding: 12 }}
+              columnWrapperStyle={{ justifyContent: "space-between" }}
+              refreshControl={
+                <RefreshControl refreshing={false} onRefresh={handleRefresh} />
+              }
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+            />
+            <ScrollFade
+              showTopFade={showTopFade}
+              showBottomFade={showBottomFade}
+            />
+          </View>
+        </>
       );
-    }
+    };
 
     return (
       <View className="flex-1" onLayout={handleLayout}>
-        <View className="px-4 py-2">
-          <Text className="text-xl font-bold text-cream-800">
-            {query ? `Results for "${query}"` : "All Plants"}
-          </Text>
-          <Text className="text-cream-600">
-            {data.count} plants found • Page {page} of {totalPages}
-          </Text>
-        </View>
-
-        <View className="flex-1 relative">
-          <FlatList
-            ref={flatListRef}
-            data={validResults}
-            keyExtractor={(item) => item.slug}
-            renderItem={({ item }) => (
-              <PlantCard
-                plant={item}
-                displayMode={nameType as "scientific" | "common"}
-              />
-            )}
-            numColumns={columnCount}
-            contentContainerStyle={{ padding: 12 }}
-            columnWrapperStyle={{ justifyContent: "space-between" }}
-            refreshControl={
-              <RefreshControl refreshing={false} onRefresh={handleRefresh} />
-            }
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          />
-          <ScrollFade
-            showTopFade={showTopFade}
-            showBottomFade={showBottomFade}
-          />
-        </View>
+        {renderContent()}
         <Pagination
           currentPage={page}
           totalPages={totalPages}

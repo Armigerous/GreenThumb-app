@@ -13,8 +13,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       className="flex-row bg-cream-800"
       style={{
         paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
-        paddingTop: 10,
-        height: 70 + (insets.bottom > 0 ? insets.bottom : 0),
+        paddingTop: 15,
+        height: 70 + (insets.bottom > 0 ? insets.bottom : 0) + 15,
       }}
     >
       {state.routes.map((route, index) => {
