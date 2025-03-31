@@ -1,20 +1,20 @@
 module.exports = {
   expo: {
-    name: "theGreenThumb-app",
+    name: "The GreenThumb",
     slug: "theGreenThumb-app",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/logo.png",
     scheme: "TheGreenThumb",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
 
     // Splash screen configuration
     splash: {
-      image: "./assets/images/splash-icon.png",
+      image: "./assets/images/logo.png",
       imageWidth: 200,
       resizeMode: "contain",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#fff8e8",
     },
 
     // Plugin configurations
@@ -59,15 +59,17 @@ module.exports = {
     // Platform specific configurations
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "com.thegreenthumb.app",
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/icon.png",
+        foregroundImage: "./assets/images/logo.png",
         backgroundColor: "#ffffff",
       },
+      package: "com.thegreenthumb.app",
     },
     web: {
-      favicon: "./assets/favicon.png",
+      favicon: "./assets/images/logo.png",
     },
 
     // Asset patterns

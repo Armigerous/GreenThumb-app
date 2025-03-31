@@ -15,6 +15,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { GoogleIcon, AppleIcon, FacebookIcon } from "@/components/icons";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
+import { Ionicons } from "@expo/vector-icons";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -258,10 +259,24 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-row justify-between items-center px-5 pt-5">
-        <Text className="text-foreground text-base">Welcome</Text>
-        <TouchableOpacity onPress={() => router.push("/(auth)/welcome")}>
-          <Text className="text-foreground text-base">Back</Text>
-        </TouchableOpacity>
+        <Link href="/(auth)/welcome" asChild>
+          <TouchableOpacity>
+            <View className="flex-row items-center">
+              <Ionicons name="chevron-back" size={20} color="#000" />
+              <Text className="text-foreground text-base ml-1">Back</Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
+
+        <Text className="text-foreground text-base font-medium">Sign Up</Text>
+
+        <Link href="/(auth)/sign-in" asChild>
+          <TouchableOpacity>
+            <View className="flex-row items-center">
+              <Text className="text-primary text-base">Sign In</Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
       </View>
 
       <ScrollView className="flex-1 p-5">
@@ -274,7 +289,7 @@ export default function SignUpScreen() {
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          The brandThumb
+          The GreenThumb
         </Text>
 
         {error && (
@@ -322,52 +337,74 @@ export default function SignUpScreen() {
                   <Text className="text-foreground mb-1 text-sm">
                     Phone Number
                   </Text>
-                  <TextInput
-                    className="bg-cream-50 border-2 border-foreground rounded-lg p-3 text-foreground mb-4"
-                    autoCapitalize="none"
-                    value={phoneNumber}
-                    placeholder="Enter your phone number"
-                    placeholderTextColor="#999"
-                    onChangeText={(text) => setPhoneNumber(text)}
-                    keyboardType="phone-pad"
-                    editable={!isLoading}
-                  />
+                  <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                    <View className="p-3 justify-center">
+                      <Ionicons name="call-outline" size={20} color="#333" />
+                    </View>
+                    <TextInput
+                      className="flex-1 p-3 text-foreground"
+                      autoCapitalize="none"
+                      value={phoneNumber}
+                      placeholder="Enter your phone number"
+                      placeholderTextColor="#999"
+                      onChangeText={(text) => setPhoneNumber(text)}
+                      keyboardType="phone-pad"
+                      editable={!isLoading}
+                    />
+                  </View>
                 </>
               ) : (
                 <>
                   <Text className="text-foreground mb-1 text-sm">Email</Text>
-                  <TextInput
-                    className="bg-cream-50 border-2 border-foreground rounded-lg p-3 text-foreground mb-4"
-                    autoCapitalize="none"
-                    value={emailAddress}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#999"
-                    onChangeText={(email) => setEmailAddress(email)}
-                    keyboardType="email-address"
-                    editable={!isLoading}
-                  />
+                  <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                    <View className="p-3 justify-center">
+                      <Ionicons name="mail-outline" size={20} color="#333" />
+                    </View>
+                    <TextInput
+                      className="flex-1 p-3 text-foreground"
+                      autoCapitalize="none"
+                      value={emailAddress}
+                      placeholder="Enter your email"
+                      placeholderTextColor="#999"
+                      onChangeText={(email) => setEmailAddress(email)}
+                      keyboardType="email-address"
+                      editable={!isLoading}
+                    />
+                  </View>
                 </>
               )}
 
               <Text className="text-foreground mb-1 text-sm">Password</Text>
-              <TextInput
-                className="bg-cream-50 border-2 border-foreground rounded-lg p-3 text-foreground mb-4"
-                value={password}
-                placeholder="Enter your password"
-                placeholderTextColor="#999"
-                secureTextEntry={true}
-                onChangeText={(text) => setPassword(text)}
-                editable={!isLoading}
-              />
+              <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                <View className="p-3 justify-center">
+                  <Ionicons name="lock-closed-outline" size={20} color="#333" />
+                </View>
+                <TextInput
+                  className="flex-1 p-3 text-foreground"
+                  value={password}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#999"
+                  secureTextEntry={true}
+                  onChangeText={(text) => setPassword(text)}
+                  editable={!isLoading}
+                />
+              </View>
 
               <TouchableOpacity
-                className="bg-primary py-4 rounded-lg items-center"
+                className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
                 onPress={onSignUpPress}
                 disabled={isLoading || !isLoaded}
               >
-                <Text className="text-primary-foreground font-bold text-base">
+                <Text className="text-primary-foreground font-bold text-base mr-2">
                   {isLoading ? "Creating Account..." : "Sign Up"}
                 </Text>
+                {!isLoading && (
+                  <Ionicons
+                    name="person-add-outline"
+                    size={20}
+                    color="#FFFFFF"
+                  />
+                )}
               </TouchableOpacity>
             </View>
 
@@ -410,38 +447,53 @@ export default function SignUpScreen() {
               We've sent a verification code to your{" "}
               {isPhone ? "phone" : "email"}. Please enter it below.
             </Text>
-            <TextInput
-              className="bg-cream-50 border-2 border-foreground rounded-lg p-3 text-foreground mb-4"
-              value={verificationCode}
-              placeholder="Verification code"
-              placeholderTextColor="#999"
-              onChangeText={(code) => setVerificationCode(code)}
-              keyboardType="number-pad"
-              editable={!isLoading}
-            />
+            <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+              <View className="p-3 justify-center">
+                <Ionicons name="keypad-outline" size={20} color="#333" />
+              </View>
+              <TextInput
+                className="flex-1 p-3 text-foreground"
+                value={verificationCode}
+                placeholder="Verification code"
+                placeholderTextColor="#999"
+                onChangeText={(code) => setVerificationCode(code)}
+                keyboardType="number-pad"
+                editable={!isLoading}
+              />
+            </View>
 
             <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center"
+              className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
               onPress={onPressVerify}
               disabled={isLoading || !isLoaded}
             >
-              <Text className="text-primary-foreground font-bold text-base">
+              <Text className="text-primary-foreground font-bold text-base mr-2">
                 {isLoading ? "Verifying..." : "Verify Code"}
               </Text>
+              {!isLoading && (
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={20}
+                  color="#FFFFFF"
+                />
+              )}
             </TouchableOpacity>
           </View>
         )}
 
         {isLoading && (
           <View className="mt-4 items-center">
-            <CompactSpinner size={32} color="#4CAF50" />
+            <CompactSpinner size={32} color="#5E994B" />
           </View>
         )}
 
         <View className="flex-row justify-center mt-6 mb-8">
           <Text className="text-foreground">Already have an account? </Text>
-          <Link href="/sign-in">
-            <Text className="text-primary">Sign in</Text>
+          <Link href="/(auth)/sign-in" asChild>
+            <TouchableOpacity className="flex-row items-center">
+              <Text className="text-primary mr-1">Sign in</Text>
+              <Ionicons name="log-in-outline" size={16} color="#5E994B" />
+            </TouchableOpacity>
           </Link>
         </View>
       </ScrollView>

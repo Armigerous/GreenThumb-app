@@ -6,7 +6,6 @@ import { SWRConfig } from "swr";
 import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { configureBackgroundFetch } from "@/lib/backgroundService";
 import {
   checkSupabaseStorage,
   checkRequestingUserIdFunction,
@@ -43,13 +42,10 @@ function InitialLayout() {
     }
   }, [isSignedIn, isLoaded, segments]);
 
-  // Initialize background service and check Supabase storage when user is signed in
+  // Initialize Supabase storage check when user is signed in
   useEffect(() => {
     if (isSignedIn && Platform.OS !== "web") {
       try {
-        // Configure background fetch for plant data updates
-        configureBackgroundFetch();
-
         // Check Supabase storage buckets and RLS function - add delay to ensure auth is ready
         let storageChecked = false;
         let rlsFunctionChecked = false;
@@ -91,10 +87,7 @@ function InitialLayout() {
           }
         }, 4000); // Increase delay to ensure RLS function check completes first
       } catch (error) {
-        console.error(
-          "Error setting up background and storage services:",
-          error
-        );
+        console.error("Error setting up storage services:", error);
       }
     }
   }, [isSignedIn]);

@@ -4,13 +4,11 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   Modal,
-  Animated,
 } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   format,
@@ -27,6 +25,7 @@ import { TaskWithDetails } from "@/types/garden";
 import { useTasksForDate } from "@/lib/queries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { Task } from "@/components/Task";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -36,9 +35,6 @@ export default function CalendarScreen() {
   );
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const queryClient = useQueryClient();
-
-  // Add animation reference
-  const checkboxAnimationValues = useRef<{ [key: number]: Animated.Value }>({});
 
   // Use the hook to fetch tasks for the selected date
   const {
@@ -110,25 +106,6 @@ export default function CalendarScreen() {
   const handleToggleComplete = async (id: number) => {
     const taskToUpdate = tasks?.find((task) => task.id === id);
     if (!taskToUpdate) return;
-
-    // Get or create animation value for this task
-    if (!checkboxAnimationValues.current[id]) {
-      checkboxAnimationValues.current[id] = new Animated.Value(1);
-    }
-
-    // Create animation sequence
-    Animated.sequence([
-      Animated.timing(checkboxAnimationValues.current[id], {
-        toValue: 0.8,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(checkboxAnimationValues.current[id], {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
 
     // Execute the mutation with optimistic updates
     toggleTaskMutation.mutate({
@@ -202,7 +179,7 @@ export default function CalendarScreen() {
           </Text>
           <TouchableOpacity
             onPress={() => setIsMonthPickerVisible(true)}
-            className="flex-row items-center bg-brand-50 px-3 py-1 rounded-lg"
+            className="flex-row items-center bg-brand-50 px-3 py-1 rounded-lg border border-brand-100"
           >
             <Text className="text-brand-600 font-medium mr-1">
               {format(selectedDay, "MMMM yyyy")}
@@ -220,7 +197,7 @@ export default function CalendarScreen() {
 
         <TouchableOpacity
           onPress={goToToday}
-          className="flex-row items-center px-3 py-1 rounded-lg bg-brand-50"
+          className="flex-row items-center px-3 py-1 rounded-lg bg-brand-50 border border-brand-100"
         >
           <Ionicons
             name="calendar"
@@ -244,10 +221,10 @@ export default function CalendarScreen() {
               key={index}
               className={`items-center justify-center w-12 h-16 rounded-lg ${
                 isSameDay(day, selectedDay)
-                  ? "bg-brand-500"
+                  ? "bg-brand-500 border border-brand-600"
                   : isSameDay(day, new Date())
-                  ? "bg-brand-100"
-                  : "bg-cream-50"
+                  ? "bg-brand-100 border border-brand-200"
+                  : "bg-cream-50 border border-cream-300"
               }`}
               onPress={() => setSelectedDay(day)}
             >
@@ -298,7 +275,7 @@ export default function CalendarScreen() {
             </Text>
           </View>
         ) : !tasks?.length ? (
-          <View className="bg-cream-50 rounded-xl p-8 items-center justify-center">
+          <View className="bg-cream-50 border border-cream-300 rounded-xl p-8 items-center justify-center">
             <Ionicons name="calendar-outline" size={48} color="#d1d5db" />
             <Text className="text-base text-cream-500 mt-4 text-center">
               No care tasks for this day
@@ -311,68 +288,22 @@ export default function CalendarScreen() {
                 {gardenName}
               </Text>
               <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-                {gardenTasks.map((task, index) => {
-                  // Initialize animation value if not exists
-                  if (!checkboxAnimationValues.current[task.id]) {
-                    checkboxAnimationValues.current[task.id] =
-                      new Animated.Value(1);
-                  }
-
-                  return (
-                    <TouchableOpacity
-                      key={task.id}
-                      onPress={() => handleToggleComplete(task.id)}
-                      activeOpacity={0.7}
-                      className={`p-4 flex-row items-center justify-between ${
-                        index < gardenTasks.length - 1
-                          ? "border-b border-cream-100"
-                          : ""
-                      }`}
-                    >
-                      <View className="flex-row items-center flex-1">
-                        <View className="min-w-[48px] min-h-[48px] items-center justify-center">
-                          <Animated.View
-                            style={{
-                              transform: [
-                                {
-                                  scale:
-                                    checkboxAnimationValues.current[task.id],
-                                },
-                              ],
-                            }}
-                            className={`w-7 h-7 rounded-lg border-2 items-center justify-center ${
-                              task.completed
-                                ? "bg-brand-500 border-brand-500"
-                                : "border-cream-300"
-                            }`}
-                          >
-                            {task.completed && (
-                              <Ionicons
-                                name="checkmark"
-                                size={16}
-                                color="white"
-                              />
-                            )}
-                          </Animated.View>
-                        </View>
-                        <View className="flex-1">
-                          <Text
-                            className={`text-base font-medium ${
-                              task.completed
-                                ? "text-cream-400 line-through"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {task.task_type} {task.plant?.nickname}
-                          </Text>
-                          <Text className="text-xs text-cream-500">
-                            {format(new Date(task.due_date), "h:mm a")}
-                          </Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+                {gardenTasks.map((task, index) => (
+                  <View
+                    key={task.id}
+                    className={
+                      index < gardenTasks.length - 1
+                        ? "border-b border-cream-100"
+                        : ""
+                    }
+                  >
+                    <Task
+                      task={task}
+                      onToggleComplete={handleToggleComplete}
+                      showGardenName={false}
+                    />
+                  </View>
+                ))}
               </View>
             </View>
           ))
@@ -392,8 +323,8 @@ export default function CalendarScreen() {
           onPress={() => setIsMonthPickerVisible(false)}
         >
           <View className="flex-1 justify-center px-5">
-            <View className="bg-white rounded-xl p-4">
-              <Text className="text-lg font-semibold text-foreground mb-4">
+            <View className="bg-cream-50 border border-cream-300 rounded-xl p-4">
+              <Text className="text-lg font-semibold text-foreground border-b border-cream-300 pb-4">
                 Select Month
               </Text>
               <ScrollView className="max-h-80">
