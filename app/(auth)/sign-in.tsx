@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
-  ScrollView,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
@@ -257,13 +256,11 @@ export default function Page() {
         <Link href="/(auth)/welcome" asChild>
           <TouchableOpacity>
             <View className="flex-row items-center">
-              <Ionicons name="chevron-back" size={20} color="#000" />
+              <Ionicons name="chevron-back" size={20} color="#2e2c29" />
               <Text className="text-foreground text-base ml-1">Back</Text>
             </View>
           </TouchableOpacity>
         </Link>
-
-        <Text className="text-foreground text-base font-medium">Sign In</Text>
 
         <Link href="/(auth)/sign-up" asChild>
           <TouchableOpacity>
@@ -275,10 +272,10 @@ export default function Page() {
         </Link>
       </View>
 
-      <ScrollView className="flex-1 p-5">
-        <View className="w-full h-[150px] justify-center items-center">
+      <View className="flex-1 p-5">
+        <View className="w-full h-44 justify-center items-center">
           <Image
-            source={require("@/assets/images/logo.png")}
+            source={require("@/assets/images/sign-in.png")}
             className="w-1/2 h-full"
             resizeMode="contain"
           />
@@ -315,10 +312,14 @@ export default function Page() {
                 <TouchableOpacity
                   onPress={() => handleIdentifierTypeChange(true)}
                   className={`py-2 px-4 rounded-lg ${
-                    isPhone ? "bg-primary" : "bg-cream-800/70"
+                    isPhone ? "bg-primary" : "bg-cream-200"
                   }`}
                 >
-                  <Text className="text-primary-foreground">
+                  <Text
+                    className={
+                      isPhone ? "text-primary-foreground" : "text-foreground"
+                    }
+                  >
                     {!isPhone ? "Use Phone" : "Phone"}
                   </Text>
                 </TouchableOpacity>
@@ -332,7 +333,7 @@ export default function Page() {
                   <Ionicons
                     name={isPhone ? "call-outline" : "mail-outline"}
                     size={20}
-                    color="#333"
+                    color="#2e2c29"
                   />
                 </View>
                 <TextInput
@@ -342,7 +343,7 @@ export default function Page() {
                   placeholder={
                     isPhone ? "Enter your phone number" : "Enter your email"
                   }
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#2e2c29"
                   onChangeText={(text) => setIdentifier(text)}
                   keyboardType={isPhone ? "phone-pad" : "email-address"}
                   editable={!isLoading}
@@ -352,7 +353,11 @@ export default function Page() {
               <Text className="text-foreground mb-1 text-sm">Password</Text>
               <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
                 <View className="p-3 justify-center">
-                  <Ionicons name="lock-closed-outline" size={20} color="#333" />
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color="#2e2c29"
+                  />
                 </View>
                 <TextInput
                   className="flex-1 p-3 text-foreground"
@@ -380,7 +385,7 @@ export default function Page() {
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Text>
                 {!isLoading && (
-                  <Ionicons name="log-in-outline" size={20} color="#FFFFFF" />
+                  <Ionicons name="log-in-outline" size={20} color="#fffefa" />
                 )}
               </TouchableOpacity>
             </View>
@@ -426,7 +431,7 @@ export default function Page() {
             </Text>
             <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
               <View className="p-3 justify-center">
-                <Ionicons name="keypad-outline" size={20} color="#333" />
+                <Ionicons name="keypad-outline" size={20} color="#2e2c29" />
               </View>
               <TextInput
                 className="flex-1 p-3 text-foreground"
@@ -464,7 +469,7 @@ export default function Page() {
           </View>
         )}
 
-        <View className="flex-row justify-center mt-6 mb-8">
+        <View className="flex-row justify-center mt-auto mb-8">
           <Text className="text-foreground">Don't have an account? </Text>
           <Link href="/(auth)/sign-up" asChild>
             <TouchableOpacity className="flex-row items-center">
@@ -473,7 +478,7 @@ export default function Page() {
             </TouchableOpacity>
           </Link>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
