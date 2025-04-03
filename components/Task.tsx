@@ -38,6 +38,10 @@ export function Task({
     onToggleComplete(task.id);
   };
 
+  // Check if plant data exists before accessing to avoid errors
+  const plantNickname = task.plant?.nickname || "Unknown Plant";
+  const gardenName = task.plant?.garden?.name || "Unknown Garden";
+
   return (
     <TouchableOpacity
       onPress={handleToggleComplete}
@@ -67,10 +71,10 @@ export function Task({
               task.completed ? "text-cream-400 line-through" : "text-foreground"
             }`}
           >
-            {task.task_type} {task.plant?.nickname}
+            {task.task_type} {plantNickname}
           </Text>
           <Text className="text-xs text-cream-500">
-            {showGardenName && `${task.plant?.garden?.name} • `}
+            {showGardenName && `${gardenName} • `}
             {format(new Date(task.due_date), "h:mm a")}
           </Text>
         </View>
