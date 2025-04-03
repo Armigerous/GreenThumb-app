@@ -441,7 +441,7 @@ export default function FilterModal({
 
         {/* Search Bar */}
         <View className="px-4 py-2 border-b border-cream-400">
-          <View className="flex-row items-center bg-cream-400/40 rounded-lg px-3 py-2">
+          <View className="flex-row items-center bg-cream-100 rounded-xl px-3 py-2.5 mb-4 border border-cream-300">
             <Feather name="search" size={18} color="#666" />
             <TextInput
               className="flex-1 ml-2 text-base"
@@ -468,7 +468,7 @@ export default function FilterModal({
                 }
                 className="flex-row items-center"
               >
-                <Text className="text-brand-600 mr-1">
+                <Text className="text-primary mr-1">
                   {showQuickFilterDetails ? "Hide details" : "Show details"}
                 </Text>
                 <Feather
@@ -481,7 +481,7 @@ export default function FilterModal({
           </View>
 
           {activeFilterDetails && showQuickFilterDetails && (
-            <View className="mb-3 bg-cream-400/20 p-4 rounded-lg border border-cream-400/50">
+            <View className="mb-3 bg-cream-100/20 p-4 rounded-lg border border-cream-300">
               <View className="flex-row items-start mb-3">
                 <View className="bg-brand-600/10 p-2 rounded-full mr-3">
                   <Feather
@@ -576,7 +576,7 @@ export default function FilterModal({
                         ? "bg-brand-600"
                         : isPartiallyApplied
                         ? "bg-brand-600/30"
-                        : "bg-cream-400/40"
+                        : "bg-cream-100 border border-cream-300"
                     }`}
                     onPress={() => {
                       // Close any open tooltip first

@@ -99,6 +99,45 @@ export default function WelcomeScreen() {
           <Text className="text-base text-foreground text-center opacity-80 px-4">
             {item.description}
           </Text>
+
+          {/* Feature highlights */}
+          <View className="w-full flex flex-row flex-wrap justify-center items-center mb-4">
+            {/* Features grid with 2 columns to ensure proper centering */}
+            <View className="flex flex-row w-full justify-center">
+              <View className="flex-row items-center bg-cream-50 rounded-lg px-3 py-2 m-1">
+                <Ionicons name="calendar-outline" size={16} color="#5E994B" />
+                <Text className="text-sm text-foreground ml-2">
+                  Care Calendar
+                </Text>
+              </View>
+
+              <View className="flex-row items-center bg-cream-50 rounded-lg px-3 py-2 m-1">
+                <Ionicons name="leaf-outline" size={16} color="#5E994B" />
+                <Text className="text-sm text-foreground ml-2">
+                  Custom Gardens
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex flex-row w-full justify-center">
+              <View className="flex-row items-center bg-cream-50 rounded-lg px-3 py-2 m-1">
+                <Ionicons
+                  name="information-circle-outline"
+                  size={16}
+                  color="#5E994B"
+                />
+                <Text className="text-sm text-foreground ml-2">
+                  Expert Care Tips
+                </Text>
+              </View>
+              <View className="flex-row items-center bg-cream-50 rounded-lg px-3 py-2 m-1">
+                <Ionicons name="search-outline" size={16} color="#5E994B" />
+                <Text className="text-sm text-foreground ml-2">
+                  Plant Database
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
       </View>
     );

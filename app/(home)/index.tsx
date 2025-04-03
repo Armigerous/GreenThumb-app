@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
@@ -15,10 +14,14 @@ import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import { useCallback, useMemo } from "react";
 import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TaskWithDetails } from "@/types/garden";
+import { Task } from "@/components/Task";
 
 export default function Page() {
   const { user } = useUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Initialize Supabase with Clerk token
   useSupabaseAuth();
@@ -99,27 +102,77 @@ export default function Page() {
     };
   }, [gardens]);
 
+  // Toggle task completion mutation with optimistic updates
+  const toggleTaskMutation = useMutation({
+    mutationFn: async ({
+      id,
+      completed,
+    }: {
+      id: number;
+      completed: boolean;
+    }) => {
+      const { error } = await supabase
+        .from("plant_tasks")
+        .update({ completed })
+        .eq("id", id);
+
+      if (error) throw error;
+      return { id, completed };
+    },
+    onMutate: async ({ id, completed }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["tasks", format(today, "yyyy-MM-dd"), user?.id],
+      });
+
+      // Snapshot the previous value
+      const previousTasks = queryClient.getQueryData([
+        "tasks",
+        format(today, "yyyy-MM-dd"),
+        user?.id,
+      ]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        ["tasks", format(today, "yyyy-MM-dd"), user?.id],
+        (old: TaskWithDetails[] | undefined) =>
+          old?.map((task) => (task.id === id ? { ...task, completed } : task))
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousTasks };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousTasks) {
+        queryClient.setQueryData(
+          ["tasks", format(today, "yyyy-MM-dd"), user?.id],
+          context.previousTasks
+        );
+      }
+      console.error("Error updating task:", err);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to make sure our local data is in sync with the server
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", format(today, "yyyy-MM-dd"), user?.id],
+      });
+    },
+  });
+
   // Function to handle marking a task as complete
   const handleCompleteTask = useCallback(
     async (taskId: number) => {
-      try {
-        const taskToUpdate = todaysTasks?.find((task) => task.id === taskId);
-        if (!taskToUpdate) return;
+      const taskToUpdate = todaysTasks?.find((task) => task.id === taskId);
+      if (!taskToUpdate) return;
 
-        const { error } = await supabase
-          .from("plant_tasks")
-          .update({ completed: !taskToUpdate.completed })
-          .eq("id", taskId);
-
-        if (error) throw error;
-
-        // Refetch tasks to update UI
-        refetchTasks();
-      } catch (error) {
-        console.error("Error updating task:", error);
-      }
+      // Execute the mutation with optimistic updates
+      toggleTaskMutation.mutate({
+        id: taskId,
+        completed: !taskToUpdate.completed,
+      });
     },
-    [todaysTasks, refetchTasks]
+    [todaysTasks, toggleTaskMutation]
   );
 
   const isLoading = gardensLoading || tasksLoading;
@@ -174,7 +227,7 @@ export default function Page() {
             </View>
 
             {/* Garden Stats */}
-            <View className="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <View className="bg-cream-50 border border-cream-300 rounded-xl p-4 mb-6">
               <Text className="text-sm font-medium text-cream-600 mb-3">
                 Gardens Overview
               </Text>
@@ -247,41 +300,17 @@ export default function Page() {
                 {todaysTasks.slice(0, 3).map((task, index) => (
                   <View
                     key={task.id}
-                    className={`p-4 flex-row items-center justify-between ${
+                    className={
                       index < Math.min(todaysTasks.length - 1, 2)
                         ? "border-b border-cream-100"
                         : ""
-                    }`}
+                    }
                   >
-                    <View className="flex-row items-center flex-1">
-                      <TouchableOpacity
-                        className={`w-6 h-6 rounded-lg border-2 mr-3 items-center justify-center ${
-                          task.completed
-                            ? "bg-brand-500 border-brand-500"
-                            : "border-cream-300"
-                        }`}
-                        onPress={() => handleCompleteTask(task.id)}
-                      >
-                        {task.completed && (
-                          <Ionicons name="checkmark" size={14} color="white" />
-                        )}
-                      </TouchableOpacity>
-                      <View className="flex-1">
-                        <Text
-                          className={`text-base font-medium ${
-                            task.completed
-                              ? "text-cream-400 line-through"
-                              : "text-foreground"
-                          }`}
-                        >
-                          {task.task_type} {task.plant?.nickname}
-                        </Text>
-                        <Text className="text-xs text-cream-500">
-                          {task.plant?.garden?.name} •{" "}
-                          {format(new Date(task.due_date), "h:mm a")}
-                        </Text>
-                      </View>
-                    </View>
+                    <Task
+                      task={task}
+                      onToggleComplete={handleCompleteTask}
+                      showGardenName={true}
+                    />
                   </View>
                 ))}
 
