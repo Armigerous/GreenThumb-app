@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import { GoogleIcon, AppleIcon, FacebookIcon } from "@/components/icons";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
+import { Ionicons } from "@expo/vector-icons";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -252,9 +253,9 @@ export default function Page() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row justify-between items-center px-5 pt-5">
-        <Text className="text-foreground text-base">Welcome</Text>
-        <TouchableOpacity onPress={() => router.push("/(auth)/welcome")}>
+      <View className="flex-row items-center px-5 pt-5">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <Ionicons name="arrow-back" size={24} color="black" />
           <Text className="text-foreground text-base">Back</Text>
         </TouchableOpacity>
       </View>
@@ -269,7 +270,7 @@ export default function Page() {
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          The brandThumb
+          Welcome Back
         </Text>
 
         {error && (
@@ -285,7 +286,7 @@ export default function Page() {
                 <TouchableOpacity
                   onPress={() => handleIdentifierTypeChange(false)}
                   className={`py-2 px-4 rounded-lg ${
-                    !isPhone ? "bg-primary" : "bg-cream-400/70"
+                    !isPhone ? "bg-primary" : "bg-cream-200"
                   }`}
                 >
                   <Text
@@ -299,7 +300,7 @@ export default function Page() {
                 <TouchableOpacity
                   onPress={() => handleIdentifierTypeChange(true)}
                   className={`py-2 px-4 rounded-lg ${
-                    isPhone ? "bg-primary" : "bg-cream-400/70"
+                    isPhone ? "bg-primary" : "bg-cream-200"
                   }`}
                 >
                   <Text
@@ -339,12 +340,14 @@ export default function Page() {
                 editable={!isLoading}
               />
 
-              <Text className="text-primary text-right mb-5 text-sm">
-                Forgot your password?
-              </Text>
+              <TouchableOpacity onPress={() => {}} className="mb-5">
+                <Text className="text-primary text-right text-sm font-semibold">
+                  Forgot your password?
+                </Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
-                className="bg-primary py-4 rounded-lg items-center"
+                className="bg-primary py-4 rounded-2xl items-center"
                 onPress={onSignInPress}
                 disabled={isLoading || !isLoaded}
               >
@@ -404,7 +407,7 @@ export default function Page() {
             />
 
             <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center"
+              className="bg-primary py-4 rounded-2xl items-center"
               onPress={onVerifyPress}
               disabled={isLoading || !isLoaded}
             >
@@ -424,7 +427,7 @@ export default function Page() {
         <View className="flex-row justify-center mt-6 mb-8">
           <Text className="text-foreground">Don't have an account? </Text>
           <Link href="/sign-up">
-            <Text className="text-primary">Sign up</Text>
+            <Text className="text-primary font-semibold">Sign up</Text>
           </Link>
         </View>
       </ScrollView>

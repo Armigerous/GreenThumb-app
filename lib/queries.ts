@@ -316,6 +316,91 @@ export function useGardenDetails(gardenId: number) {
   });
 }
 
+// User Plant Details query hook
+export function useUserPlantDetails(userPlantId: string) {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ["userPlantDetails", userPlantId],
+    queryFn: async () => {
+      if (!userPlantId) throw new Error("User plant ID is required");
+
+      // First fetch the user plant data
+      const { data: userPlant, error: userPlantError } = await supabase
+        .from("user_plants")
+        .select(`
+          id,
+          garden_id,
+          plant_id,
+          nickname,
+          status,
+          images,
+          care_logs,
+          created_at,
+          updated_at
+        `)
+        .eq("id", userPlantId)
+        .single();
+
+      if (userPlantError) {
+        console.error("Error fetching user plant:", userPlantError);
+        throw new Error(userPlantError.message);
+      }
+
+      if (!userPlant) {
+        throw new Error("Plant not found");
+      }
+
+      // Now get the garden information for this plant
+      const { data: garden, error: gardenError } = await supabase
+        .from("user_gardens")
+        .select("name")
+        .eq("id", userPlant.garden_id)
+        .single();
+
+      if (gardenError) {
+        console.error("Error fetching garden:", gardenError);
+      }
+
+      // Get general plant information
+      const { data: plantInfo, error: plantInfoError } = await supabase
+        .from("plant_full_data")
+        .select(`
+          scientific_name,
+          common_names,
+          light_requirements,
+          soil_drainage,
+          soil_texture,
+          usda_zones
+        `)
+        .eq("id", userPlant.plant_id)
+        .single();
+
+      if (plantInfoError) {
+        console.error("Error fetching plant info:", plantInfoError);
+      }
+
+      // Combine and transform the data
+      return {
+        ...userPlant,
+        garden_name: garden?.name || 'Unknown Garden',
+        scientific_name: plantInfo?.scientific_name || 'Unknown Species',
+        common_names: plantInfo?.common_names || [],
+        added_date: userPlant.created_at,
+        water_requirements: "Water when the top inch of soil is dry.",
+        light_requirements: plantInfo?.light_requirements || "Needs adequate light",
+        soil_requirements: [
+          ...(plantInfo?.soil_texture || []),
+          ...(plantInfo?.soil_drainage || [])
+        ].join(", ") || "Well-draining soil mix",
+        temperature_requirements: plantInfo?.usda_zones?.join(", ") || "Check plant hardiness zone"
+      };
+    },
+    enabled: !!userPlantId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes to avoid showing outdated information
+  });
+}
+
 // Fetch plant data by ID
 export function usePlantDataById(plantId?: string) {
   const queryClient = useQueryClient();

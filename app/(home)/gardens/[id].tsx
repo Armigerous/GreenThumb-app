@@ -2,8 +2,8 @@ import GardenConditions from "@/components/Gardens/GardenConditions";
 import { useGardenDetails } from "@/lib/queries";
 import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -12,8 +12,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { supabase } from "@/lib/supabaseClient";
 
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
@@ -25,6 +27,13 @@ const GardenDetails = () => {
     refetch,
   } = useGardenDetails(Number(id));
   const [activeTab, setActiveTab] = useState<"plants" | "conditions">("plants");
+
+  // Refetch garden data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const handleEditPress = () => {
     if (gardenData?.id) {
@@ -46,14 +55,48 @@ const GardenDetails = () => {
 
   const handlePlantPress = (plant: UserPlant) => {
     router.push({
-      pathname: "/(home)/plants",
+      pathname: "/(home)/gardens/plant/[id]",
       params: { id: plant.id.toString() },
     });
   };
 
   const handleWaterPlant = async (plant: UserPlant) => {
-    // TODO: Implement water plant functionality
-    console.log("Water plant:", plant.id);
+    try {
+      // Create a new care log entry for watering
+      const now = new Date().toISOString();
+      const careLog = {
+        care_type: "Watered",
+        taken_care_at: now,
+        care_notes: "Plant watered via quick action",
+      };
+
+      // Get existing care logs and add new one
+      const existingLogs = plant.care_logs || [];
+      const updatedLogs = [...existingLogs, careLog];
+
+      // Update the plant status and add the care log
+      const { error } = await supabase
+        .from("user_plants")
+        .update({
+          status: "Healthy",
+          care_logs: updatedLogs,
+          updated_at: now,
+        })
+        .eq("id", plant.id);
+
+      if (error) {
+        console.error("Error watering plant:", error);
+        Alert.alert("Error", "Could not update plant watering status.");
+        return;
+      }
+
+      // Refetch garden data to update the UI
+      Alert.alert("Success", `${plant.nickname} has been watered!`);
+      refetch();
+    } catch (err) {
+      console.error("Water plant error:", err);
+      Alert.alert("Error", "Failed to water plant. Please try again.");
+    }
   };
 
   const handleEditPlant = (plant: UserPlant) => {
@@ -164,7 +207,7 @@ const GardenDetails = () => {
           {plant.images?.[0] && (
             <Image
               source={{ uri: plant.images[0] }}
-              className="h-16 rounded-lg w-16 mr-3"
+              className="h-20 rounded-lg w-20 mr-3"
               resizeMode="cover"
             />
           )}
@@ -189,26 +232,15 @@ const GardenDetails = () => {
               </View>
             </View>
 
-            <View className="flex-row mt-3 justify-end">
-              <TouchableOpacity
-                className="flex-row bg-blue-50 rounded-full items-center mr-2 px-3 py-1.5"
-                onPress={() => handleWaterPlant(plant)}
-              >
-                <Ionicons name="water" size={14} color="#0891b2" />
-                <Text className="text-blue-600 text-xs font-medium ml-1">
-                  Water
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-row bg-cream-50 rounded-full items-center px-3 py-1.5"
-                onPress={() => handleEditPlant(plant)}
-              >
-                <Ionicons name="create-outline" size={14} color="#6b7280" />
-                <Text className="text-cream-600 text-xs font-medium ml-1">
-                  Edit
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              className="flex-row bg-blue-50 rounded-lg items-center mt-3 px-4 py-2 self-end"
+              onPress={() => handleWaterPlant(plant)}
+            >
+              <Ionicons name="water" size={16} color="#0891b2" />
+              <Text className="text-blue-600 text-sm font-medium ml-2">
+                Water Plant
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>

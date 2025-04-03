@@ -15,13 +15,17 @@ export default function AuthRoutesLayout() {
   }
 
   if (isSignedIn) {
-    return <Redirect href={"/"} />;
+    return <Redirect href={"/(home)"} />;
   }
 
   return (
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "slide_from_right",
+        presentation: "card",
+        gestureEnabled: true,
+        gestureDirection: "horizontal",
       }}
       initialRouteName="welcome"
     />
