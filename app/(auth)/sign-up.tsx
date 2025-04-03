@@ -289,7 +289,7 @@ export default function SignUpScreen() {
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          The GreenThumb
+          Create an Account
         </Text>
 
         {error && (

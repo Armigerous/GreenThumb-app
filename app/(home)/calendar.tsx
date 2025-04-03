@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   format,
@@ -26,6 +26,7 @@ import { useTasksForDate } from "@/lib/queries";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { Task } from "@/components/Task";
+import { useFocusEffect } from "expo-router";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -43,6 +44,19 @@ export default function CalendarScreen() {
     isError,
     refetch,
   } = useTasksForDate(selectedDay, user?.id);
+
+  // Refetch tasks when the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) {
+        // Invalidate task queries to ensure fresh data
+        queryClient.invalidateQueries({
+          queryKey: ["tasks"],
+        });
+        refetch();
+      }
+    }, [refetch, queryClient, user?.id])
+  );
 
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({
@@ -113,13 +127,6 @@ export default function CalendarScreen() {
       completed: !taskToUpdate.completed,
     });
   };
-
-  // Refetch tasks when the selected day changes or when user changes
-  useEffect(() => {
-    if (user?.id) {
-      refetch();
-    }
-  }, [selectedDay, user?.id, refetch]);
 
   // Generate days for the week view
   const weekDays = useMemo(() => {

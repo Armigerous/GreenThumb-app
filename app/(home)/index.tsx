@@ -11,12 +11,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskWithDetails } from "@/types/garden";
 import { Task } from "@/components/Task";
+import { useFocusEffect } from "expo-router";
 
 export default function Page() {
   const { user } = useUser();
@@ -72,6 +73,19 @@ export default function Page() {
     error: tasksError,
     refetch: refetchTasks,
   } = useTasksForDate(today, user?.id);
+
+  // Refresh tasks when the home screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) {
+        // Invalidate task queries to ensure fresh data
+        queryClient.invalidateQueries({
+          queryKey: ["tasks"],
+        });
+        refetchTasks();
+      }
+    }, [refetchTasks, queryClient, user?.id])
+  );
 
   // Calculate garden stats from actual data
   const gardenStats = useMemo(() => {
