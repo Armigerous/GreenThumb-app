@@ -36,10 +36,16 @@ export default function Page() {
     if (!gardens || gardens.length === 0)
       return "Let's start your plant journey today!";
 
-    if (gardenStats.plantsNeedingCare > 0)
+    // Plants
+    if (gardenStats.plantsNeedingCare === 1)
+      return `You have ${gardenStats.plantsNeedingCare} plant that could use your attention today.`;
+    if (gardenStats.plantsNeedingCare > 1)
       return `You have ${gardenStats.plantsNeedingCare} plants that could use your attention today.`;
 
-    if (todaysTasks && todaysTasks.length > 0)
+    // Tasks
+    if (todaysTasks && todaysTasks.length === 1)
+      return `You have ${todaysTasks.length} task planned for today.`;
+    if (todaysTasks && todaysTasks.length > 1)
       return `You have ${todaysTasks.length} tasks planned for today.`;
 
     return "Your garden is looking great today!";

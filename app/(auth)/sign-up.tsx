@@ -257,10 +257,9 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row justify-between items-center px-5 pt-5">
-        <Text className="text-foreground text-base">Welcome</Text>
-        <TouchableOpacity onPress={() => router.push("/(auth)/welcome")}>
-          <Text className="text-foreground text-base">Back</Text>
+      <View className="flex-row items-center px-5 pt-5">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <Text className="text-foreground text-base">← Back</Text>
         </TouchableOpacity>
       </View>
 
@@ -274,7 +273,7 @@ export default function SignUpScreen() {
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          The brandThumb
+          Create Account
         </Text>
 
         {error && (
@@ -361,7 +360,7 @@ export default function SignUpScreen() {
               />
 
               <TouchableOpacity
-                className="bg-primary py-4 rounded-lg items-center"
+                className="bg-primary py-4 rounded-2xl items-center"
                 onPress={onSignUpPress}
                 disabled={isLoading || !isLoaded}
               >
@@ -421,7 +420,7 @@ export default function SignUpScreen() {
             />
 
             <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center"
+              className="bg-primary py-4 rounded-2xl items-center"
               onPress={onPressVerify}
               disabled={isLoading || !isLoaded}
             >
@@ -441,7 +440,7 @@ export default function SignUpScreen() {
         <View className="flex-row justify-center mt-6 mb-8">
           <Text className="text-foreground">Already have an account? </Text>
           <Link href="/sign-in">
-            <Text className="text-primary">Sign in</Text>
+            <Text className="text-primary font-semibold">Sign in</Text>
           </Link>
         </View>
       </ScrollView>
