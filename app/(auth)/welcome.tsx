@@ -37,7 +37,7 @@ const slides = [
   },
   {
     id: "4",
-    image: null, // No main image for features slide
+    image: require("@/assets/images/key-features.png"),
     title: "Key Features",
     description: "Everything you need to be a successful plant parent",
     isFeatureSlide: true,
@@ -103,26 +103,37 @@ export default function WelcomeScreen() {
     if (item.isFeatureSlide) {
       return (
         <View className="w-full items-center justify-center" style={{ width }}>
-          <View className="items-center px-5 mb-4">
-            <Text className="text-2xl font-bold text-foreground mb-3 text-center">
+          <View className="w-full items-center px-5">
+            <Text className="text-2xl font-bold text-foreground mb-2 text-center">
               {item.title}
             </Text>
-            <Text className="text-base text-foreground text-center opacity-80 px-4 mb-6">
+            <Text className="text-base text-foreground text-center opacity-80 px-4 mb-3">
               {item.description}
             </Text>
 
-            <View className="flex-row flex-wrap justify-center">
-              {features.map((feature, index) => (
-                <View
-                  key={index}
-                  className="flex-row items-center bg-cream-50 rounded-lg px-4 py-3 m-2 shadow-sm w-[45%]"
-                >
-                  <Ionicons name={feature.icon} size={20} color="#5E994B" />
-                  <Text className="text-sm text-foreground ml-2 font-medium">
-                    {feature.text}
-                  </Text>
-                </View>
-              ))}
+            {/* Feature icons with illustration background */}
+            <View className="relative w-full justify-center items-center mb-3">
+              {/* Background illustration */}
+              <Image
+                source={item.image}
+                className="w-full h-[180px]"
+                resizeMode="contain"
+              />
+
+              {/* Features overlaid in a grid */}
+              <View className="flex-row flex-wrap justify-center">
+                {features.map((feature, index) => (
+                  <View
+                    key={index}
+                    className="flex-row items-center bg-cream-50/90 rounded-lg px-4 py-3 m-2 shadow-sm w-[45%] border border-cream-200"
+                  >
+                    <Ionicons name={feature.icon} size={22} color="#5E994B" />
+                    <Text className="text-sm text-foreground ml-2 font-medium">
+                      {feature.text}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
         </View>
@@ -220,7 +231,7 @@ export default function WelcomeScreen() {
             onPress={handleGetStarted}
           >
             <Text className="text-primary-foreground text-base font-bold">
-              Get Started
+              Start Your Plant Journey
             </Text>
           </TouchableOpacity>
 

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
-  ScrollView,
 } from "react-native";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { useRouter, Link } from "expo-router";
@@ -262,27 +261,26 @@ export default function SignUpScreen() {
         <Link href="/(auth)/welcome" asChild>
           <TouchableOpacity>
             <View className="flex-row items-center">
-              <Ionicons name="chevron-back" size={20} color="#000" />
+              <Ionicons name="chevron-back" size={20} color="#2e2c29" />
               <Text className="text-foreground text-base ml-1">Back</Text>
             </View>
           </TouchableOpacity>
         </Link>
 
-        <Text className="text-foreground text-base font-medium">Sign Up</Text>
-
         <Link href="/(auth)/sign-in" asChild>
           <TouchableOpacity>
             <View className="flex-row items-center">
               <Text className="text-primary text-base">Sign In</Text>
+              <Ionicons name="log-in-outline" size={16} color="#5E994B" />
             </View>
           </TouchableOpacity>
         </Link>
       </View>
 
-      <ScrollView className="flex-1 p-5">
-        <View className="w-full h-[150px] justify-center items-center">
+      <View className="flex-1 p-5">
+        <View className="w-full h-44 justify-center items-center">
           <Image
-            source={require("@/assets/images/logo.png")}
+            source={require("@/assets/images/sign-up.png")}
             className="w-1/2 h-full"
             resizeMode="contain"
           />
@@ -339,7 +337,7 @@ export default function SignUpScreen() {
                   </Text>
                   <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
                     <View className="p-3 justify-center">
-                      <Ionicons name="call-outline" size={20} color="#333" />
+                      <Ionicons name="call-outline" size={20} color="#2e2c29" />
                     </View>
                     <TextInput
                       className="flex-1 p-3 text-foreground"
@@ -358,7 +356,7 @@ export default function SignUpScreen() {
                   <Text className="text-foreground mb-1 text-sm">Email</Text>
                   <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
                     <View className="p-3 justify-center">
-                      <Ionicons name="mail-outline" size={20} color="#333" />
+                      <Ionicons name="mail-outline" size={20} color="#2e2c29" />
                     </View>
                     <TextInput
                       className="flex-1 p-3 text-foreground"
@@ -377,7 +375,11 @@ export default function SignUpScreen() {
               <Text className="text-foreground mb-1 text-sm">Password</Text>
               <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
                 <View className="p-3 justify-center">
-                  <Ionicons name="lock-closed-outline" size={20} color="#333" />
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color="#2e2c29"
+                  />
                 </View>
                 <TextInput
                   className="flex-1 p-3 text-foreground"
@@ -449,13 +451,13 @@ export default function SignUpScreen() {
             </Text>
             <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
               <View className="p-3 justify-center">
-                <Ionicons name="keypad-outline" size={20} color="#333" />
+                <Ionicons name="keypad-outline" size={20} color="#2e2c29" />
               </View>
               <TextInput
                 className="flex-1 p-3 text-foreground"
                 value={verificationCode}
                 placeholder="Verification code"
-                placeholderTextColor="#999"
+                placeholderTextColor="#2e2c29"
                 onChangeText={(code) => setVerificationCode(code)}
                 keyboardType="number-pad"
                 editable={!isLoading}
@@ -487,7 +489,7 @@ export default function SignUpScreen() {
           </View>
         )}
 
-        <View className="flex-row justify-center mt-6 mb-8">
+        <View className="flex-row justify-center mt-auto mb-8">
           <Text className="text-foreground">Already have an account? </Text>
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity className="flex-row items-center">
@@ -496,7 +498,7 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
