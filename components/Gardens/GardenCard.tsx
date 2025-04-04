@@ -30,7 +30,7 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
   return (
     <TouchableOpacity
-      className="bg-white border border-cream-300 rounded-xl shadow-sm mb-4 overflow-hidden"
+      className="bg-white border border-cream-300 rounded-xl shadow-sm mb-5 overflow-hidden"
       onPress={() =>
         router.push({
           pathname: "/(home)/gardens/[id]",
@@ -38,13 +38,13 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
         })
       }
     >
-      <View className="p-4">
+      <View className="p-5">
         <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-foreground text-lg font-bold">
+          <Text className="text-foreground text-xl font-bold">
             {garden.name}
           </Text>
           {garden.plants_needing_care > 0 && (
-            <View className="bg-accent-100 rounded-full px-3 py-1">
+            <View className="bg-accent-100 rounded-full px-3.5 py-1.5">
               <Text className="text-xs text-accent-700 font-medium">
                 {garden.plants_needing_care}{" "}
                 {garden.plants_needing_care === 1 ? "plant" : "plants"} need
@@ -55,17 +55,17 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
         </View>
 
         {/* Updated date */}
-        <View className="flex-row items-center mb-2">
-          <Ionicons name="time-outline" size={14} color="#6b7280" />
-          <Text className="text-cream-600 text-xs ml-1">
+        <View className="flex-row items-center mb-3">
+          <Ionicons name="time-outline" size={16} color="#6b7280" />
+          <Text className="text-cream-600 text-xs ml-1.5">
             Updated {formatDate(garden.updated_at)}
           </Text>
         </View>
 
         {/* Health summary bar */}
         {garden.total_plants > 0 && (
-          <View className="mb-3">
-            <View className="flex-row justify-between items-center mb-1">
+          <View className="mb-4">
+            <View className="flex-row justify-between items-center mb-1.5">
               <Text className="text-cream-700 text-xs">Garden Health</Text>
               <Text
                 className="text-xs font-medium"
@@ -74,7 +74,7 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
                 {garden.health_percentage}%
               </Text>
             </View>
-            <View className="h-2 bg-cream-100 rounded-full overflow-hidden">
+            <View className="h-2.5 bg-cream-100 rounded-full overflow-hidden">
               <View
                 className="h-full rounded-full"
                 style={{
@@ -86,27 +86,27 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
           </View>
         )}
 
-        <View className="flex-row items-center mb-3">
+        <View className="flex-row items-center mb-4">
           <View className="flex-row items-center">
-            <Ionicons name="leaf" size={16} color="#77B860" />
-            <Text className="text-brand-600 text-sm font-medium ml-1">
+            <Ionicons name="leaf" size={18} color="#77B860" />
+            <Text className="text-brand-600 text-sm font-medium ml-1.5">
               {garden.total_plants} Plants
             </Text>
           </View>
 
           {garden.total_plants > 0 && (
-            <View className="flex-row ml-4">
+            <View className="flex-row ml-5">
               {garden.healthy_plants > 0 && (
-                <View className="flex-row items-center mr-2">
-                  <View className="bg-brand-500 h-2 rounded-full w-2 mr-1" />
+                <View className="flex-row items-center mr-3">
+                  <View className="bg-brand-500 h-2.5 rounded-full w-2.5 mr-1.5" />
                   <Text className="text-brand-700 text-xs">
                     {garden.healthy_plants}
                   </Text>
                 </View>
               )}
               {garden.plants_needing_care > 0 && (
-                <View className="flex-row items-center mr-2">
-                  <View className="bg-accent-500 h-2 rounded-full w-2 mr-1" />
+                <View className="flex-row items-center mr-2.5">
+                  <View className="bg-accent-500 h-2.5 rounded-full w-2.5 mr-1.5" />
                   <Text className="text-xs text-accent-700">
                     {garden.plants_needing_care}
                   </Text>
@@ -118,8 +118,8 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
         {/* Next upcoming task if available */}
         {nextTask && (
-          <View className="bg-blue-50 p-3 rounded-lg mb-3">
-            <View className="flex-row justify-between items-center mb-1">
+          <View className="bg-blue-50 p-4 rounded-lg mb-4">
+            <View className="flex-row justify-between items-center mb-1.5">
               <Text className="text-blue-700 text-sm font-medium">
                 Next Task
               </Text>
@@ -136,10 +136,10 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
                     ? "flask"
                     : "leaf"
                 }
-                size={14}
+                size={16}
                 color="#3b82f6"
               />
-              <Text className="text-blue-700 text-xs ml-1">
+              <Text className="text-blue-700 text-xs ml-1.5">
                 {nextTask.task_type} {nextTask.plant_nickname}
               </Text>
             </View>
@@ -156,12 +156,12 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
                 .map((plant) => (
                   <View
                     key={plant.id}
-                    className="flex-row bg-cream-50 p-2 rounded-lg items-center mb-2"
+                    className="flex-row bg-cream-50 p-3 rounded-lg items-center mb-2.5"
                   >
                     {plant.images?.[0] && (
                       <Image
                         source={{ uri: plant.images[0] }}
-                        className="h-8 rounded-full w-8 mr-2"
+                        className="h-10 rounded-full w-10 mr-3"
                       />
                     )}
                     <View className="flex-1">
@@ -178,7 +178,7 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
                           ? "alert-circle"
                           : "water"
                       }
-                      size={16}
+                      size={18}
                       color={
                         plant.status === "Dead" || plant.status === "Wilting"
                           ? "#dc2626"
@@ -190,17 +190,17 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
             {/* Show remaining healthy plants count if any */}
             {garden.healthy_plants > 0 && (
-              <View className="flex-row bg-brand-50 justify-between p-2 rounded-lg items-center">
+              <View className="flex-row bg-brand-50 justify-between p-3.5 rounded-lg items-center">
                 <Text className="text-brand-700 text-sm">
                   {garden.healthy_plants} healthy{" "}
                   {garden.healthy_plants === 1 ? "plant" : "plants"}
                 </Text>
-                <Ionicons name="checkmark-circle" size={16} color="#059669" />
+                <Ionicons name="checkmark-circle" size={18} color="#059669" />
               </View>
             )}
           </View>
         ) : (
-          <View className="bg-cream-50 p-3 rounded-lg">
+          <View className="bg-cream-50 p-4 rounded-lg">
             <Text className="text-center text-cream-600 text-sm">
               Add your first plant to get started
             </Text>

@@ -156,29 +156,29 @@ export default function GardenPlantsList({
 
     return (
       <TouchableOpacity
-        className="bg-white border border-cream-100 p-3 rounded-lg shadow-sm mb-3 mx-4"
+        className="bg-white border border-cream-100 px-4 py-3.5 rounded-lg shadow-sm mb-3.5 mx-4"
         onPress={() => onPlantPress(item)}
       >
-        <View className="flex-row items-start mb-2">
+        <View className="flex-row items-start mb-3">
           {item.images?.[0] && (
             <Image
               source={{ uri: item.images[0] }}
-              className="h-16 rounded-lg w-16 mr-3"
+              className="h-18 rounded-lg w-18 mr-4"
             />
           )}
           <View className="flex-1">
             <View className="flex-row justify-between items-start">
-              <View className="flex-1 mr-2">
+              <View className="flex-1 mr-3">
                 <Text className="text-base text-foreground font-medium">
                   {item.nickname}
                 </Text>
               </View>
               <View
-                className={`rounded-full px-3 py-1 flex-row items-center ${statusStyle.bg}`}
+                className={`rounded-full px-3.5 py-1.5 flex-row items-center ${statusStyle.bg}`}
               >
                 <Ionicons
                   name={statusStyle.icon}
-                  size={14}
+                  size={16}
                   color={
                     item.status === "Healthy"
                       ? "#059669"
@@ -189,7 +189,7 @@ export default function GardenPlantsList({
                   }
                 />
                 <Text
-                  className={`text-xs font-medium ml-1 ${statusStyle.text}`}
+                  className={`text-xs font-medium ml-1.5 ${statusStyle.text}`}
                 >
                   {item.status === "Healthy"
                     ? "Healthy"
@@ -204,19 +204,19 @@ export default function GardenPlantsList({
               </View>
             </View>
 
-            <View className="flex-row items-center mt-2">
+            <View className="flex-row items-center mt-2.5">
               {lastWatered && (
                 <View className="flex-row items-center mr-4">
-                  <Ionicons name="water-outline" size={14} color="#0891b2" />
-                  <Text className="text-blue-600 text-xs ml-1">
+                  <Ionicons name="water-outline" size={16} color="#0891b2" />
+                  <Text className="text-blue-600 text-xs ml-1.5">
                     Watered {lastWatered}
                   </Text>
                 </View>
               )}
               {item.care_logs && item.care_logs.length > 0 && (
                 <View className="flex-row items-center">
-                  <Ionicons name="calendar-outline" size={14} color="#9ca3af" />
-                  <Text className="text-cream-500 text-xs ml-1">
+                  <Ionicons name="calendar-outline" size={16} color="#9ca3af" />
+                  <Text className="text-cream-500 text-xs ml-1.5">
                     {item.care_logs.length} Care{" "}
                     {item.care_logs.length === 1 ? "Log" : "Logs"}
                   </Text>
@@ -226,25 +226,25 @@ export default function GardenPlantsList({
           </View>
         </View>
 
-        <View className="flex-row border-cream-100 border-t justify-end pt-2">
+        <View className="flex-row border-cream-100 border-t justify-end pt-3">
           {onWaterPlant && (
             <TouchableOpacity
-              className="flex-row bg-blue-50 rounded-full items-center mr-2 px-3 py-1.5"
+              className="flex-row bg-blue-50 rounded-full items-center mr-3 px-4 py-2"
               onPress={() => onWaterPlant(item)}
             >
-              <Ionicons name="water" size={14} color="#0891b2" />
-              <Text className="text-blue-600 text-xs font-medium ml-1">
+              <Ionicons name="water" size={16} color="#0891b2" />
+              <Text className="text-blue-600 text-xs font-medium ml-1.5">
                 Water
               </Text>
             </TouchableOpacity>
           )}
           {onEditPlant && (
             <TouchableOpacity
-              className="flex-row bg-cream-50 rounded-full items-center px-3 py-1.5"
+              className="flex-row bg-cream-50 rounded-full items-center px-4 py-2"
               onPress={() => onEditPlant(item)}
             >
-              <Ionicons name="create-outline" size={14} color="#6b7280" />
-              <Text className="text-cream-600 text-xs font-medium ml-1">
+              <Ionicons name="create-outline" size={16} color="#6b7280" />
+              <Text className="text-cream-600 text-xs font-medium ml-1.5">
                 Edit
               </Text>
             </TouchableOpacity>
@@ -259,28 +259,28 @@ export default function GardenPlantsList({
   }: {
     section: SectionListData<UserPlant, PlantSection>;
   }) => (
-    <View className="flex-row items-center mb-2 mt-4 mx-4">
-      <Ionicons name={section.icon} size={20} color={section.color} />
-      <Text className="text-foreground text-lg font-semibold ml-2">
+    <View className="flex-row items-center mb-3 mt-5 mx-4">
+      <Ionicons name={section.icon} size={22} color={section.color} />
+      <Text className="text-foreground text-lg font-semibold ml-2.5">
         {section.title}
       </Text>
-      <Text className="text-cream-500 ml-2">({section.data.length})</Text>
+      <Text className="text-cream-500 ml-2.5">({section.data.length})</Text>
     </View>
   );
 
   const ListHeader = () => {
     return (
       <>
-        <View className="flex-row justify-between items-center mb-4 mx-4">
+        <View className="flex-row justify-between items-center mb-5 mx-4 mt-2">
           <Text className="text-foreground text-xl font-semibold">
             My Plants
           </Text>
           <TouchableOpacity
-            className="flex-row bg-brand-500 rounded-full items-center px-3 py-2"
+            className="flex-row bg-brand-500 rounded-full items-center px-4 py-2.5"
             onPress={onAddPlant}
           >
-            <Ionicons name="add" size={18} color="white" />
-            <Text className="text-white font-medium ml-1">Add Plant</Text>
+            <Ionicons name="add" size={20} color="white" />
+            <Text className="text-white font-medium ml-1.5">Add Plant</Text>
           </TouchableOpacity>
         </View>
         {HeaderComponent}
@@ -292,39 +292,39 @@ export default function GardenPlantsList({
     return (
       <View className="flex-1">
         {HeaderComponent}
-        <View className="mb-4 mx-4">
-          <View className="flex-row justify-between items-center mb-4">
+        <View className="mb-5 mx-4">
+          <View className="flex-row justify-between items-center mb-5">
             <Text className="text-foreground text-xl font-semibold">
               My Plants
             </Text>
             <TouchableOpacity
-              className="flex-row bg-brand-500 rounded-full items-center px-3 py-2"
+              className="flex-row bg-brand-500 rounded-full items-center px-4 py-2.5"
               onPress={onAddPlant}
             >
-              <Ionicons name="add" size={18} color="white" />
-              <Text className="text-white font-medium ml-1">Add Plant</Text>
+              <Ionicons name="add" size={20} color="white" />
+              <Text className="text-white font-medium ml-1.5">Add Plant</Text>
             </TouchableOpacity>
           </View>
 
-          <View className="bg-white rounded-xl shadow-sm items-center px-4 py-10">
+          <View className="bg-white rounded-xl shadow-sm items-center px-5 py-12">
             <Ionicons
               name="leaf-outline"
-              size={48}
+              size={56}
               color="#9e9a90"
-              className="mb-2"
+              className="mb-3"
             />
-            <Text className="text-center text-foreground text-lg font-medium mb-2">
+            <Text className="text-center text-foreground text-lg font-medium mb-3">
               No plants added yet
             </Text>
-            <Text className="text-center text-cream-500 mb-6">
+            <Text className="text-center text-cream-500 mb-7 px-5">
               Add your first plant to start tracking its care
             </Text>
             <TouchableOpacity
-              className="flex-row bg-brand-500 rounded-full items-center px-4 py-2"
+              className="flex-row bg-brand-500 rounded-full items-center px-5 py-3"
               onPress={onAddPlant}
             >
-              <Ionicons name="add" size={18} color="white" />
-              <Text className="text-white font-medium ml-1">
+              <Ionicons name="add" size={20} color="white" />
+              <Text className="text-white font-medium ml-2 text-base">
                 Add First Plant
               </Text>
             </TouchableOpacity>
@@ -345,7 +345,7 @@ export default function GardenPlantsList({
         FooterComponent ? () => <>{FooterComponent}</> : undefined
       }
       stickySectionHeadersEnabled={false}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 24 }}
     />
   );
 }

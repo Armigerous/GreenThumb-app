@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { Garden } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   FlatList,
@@ -49,12 +50,10 @@ function CollapsibleSection({
   const [expanded, setExpanded] = useState(initiallyExpanded);
 
   return (
-    <View className="mb-4 border border-cream-100 rounded-lg overflow-hidden">
+    <View className="mb-4 border border-cream-300 rounded-lg overflow-hidden">
       <TouchableOpacity
         onPress={() => setExpanded(!expanded)}
-        className={`flex-row justify-between items-center p-3 ${
-          expanded ? "bg-cream-50" : "bg-white"
-        }`}
+        className="flex-row justify-between items-center p-3 bg-cream-50"
       >
         <View className="flex-row items-center">
           <Ionicons name={icon} size={18} color="#059669" className="mr-2" />
@@ -67,7 +66,7 @@ function CollapsibleSection({
         />
       </TouchableOpacity>
 
-      {expanded && <View className="p-3 bg-white">{children}</View>}
+      {expanded && <View className="p-3 bg-cream-50">{children}</View>}
     </View>
   );
 }
@@ -86,8 +85,8 @@ function SelectionItem({
 }) {
   return (
     <TouchableOpacity
-      className={`flex-row items-center p-3 border-b border-cream-100 ${
-        isSelected ? "bg-brand-50" : "bg-white"
+      className={`flex-row items-center p-3 border-b border-cream-300 ${
+        isSelected ? "bg-cream-100" : "bg-cream-50"
       }`}
       onPress={onToggle}
     >
@@ -178,9 +177,9 @@ function SelectionModal<T extends boolean = true>({
       onRequestClose={onClose}
     >
       <View className="flex-1 bg-black/30 justify-end">
-        <View className="bg-white rounded-t-xl h-[70%] w-full">
+        <View className="bg-cream-50 rounded-t-xl h-[70%] w-full">
           {/* Header */}
-          <View className="flex-row justify-between items-center p-4 border-b border-cream-100">
+          <View className="flex-row justify-between items-center p-4 border-b border-cream-300">
             <TouchableOpacity onPress={handleClear}>
               <Text className="text-red-500 font-medium">Clear</Text>
             </TouchableOpacity>
@@ -260,7 +259,7 @@ function BetterSelector<T extends boolean = true>({
       <Text className="text-foreground font-medium mb-2">{label}</Text>
 
       <TouchableOpacity
-        className="border border-cream-200 rounded-lg p-3 bg-cream-50 min-h-[45px] flex-row justify-between items-center"
+        className="border border-cream-300 rounded-lg p-3 bg-cream-50 min-h-[45px] flex-row justify-between items-center"
         onPress={() => setModalVisible(true)}
       >
         <Text className={getDisplayValue() ? "text-gray-800" : "text-gray-400"}>
@@ -289,32 +288,46 @@ export default function GardenConditionsEditor({
 }: GardenConditionsEditorProps) {
   const [activeTab, setActiveTab] = useState("environment");
   const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
 
   // State for form values
   const [formValues, setFormValues] = useState({
     name: garden.name || "",
     // Environment settings
     sunlight_ids: getIdsFromNames(
-      garden.sunlight_conditions,
+      garden.sunlight_conditions || garden.sunlight,
       LOOKUP_TABLES.light
     ),
     soil_texture_ids: getIdsFromNames(
-      garden.soil_textures,
+      garden.soil_textures || garden.soil_texture,
       LOOKUP_TABLES.soil_texture
     ),
     soil_drainage_ids: getIdsFromNames(
       garden.soil_drainage,
       LOOKUP_TABLES.soil_drainage
     ),
-    soil_ph_ids: getIdsFromNames(garden.soil_ph_ranges, LOOKUP_TABLES.soil_ph),
-    location_ids:
+    soil_ph_ids: getIdsFromNames(
+      garden.soil_ph_ranges || garden.soil_ph,
+      LOOKUP_TABLES.soil_ph
+    ),
+    landscape_location_ids:
       getIdsFromNames(
-        garden.landscape_locations,
+        garden.landscape_locations || garden.locations,
         LOOKUP_TABLES.landscape_location
       ) || [],
+    nc_region_ids: LOOKUP_TABLES.nc_regions
+      ? getIdsFromNames(garden.nc_regions, LOOKUP_TABLES.nc_regions) || []
+      : [],
+    usda_zone_ids: LOOKUP_TABLES.usda_zone
+      ? getIdsFromNames(garden.usda_zones, LOOKUP_TABLES.usda_zone) || []
+      : [],
 
     // Maintenance and preferences
-    maintenance_id: garden.maintenance
+    maintenance_id: garden.maintenance_level
+      ? LOOKUP_TABLES.maintenance.find(
+          (option: LookupItem) => option.label === garden.maintenance_level
+        )?.value || null
+      : garden.maintenance
       ? LOOKUP_TABLES.maintenance.find(
           (option: LookupItem) => option.label === garden.maintenance
         )?.value || null
@@ -325,10 +338,14 @@ export default function GardenConditionsEditor({
         )?.value || null
       : null,
     available_space_to_plant_ids: getIdsFromNames(
-      garden.available_space_to_plant,
+      garden.available_space_to_plant || garden.available_space,
       LOOKUP_TABLES.available_space_to_plant
     ),
-    texture_id: garden.texture
+    texture_id: garden.texture_preference
+      ? LOOKUP_TABLES.texture.find(
+          (option: LookupItem) => option.label === garden.texture_preference
+        )?.value || null
+      : garden.texture
       ? LOOKUP_TABLES.texture.find(
           (option: LookupItem) => option.label === garden.texture
         )?.value || null
@@ -348,12 +365,43 @@ export default function GardenConditionsEditor({
       ) || [],
     problems_ids:
       getIdsFromNames(garden.problems, LOOKUP_TABLES.problems) || [],
+    design_feature_ids: LOOKUP_TABLES.design_feature
+      ? getIdsFromNames(garden.design_features, LOOKUP_TABLES.design_feature) ||
+        []
+      : [],
+    plant_type_ids: LOOKUP_TABLES.plant_type
+      ? getIdsFromNames(garden.plant_types, LOOKUP_TABLES.plant_type) || []
+      : [],
+    habit_form_ids: LOOKUP_TABLES.habit_form
+      ? getIdsFromNames(garden.habit_forms, LOOKUP_TABLES.habit_form) || []
+      : [],
 
     // Plant aesthetics
     flower_color_ids:
       getIdsFromNames(garden.flower_colors, LOOKUP_TABLES.flower_color) || [],
     leaf_color_ids:
       getIdsFromNames(garden.leaf_colors, LOOKUP_TABLES.leaf_color) || [],
+    flower_bloom_time_ids: LOOKUP_TABLES.flower_bloom_time
+      ? getIdsFromNames(
+          garden.flower_bloom_times,
+          LOOKUP_TABLES.flower_bloom_time
+        ) || []
+      : [],
+    flower_value_to_gardener_ids: LOOKUP_TABLES.flower_value_to_gardener
+      ? getIdsFromNames(
+          garden.flower_values,
+          LOOKUP_TABLES.flower_value_to_gardener
+        ) || []
+      : [],
+    leaf_feel_ids: LOOKUP_TABLES.leaf_feel
+      ? getIdsFromNames(garden.leaf_feels, LOOKUP_TABLES.leaf_feel) || []
+      : [],
+    leaf_value_ids: LOOKUP_TABLES.leaf_value
+      ? getIdsFromNames(garden.leaf_values, LOOKUP_TABLES.leaf_value) || []
+      : [],
+    fall_color_ids: LOOKUP_TABLES.fall_color
+      ? getIdsFromNames(garden.fall_colors, LOOKUP_TABLES.fall_color) || []
+      : [],
 
     // Preferences
     wants_recommendations: garden.wants_recommendations || false,
@@ -377,7 +425,7 @@ export default function GardenConditionsEditor({
       // This prevents overwriting fields that might have been changed elsewhere
       const gardenDbUpdate = {
         name: formValues.name,
-        sunlight_ids: formValues.sunlight_ids,
+        light_ids: formValues.sunlight_ids,
         soil_texture_ids: formValues.soil_texture_ids,
         soil_drainage_ids: formValues.soil_drainage_ids,
         soil_ph_ids: formValues.soil_ph_ids,
@@ -386,7 +434,7 @@ export default function GardenConditionsEditor({
         available_space_to_plant_ids: formValues.available_space_to_plant_ids,
         wants_recommendations: formValues.wants_recommendations,
         year_round_interest: formValues.year_round_interest,
-        location_ids: formValues.location_ids,
+        landscape_location_ids: formValues.landscape_location_ids,
         landscape_theme_ids: formValues.landscape_theme_ids,
         attracts_ids: formValues.attracts_ids,
         resistance_to_challenges_ids: formValues.resistance_to_challenges_ids,
@@ -394,6 +442,16 @@ export default function GardenConditionsEditor({
         flower_color_ids: formValues.flower_color_ids,
         leaf_color_ids: formValues.leaf_color_ids,
         texture_id: formValues.texture_id,
+        nc_region_ids: formValues.nc_region_ids,
+        usda_zone_ids: formValues.usda_zone_ids,
+        flower_bloom_time_ids: formValues.flower_bloom_time_ids,
+        flower_value_to_gardener_ids: formValues.flower_value_to_gardener_ids,
+        leaf_feel_ids: formValues.leaf_feel_ids,
+        leaf_value_ids: formValues.leaf_value_ids,
+        fall_color_ids: formValues.fall_color_ids,
+        design_feature_ids: formValues.design_feature_ids,
+        plant_type_ids: formValues.plant_type_ids,
+        habit_form_ids: formValues.habit_form_ids,
         // Set updated_at timestamp
         updated_at: new Date().toISOString(),
       };
@@ -424,6 +482,12 @@ export default function GardenConditionsEditor({
           );
           // The garden data was likely updated, but the trigger to refresh the materialized view failed
           // We can still consider this a success from the user's perspective
+
+          // Force invalidate the query cache to ensure fresh data is fetched next time
+          queryClient.invalidateQueries({
+            queryKey: ["gardenDetails", garden.id],
+          });
+
           setTimeout(() => onSave(true), 500); // Short delay to allow UI to update
           return;
         }
@@ -436,6 +500,11 @@ export default function GardenConditionsEditor({
         });
         throw error;
       }
+
+      // Force invalidate the query cache to ensure fresh data is fetched next time
+      queryClient.invalidateQueries({
+        queryKey: ["gardenDetails", garden.id],
+      });
 
       console.log("Garden updated successfully!");
 
@@ -461,12 +530,19 @@ export default function GardenConditionsEditor({
       soilTexture: formValues.soil_texture_ids.length > 0,
       soilPh: formValues.soil_ph_ids.length > 0,
       soilDrainage: formValues.soil_drainage_ids.length > 0,
-      location: formValues.location_ids.length > 0,
+      location: formValues.landscape_location_ids.length > 0,
+      region: formValues.nc_region_ids.length > 0,
+      zone: formValues.usda_zone_ids.length > 0,
 
       // Aesthetics
       gardenTheme: formValues.landscape_theme_ids.length > 0,
       flowerColor: formValues.flower_color_ids.length > 0,
       leafColor: formValues.leaf_color_ids.length > 0,
+      flowerBloomTime: formValues.flower_bloom_time_ids.length > 0,
+      flowerValue: formValues.flower_value_to_gardener_ids.length > 0,
+      leafFeel: formValues.leaf_feel_ids.length > 0,
+      leafValue: formValues.leaf_value_ids.length > 0,
+      fallColor: formValues.fall_color_ids.length > 0,
       texturePreference: !!formValues.texture_id,
 
       // Maintenance
@@ -476,6 +552,9 @@ export default function GardenConditionsEditor({
       wildlifeAttraction: formValues.attracts_ids.length > 0,
       resistanceChallenge: formValues.resistance_to_challenges_ids.length > 0,
       problemsToExclude: formValues.problems_ids.length > 0,
+      habitForm: formValues.habit_form_ids.length > 0,
+      plantType: formValues.plant_type_ids.length > 0,
+      designFeature: formValues.design_feature_ids.length > 0,
     };
 
     // Count filled categories
@@ -502,7 +581,7 @@ export default function GardenConditionsEditor({
               <TextInput
                 value={formValues.name}
                 onChangeText={(text) => updateFormValues("name", text)}
-                className="border border-cream-200 rounded-lg p-3 bg-cream-50"
+                className="border border-cream-300 rounded-lg p-3 bg-cream-50"
                 placeholder="Garden Name"
               />
             </View>
@@ -557,12 +636,34 @@ export default function GardenConditionsEditor({
 
             <CollapsibleSection title="Location" icon="location-outline">
               <BetterSelector
-                label="Garden Location"
+                label="Landscape Location"
                 placeholder="Select locations"
                 items={LOOKUP_TABLES.landscape_location}
-                value={formValues.location_ids}
-                onChange={(value) => updateFormValues("location_ids", value)}
+                value={formValues.landscape_location_ids}
+                onChange={(value) =>
+                  updateFormValues("landscape_location_ids", value)
+                }
               />
+
+              {LOOKUP_TABLES.nc_regions && (
+                <BetterSelector
+                  label="Region"
+                  placeholder="Select region"
+                  items={LOOKUP_TABLES.nc_regions}
+                  value={formValues.nc_region_ids}
+                  onChange={(value) => updateFormValues("nc_region_ids", value)}
+                />
+              )}
+
+              {LOOKUP_TABLES.usda_zone && (
+                <BetterSelector
+                  label="USDA Zone"
+                  placeholder="Select USDA zone"
+                  items={LOOKUP_TABLES.usda_zone}
+                  value={formValues.usda_zone_ids}
+                  onChange={(value) => updateFormValues("usda_zone_ids", value)}
+                />
+              )}
             </CollapsibleSection>
           </>
         );
@@ -591,6 +692,18 @@ export default function GardenConditionsEditor({
                 value={formValues.attracts_ids}
                 onChange={(value) => updateFormValues("attracts_ids", value)}
               />
+
+              {LOOKUP_TABLES.design_feature && (
+                <BetterSelector
+                  label="Design Features"
+                  placeholder="Select design features"
+                  items={LOOKUP_TABLES.design_feature}
+                  value={formValues.design_feature_ids}
+                  onChange={(value) =>
+                    updateFormValues("design_feature_ids", value)
+                  }
+                />
+              )}
             </CollapsibleSection>
 
             <CollapsibleSection
@@ -608,6 +721,30 @@ export default function GardenConditionsEditor({
                 }
               />
 
+              {LOOKUP_TABLES.flower_bloom_time && (
+                <BetterSelector
+                  label="Flower Bloom Times"
+                  placeholder="Select flower bloom times"
+                  items={LOOKUP_TABLES.flower_bloom_time}
+                  value={formValues.flower_bloom_time_ids}
+                  onChange={(value) =>
+                    updateFormValues("flower_bloom_time_ids", value)
+                  }
+                />
+              )}
+
+              {LOOKUP_TABLES.flower_value_to_gardener && (
+                <BetterSelector
+                  label="Flower Values"
+                  placeholder="Select flower values"
+                  items={LOOKUP_TABLES.flower_value_to_gardener}
+                  value={formValues.flower_value_to_gardener_ids}
+                  onChange={(value) =>
+                    updateFormValues("flower_value_to_gardener_ids", value)
+                  }
+                />
+              )}
+
               <BetterSelector
                 label="Leaf Colors"
                 placeholder="Select leaf colors"
@@ -615,6 +752,40 @@ export default function GardenConditionsEditor({
                 value={formValues.leaf_color_ids}
                 onChange={(value) => updateFormValues("leaf_color_ids", value)}
               />
+
+              {LOOKUP_TABLES.leaf_feel && (
+                <BetterSelector
+                  label="Leaf Textures"
+                  placeholder="Select leaf textures"
+                  items={LOOKUP_TABLES.leaf_feel}
+                  value={formValues.leaf_feel_ids}
+                  onChange={(value) => updateFormValues("leaf_feel_ids", value)}
+                />
+              )}
+
+              {LOOKUP_TABLES.leaf_value && (
+                <BetterSelector
+                  label="Leaf Values"
+                  placeholder="Select leaf values"
+                  items={LOOKUP_TABLES.leaf_value}
+                  value={formValues.leaf_value_ids}
+                  onChange={(value) =>
+                    updateFormValues("leaf_value_ids", value)
+                  }
+                />
+              )}
+
+              {LOOKUP_TABLES.fall_color && (
+                <BetterSelector
+                  label="Fall Colors"
+                  placeholder="Select fall colors"
+                  items={LOOKUP_TABLES.fall_color}
+                  value={formValues.fall_color_ids}
+                  onChange={(value) =>
+                    updateFormValues("fall_color_ids", value)
+                  }
+                />
+              )}
 
               <BetterSelector
                 label="Texture Preference"
@@ -653,6 +824,18 @@ export default function GardenConditionsEditor({
                 onChange={(value) => updateFormValues("growth_rate_id", value)}
                 multiple={false}
               />
+
+              {LOOKUP_TABLES.habit_form && (
+                <BetterSelector
+                  label="Plant Form/Habit"
+                  placeholder="Select plant forms"
+                  items={LOOKUP_TABLES.habit_form}
+                  value={formValues.habit_form_ids}
+                  onChange={(value) =>
+                    updateFormValues("habit_form_ids", value)
+                  }
+                />
+              )}
             </CollapsibleSection>
 
             <CollapsibleSection
@@ -688,14 +871,28 @@ export default function GardenConditionsEditor({
               />
             </CollapsibleSection>
 
+            {LOOKUP_TABLES.plant_type && (
+              <CollapsibleSection title="Plant Types" icon="leaf-outline">
+                <BetterSelector
+                  label="Plant Types"
+                  placeholder="Select plant types"
+                  items={LOOKUP_TABLES.plant_type}
+                  value={formValues.plant_type_ids}
+                  onChange={(value) =>
+                    updateFormValues("plant_type_ids", value)
+                  }
+                />
+              </CollapsibleSection>
+            )}
+
             <CollapsibleSection title="Preferences" icon="options-outline">
-              <View className="p-3 bg-cream-50 rounded-lg">
+              <View className="p-3 bg-cream-50 border border-cream-300 rounded-lg">
                 <View className="flex-row justify-between items-center mb-4">
                   <View className="flex-1 mr-4">
                     <Text className="text-foreground font-medium">
                       Plant Recommendations
                     </Text>
-                    <Text className="text-sm text-cream-700">
+                    <Text className="text-sm text-gray-600">
                       Get personalized plant suggestions
                     </Text>
                   </View>
@@ -716,7 +913,7 @@ export default function GardenConditionsEditor({
                     <Text className="text-foreground font-medium">
                       Year-round Interest
                     </Text>
-                    <Text className="text-sm text-cream-700">
+                    <Text className="text-sm text-gray-600">
                       Plants that look good all seasons
                     </Text>
                   </View>
@@ -741,28 +938,28 @@ export default function GardenConditionsEditor({
   };
 
   return (
-    <View className="bg-white p-4 rounded-xl mb-8">
+    <View className="bg-cream-50 p-4 rounded-xl mb-8">
       {/* Header with title and action buttons */}
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-foreground text-lg font-semibold">
           Edit Garden Settings
         </Text>
-        <View className="flex-row">
+        <View className="flex-row gap-x-4">
           <TouchableOpacity
             onPress={onCancel}
-            className="bg-cream-50 p-2 rounded-full mr-2"
+            className="bg-gray-200 px-4 py-2 rounded-lg"
           >
-            <Ionicons name="close-outline" size={20} color="#6b7280" />
+            <Text className="text-gray-700 font-medium">Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={saveChanges}
             disabled={isSaving}
-            className="bg-brand-500 p-2 rounded-full"
+            className="bg-brand-500 px-4 py-2 rounded-lg"
           >
             {isSaving ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Ionicons name="checkmark" size={20} color="white" />
+              <Text className="text-white font-medium">Save</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -771,7 +968,7 @@ export default function GardenConditionsEditor({
       {/* Progress indicator */}
       <View className="mb-4">
         <View className="flex-row justify-between mb-1">
-          <Text className="text-sm text-cream-700">Profile Completion</Text>
+          <Text className="text-sm text-gray-600">Profile Completion</Text>
           <Text
             className="text-sm font-medium"
             style={{ color: completionColor }}
@@ -807,9 +1004,7 @@ export default function GardenConditionsEditor({
             />
             <Text
               className={`text-center font-medium ${
-                activeTab === "environment"
-                  ? "text-brand-700"
-                  : "text-cream-500"
+                activeTab === "environment" ? "text-brand-700" : "text-gray-500"
               }`}
             >
               Environment
@@ -831,7 +1026,7 @@ export default function GardenConditionsEditor({
             />
             <Text
               className={`text-center font-medium ${
-                activeTab === "aesthetics" ? "text-brand-700" : "text-cream-500"
+                activeTab === "aesthetics" ? "text-brand-700" : "text-gray-500"
               }`}
             >
               Aesthetics
@@ -853,9 +1048,7 @@ export default function GardenConditionsEditor({
             />
             <Text
               className={`text-center font-medium ${
-                activeTab === "maintenance"
-                  ? "text-brand-700"
-                  : "text-cream-500"
+                activeTab === "maintenance" ? "text-brand-700" : "text-gray-500"
               }`}
             >
               Maintenance
