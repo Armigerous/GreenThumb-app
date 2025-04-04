@@ -12,7 +12,7 @@ interface PlantGrowthLoaderProps {
  */
 export function PlantGrowthLoader({
   message = "Growing...",
-  color = "#047857",
+  color = "#5E994B",
 }: PlantGrowthLoaderProps) {
   // Animation values
   const seedSize = useRef(new Animated.Value(0)).current;
@@ -200,7 +200,7 @@ interface CompactPlantLoaderProps {
 
 export function CompactPlantLoader({
   size = 24,
-  color = "#047857",
+  color = "#5E994B",
 }: CompactPlantLoaderProps) {
   // Animation values
   const seedSize = useRef(new Animated.Value(0)).current;

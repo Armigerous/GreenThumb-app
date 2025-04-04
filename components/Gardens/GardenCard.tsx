@@ -30,7 +30,7 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
 
   return (
     <TouchableOpacity
-      className="bg-white border border-cream-100 rounded-xl shadow-sm mb-4 overflow-hidden"
+      className="bg-white border border-cream-300 rounded-xl shadow-sm mb-4 overflow-hidden"
       onPress={() =>
         router.push({
           pathname: "/(home)/gardens/[id]",

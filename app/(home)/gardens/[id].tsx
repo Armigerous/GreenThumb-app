@@ -1,21 +1,23 @@
-import GardenConditions from "@/components/Gardens/GardenConditions";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useGardenDetails } from "@/lib/queries";
+import { supabase } from "@/lib/supabaseClient";
 import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { useState, useCallback } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback } from "react";
 import {
-  ActivityIndicator,
+  Alert,
+  Dimensions,
   Image,
   SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
-import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { supabase } from "@/lib/supabaseClient";
+
+// Get screen width for responsive sizing
+const screenWidth = Dimensions.get("window").width;
 
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
@@ -26,7 +28,6 @@ const GardenDetails = () => {
     error,
     refetch,
   } = useGardenDetails(Number(id));
-  const [activeTab, setActiveTab] = useState<"plants" | "conditions">("plants");
 
   // Refetch garden data whenever the screen comes into focus
   useFocusEffect(
@@ -35,11 +36,12 @@ const GardenDetails = () => {
     }, [refetch])
   );
 
-  const handleEditPress = () => {
+  const handleConditionsPress = () => {
+    // Navigate to garden conditions page
     if (gardenData?.id) {
       router.push({
-        pathname: "/(home)/gardens/[id]",
-        params: { id: gardenData.id.toString(), edit: "true" },
+        pathname: "/(home)/gardens/conditions",
+        params: { id: gardenData.id.toString() },
       });
     }
   };
@@ -161,85 +163,110 @@ const GardenDetails = () => {
       (gardenData.soil_drainage && gardenData.soil_drainage.length > 0)
   );
 
-  const renderPlantCard = (plant: UserPlant) => {
-    const statusColors = {
-      Healthy: {
-        bg: "bg-brand-100",
-        text: "text-brand-700",
-        icon: "checkmark-circle" as const,
-        color: "#059669",
-      },
-      "Needs Water": {
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        icon: "water" as const,
-        color: "#d97706",
-      },
-      Wilting: {
-        bg: "bg-red-100",
-        text: "text-red-700",
-        icon: "alert-circle" as const,
-        color: "#dc2626",
-      },
-      Dormant: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        icon: "moon" as const,
-        color: "#d97706",
-      },
-      Dead: {
-        bg: "bg-red-100",
-        text: "text-red-700",
-        icon: "alert-circle" as const,
-        color: "#dc2626",
-      },
-    } as const;
+  // Status configuration for consistent styling
+  const statusConfig = {
+    Healthy: {
+      bg: "bg-brand-100",
+      text: "text-brand-700",
+      icon: "checkmark-circle" as const,
+      color: "#059669",
+      description: "Thriving and happy",
+    },
+    "Needs Water": {
+      bg: "bg-yellow-100",
+      text: "text-yellow-700",
+      icon: "water" as const,
+      color: "#d97706",
+      description: "Time for a drink",
+    },
+    Wilting: {
+      bg: "bg-red-100",
+      text: "text-red-700",
+      icon: "alert-circle" as const,
+      color: "#dc2626",
+      description: "Urgent care needed",
+    },
+    Dormant: {
+      bg: "bg-yellow-100",
+      text: "text-yellow-700",
+      icon: "moon" as const,
+      color: "#d97706",
+      description: "Resting period",
+    },
+    Dead: {
+      bg: "bg-red-100",
+      text: "text-red-700",
+      icon: "alert-circle" as const,
+      color: "#dc2626",
+      description: "May need replacement",
+    },
+  } as const;
 
-    const statusStyle = statusColors[plant.status as keyof typeof statusColors];
+  // Render a more visually appealing plant card
+  const renderPlantCard = (plant: UserPlant) => {
+    const status = statusConfig[plant.status as keyof typeof statusConfig];
 
     return (
       <TouchableOpacity
         key={plant.id}
-        className="bg-white border border-cream-100 p-3 rounded-lg shadow-sm mb-3"
+        className="bg-white border border-cream-100 rounded-xl shadow-md mb-5 overflow-hidden"
         onPress={() => handlePlantPress(plant)}
       >
-        <View className="flex-row items-start">
-          {plant.images?.[0] && (
+        {/* Plant Image Banner */}
+        <View className="w-full h-32 bg-cream-50">
+          {plant.images?.[0] ? (
             <Image
               source={{ uri: plant.images[0] }}
-              className="h-20 rounded-lg w-20 mr-3"
+              className="h-full w-full"
               resizeMode="cover"
             />
-          )}
-          <View className="flex-1">
-            <View className="flex-row justify-between items-start">
-              <Text className="text-base text-foreground font-medium flex-1 mr-2">
-                {plant.nickname}
-              </Text>
-              <View
-                className={`rounded-full px-3 py-1 flex-row items-center ${statusStyle.bg}`}
-              >
-                <Ionicons
-                  name={statusStyle.icon}
-                  size={14}
-                  color={statusStyle.color}
-                />
-                <Text
-                  className={`text-xs font-medium ml-1 ${statusStyle.text}`}
-                >
-                  {plant.status}
-                </Text>
-              </View>
+          ) : (
+            <View className="h-full w-full items-center justify-center">
+              <Ionicons name="leaf-outline" size={48} color="#9e9a90" />
             </View>
+          )}
+        </View>
 
+        {/* Plant Information */}
+        <View className="p-4">
+          {/* Plant Name and Status Badge */}
+          <View className="flex-row justify-between items-start mb-3">
+            <Text className="text-xl text-foreground font-bold flex-1 mr-2">
+              {plant.nickname}
+            </Text>
+            <View
+              className={`rounded-full px-3 py-1 flex-row items-center ${status.bg}`}
+            >
+              <Ionicons name={status.icon} size={16} color={status.color} />
+              <Text className={`text-xs font-medium ml-1 ${status.text}`}>
+                {plant.status}
+              </Text>
+            </View>
+          </View>
+
+          {/* Status description */}
+          <Text className="text-cream-600 mb-4">{status.description}</Text>
+
+          {/* Action Buttons */}
+          <View className="flex-row justify-between">
             <TouchableOpacity
-              className="flex-row bg-blue-50 rounded-lg items-center mt-3 px-4 py-2 self-end"
+              className="flex-1 bg-blue-50 rounded-lg items-center py-3 mr-2"
               onPress={() => handleWaterPlant(plant)}
             >
-              <Ionicons name="water" size={16} color="#0891b2" />
-              <Text className="text-blue-600 text-sm font-medium ml-2">
-                Water Plant
-              </Text>
+              <View className="flex-row items-center">
+                <Ionicons name="water" size={18} color="#0891b2" />
+                <Text className="text-blue-600 font-medium ml-2">Water</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-1 bg-cream-50 rounded-lg items-center py-3 ml-2"
+              onPress={() => handleEditPlant(plant)}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="settings-outline" size={18} color="#6b7280" />
+                <Text className="text-cream-700 font-medium ml-2">Manage</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -247,223 +274,148 @@ const GardenDetails = () => {
     );
   };
 
-  const renderConditionsSection = () => {
-    if (!hasConditions) {
-      return (
-        <View className="items-center py-6 bg-white rounded-xl p-4">
-          <Ionicons
-            name="leaf-outline"
-            size={40}
-            color="#9e9a90"
-            className="mb-2"
-          />
-          <Text className="text-center text-cream-500 mb-4">
-            Set your garden conditions to get personalized plant recommendations
+  // Render empty state with more visual appeal
+  const renderEmptyState = () => (
+    <View className="bg-white rounded-xl shadow-md items-center px-6 py-10 mt-4">
+      <Ionicons
+        name="leaf-outline"
+        size={64}
+        color="#77B860"
+        className="mb-4"
+      />
+      <Text className="text-center text-foreground text-xl font-bold mb-2">
+        Your Garden Awaits
+      </Text>
+      <Text className="text-center text-cream-600 mb-6 px-4">
+        Add your first plant to start your gardening journey. Track growth, care
+        schedules, and watch them thrive!
+      </Text>
+      <TouchableOpacity
+        className="bg-brand-500 rounded-lg px-6 py-3"
+        onPress={handleAddPlant}
+      >
+        <View className="flex-row items-center justify-center">
+          <Ionicons name="add-circle-outline" size={20} color="white" />
+          <Text className="text-white font-bold ml-2 text-base">
+            Plant Something New
           </Text>
-          <TouchableOpacity
-            onPress={handleEditPress}
-            className="flex-row bg-brand-500 rounded-full items-center px-4 py-2"
-          >
-            <Ionicons name="create-outline" size={18} color="white" />
-            <Text className="text-white font-medium ml-2">Set Conditions</Text>
-          </TouchableOpacity>
         </View>
-      );
-    }
-
-    return (
-      <View className="bg-white rounded-xl">
-        {gardenData.sunlight_conditions &&
-          gardenData.sunlight_conditions.length > 0 && (
-            <View className="p-4 border-b border-cream-100">
-              <View className="flex-row items-center mb-2">
-                <Ionicons name="sunny" size={20} color="#d97706" />
-                <Text className="text-foreground font-semibold ml-2">
-                  Sunlight
-                </Text>
-              </View>
-              <Text className="text-cream-700">
-                {gardenData.sunlight_conditions.join(", ")}
-              </Text>
-            </View>
-          )}
-
-        {gardenData.soil_textures && gardenData.soil_textures.length > 0 && (
-          <View className="p-4 border-b border-cream-100">
-            <View className="flex-row items-center mb-2">
-              <Ionicons name="layers-outline" size={20} color="#92400e" />
-              <Text className="text-foreground font-semibold ml-2">
-                Soil Type
-              </Text>
-            </View>
-            <Text className="text-cream-700">
-              {gardenData.soil_textures.join(", ")}
-            </Text>
-          </View>
-        )}
-
-        {gardenData.soil_ph_ranges && gardenData.soil_ph_ranges.length > 0 && (
-          <View className="p-4 border-b border-cream-100">
-            <View className="flex-row items-center mb-2">
-              <Ionicons name="flask-outline" size={20} color="#6b21a8" />
-              <Text className="text-foreground font-semibold ml-2">
-                Soil pH
-              </Text>
-            </View>
-            <Text className="text-cream-700">
-              {gardenData.soil_ph_ranges.join(" to ")}
-            </Text>
-          </View>
-        )}
-
-        {gardenData.soil_drainage && gardenData.soil_drainage.length > 0 && (
-          <View className="p-4">
-            <View className="flex-row items-center mb-2">
-              <Ionicons name="water-outline" size={20} color="#0284c7" />
-              <Text className="text-foreground font-semibold ml-2">
-                Drainage
-              </Text>
-            </View>
-            <Text className="text-cream-700">
-              {gardenData.soil_drainage.join(", ")}
-            </Text>
-          </View>
-        )}
-      </View>
-    );
-  };
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* Header */}
-      <View className="px-5 pt-5 pb-2">
-        <View className="flex-row justify-between items-center">
+      {/* Header with Garden Name and Navigation */}
+      <View className="pt-5 pb-2 px-5">
+        <View className="flex-row justify-between items-center mb-2">
           <TouchableOpacity
             onPress={() => router.back()}
             className="flex-row items-center"
           >
             <Ionicons name="arrow-back" size={24} color="#2e2c29" />
-            <Text className="text-foreground text-lg ml-2">Back</Text>
+            <Text className="text-foreground text-base ml-2">Back</Text>
           </TouchableOpacity>
 
           <View className="flex-row">
             <TouchableOpacity
-              className="bg-brand-500 p-2 rounded-full mr-2"
+              className="bg-accent-100 rounded-lg py-2 px-4 mr-2 flex-row items-center"
+              onPress={handleConditionsPress}
+            >
+              <Ionicons name="sunny-outline" size={18} color="#2e2c29" />
+              <Text className="text-foreground ml-2 font-medium">
+                Conditions
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="bg-primary rounded-lg py-2 px-4 flex-row items-center"
               onPress={handleAddPlant}
             >
-              <Ionicons name="add" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-cream-100 p-2 rounded-full"
-              onPress={handleEditPress}
-            >
-              <Ionicons name="create-outline" size={24} color="#6b7280" />
+              <Ionicons name="add" size={18} color="white" />
+              <Text className="text-primary-foreground ml-2 font-medium">
+                Add Plant
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      {/* Garden Title and Health Stats */}
-      <View className="px-5 pb-4">
-        <Text className="text-2xl text-foreground font-bold mb-4">
+        {/* Garden Title */}
+        <Text className="text-2xl text-foreground font-bold mb-2">
           {gardenData.name}
         </Text>
+      </View>
 
-        {dashboardData && (
-          <View className="flex-row justify-between p-3 bg-white rounded-xl shadow-sm">
-            <View className="items-center">
-              <Text className="text-cream-600 text-xs mb-1">PLANTS</Text>
-              <View className="flex-row items-center">
-                <Ionicons name="leaf" size={16} color="#77B860" />
-                <Text className="text-brand-700 text-lg font-semibold ml-1">
-                  {dashboardData.total_plants}
-                </Text>
+      {/* Garden Stats Overview */}
+      {dashboardData && (
+        <View className="px-5 py-4">
+          <View className="flex-row justify-between p-4 bg-white rounded-xl shadow-sm">
+            <View className="items-center flex-1">
+              <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                <Ionicons name="leaf" size={24} color="#77B860" />
               </View>
+              <Text className="text-xl font-bold text-brand-700">
+                {dashboardData.total_plants}
+              </Text>
+              <Text className="text-cream-600 text-xs">PLANTS</Text>
             </View>
 
-            <View className="items-center">
-              <Text className="text-cream-600 text-xs mb-1">NEED CARE</Text>
-              <View className="flex-row items-center">
+            <View className="items-center flex-1">
+              <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
                 <Ionicons
                   name="water"
-                  size={16}
+                  size={24}
                   color={
                     dashboardData.plants_needing_care > 0
                       ? "#d97706"
                       : "#9e9a90"
                   }
                 />
-                <Text
-                  className={`text-lg font-semibold ml-1 ${
-                    dashboardData.plants_needing_care > 0
-                      ? "text-yellow-700"
-                      : "text-cream-500"
-                  }`}
-                >
-                  {dashboardData.plants_needing_care}
-                </Text>
               </View>
+              <Text
+                className={`text-xl font-bold ${
+                  dashboardData.plants_needing_care > 0
+                    ? "text-yellow-600"
+                    : "text-foreground"
+                }`}
+              >
+                {dashboardData.plants_needing_care}
+              </Text>
+              <Text className="text-foreground text-xs">NEED CARE</Text>
             </View>
 
-            <View className="items-center">
-              <Text className="text-cream-600 text-xs mb-1">HEALTH</Text>
-              <View className="flex-row items-center">
-                <Ionicons name="heart" size={16} color="#77B860" />
-                <Text className="text-brand-700 text-lg font-semibold ml-1">
-                  {dashboardData.health_percentage}%
-                </Text>
+            <View className="items-center flex-1">
+              <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                <Ionicons name="heart" size={24} color="#77B860" />
               </View>
+              <Text className="text-xl font-bold text-primary">
+                {dashboardData.health_percentage}%
+              </Text>
+              <Text className="text-foreground text-xs">HEALTH</Text>
             </View>
           </View>
-        )}
-      </View>
+        </View>
+      )}
 
-      {/* Tab Navigation */}
-      <View className="flex-row border-b border-cream-100 mx-5 mb-4">
-        <TouchableOpacity
-          className={`flex-1 py-2 ${
-            activeTab === "plants" ? "border-b-2 border-brand-500" : ""
-          }`}
-          onPress={() => setActiveTab("plants")}
-        >
-          <Text
-            className={`text-center font-medium ${
-              activeTab === "plants" ? "text-brand-700" : "text-cream-500"
-            }`}
-          >
-            Plants
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className={`flex-1 py-2 ${
-            activeTab === "conditions" ? "border-b-2 border-brand-500" : ""
-          }`}
-          onPress={() => setActiveTab("conditions")}
-        >
-          <Text
-            className={`text-center font-medium ${
-              activeTab === "conditions" ? "text-brand-700" : "text-cream-500"
-            }`}
-          >
-            Conditions
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Content Area */}
-      <ScrollView className="flex-1 px-5">
-        {activeTab === "plants" ? (
+      {/* Plants Content Area */}
+      <ScrollView className="flex-1 px-5 pt-4">
+        {plants.length === 0 ? (
+          renderEmptyState()
+        ) : (
           <View className="mb-8">
             {criticalPlants.length > 0 && (
               <View className="mb-6">
-                <View className="flex-row items-center mb-2">
-                  <Ionicons name="alert-circle" size={20} color="#dc2626" />
-                  <Text className="text-foreground text-lg font-semibold ml-2">
-                    Needs Immediate Care
-                  </Text>
-                  <Text className="text-cream-500 ml-2">
-                    ({criticalPlants.length})
-                  </Text>
+                <View className="flex-row items-center mb-4 bg-red-50 px-4 py-2 rounded-lg">
+                  <Ionicons name="alert-circle" size={24} color="#dc2626" />
+                  <View className="ml-3">
+                    <Text className="text-foreground text-lg font-bold">
+                      Needs Immediate Care
+                    </Text>
+                    <Text className="text-destructive">
+                      These plants are in critical condition and need your help
+                      now
+                    </Text>
+                  </View>
                 </View>
                 {criticalPlants.map((plant) => renderPlantCard(plant))}
               </View>
@@ -471,14 +423,16 @@ const GardenDetails = () => {
 
             {needsAttentionPlants.length > 0 && (
               <View className="mb-6">
-                <View className="flex-row items-center mb-2">
-                  <Ionicons name="water" size={20} color="#d97706" />
-                  <Text className="text-foreground text-lg font-semibold ml-2">
-                    Due for Care
-                  </Text>
-                  <Text className="text-cream-500 ml-2">
-                    ({needsAttentionPlants.length})
-                  </Text>
+                <View className="flex-row items-center mb-4 bg-yellow-50 px-4 py-2 rounded-lg">
+                  <Ionicons name="water" size={24} color="#d97706" />
+                  <View className="ml-3">
+                    <Text className="text-foreground text-lg font-bold">
+                      Due for Care
+                    </Text>
+                    <Text className="text-accent-400">
+                      These plants could use a little attention soon
+                    </Text>
+                  </View>
                 </View>
                 {needsAttentionPlants.map((plant) => renderPlantCard(plant))}
               </View>
@@ -486,52 +440,20 @@ const GardenDetails = () => {
 
             {healthyPlants.length > 0 && (
               <View className="mb-6">
-                <View className="flex-row items-center mb-2">
-                  <Ionicons name="checkmark-circle" size={20} color="#77B860" />
-                  <Text className="text-foreground text-lg font-semibold ml-2">
-                    Looking Good
-                  </Text>
-                  <Text className="text-cream-500 ml-2">
-                    ({healthyPlants.length})
-                  </Text>
+                <View className="flex-row items-center mb-4 bg-brand-50 border border-brand-300 px-4 py-2 rounded-lg">
+                  <Ionicons name="checkmark-circle" size={24} color="#77B860" />
+                  <View className="ml-3">
+                    <Text className="text-foreground text-lg font-bold">
+                      Looking Good
+                    </Text>
+                    <Text className="text-brand-600">
+                      These plants are thriving under your care
+                    </Text>
+                  </View>
                 </View>
                 {healthyPlants.map((plant) => renderPlantCard(plant))}
               </View>
             )}
-
-            {plants.length === 0 && (
-              <View className="bg-white rounded-xl shadow-sm items-center px-4 py-10">
-                <Ionicons
-                  name="leaf-outline"
-                  size={48}
-                  color="#9e9a90"
-                  className="mb-2"
-                />
-                <Text className="text-center text-foreground text-lg font-medium mb-2">
-                  No plants added yet
-                </Text>
-                <Text className="text-center text-cream-500 mb-6">
-                  Add your first plant to start tracking its care
-                </Text>
-                <TouchableOpacity
-                  className="flex-row bg-brand-500 rounded-full items-center px-4 py-2"
-                  onPress={handleAddPlant}
-                >
-                  <Ionicons name="add" size={18} color="white" />
-                  <Text className="text-white font-medium ml-1">
-                    Add First Plant
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        ) : (
-          <View className="mb-8">
-            <GardenConditions
-              garden={gardenData}
-              onEditPress={handleEditPress}
-              onSettingsUpdate={handleSettingsUpdate}
-            />
           </View>
         )}
       </ScrollView>

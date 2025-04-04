@@ -416,7 +416,7 @@ export default function Page() {
                 Plant Care Tip
               </Text>
             </View>
-            <View className="bg-cream-50 rounded-xl p-5">
+            <View className="bg-cream-50 rounded-xl p-5 border border-cream-300">
               <View className="flex-row items-center mb-2">
                 <Ionicons
                   name="bulb-outline"
