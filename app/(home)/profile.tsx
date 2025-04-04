@@ -218,7 +218,7 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <View className="bg-cream-50 p-4 rounded-lg mb-6">
+          <View className="bg-cream-50 p-4 rounded-lg mb-6 border border-cream-300">
             <Text className="text-lg font-semibold text-foreground mb-2">
               Account Summary
             </Text>
