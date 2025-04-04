@@ -258,7 +258,7 @@ export function useUserGardens(userId?: string) {
       if (!userId) throw new Error("User ID is required");
 
       const { data: gardens, error } = await supabase
-        .from("user_gardens_full_data")
+        .from("secure_user_gardens_view")
         .select("*")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false });
@@ -289,7 +289,7 @@ export function useGardenDetails(gardenId: number) {
         { data: dashboard, error: dashboardError },
       ] = await Promise.all([
         supabase
-          .from("user_gardens_full_data")
+          .from("secure_user_gardens_view")  // Use the secure view instead of the materialized view directly
           .select("*")
           .eq("id", gardenId)
           .single(),
@@ -312,7 +312,9 @@ export function useGardenDetails(gardenId: number) {
       };
     },
     enabled: !!gardenId,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 30, // Reduced to 30 seconds (from 5 minutes)
+    refetchOnMount: "always", // Always refetch when component mounts
+    gcTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
 

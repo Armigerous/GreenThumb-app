@@ -57,12 +57,12 @@ export default function NewGardenForm({
 
   return (
     <View className="flex-1">
-      <View className="bg-white p-4 rounded-xl mb-4">
-        <Text className="text-base text-foreground font-medium mb-2">
+      <View className="bg-white p-5 rounded-xl mb-5 shadow-sm">
+        <Text className="text-lg text-foreground font-medium mb-3">
           Garden Name
         </Text>
         <TextInput
-          className="bg-cream-50 rounded-lg text-foreground px-4 py-3"
+          className="bg-cream-50 rounded-lg text-foreground px-4 py-3.5 text-base"
           placeholder="Enter garden name"
           value={name}
           onChangeText={setName}
@@ -70,11 +70,11 @@ export default function NewGardenForm({
         />
 
         {error && (
-          <Text className="text-destructive text-sm mt-2">{error}</Text>
+          <Text className="text-destructive text-sm mt-3">{error}</Text>
         )}
 
         <TouchableOpacity
-          className={`bg-brand-500 rounded-lg mt-4 py-3 items-center ${
+          className={`bg-brand-500 rounded-lg mt-5 py-3.5 items-center ${
             !name.trim() || isSubmitting ? "opacity-50" : ""
           }`}
           onPress={handleSubmit}
@@ -83,35 +83,37 @@ export default function NewGardenForm({
           {isSubmitting ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
-            <Text className="text-white font-medium">Create Garden</Text>
+            <Text className="text-white font-medium text-base">
+              Create Garden
+            </Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <View className="bg-white p-4 rounded-xl mb-4">
-        <Text className="text-base text-foreground font-medium mb-4">
+      <View className="bg-white p-5 rounded-xl mb-5 shadow-sm">
+        <Text className="text-lg text-foreground font-medium mb-4">
           Quick Start
         </Text>
-        <Text className="text-cream-600 text-sm leading-5">
+        <Text className="text-cream-600 text-base leading-5">
           Start by giving your garden a name. After creating your garden, you
           can:
         </Text>
-        <View className="mt-4 space-y-3">
+        <View className="mt-5 space-y-4">
           <View className="flex-row items-center">
-            <Ionicons name="leaf-outline" size={20} color="#5E994B" />
-            <Text className="text-foreground text-sm ml-2">
+            <Ionicons name="leaf-outline" size={22} color="#5E994B" />
+            <Text className="text-foreground text-base ml-3">
               Add plants to your garden
             </Text>
           </View>
           <View className="flex-row items-center">
-            <Ionicons name="sunny-outline" size={20} color="#5E994B" />
-            <Text className="text-foreground text-sm ml-2">
+            <Ionicons name="sunny-outline" size={22} color="#5E994B" />
+            <Text className="text-foreground text-base ml-3">
               Set garden conditions like sunlight and soil type
             </Text>
           </View>
           <View className="flex-row items-center">
-            <Ionicons name="location-outline" size={20} color="#5E994B" />
-            <Text className="text-foreground text-sm ml-2">
+            <Ionicons name="location-outline" size={22} color="#5E994B" />
+            <Text className="text-foreground text-base ml-3">
               Specify your garden's location and growing zones
             </Text>
           </View>

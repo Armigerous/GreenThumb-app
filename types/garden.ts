@@ -187,26 +187,40 @@ export interface Garden {
   name: string;
   /** Whether the user wants plant recommendations */
   wants_recommendations: boolean | null;
-  /** Whether the garden should have plants with year-round interest */
+  /** Whether the garden should have year-round interest */
   year_round_interest: boolean | null;
   /** Growth rate preference */
   growth_rate: string | null;
   /** Maintenance level preference */
   maintenance: string | null;
+  /** Alternate field for maintenance from the materialized view */
+  maintenance_level?: string | null;
   /** Texture preference */
   texture: string | null;
+  /** Alternate field for texture from the materialized view */
+  texture_preference?: string | null;
   /** Array of location names */
   landscape_locations: string[];
+  /** Alternate field for locations from the materialized view */
+  locations?: string[];
   /** Array of space availability options */
   available_space_to_plant: string[];
+  /** Alternate field for available space from the materialized view */
+  available_space?: string[];
   /** Array of sunlight condition descriptions */
   sunlight_conditions: string[];
+  /** Alternate field for sunlight from the materialized view */
+  sunlight?: string[];
   /** Array of soil texture types */
   soil_textures: string[];
+  /** Alternate field for soil texture from the materialized view */
+  soil_texture?: string[];
   /** Array of soil drainage descriptions */
   soil_drainage: string[];
   /** Array of soil pH ranges */
   soil_ph_ranges: string[];
+  /** Alternate field for soil_ph from the materialized view */
+  soil_ph?: string[];
   /** Array of garden theme names */
   garden_themes: string[];
   /** Array of wildlife attraction descriptions */
@@ -216,7 +230,7 @@ export interface Garden {
   /** Array of problem descriptions to exclude */
   problems: string[];
   /** Array of NC region names */
-  nc_region: string[];
+  nc_regions: string[];
   /** Array of USDA zone descriptions */
   usda_zones: string[];
   /** Array of flower colors */
@@ -262,12 +276,16 @@ export interface GardenDatabase {
   user_id: string;
   /** Name of the garden */
   name: string;
-  /** JSON array of location IDs */
+  /** JSON array of location IDs - actual database field */
   landscape_location_ids: number[];
+  /** Alternate form field for landscape_location_ids - not in database */
+  location_ids?: number[];
   /** JSON array of space availability IDs */
   available_space_to_plant_ids: number[];
-  /** JSON array of sunlight condition IDs */
+  /** JSON array of sunlight condition IDs - actual database field */
   light_ids: number[];
+  /** Form field alias for light_ids - not in database */
+  sunlight_ids?: number[];
   /** JSON array of soil texture IDs */
   soil_texture_ids: number[];
   /** JSON array of soil drainage IDs */
@@ -284,10 +302,14 @@ export interface GardenDatabase {
   problems_ids: number[];
   /** Growth rate preference ID */
   growth_rate_id: number | null;
-  /** Maintenance level preference ID */
+  /** Maintenance level preference ID - actual database field */
   maintenance_id: number | null;
-  /** Texture preference ID */
+  /** Form field alias for maintenance_id - not in database */
+  maintenance_level_id?: number | null;
+  /** Texture preference ID - actual database field */
   texture_id: number | null;
+  /** Form field alias for texture_id - not in database */
+  texture_preference_id?: number | null;
   /** Whether the user wants plant recommendations */
   wants_recommendations: boolean | null;
   /** Whether the garden should have plants with year-round interest */

@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Garden } from "../../types/garden";
-import { formatConditionValues } from "../../lib/gardenHelpers";
+import {
+  formatConditionValues,
+  getCompletionColor,
+  calculateGardenCompletion,
+  getCompletionStatusText,
+} from "../../lib/gardenHelpers";
 import GardenConditionsEditor from "./GardenConditionsEditor";
 
 type GardenConditionsProps = {
@@ -11,33 +16,121 @@ type GardenConditionsProps = {
   onSettingsUpdate?: (updated: boolean) => void;
 };
 
-// Condition card component for better organization
+// Enhanced condition card component with improved styling
 function ConditionCard({
   icon,
   title,
   value,
-  bgColor = "bg-amber-50",
-  textColor = "text-amber-700",
-  valueColor = "text-amber-600",
-  iconColor = "#d97706",
+  category = "environment", // Determines the color theme
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   title: string;
   value: string;
-  bgColor?: string;
-  textColor?: string;
-  valueColor?: string;
-  iconColor?: string;
+  category?: "environment" | "design" | "aesthetics" | "plants" | "preferences";
 }) {
   if (!value) return null;
 
+  // Color schemes based on category
+  const colorSchemes = {
+    environment: {
+      bg: "bg-brand-50",
+      border: "border-brand-200",
+      icon: "#059669", // Green
+      title: "text-brand-800",
+    },
+    design: {
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      icon: "#3b82f6", // Blue
+      title: "text-blue-800",
+    },
+    aesthetics: {
+      bg: "bg-purple-50",
+      border: "border-purple-200",
+      icon: "#8b5cf6", // Purple
+      title: "text-purple-800",
+    },
+    plants: {
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+      icon: "#d97706", // Amber
+      title: "text-amber-800",
+    },
+    preferences: {
+      bg: "bg-slate-50",
+      border: "border-slate-200",
+      icon: "#475569", // Slate
+      title: "text-slate-800",
+    },
+  };
+
+  const {
+    bg,
+    border,
+    icon: iconColor,
+    title: titleColor,
+  } = colorSchemes[category];
+
   return (
-    <View className={`${bgColor} p-3 rounded-lg mb-3`}>
+    <View className={`${bg} border ${border} p-3 rounded-lg mb-3`}>
       <View className="flex-row items-center mb-2">
         <Ionicons name={icon} size={18} color={iconColor} />
-        <Text className={`${textColor} font-medium ml-2`}>{title}</Text>
+        <Text className={`${titleColor} font-medium ml-2`}>{title}</Text>
       </View>
-      <Text className={`${valueColor} text-sm`}>{value}</Text>
+      <Text className="text-gray-700 text-sm">{value}</Text>
+    </View>
+  );
+}
+
+// Section header for better organization
+function SectionHeader({
+  title,
+  icon,
+  category = "environment",
+}: {
+  title: string;
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  category?: "environment" | "design" | "aesthetics" | "plants" | "preferences";
+}) {
+  // Color schemes based on category
+  const colorSchemes = {
+    environment: {
+      bg: "bg-brand-100",
+      icon: "#059669", // Green
+      text: "text-brand-800",
+    },
+    design: {
+      bg: "bg-blue-100",
+      icon: "#3b82f6", // Blue
+      text: "text-blue-800",
+    },
+    aesthetics: {
+      bg: "bg-purple-100",
+      icon: "#8b5cf6", // Purple
+      text: "text-purple-800",
+    },
+    plants: {
+      bg: "bg-amber-100",
+      icon: "#d97706", // Amber
+      text: "text-amber-800",
+    },
+    preferences: {
+      bg: "bg-slate-100",
+      icon: "#475569", // Slate
+      text: "text-slate-800",
+    },
+  };
+
+  const { bg, icon: iconColor, text } = colorSchemes[category];
+
+  return (
+    <View className={`flex-row items-center mb-3 ${bg} p-2 rounded-lg`}>
+      <Ionicons name={icon} size={18} color={iconColor} />
+      <Text
+        className={`${text} font-semibold text-sm uppercase tracking-wider ml-2`}
+      >
+        {title}
+      </Text>
     </View>
   );
 }
@@ -65,12 +158,33 @@ export default function GardenConditions({
     setEditMode(false);
   };
 
+  const completionPercentage = calculateGardenCompletion(garden);
+  const completionColor = getCompletionColor(completionPercentage);
+  const completionStatus = getCompletionStatusText(completionPercentage);
+
   const hasConditions = Boolean(
     (garden.sunlight_conditions && garden.sunlight_conditions.length > 0) ||
+      (garden.sunlight && garden.sunlight.length > 0) ||
       (garden.soil_textures && garden.soil_textures.length > 0) ||
+      (garden.soil_texture && garden.soil_texture.length > 0) ||
       (garden.soil_ph_ranges && garden.soil_ph_ranges.length > 0) ||
+      (garden.soil_ph && garden.soil_ph.length > 0) ||
       (garden.soil_drainage && garden.soil_drainage.length > 0)
   );
+
+  // Calculate if garden is ready to display recommendations
+  const isGardenComplete =
+    (garden.sunlight_conditions && garden.sunlight_conditions.length > 0) ||
+    (garden.sunlight && garden.sunlight.length > 0) ||
+    (garden.soil_textures && garden.soil_textures.length > 0) ||
+    (garden.soil_texture && garden.soil_texture.length > 0) ||
+    (garden.soil_drainage && garden.soil_drainage.length > 0) ||
+    (garden.soil_ph_ranges && garden.soil_ph_ranges.length > 0) ||
+    (garden.soil_ph && garden.soil_ph.length > 0) ||
+    (garden.landscape_locations && garden.landscape_locations.length > 0) ||
+    (garden.locations && garden.locations.length > 0) ||
+    (garden.nc_regions && garden.nc_regions.length > 0) ||
+    (garden.usda_zones && garden.usda_zones.length > 0);
 
   // If in edit mode, render the new editor component
   if (editMode) {
@@ -85,254 +199,336 @@ export default function GardenConditions({
 
   // View mode - show garden conditions summary
   return (
-    <View className="bg-white p-4 rounded-xl mb-8 shadow-sm">
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-foreground text-lg font-semibold">
-          Growing Conditions
-        </Text>
-        <TouchableOpacity
-          onPress={toggleEditMode}
-          className="bg-cream-50 p-2 rounded-full"
-        >
-          <Ionicons name="create-outline" size={20} color="#6b7280" />
-        </TouchableOpacity>
+    <View className="bg-white p-4 rounded-xl mb-8 shadow-sm border border-cream-200">
+      {/* Completion indicator */}
+      <View className="mb-5 bg-cream-50 p-3 rounded-lg border border-cream-200">
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-gray-700 font-medium">Settings Completion</Text>
+          <Text
+            className="text-sm font-medium"
+            style={{ color: completionColor }}
+          >
+            {completionStatus} ({completionPercentage}%)
+          </Text>
+        </View>
+        <View className="h-2 bg-cream-200 rounded-full overflow-hidden">
+          <View
+            className="h-full rounded-full"
+            style={{
+              width: `${completionPercentage}%`,
+              backgroundColor: completionColor,
+            }}
+          />
+        </View>
       </View>
 
       {hasConditions ? (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View className="space-y-1">
+        <ScrollView showsVerticalScrollIndicator={false} className="max-h-96">
+          <View className="space-y-4">
             {/* Environment Section */}
             {(garden.sunlight_conditions?.length > 0 ||
               garden.soil_textures?.length > 0 ||
               garden.soil_ph_ranges?.length > 0 ||
-              garden.soil_drainage?.length > 0) && (
-              <View className="mb-4">
-                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
-                  Environment
-                </Text>
+              garden.soil_drainage?.length > 0 ||
+              garden.nc_regions?.length > 0 ||
+              garden.usda_zones?.length > 0) && (
+              <View>
+                <SectionHeader
+                  title="Environment"
+                  icon="sunny-outline"
+                  category="environment"
+                />
 
                 <ConditionCard
                   icon="sunny"
                   title="Sunlight"
                   value={formatConditionValues(garden.sunlight_conditions)}
-                  bgColor="bg-amber-50"
-                  textColor="text-amber-700"
-                  valueColor="text-amber-600"
-                  iconColor="#d97706"
+                  category="environment"
                 />
 
                 <ConditionCard
                   icon="layers-outline"
                   title="Soil Type"
                   value={formatConditionValues(garden.soil_textures)}
-                  bgColor="bg-amber-50"
-                  textColor="text-amber-700"
-                  valueColor="text-amber-600"
-                  iconColor="#92400e"
+                  category="environment"
                 />
 
                 <ConditionCard
                   icon="flask-outline"
                   title="Soil pH Range"
                   value={formatConditionValues(garden.soil_ph_ranges)}
-                  bgColor="bg-purple-50"
-                  textColor="text-purple-700"
-                  valueColor="text-purple-600"
-                  iconColor="#6b21a8"
+                  category="environment"
                 />
 
                 <ConditionCard
                   icon="water-outline"
                   title="Soil Drainage"
                   value={formatConditionValues(garden.soil_drainage)}
-                  bgColor="bg-blue-50"
-                  textColor="text-blue-700"
-                  valueColor="text-blue-600"
-                  iconColor="#0284c7"
+                  category="environment"
+                />
+
+                <ConditionCard
+                  icon="thermometer-outline"
+                  title="USDA Zones"
+                  value={formatConditionValues(garden.usda_zones)}
+                  category="environment"
+                />
+
+                <ConditionCard
+                  icon="map-outline"
+                  title="Region"
+                  value={formatConditionValues(garden.nc_regions)}
+                  category="environment"
+                />
+              </View>
+            )}
+
+            {/* Design Section */}
+            {(garden.landscape_locations?.length > 0 ||
+              garden.garden_themes?.length > 0 ||
+              garden.design_features?.length > 0 ||
+              garden.available_space_to_plant?.length > 0) && (
+              <View>
+                <SectionHeader
+                  title="Design"
+                  icon="grid-outline"
+                  category="design"
                 />
 
                 <ConditionCard
                   icon="location-outline"
                   title="Locations"
                   value={formatConditionValues(garden.landscape_locations)}
-                  bgColor="bg-blue-50"
-                  textColor="text-blue-700"
-                  valueColor="text-blue-600"
-                  iconColor="#0284c7"
-                />
-              </View>
-            )}
-
-            {/* Maintenance Section */}
-            {(garden.maintenance ||
-              garden.growth_rate ||
-              garden.available_space_to_plant?.length > 0 ||
-              garden.resistance_challenges?.length > 0 ||
-              garden.problems?.length > 0) && (
-              <View className="mb-4">
-                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
-                  Maintenance & Growth
-                </Text>
-
-                <ConditionCard
-                  icon="construct-outline"
-                  title="Maintenance Level"
-                  value={garden.maintenance || ""}
-                  bgColor="bg-brand-50"
-                  textColor="text-brand-700"
-                  valueColor="text-brand-600"
-                  iconColor="#059669"
+                  category="design"
                 />
 
                 <ConditionCard
-                  icon="trending-up-outline"
-                  title="Growth Rate"
-                  value={garden.growth_rate || ""}
-                  bgColor="bg-brand-50"
-                  textColor="text-brand-700"
-                  valueColor="text-brand-600"
-                  iconColor="#059669"
+                  icon="color-palette-outline"
+                  title="Garden Themes"
+                  value={formatConditionValues(garden.garden_themes)}
+                  category="design"
+                />
+
+                <ConditionCard
+                  icon="grid-outline"
+                  title="Design Features"
+                  value={formatConditionValues(garden.design_features)}
+                  category="design"
                 />
 
                 <ConditionCard
                   icon="resize-outline"
                   title="Space Available"
                   value={formatConditionValues(garden.available_space_to_plant)}
-                  bgColor="bg-brand-50"
-                  textColor="text-brand-700"
-                  valueColor="text-brand-600"
-                  iconColor="#059669"
-                />
-
-                <ConditionCard
-                  icon="shield-outline"
-                  title="Resistance Challenges"
-                  value={formatConditionValues(garden.resistance_challenges)}
-                  bgColor="bg-brand-50"
-                  textColor="text-brand-700"
-                  valueColor="text-brand-600"
-                  iconColor="#059669"
-                />
-
-                <ConditionCard
-                  icon="alert-circle-outline"
-                  title="Problems to Exclude"
-                  value={formatConditionValues(garden.problems)}
-                  bgColor="bg-red-50"
-                  textColor="text-red-700"
-                  valueColor="text-red-600"
-                  iconColor="#dc2626"
+                  category="design"
                 />
               </View>
             )}
 
-            {/* Aesthetics Section */}
-            {(garden.garden_themes?.length > 0 ||
-              garden.flower_colors?.length > 0 ||
-              garden.leaf_colors?.length > 0 ||
-              garden.texture ||
-              garden.wildlife_attractions?.length > 0) && (
-              <View className="mb-4">
-                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
-                  Aesthetics & Design
-                </Text>
-
-                <ConditionCard
-                  icon="color-palette-outline"
-                  title="Garden Themes"
-                  value={formatConditionValues(garden.garden_themes)}
-                  bgColor="bg-purple-50"
-                  textColor="text-purple-700"
-                  valueColor="text-purple-600"
-                  iconColor="#6b21a8"
-                />
-
-                <ConditionCard
-                  icon="flower-outline"
-                  title="Flower Colors"
-                  value={formatConditionValues(garden.flower_colors)}
-                  bgColor="bg-pink-50"
-                  textColor="text-pink-700"
-                  valueColor="text-pink-600"
-                  iconColor="#be185d"
+            {/* Plants Section */}
+            {(garden.plant_types?.length > 0 ||
+              garden.habit_forms?.length > 0 ||
+              garden.growth_rate ||
+              garden.wildlife_attractions?.length > 0 ||
+              garden.resistance_challenges?.length > 0 ||
+              garden.problems?.length > 0) && (
+              <View>
+                <SectionHeader
+                  title="Plants"
+                  icon="leaf-outline"
+                  category="plants"
                 />
 
                 <ConditionCard
                   icon="leaf-outline"
-                  title="Leaf Colors"
-                  value={formatConditionValues(garden.leaf_colors)}
-                  bgColor="bg-brand-50"
-                  textColor="text-brand-700"
-                  valueColor="text-brand-600"
-                  iconColor="#059669"
+                  title="Plant Types"
+                  value={formatConditionValues(garden.plant_types)}
+                  category="plants"
                 />
 
                 <ConditionCard
-                  icon="diamond-outline"
-                  title="Texture Preference"
-                  value={garden.texture || ""}
-                  bgColor="bg-purple-50"
-                  textColor="text-purple-700"
-                  valueColor="text-purple-600"
-                  iconColor="#6b21a8"
+                  icon="git-branch-outline"
+                  title="Plant Form/Habit"
+                  value={formatConditionValues(garden.habit_forms)}
+                  category="plants"
+                />
+
+                <ConditionCard
+                  icon="trending-up-outline"
+                  title="Growth Rate"
+                  value={garden.growth_rate || ""}
+                  category="plants"
                 />
 
                 <ConditionCard
                   icon="paw-outline"
                   title="Wildlife Attractions"
                   value={formatConditionValues(garden.wildlife_attractions)}
-                  bgColor="bg-amber-50"
-                  textColor="text-amber-700"
-                  valueColor="text-amber-600"
-                  iconColor="#d97706"
+                  category="plants"
+                />
+
+                <ConditionCard
+                  icon="shield-outline"
+                  title="Resistance Challenges"
+                  value={formatConditionValues(garden.resistance_challenges)}
+                  category="plants"
+                />
+
+                <ConditionCard
+                  icon="alert-circle-outline"
+                  title="Problems to Exclude"
+                  value={formatConditionValues(garden.problems)}
+                  category="plants"
+                />
+              </View>
+            )}
+
+            {/* Aesthetics Section */}
+            {(garden.flower_colors?.length > 0 ||
+              garden.leaf_colors?.length > 0 ||
+              garden.flower_bloom_times?.length > 0 ||
+              garden.flower_values?.length > 0 ||
+              garden.leaf_feels?.length > 0 ||
+              garden.leaf_values?.length > 0 ||
+              garden.fall_colors?.length > 0 ||
+              garden.texture) && (
+              <View>
+                <SectionHeader
+                  title="Aesthetics"
+                  icon="color-palette-outline"
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="flower-outline"
+                  title="Flower Colors"
+                  value={formatConditionValues(garden.flower_colors)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="calendar-outline"
+                  title="Flower Bloom Times"
+                  value={formatConditionValues(garden.flower_bloom_times)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="star-outline"
+                  title="Flower Values"
+                  value={formatConditionValues(garden.flower_values)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="leaf-outline"
+                  title="Leaf Colors"
+                  value={formatConditionValues(garden.leaf_colors)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="hand-left-outline"
+                  title="Leaf Textures"
+                  value={formatConditionValues(garden.leaf_feels)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="apps-outline"
+                  title="Leaf Values"
+                  value={formatConditionValues(garden.leaf_values)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="leaf-outline"
+                  title="Fall Colors"
+                  value={formatConditionValues(garden.fall_colors)}
+                  category="aesthetics"
+                />
+
+                <ConditionCard
+                  icon="diamond-outline"
+                  title="Texture Preference"
+                  value={garden.texture || ""}
+                  category="aesthetics"
                 />
               </View>
             )}
 
             {/* Preferences */}
-            {(garden.wants_recommendations || garden.year_round_interest) && (
-              <View className="mb-4">
-                <Text className="text-brand-800 font-semibold mb-2 text-sm uppercase tracking-wider">
-                  Preferences
-                </Text>
+            {(garden.maintenance ||
+              garden.wants_recommendations !== null ||
+              garden.year_round_interest !== null) && (
+              <View>
+                <SectionHeader
+                  title="Preferences"
+                  icon="options-outline"
+                  category="preferences"
+                />
 
-                <View className="bg-cream-50 p-3 rounded-lg mb-3">
-                  <View className="flex-row items-center mb-1">
+                <ConditionCard
+                  icon="construct-outline"
+                  title="Maintenance Level"
+                  value={garden.maintenance || ""}
+                  category="preferences"
+                />
+
+                <View className="bg-slate-50 border border-slate-200 p-3 rounded-lg mb-3">
+                  <Text className="text-slate-800 font-medium mb-2 flex-row items-center">
                     <Ionicons
                       name="options-outline"
                       size={18}
-                      color="#047857"
+                      color="#475569"
+                      style={{ marginRight: 8 }}
                     />
-                    <Text className="text-brand-700 font-medium ml-2">
-                      Settings
-                    </Text>
+                    Settings
+                  </Text>
+
+                  <View className="space-y-2">
+                    {garden.wants_recommendations !== null && (
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name={
+                            garden.wants_recommendations
+                              ? "checkmark-circle"
+                              : "close-circle"
+                          }
+                          size={16}
+                          color={
+                            garden.wants_recommendations ? "#77B860" : "#9ca3af"
+                          }
+                        />
+                        <Text className="text-gray-700 text-sm ml-2">
+                          Plant Recommendations:{" "}
+                          {garden.wants_recommendations
+                            ? "Enabled"
+                            : "Disabled"}
+                        </Text>
+                      </View>
+                    )}
+
+                    {garden.year_round_interest !== null && (
+                      <View className="flex-row items-center mt-1">
+                        <Ionicons
+                          name={
+                            garden.year_round_interest
+                              ? "checkmark-circle"
+                              : "close-circle"
+                          }
+                          size={16}
+                          color={
+                            garden.year_round_interest ? "#77B860" : "#9ca3af"
+                          }
+                        />
+                        <Text className="text-gray-700 text-sm ml-2">
+                          Year-round Interest:{" "}
+                          {garden.year_round_interest ? "Enabled" : "Disabled"}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-
-                  {garden.wants_recommendations && (
-                    <View className="flex-row items-center mt-2">
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={16}
-                        color="#77B860"
-                      />
-                      <Text className="text-brand-600 text-sm ml-2">
-                        Plant Recommendations Enabled
-                      </Text>
-                    </View>
-                  )}
-
-                  {garden.year_round_interest && (
-                    <View className="flex-row items-center mt-2">
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={16}
-                        color="#77B860"
-                      />
-                      <Text className="text-brand-600 text-sm ml-2">
-                        Year-round Interest
-                      </Text>
-                    </View>
-                  )}
                 </View>
               </View>
             )}
@@ -350,11 +546,10 @@ export default function GardenConditions({
             Set your garden conditions to get personalized plant recommendations
           </Text>
           <TouchableOpacity
-            onPress={toggleEditMode}
-            className="flex-row bg-brand-500 rounded-full items-center px-4 py-2"
+            onPress={onEditPress}
+            className="flex-row bg-brand-500 rounded-lg items-center px-6 py-3"
           >
-            <Ionicons name="create-outline" size={18} color="white" />
-            <Text className="text-white font-medium ml-2">Set Conditions</Text>
+            <Text className="text-white font-medium">Set Conditions</Text>
           </TouchableOpacity>
         </View>
       )}

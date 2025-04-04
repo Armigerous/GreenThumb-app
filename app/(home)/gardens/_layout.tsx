@@ -24,6 +24,14 @@ export default function GardensLayout() {
         }}
       />
       <Stack.Screen
+        name="conditions"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen
         name="plant"
         options={{
           headerShown: false,
