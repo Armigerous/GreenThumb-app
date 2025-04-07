@@ -27,6 +27,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
+import { TaskList } from "@/components/TaskList";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -281,39 +282,13 @@ export default function CalendarScreen() {
               Error loading tasks. Please try again.
             </Text>
           </View>
-        ) : !tasks?.length ? (
-          <View className="bg-cream-50 border border-cream-300 rounded-xl p-8 items-center justify-center">
-            <Ionicons name="calendar-outline" size={48} color="#d1d5db" />
-            <Text className="text-base text-cream-500 mt-4 text-center">
-              No care tasks for this day
-            </Text>
-          </View>
         ) : (
-          Object.entries(groupedTasks).map(([gardenName, gardenTasks]) => (
-            <View key={gardenName} className="mb-6">
-              <Text className="text-sm font-medium text-cream-600 mb-2">
-                {gardenName}
-              </Text>
-              <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-                {gardenTasks.map((task, index) => (
-                  <View
-                    key={task.id}
-                    className={
-                      index < gardenTasks.length - 1
-                        ? "border-b border-cream-100"
-                        : ""
-                    }
-                  >
-                    <Task
-                      task={task}
-                      onToggleComplete={handleToggleComplete}
-                      showGardenName={false}
-                    />
-                  </View>
-                ))}
-              </View>
-            </View>
-          ))
+          <TaskList
+            tasks={tasks || []}
+            onToggleComplete={handleToggleComplete}
+            showGardenName={false}
+            groupByGarden={true}
+          />
         )}
       </ScrollView>
 

@@ -6,6 +6,7 @@ import { SWRConfig } from "swr";
 import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   checkSupabaseStorage,
   checkRequestingUserIdFunction,
@@ -129,20 +130,22 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
-      <ClerkLoaded>
-        <QueryClientProvider client={queryClient}>
-          <SWRConfig
-            value={{
-              provider: () => new Map(),
-              revalidateOnFocus: false,
-              revalidateOnReconnect: true,
-            }}
-          >
-            <InitialLayout />
-          </SWRConfig>
-        </QueryClientProvider>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
+        <ClerkLoaded>
+          <QueryClientProvider client={queryClient}>
+            <SWRConfig
+              value={{
+                provider: () => new Map(),
+                revalidateOnFocus: false,
+                revalidateOnReconnect: true,
+              }}
+            >
+              <InitialLayout />
+            </SWRConfig>
+          </QueryClientProvider>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

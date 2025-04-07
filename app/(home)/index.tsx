@@ -18,6 +18,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskWithDetails } from "@/types/garden";
 import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
+import { TaskList } from "@/components/TaskList";
 
 export default function Page() {
   const { user } = useUser();
@@ -310,27 +311,16 @@ export default function Page() {
                 </Text>
               </View>
             ) : todaysTasks && todaysTasks.length > 0 ? (
-              <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-                {todaysTasks.slice(0, 3).map((task, index) => (
-                  <View
-                    key={task.id}
-                    className={
-                      index < Math.min(todaysTasks.length - 1, 2)
-                        ? "border-b border-cream-100"
-                        : ""
-                    }
-                  >
-                    <Task
-                      task={task}
-                      onToggleComplete={handleCompleteTask}
-                      showGardenName={true}
-                    />
-                  </View>
-                ))}
-
+              <View>
+                <TaskList
+                  tasks={todaysTasks}
+                  onToggleComplete={handleCompleteTask}
+                  showGardenName={true}
+                  maxTasks={3}
+                />
                 {todaysTasks.length > 3 && (
                   <TouchableOpacity
-                    className="p-3 bg-cream-50 items-center"
+                    className="p-3 bg-cream-50 items-center mt-2 rounded-xl"
                     onPress={() => router.push("/(home)/calendar")}
                   >
                     <Text className="text-brand-600 font-medium">
