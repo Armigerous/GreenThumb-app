@@ -1,14 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useRef } from "react";
-import {
-  Animated,
-  View,
-  Text,
-  TouchableOpacity,
-  I18nManager,
-} from "react-native";
+import { Animated, Text, View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { Ionicons } from "@expo/vector-icons";
 
 interface SwipeableRowProps {
   children: React.ReactNode;
