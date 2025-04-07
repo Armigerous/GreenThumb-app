@@ -238,7 +238,7 @@ export default function ProfileScreen() {
                 </View>
                 <View className="items-center">
                   <Text className="text-2xl font-bold text-primary">
-                    {accountSummary.tasks === 0 ? "" : accountSummary.tasks}
+                    {accountSummary.tasks}
                   </Text>
                   <Text className="text-sm text-foreground opacity-70">
                     {accountSummary.tasks === 0

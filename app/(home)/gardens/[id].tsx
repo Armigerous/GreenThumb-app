@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SwipeableRow } from "@/components/UI/SwipeableRow";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -202,75 +203,82 @@ const GardenDetails = () => {
     },
   } as const;
 
-  // Render a more visually appealing plant card
+  // Render a more iOS-like plant card
   const renderPlantCard = (plant: UserPlant) => {
     const status = statusConfig[plant.status as keyof typeof statusConfig];
 
     return (
-      <TouchableOpacity
-        key={plant.id}
-        className="bg-white border border-cream-100 rounded-xl shadow-md mb-5 overflow-hidden"
-        onPress={() => handlePlantPress(plant)}
+      <SwipeableRow
+        onDelete={() => {
+          Alert.alert(
+            "Delete Plant",
+            `Are you sure you want to delete ${plant.nickname}?`,
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Delete",
+                style: "destructive",
+                onPress: async () => {
+                  try {
+                    const { error } = await supabase
+                      .from("user_plants")
+                      .delete()
+                      .eq("id", plant.id);
+
+                    if (error) throw error;
+                    refetch();
+                  } catch (err) {
+                    console.error("Error deleting plant:", err);
+                    Alert.alert(
+                      "Error",
+                      "Could not delete plant. Please try again."
+                    );
+                  }
+                },
+              },
+            ]
+          );
+        }}
+        onEdit={() => handleEditPlant(plant)}
+        onWater={() => handleWaterPlant(plant)}
       >
-        {/* Plant Image Banner */}
-        <View className="w-full h-32 bg-cream-50">
+        <TouchableOpacity
+          onPress={() => handlePlantPress(plant)}
+          className="bg-white flex-row items-center px-4 py-3 border-b border-cream-100"
+        >
+          {/* Plant Image */}
           {plant.images?.[0] ? (
             <Image
               source={{ uri: plant.images[0] }}
-              className="h-full w-full"
+              className="w-12 h-12 rounded-full"
               resizeMode="cover"
             />
           ) : (
-            <View className="h-full w-full items-center justify-center">
-              <Ionicons name="leaf-outline" size={48} color="#9e9a90" />
+            <View className="w-12 h-12 rounded-full bg-cream-100 items-center justify-center">
+              <Ionicons name="leaf-outline" size={24} color="#9e9a90" />
             </View>
           )}
-        </View>
 
-        {/* Plant Information */}
-        <View className="p-4">
-          {/* Plant Name and Status Badge */}
-          <View className="flex-row justify-between items-start mb-3">
-            <Text className="text-xl text-foreground font-bold flex-1 mr-2">
+          {/* Plant Info */}
+          <View className="flex-1 ml-4">
+            <Text className="text-lg text-foreground font-medium">
               {plant.nickname}
             </Text>
-            <View
-              className={`rounded-full px-3 py-1 flex-row items-center ${status.bg}`}
-            >
+            <View className="flex-row items-center">
               <Ionicons name={status.icon} size={16} color={status.color} />
-              <Text className={`text-xs font-medium ml-1 ${status.text}`}>
-                {plant.status}
+              <Text className={`text-sm ml-1 ${status.text}`}>
+                {status.description}
               </Text>
             </View>
           </View>
 
-          {/* Status description */}
-          <Text className="text-cream-600 mb-4">{status.description}</Text>
-
-          {/* Action Buttons */}
-          <View className="flex-row justify-between">
-            <TouchableOpacity
-              className="flex-1 bg-blue-50 rounded-lg items-center py-3 mr-2"
-              onPress={() => handleWaterPlant(plant)}
-            >
-              <View className="flex-row items-center">
-                <Ionicons name="water" size={18} color="#0891b2" />
-                <Text className="text-blue-600 font-medium ml-2">Water</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-1 bg-cream-50 rounded-lg items-center py-3 ml-2"
-              onPress={() => handleEditPlant(plant)}
-            >
-              <View className="flex-row items-center">
-                <Ionicons name="settings-outline" size={18} color="#6b7280" />
-                <Text className="text-cream-700 font-medium ml-2">Manage</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity>
+          {/* Right Arrow */}
+          <Ionicons name="chevron-forward" size={20} color="#9e9a90" />
+        </TouchableOpacity>
+      </SwipeableRow>
     );
   };
 
@@ -397,61 +405,48 @@ const GardenDetails = () => {
         </View>
       )}
 
-      {/* Plants Content Area */}
-      <ScrollView className="flex-1 px-5 pt-4">
+      {/* Plants List */}
+      <ScrollView className="flex-1">
         {plants.length === 0 ? (
           renderEmptyState()
         ) : (
           <View className="mb-8">
             {criticalPlants.length > 0 && (
-              <View className="mb-6">
-                <View className="flex-row items-center mb-4 bg-red-50 px-4 py-2 rounded-lg">
-                  <Ionicons name="alert-circle" size={24} color="#dc2626" />
-                  <View className="ml-3">
-                    <Text className="text-foreground text-lg font-bold">
-                      Needs Immediate Care
-                    </Text>
-                    <Text className="text-destructive">
-                      These plants are in critical condition and need your help
-                      now
-                    </Text>
-                  </View>
+              <View className="mb-4">
+                <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                  <Text className="text-destructive font-medium">
+                    Needs Immediate Care
+                  </Text>
                 </View>
-                {criticalPlants.map((plant) => renderPlantCard(plant))}
+                {criticalPlants.map((plant) => (
+                  <View key={plant.id}>{renderPlantCard(plant)}</View>
+                ))}
               </View>
             )}
 
             {needsAttentionPlants.length > 0 && (
-              <View className="mb-6">
-                <View className="flex-row items-center mb-4 bg-yellow-50 px-4 py-2 rounded-lg">
-                  <Ionicons name="water" size={24} color="#d97706" />
-                  <View className="ml-3">
-                    <Text className="text-foreground text-lg font-bold">
-                      Due for Care
-                    </Text>
-                    <Text className="text-accent-400">
-                      These plants could use a little attention soon
-                    </Text>
-                  </View>
+              <View className="mb-4">
+                <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                  <Text className="text-yellow-700 font-medium">
+                    Due for Care
+                  </Text>
                 </View>
-                {needsAttentionPlants.map((plant) => renderPlantCard(plant))}
+                {needsAttentionPlants.map((plant) => (
+                  <View key={plant.id}>{renderPlantCard(plant)}</View>
+                ))}
               </View>
             )}
 
             {healthyPlants.length > 0 && (
-              <View className="mb-6">
-                <View className="flex-row items-center mb-4 bg-brand-50 border border-brand-300 px-4 py-2 rounded-lg">
-                  <Ionicons name="checkmark-circle" size={24} color="#77B860" />
-                  <View className="ml-3">
-                    <Text className="text-foreground text-lg font-bold">
-                      Looking Good
-                    </Text>
-                    <Text className="text-brand-600">
-                      These plants are thriving under your care
-                    </Text>
-                  </View>
+              <View className="mb-4">
+                <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                  <Text className="text-brand-700 font-medium">
+                    Looking Good
+                  </Text>
                 </View>
-                {healthyPlants.map((plant) => renderPlantCard(plant))}
+                {healthyPlants.map((plant) => (
+                  <View key={plant.id}>{renderPlantCard(plant)}</View>
+                ))}
               </View>
             )}
           </View>
