@@ -68,32 +68,34 @@ export default function GardensScreen() {
         <View className="flex-row justify-between items-center mb-6">
           <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
           <TouchableOpacity
-            className="bg-brand-500 border border-brand-600 rounded-lg p-2 flex-row items-center"
+            className="bg-primary border border-brand-700 rounded-lg p-2 flex-row items-center"
             onPress={() => router.push("/(home)/gardens/new")}
           >
-            <Text className="text-white font-medium mr-2">New Garden</Text>
-            <Ionicons name="add" size={24} color="white" />
+            <Text className="text-primary-foreground font-medium mr-2">
+              New Garden
+            </Text>
+            <Ionicons name="add" size={24} color="#fffefa" />
           </TouchableOpacity>
         </View>
 
         {/* Overall Health Summary */}
         {overallHealth && (
           <View className="flex-row justify-between mb-6">
-            <View className="flex-1 bg-white rounded-lg p-3 mr-2 shadow-sm">
+            <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
               <Text className="text-xs text-cream-600 mb-1">Total Plants</Text>
               <Text className="text-xl font-bold text-foreground">
                 {overallHealth.totalPlantsCount}
               </Text>
             </View>
 
-            <View className="flex-1 bg-white rounded-lg p-3 mx-2 shadow-sm">
+            <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
               <Text className="text-xs text-cream-600 mb-1">Need Care</Text>
               <Text className="text-xl font-bold text-destructive">
                 {overallHealth.plantsNeedingCare}
               </Text>
             </View>
 
-            <View className="flex-1 bg-white rounded-lg p-3 ml-2 shadow-sm">
+            <View className="flex-1 bg-cream-50 rounded-lg p-3 ml-2 shadow-sm">
               <Text className="text-xs text-cream-600 mb-1">Health Score</Text>
               <View className="flex-row items-center">
                 <Text
@@ -123,10 +125,10 @@ export default function GardensScreen() {
               You haven't created any gardens yet
             </Text>
             <TouchableOpacity
-              className="bg-brand-500 rounded-full px-6 py-3"
+              className="bg-primary rounded-lg px-6 py-3"
               onPress={() => router.push("/(home)/gardens/new")}
             >
-              <Text className="text-white font-medium">
+              <Text className="text-primary-foreground font-medium">
                 Create Your First Garden
               </Text>
             </TouchableOpacity>
