@@ -3,7 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function GardensLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        contentStyle: { backgroundColor: "#fff8e8" },
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
@@ -20,7 +24,7 @@ export default function GardensLayout() {
         name="new"
         options={{
           headerShown: false,
-          presentation: "modal",
+          presentation: "fullScreenModal",
         }}
       />
       <Stack.Screen

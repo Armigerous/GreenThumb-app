@@ -296,25 +296,25 @@ export default function GardenConditionsPage() {
 
           {!isEditing ? (
             <TouchableOpacity
-              className="bg-brand-500 px-4 py-2 rounded-lg"
+              className="bg-primary px-4 py-2 rounded-lg"
               onPress={handleEditToggle}
             >
-              <Text className="text-white font-medium">Edit</Text>
+              <Text className="text-primary-foreground font-medium">Edit</Text>
             </TouchableOpacity>
           ) : (
             <View className="flex-row">
               <TouchableOpacity
-                className="bg-gray-200 px-4 py-2 rounded-lg mr-2"
+                className="bg-cream-300 px-4 py-2 rounded-lg mr-2"
                 onPress={handleCancel}
               >
-                <Text className="text-gray-700 font-medium">Cancel</Text>
+                <Text className="text-cream-700 font-medium">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="bg-brand-500 px-4 py-2 rounded-lg"
+                className="bg-primary px-4 py-2 rounded-lg"
                 onPress={handleSave}
                 disabled={isSaving}
               >
-                <Text className="text-white font-medium">
+                <Text className="text-primary-foreground font-medium">
                   {isSaving ? "Saving..." : "Save"}
                 </Text>
               </TouchableOpacity>

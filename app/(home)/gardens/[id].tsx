@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SwipeableRow } from "@/components/UI/SwipeableRow";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -23,6 +24,7 @@ const screenWidth = Dimensions.get("window").width;
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     data: gardenData,
     isLoading,
@@ -104,8 +106,8 @@ const GardenDetails = () => {
 
   const handleEditPlant = (plant: UserPlant) => {
     router.push({
-      pathname: "/(home)/plants",
-      params: { id: plant.id.toString(), edit: "true" },
+      pathname: "/(home)/gardens/plant/[id]",
+      params: { id: plant.id.toString() },
     });
   };
 
@@ -113,6 +115,62 @@ const GardenDetails = () => {
     if (updated) {
       refetch();
     }
+  };
+
+  /**
+   * Handles the deletion of the garden with confirmation
+   * Deletes all associated plants and the garden itself
+   */
+  const handleDeleteGarden = async () => {
+    if (!gardenData?.id) return;
+
+    Alert.alert(
+      "Delete Garden",
+      "Are you sure you want to delete this garden? This action cannot be undone and all plants in this garden will be deleted.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // First delete all plants in the garden
+              const { error: plantsError } = await supabase
+                .from("user_plants")
+                .delete()
+                .eq("garden_id", gardenData.id);
+
+              if (plantsError) throw plantsError;
+
+              // Then delete the garden
+              const { error: gardenError } = await supabase
+                .from("user_gardens")
+                .delete()
+                .eq("id", gardenData.id);
+
+              if (gardenError) throw gardenError;
+
+              // Invalidate the garden dashboard query cache to trigger a refetch
+              queryClient.invalidateQueries({
+                queryKey: ["gardenDashboard", gardenData.user_id],
+              });
+
+              Alert.alert("Success", "Garden deleted successfully");
+              router.back();
+            } catch (err) {
+              console.error("Error deleting garden:", err);
+              Alert.alert(
+                "Error",
+                "Failed to delete garden. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -247,7 +305,7 @@ const GardenDetails = () => {
       >
         <TouchableOpacity
           onPress={() => handlePlantPress(plant)}
-          className="bg-white flex-row items-center px-4 py-3 border-b border-cream-100"
+          className="bg-white flex-row items-center px-4 py-3 border-b border-cream-300"
         >
           {/* Plant Image */}
           {plant.images?.[0] ? (
@@ -284,7 +342,7 @@ const GardenDetails = () => {
 
   // Render empty state with more visual appeal
   const renderEmptyState = () => (
-    <View className="bg-white rounded-xl shadow-md items-center px-6 py-10 mt-4">
+    <View className="bg-white items-center px-6 py-10 mt-4">
       <Ionicons
         name="leaf-outline"
         size={64}
@@ -327,7 +385,7 @@ const GardenDetails = () => {
 
           <View className="flex-row">
             <TouchableOpacity
-              className="bg-accent-100 rounded-lg py-2 px-4 mr-2 flex-row items-center"
+              className="bg-accent-200 rounded-lg py-2 px-4 mr-2 flex-row items-center"
               onPress={handleConditionsPress}
             >
               <Ionicons name="sunny-outline" size={18} color="#2e2c29" />
@@ -340,7 +398,7 @@ const GardenDetails = () => {
               className="bg-primary rounded-lg py-2 px-4 flex-row items-center"
               onPress={handleAddPlant}
             >
-              <Ionicons name="add" size={18} color="white" />
+              <Ionicons name="add" size={18} color="#fffefa" />
               <Text className="text-primary-foreground ml-2 font-medium">
                 Add Plant
               </Text>
@@ -357,7 +415,7 @@ const GardenDetails = () => {
       {/* Garden Stats Overview */}
       {dashboardData && (
         <View className="px-5 py-4">
-          <View className="flex-row justify-between p-4 bg-white rounded-xl shadow-sm">
+          <View className="flex-row justify-between p-4 bg-cream-50 rounded-xl shadow-sm">
             <View className="items-center flex-1">
               <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
                 <Ionicons name="leaf" size={24} color="#77B860" />
@@ -452,6 +510,19 @@ const GardenDetails = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* Delete Garden Button - Fixed at bottom */}
+      <View className="px-5 py-4 border-t border-cream-200 bg-background">
+        <TouchableOpacity
+          className="bg-destructive rounded-lg py-3 flex-row items-center justify-center"
+          onPress={handleDeleteGarden}
+        >
+          <Ionicons name="trash-outline" size={20} color="#fffefa" />
+          <Text className="text-white ml-2 font-medium text-base">
+            Delete Garden
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
