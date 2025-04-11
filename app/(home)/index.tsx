@@ -6,24 +6,156 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  Animated,
+  Easing,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
-import { useCallback, useMemo, useState, useEffect } from "react";
-import { format } from "date-fns";
+import { useCallback, useMemo, useState, useEffect, useRef } from "react";
+import {
+  format,
+  isAfter,
+  isBefore,
+  isTomorrow,
+  startOfDay,
+  isToday,
+  subDays,
+} from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskWithDetails } from "@/types/garden";
 import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
 import { TaskList } from "@/components/TaskList";
+import { LinearGradient } from "expo-linear-gradient";
+import { PageContainer } from "@/components/UI/PageContainer";
+import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
+
+// Create a reusable section header component with icon
+function SectionHeader({
+  title,
+  icon,
+  onSeeAll,
+  seeAllText = "See All",
+  showSeeAll = true,
+  badge,
+}: {
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onSeeAll?: () => void;
+  seeAllText?: string;
+  showSeeAll?: boolean;
+  badge?: { count: number; type: "warning" | "info" } | null;
+}) {
+  // Create a subtle animation when the component mounts
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View
+      className="flex-row justify-between items-center mb-4"
+      style={{ opacity: fadeAnim }}
+    >
+      <View className="flex-row items-center gap-2">
+        <View className="w-8 h-8 rounded-full bg-brand-100 items-center justify-center">
+          <Ionicons name={icon} size={18} color="#5E994B" />
+        </View>
+        <View className="flex-row items-center">
+          <Text className="text-lg font-semibold text-foreground">{title}</Text>
+
+          {/* Show badge if provided */}
+          {badge && badge.count > 0 && (
+            <View
+              className={`ml-2 py-1 px-2 rounded-full ${
+                badge.type === "warning" ? "bg-orange-100" : "bg-blue-100"
+              }`}
+            >
+              <Text
+                className={`text-xs font-medium ${
+                  badge.type === "warning" ? "text-orange-600" : "text-blue-600"
+                }`}
+              >
+                {badge.count}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+      {showSeeAll && onSeeAll && (
+        <TouchableOpacity
+          onPress={onSeeAll}
+          className="flex-row items-center gap-2"
+        >
+          <Text className="text-sm text-brand-600 font-medium">
+            {seeAllText}
+          </Text>
+          <Ionicons name="arrow-forward" size={16} color="#77B860" />
+        </TouchableOpacity>
+      )}
+    </Animated.View>
+  );
+}
+
+// AnimatedSection component to replace MotiView
+function AnimatedSection({
+  children,
+  delay = 200,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const translateY = useRef(new Animated.Value(10)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 500,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 500,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={{
+        opacity,
+        transform: [{ translateY }],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
 
 export default function Page() {
   const { user } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  // Animation references
+  const headerScaleAnim = useRef(new Animated.Value(0.95)).current;
+  const headerOpacityAnim = useRef(new Animated.Value(0)).current;
 
   // Initialize Supabase with Clerk token
   useSupabaseAuth();
@@ -36,10 +168,87 @@ export default function Page() {
     return "Good evening";
   };
 
+  // Fetch garden dashboard data
+  const {
+    data: gardens,
+    isLoading: gardensLoading,
+    error: gardensError,
+  } = useGardenDashboard(user?.id);
+
+  // Fetch today's tasks
+  const today = new Date();
+  const {
+    data: todaysTasks,
+    isLoading: tasksLoading,
+    error: tasksError,
+    refetch: refetchTasks,
+  } = useTasksForDate(today, user?.id);
+
+  // Fetch tomorrow's tasks
+  const tomorrow = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    return date;
+  }, []);
+
+  const { data: tomorrowTasks } = useTasksForDate(tomorrow, user?.id);
+
+  // Check for overdue tasks (tasks from yesterday or earlier that aren't completed)
+  const yesterday = useMemo(() => subDays(startOfDay(new Date()), 1), []);
+  const { data: yesterdayTasks } = useTasksForDate(yesterday, user?.id);
+
+  // Count of overdue and upcoming tasks for badges
+  const overdueTasks = useMemo(() => {
+    return yesterdayTasks?.filter((task) => !task.completed) || [];
+  }, [yesterdayTasks]);
+
+  const upcomingTasksCount = useMemo(() => {
+    return tomorrowTasks?.length || 0;
+  }, [tomorrowTasks]);
+
+  // Trigger header animation when data is loaded
+  useEffect(() => {
+    if (!gardensLoading && !tasksLoading) {
+      Animated.parallel([
+        Animated.timing(headerScaleAnim, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(headerOpacityAnim, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [gardensLoading, tasksLoading, headerScaleAnim, headerOpacityAnim]);
+
+  // Refresh tasks when the home screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) {
+        // Invalidate task queries to ensure fresh data
+        queryClient.invalidateQueries({
+          queryKey: ["tasks"],
+        });
+        refetchTasks();
+      }
+    }, [refetchTasks, queryClient, user?.id])
+  );
+
   // Get personalized message based on garden stats
   const getPersonalizedMessage = () => {
     if (!gardens || gardens.length === 0)
       return "Let's start your plant journey today!";
+
+    // Overdue tasks take priority in messaging
+    if (overdueTasks.length > 0)
+      return `You have ${overdueTasks.length} overdue ${
+        overdueTasks.length === 1 ? "task" : "tasks"
+      } that need attention.`;
 
     // Plants
     if (gardenStats.plantsNeedingCare === 1)
@@ -58,35 +267,6 @@ export default function Page() {
 
   // Format today's date in a nice way
   const formattedDate = format(new Date(), "EEEE, MMMM d");
-
-  // Fetch garden dashboard data
-  const {
-    data: gardens,
-    isLoading: gardensLoading,
-    error: gardensError,
-  } = useGardenDashboard(user?.id);
-
-  // Fetch today's tasks
-  const today = new Date();
-  const {
-    data: todaysTasks,
-    isLoading: tasksLoading,
-    error: tasksError,
-    refetch: refetchTasks,
-  } = useTasksForDate(today, user?.id);
-
-  // Refresh tasks when the home screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) {
-        // Invalidate task queries to ensure fresh data
-        queryClient.invalidateQueries({
-          queryKey: ["tasks"],
-        });
-        refetchTasks();
-      }
-    }, [refetchTasks, queryClient, user?.id])
-  );
 
   // Calculate garden stats from actual data
   const gardenStats = useMemo(() => {
@@ -193,235 +373,431 @@ export default function Page() {
   const isLoading = gardensLoading || tasksLoading;
   const hasError = gardensError || tasksError;
 
-  // Get a random tip from the collection
-  const tips = [
-    {
-      title: "Watering Basics",
-      content:
-        "Most houseplants need to be watered when the top inch of soil feels dry to the touch.",
-    },
-    {
-      title: "Light Requirements",
-      content:
-        "Pay attention to your plant's light needs. Most plants prefer bright, indirect light.",
-    },
-    {
-      title: "Seasonal Care",
-      content:
-        "Remember to adjust your care routine seasonally. Plants typically need less water in winter.",
-    },
-    {
-      title: "Repotting",
-      content:
-        "Most plants benefit from repotting every 12-18 months with fresh soil to replenish nutrients.",
-    },
-  ];
-
-  const randomTip = tips[Math.floor(Math.random() * tips.length)];
-
   if (isLoading && !gardens && !todaysTasks) {
     return <LoadingSpinner message="Loading your garden..." />;
   }
 
+  // Get personalized suggestions for when all tasks are done
+  const getPersonalizedSuggestion = () => {
+    if (!gardens || gardens.length === 0) {
+      return {
+        text: "Start your gardening journey by creating your first garden!",
+        action: "Create Garden",
+        route: "/(home)/gardens/new" as const,
+      };
+    }
+
+    if (gardenStats.totalPlants === 0) {
+      return {
+        text: "Add your first plant to start tracking its care",
+        action: "Add Plants",
+        route: "/(home)/plants" as const,
+      };
+    }
+
+    const suggestions = [
+      {
+        text: "Browse the plant database for new additions to your garden",
+        action: "Browse Plants",
+        route: "/(home)/plants" as const,
+      },
+      {
+        text: "Explore your garden's performance over time",
+        action: "View Gardens",
+        route: "/(home)/gardens" as const,
+      },
+      {
+        text: "Check your upcoming care schedule",
+        action: "View Calendar",
+        route: "/(home)/calendar" as const,
+      },
+    ] as const;
+
+    // Randomly select a suggestion
+    return suggestions[Math.floor(Math.random() * suggestions.length)];
+  };
+
+  // Helper function to determine task badges
+  const getTasksBadge = () => {
+    const overdueCount = overdueTasks.length;
+    if (overdueCount > 0) {
+      return { count: overdueCount, type: "warning" as const };
+    }
+    if (upcomingTasksCount > 0) {
+      return { count: upcomingTasksCount, type: "info" as const };
+    }
+    return null;
+  };
+
+  // Get summary for when there are no tasks today
+  const getNoTasksSummary = () => {
+    if (overdueTasks.length > 0) {
+      return {
+        icon: "alert-circle-outline" as const,
+        color: "#ef4444",
+        text: `You have ${overdueTasks.length} overdue ${
+          overdueTasks.length === 1 ? "task" : "tasks"
+        }`,
+        action: "View Overdue",
+        actionColor: "#ef4444",
+      };
+    }
+
+    if (upcomingTasksCount > 0) {
+      return {
+        icon: "calendar-outline" as const,
+        color: "#3b82f6",
+        text: `${upcomingTasksCount} ${
+          upcomingTasksCount === 1 ? "task" : "tasks"
+        } coming up tomorrow`,
+        action: "View Upcoming",
+        actionColor: "#3b82f6",
+      };
+    }
+
+    return null;
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       <SignedIn>
         <ScrollView className="flex-1">
           <View className="px-5 pt-5">
-            <Text className="text-2xl font-bold text-foreground mb-2">
-              {getTimeOfDay()}, {user?.firstName}
-            </Text>
-            <Text className="text-base text-foreground opacity-70 mb-1">
-              Welcome to The GreenThumb!
-            </Text>
-            <Text className="text-sm text-brand-600 mb-4">{formattedDate}</Text>
-            <View className="mb-4 bg-brand-50 p-3 rounded-lg border border-brand-100">
-              <Text className="text-sm text-brand-700">
-                {getPersonalizedMessage()}
-              </Text>
+            {/* Header with Gradient */}
+            <Animated.View
+              className="mb-6 rounded-xl overflow-hidden shadow-md"
+              style={{
+                opacity: headerOpacityAnim,
+                transform: [{ scale: headerScaleAnim }],
+                shadowColor: "#333333",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 5,
+              }}
+            >
+              <LinearGradient
+                colors={["#3F6933", "#77B860"]} // Enhanced contrast
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ padding: 24, borderRadius: 12 }}
+              >
+                <Text className="text-3xl font-bold text-primary-foreground mb-2">
+                  {getTimeOfDay()}, {user?.firstName}
+                </Text>
+                <Text className="text-lg text-primary-foreground mb-3">
+                  {getPersonalizedMessage()}
+                </Text>
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="calendar" size={16} color="#fffefa" />
+                  <Text className="text-sm text-primary-foreground">
+                    {formattedDate}
+                  </Text>
+                </View>
+              </LinearGradient>
+            </Animated.View>
+
+            {/* TODAY'S TASKS SECTION (Now first) */}
+            <View className="mb-6">
+              <SectionHeader
+                title="Today's Tasks"
+                icon="calendar"
+                onSeeAll={() => router.push("/(home)/calendar")}
+                badge={getTasksBadge()}
+              />
+
+              {hasError ? (
+                <View className="bg-red-50 rounded-xl p-4 items-center">
+                  <Ionicons
+                    name="alert-circle-outline"
+                    size={24}
+                    color="#ef4444"
+                  />
+                  <Text className="text-destructive mt-2 text-center">
+                    Error loading tasks
+                  </Text>
+                </View>
+              ) : todaysTasks && todaysTasks.length > 0 ? (
+                <AnimatedSection delay={200}>
+                  <TaskList
+                    tasks={todaysTasks}
+                    onToggleComplete={handleCompleteTask}
+                    showGardenName={true}
+                    maxTasks={3}
+                  />
+                  {todaysTasks.length > 3 && (
+                    <TouchableOpacity
+                      className="p-3 bg-white items-center mt-2 rounded-xl border border-brand-100 shadow-sm"
+                      onPress={() => router.push("/(home)/calendar")}
+                    >
+                      <Text className="text-brand-600 font-medium">
+                        +{todaysTasks.length - 3} more tasks
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </AnimatedSection>
+              ) : (
+                <AnimatedSection delay={200}>
+                  <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
+                    {getNoTasksSummary() ? (
+                      <>
+                        <Ionicons
+                          name={getNoTasksSummary()!.icon}
+                          size={32}
+                          color={getNoTasksSummary()!.color}
+                        />
+                        <Text className="text-base text-cream-700 mt-2 text-center mb-2">
+                          No tasks for today
+                        </Text>
+                        <Text className="text-sm text-cream-600 text-center mb-3">
+                          {getNoTasksSummary()!.text}
+                        </Text>
+                        <TouchableOpacity
+                          className={`px-4 py-2 bg-white rounded-lg border border-${
+                            getNoTasksSummary()!.color
+                          }`}
+                          onPress={() => router.push("/(home)/calendar")}
+                        >
+                          <Text
+                            style={{
+                              color: getNoTasksSummary()!.actionColor,
+                            }}
+                            className="font-medium"
+                          >
+                            {getNoTasksSummary()!.action}
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <>
+                        <Ionicons
+                          name="checkmark-circle-outline"
+                          size={32}
+                          color="#5E994B"
+                        />
+                        <Text className="text-base text-cream-700 mt-2 text-center mb-2">
+                          All done for today!
+                        </Text>
+
+                        {/* Added personalized call-to-action */}
+                        <Text className="text-sm text-cream-600 text-center mb-3">
+                          {getPersonalizedSuggestion().text}
+                        </Text>
+
+                        <TouchableOpacity
+                          className="px-4 py-2 bg-brand-50 rounded-lg border border-brand-200"
+                          onPress={() =>
+                            router.push(getPersonalizedSuggestion().route)
+                          }
+                        >
+                          <Text className="text-brand-600 font-medium">
+                            {getPersonalizedSuggestion().action}
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                </AnimatedSection>
+              )}
             </View>
 
-            {/* Garden Stats */}
-            <View className="bg-cream-50 border border-cream-300 rounded-xl p-4 mb-6">
-              <Text className="text-sm font-medium text-cream-600 mb-3">
-                Gardens Overview
-              </Text>
-              <View className="flex-row justify-between">
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-brand-600">
-                    {gardenStats.totalGardens}
-                  </Text>
-                  <Text className="text-xs text-cream-500">Gardens</Text>
-                </View>
+            {/* GARDEN STATS SECTION (Now second) */}
+            <View className="mb-6">
+              <SectionHeader
+                title="Your Gardens"
+                icon="leaf"
+                onSeeAll={() => router.push("/(home)/gardens")}
+              />
 
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-brand-600">
-                    {gardenStats.totalPlants}
-                  </Text>
-                  <Text className="text-xs text-cream-500">Plants</Text>
-                </View>
+              <AnimatedSection delay={300}>
+                <View className="flex-row flex-wrap gap-4">
+                  {gardens && gardens.length > 0 ? (
+                    <>
+                      {gardens.slice(0, 2).map((garden) => (
+                        <TouchableOpacity
+                          key={garden.garden_id}
+                          className="flex-1 min-w-[45%] bg-white border border-cream-300 rounded-xl p-4 shadow-sm"
+                          style={{
+                            shadowColor: "#77B860",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 2,
+                            elevation: 2,
+                          }}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/(home)/gardens/[id]",
+                              params: { id: garden.garden_id },
+                            })
+                          }
+                        >
+                          <View>
+                            <Text className="text-lg font-semibold text-foreground mb-2">
+                              {garden.name}
+                            </Text>
+                            <Text className="text-sm text-cream-700 mb-3">
+                              {garden.total_plants || 0} Plants
+                            </Text>
 
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-destructive">
-                    {gardenStats.plantsNeedingCare}
-                  </Text>
-                  <Text className="text-xs text-cream-500">Need Care</Text>
-                </View>
+                            {/* Health Progress Bar with enhanced animation */}
+                            <AnimatedProgressBar
+                              percentage={garden.health_percentage}
+                              color={
+                                garden.health_percentage >= 80
+                                  ? "#5E994B"
+                                  : garden.health_percentage >= 50
+                                  ? "#9e8600"
+                                  : "#E50000"
+                              }
+                              height={8}
+                              duration={500}
+                            />
+                            <Text className="text-xs text-cream-700">
+                              {garden.health_percentage}%
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
 
-                <View className="items-center">
-                  <Text
-                    className={`text-2xl font-bold ${
-                      gardenStats.healthPercentage >= 80
-                        ? "text-brand-600"
-                        : gardenStats.healthPercentage >= 50
-                        ? "text-accent-600"
-                        : "text-destructive"
-                    }`}
-                  >
-                    {gardenStats.healthPercentage}%
-                  </Text>
-                  <Text className="text-xs text-cream-500">Health</Text>
+                      {/* New Garden Card */}
+                      <TouchableOpacity
+                        className="flex-1 min-w-[45%] border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm"
+                        style={{
+                          shadowColor: "#77B860",
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.1,
+                          shadowRadius: 2,
+                          elevation: 1,
+                        }}
+                        onPress={() => router.push("/(home)/gardens/new")}
+                      >
+                        <View className="items-center">
+                          <View className="w-10 h-10 items-center justify-center mb-2">
+                            <Ionicons name="add" size={24} color="#5E994B" />
+                          </View>
+                          <Text className="text-primary font-medium">
+                            New Garden
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      className="w-full border border-dashed border-cream-400 rounded-xl p-6 items-center shadow-sm"
+                      style={{
+                        shadowColor: "#77B860",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 1,
+                      }}
+                      onPress={() => router.push("/(home)/gardens/new")}
+                    >
+                      <View className="items-center">
+                        <View className="w-12 h-12 items-center justify-center mb-3">
+                          <Ionicons name="add" size={28} color="#5E994B" />
+                        </View>
+                        <Text className="text-brand-600 font-medium mb-1">
+                          Create Your First Garden
+                        </Text>
+                        <Text className="text-sm text-cream-700 text-center">
+                          Start your plant journey today
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
                 </View>
-              </View>
+              </AnimatedSection>
             </View>
           </View>
 
-          {/* Reminders Section */}
+          {/* QUICK ACTIONS SECTION (Now last) */}
           <View className="px-5 mb-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-semibold text-foreground">
-                Today's Tasks
-              </Text>
-              <TouchableOpacity onPress={() => router.push("/(home)/calendar")}>
-                <Text className="text-sm text-brand-600 font-medium">
-                  See All
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <SectionHeader
+              title="Quick Actions"
+              icon="flash"
+              showSeeAll={false}
+            />
 
-            {hasError ? (
-              <View className="bg-red-50 rounded-xl p-4 items-center">
-                <Ionicons
-                  name="alert-circle-outline"
-                  size={24}
-                  color="#ef4444"
-                />
-                <Text className="text-red-500 mt-2 text-center">
-                  Error loading tasks
-                </Text>
+            <AnimatedSection delay={400}>
+              <View className="flex-row flex-wrap justify-between">
+                <TouchableOpacity
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-brand-100"
+                  style={{
+                    shadowColor: "#77B860",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                    elevation: 2,
+                  }}
+                  onPress={() => router.push("/(home)/plants")}
+                >
+                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                    <Ionicons name="leaf" size={24} color="#5E994B" />
+                  </View>
+                  <Text className="text-sm font-medium text-foreground">
+                    Browse Plants
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-brand-100"
+                  style={{
+                    shadowColor: "#77B860",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                    elevation: 2,
+                  }}
+                  onPress={() => router.push("/(home)/gardens/new")}
+                >
+                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                    <Ionicons name="grid" size={24} color="#5E994B" />
+                  </View>
+                  <Text className="text-sm font-medium text-foreground">
+                    New Garden
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-brand-100"
+                  style={{
+                    shadowColor: "#77B860",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                    elevation: 2,
+                  }}
+                  onPress={() => router.push("/(home)/calendar")}
+                >
+                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                    <Ionicons name="calendar" size={24} color="#5E994B" />
+                  </View>
+                  <Text className="text-sm font-medium text-foreground">
+                    Calendar of Care
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-brand-100"
+                  style={{
+                    shadowColor: "#77B860",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                    elevation: 2,
+                  }}
+                  onPress={() => router.push("/(home)/gardens")}
+                >
+                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                    <Ionicons name="eye" size={24} color="#5E994B" />
+                  </View>
+                  <Text className="text-sm font-medium text-foreground">
+                    View Gardens
+                  </Text>
+                </TouchableOpacity>
               </View>
-            ) : todaysTasks && todaysTasks.length > 0 ? (
-              <View>
-                <TaskList
-                  tasks={todaysTasks}
-                  onToggleComplete={handleCompleteTask}
-                  showGardenName={true}
-                  maxTasks={3}
-                />
-                {todaysTasks.length > 3 && (
-                  <TouchableOpacity
-                    className="p-3 bg-cream-50 items-center mt-2 rounded-xl"
-                    onPress={() => router.push("/(home)/calendar")}
-                  >
-                    <Text className="text-brand-600 font-medium">
-                      +{todaysTasks.length - 3} more tasks
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            ) : (
-              <View className="bg-cream-50 rounded-xl p-6 items-center border border-brand-100">
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={32}
-                  color="#77B860"
-                />
-                <Text className="text-base text-cream-600 mt-2 text-center">
-                  All done for today!
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Quick Actions */}
-          <View className="px-5 mb-6">
-            <Text className="text-lg font-semibold text-foreground mb-4">
-              Quick Actions
-            </Text>
-            <View className="flex-row flex-wrap justify-between">
-              <TouchableOpacity
-                className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-brand-100"
-                onPress={() => router.push("/(home)/plants")}
-              >
-                <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
-                  <Ionicons name="leaf-outline" size={24} color="#5E994B" />
-                </View>
-                <Text className="text-sm font-medium text-foreground">
-                  Browse Plants
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-blue-100"
-                onPress={() => router.push("/(home)/gardens/new")}
-              >
-                <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mb-2">
-                  <Ionicons name="grid-outline" size={24} color="#3b82f6" />
-                </View>
-                <Text className="text-sm font-medium text-foreground">
-                  New Garden
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-amber-100"
-                onPress={() => router.push("/(home)/calendar")}
-              >
-                <View className="w-12 h-12 rounded-full bg-amber-50 items-center justify-center mb-2">
-                  <Ionicons name="calendar-outline" size={24} color="#d97706" />
-                </View>
-                <Text className="text-sm font-medium text-foreground">
-                  Calendar of Care
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-purple-100"
-                onPress={() => router.push("/(home)/gardens")}
-              >
-                <View className="w-12 h-12 rounded-full bg-purple-50 items-center justify-center mb-2">
-                  <Ionicons name="eye-outline" size={24} color="#8b5cf6" />
-                </View>
-                <Text className="text-sm font-medium text-foreground">
-                  View Gardens
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Plant Care Tip */}
-          <View className="px-5 mb-8">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-semibold text-foreground">
-                Plant Care Tip
-              </Text>
-            </View>
-            <View className="bg-cream-50 rounded-xl p-5 border border-cream-300">
-              <View className="flex-row items-center mb-2">
-                <Ionicons
-                  name="bulb-outline"
-                  size={20}
-                  color="#059669"
-                  className="mr-2"
-                />
-                <Text className="text-base font-medium text-foreground ml-1">
-                  {randomTip.title}
-                </Text>
-              </View>
-              <Text className="text-sm text-foreground opacity-70">
-                {randomTip.content}
-              </Text>
-            </View>
+            </AnimatedSection>
           </View>
         </ScrollView>
       </SignedIn>
@@ -433,7 +809,14 @@ export default function Page() {
           </Text>
           <View className="w-full gap-4">
             <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center"
+              className="bg-primary py-4 rounded-lg items-center shadow-sm"
+              style={{
+                shadowColor: "#77B860",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
               onPress={() => router.replace("/(auth)/sign-in")}
             >
               <Text className="text-primary-foreground font-bold text-base">
@@ -450,6 +833,6 @@ export default function Page() {
           </View>
         </View>
       </SignedOut>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

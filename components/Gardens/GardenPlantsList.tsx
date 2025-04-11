@@ -1,15 +1,16 @@
+import React, { ReactNode, useMemo } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   SectionList,
-  Image,
   SectionListData,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { format, isValid, parseISO, differenceInDays } from "date-fns";
 import type { UserPlant } from "@/types/garden";
-import { ReactNode } from "react";
+import CachedImage from "@/components/Database/CachedImage";
 
 type PlantSection = {
   title: string;
@@ -156,14 +157,16 @@ export default function GardenPlantsList({
 
     return (
       <TouchableOpacity
-        className="bg-white border border-cream-100 px-4 py-3.5 rounded-lg shadow-sm mb-3.5 mx-4"
+        className="bg-white border border-cream-100 px-4 py-3.5 rounded-lg mb-3.5 mx-4"
         onPress={() => onPlantPress(item)}
       >
         <View className="flex-row items-start mb-3">
           {item.images?.[0] && (
-            <Image
-              source={{ uri: item.images[0] }}
-              className="h-18 rounded-lg w-18 mr-4"
+            <CachedImage
+              uri={item.images[0]}
+              style={{ height: 72, width: 72, borderRadius: 8 }}
+              resizeMode="cover"
+              cacheKey={`garden-plant-${item.id}-image`}
             />
           )}
           <View className="flex-1">

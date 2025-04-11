@@ -13,6 +13,7 @@ import * as WebBrowser from "expo-web-browser";
 import { GoogleIcon, AppleIcon, FacebookIcon } from "@/components/icons";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
 import { Ionicons } from "@expo/vector-icons";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -251,7 +252,7 @@ export default function Page() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       <View className="flex-row justify-between items-center px-5 pt-5">
         <Link href="/(auth)/welcome" asChild>
           <TouchableOpacity>
@@ -479,6 +480,6 @@ export default function Page() {
           </Link>
         </View>
       </View>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

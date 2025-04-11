@@ -15,6 +15,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { allFilters } from "@/types/filterData";
 import { premadeFilters } from "@/types/premadeFilters";
+import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 
 // Define a type for Feather icon names
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
@@ -428,7 +429,7 @@ export default function FilterModal({
       transparent={false}
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1">
         <View className="flex-row justify-between items-center p-4 border-b border-cream-400">
           <TouchableOpacity onPress={onClose}>
             <Feather name="x" size={24} color="#000" />
@@ -513,16 +514,16 @@ export default function FilterModal({
                   Filter Progress
                 </Text>
                 <View className="flex-row items-center mb-1">
-                  <View className="flex-1 h-3 bg-cream-400/40 rounded-full overflow-hidden">
-                    <View
-                      className="h-full bg-brand-600"
-                      style={{
-                        width: `${
-                          (activeFilterDetails.appliedCount /
-                            activeFilterDetails.totalCount) *
-                          100
-                        }%`,
-                      }}
+                  <View className="flex-1">
+                    <AnimatedProgressBar
+                      percentage={
+                        (activeFilterDetails.appliedCount /
+                          activeFilterDetails.totalCount) *
+                        100
+                      }
+                      color="#5E994B" // brand-600
+                      height={12}
+                      duration={500}
                     />
                   </View>
                   <Text className="text-xs ml-2 font-medium">

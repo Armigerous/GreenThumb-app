@@ -8,6 +8,7 @@ import {
   getCompletionStatusText,
   calculateGardenCompletion,
 } from "@/lib/gardenHelpers";
+import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 
 // Import section renderers from index file
 import {
@@ -256,15 +257,12 @@ export default function GardenEditorTabs({
             </View>
           </View>
         </View>
-        <View className="h-2 bg-cream-200 rounded-full overflow-hidden">
-          <View
-            style={{
-              width: `${overallCompletion}%`,
-              backgroundColor: getCompletionColor(overallCompletion),
-            }}
-            className="h-full rounded-full"
-          />
-        </View>
+        <AnimatedProgressBar
+          percentage={overallCompletion}
+          color={getCompletionColor(overallCompletion)}
+          height={8}
+          duration={500}
+        />
       </View>
 
       {/* Tab Navigation */}

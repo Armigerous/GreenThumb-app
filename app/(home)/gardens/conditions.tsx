@@ -271,7 +271,7 @@ export default function GardenConditionsPage() {
 
   if (error || !gardenData) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1">
         <View className="pt-5 px-5">
           <Text className="text-destructive text-lg">
             Error loading garden conditions. Please try again.
@@ -282,7 +282,7 @@ export default function GardenConditionsPage() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1">
       {/* Header */}
       <View className="px-5 pt-5 pb-2">
         <View className="flex-row justify-between items-center">

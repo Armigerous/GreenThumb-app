@@ -199,7 +199,7 @@ export default function GardenConditions({
 
   // View mode - show garden conditions summary
   return (
-    <View className="bg-white p-4 rounded-xl mb-8 shadow-sm border border-cream-200">
+    <View className="bg-white p-4 rounded-xl mb-8 border border-cream-200">
       {/* Completion indicator */}
       <View className="mb-5 bg-cream-50 p-3 rounded-lg border border-cream-200">
         <View className="flex-row justify-between items-center mb-2">

@@ -1,5 +1,5 @@
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { useGardenDetails } from "@/lib/queries";
+import { useGardenDetails, useGardenTasksSummary } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,7 +9,6 @@ import {
   Alert,
   Dimensions,
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -17,6 +16,8 @@ import {
 } from "react-native";
 import { SwipeableRow } from "@/components/UI/SwipeableRow";
 import { useQueryClient } from "@tanstack/react-query";
+import { PageContainer } from "@/components/UI/PageContainer";
+import CachedImage from "@/components/Database/CachedImage";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -31,6 +32,11 @@ const GardenDetails = () => {
     error,
     refetch,
   } = useGardenDetails(Number(id));
+
+  // Fetch garden tasks summary
+  const { data: gardenTasks, isLoading: tasksLoading } = useGardenTasksSummary(
+    Number(id)
+  );
 
   // Refetch garden data whenever the screen comes into focus
   useFocusEffect(
@@ -97,6 +103,17 @@ const GardenDetails = () => {
 
       // Refetch garden data to update the UI
       Alert.alert("Success", `${plant.nickname} has been watered!`);
+
+      // Invalidate both the garden details query and the garden dashboard query
+      if (gardenData) {
+        queryClient.invalidateQueries({
+          queryKey: ["gardenDetails", gardenData.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["gardenDashboard", gardenData.user_id],
+        });
+      }
+
       refetch();
     } catch (err) {
       console.error("Water plant error:", err);
@@ -113,6 +130,15 @@ const GardenDetails = () => {
 
   const handleSettingsUpdate = (updated: boolean) => {
     if (updated) {
+      // Invalidate both the garden details query and the garden dashboard query
+      if (gardenData) {
+        queryClient.invalidateQueries({
+          queryKey: ["gardenDetails", gardenData.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["gardenDashboard", gardenData.user_id],
+        });
+      }
       refetch();
     }
   };
@@ -179,13 +205,13 @@ const GardenDetails = () => {
 
   if (error || !gardenData) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <PageContainer>
         <View className="pt-5 px-5">
           <Text className="text-destructive text-lg">
             Error loading garden details. Please try again.
           </Text>
         </View>
-      </SafeAreaView>
+      </PageContainer>
     );
   }
 
@@ -287,6 +313,15 @@ const GardenDetails = () => {
                       .eq("id", plant.id);
 
                     if (error) throw error;
+
+                    // Invalidate both the garden details query and the garden dashboard query
+                    queryClient.invalidateQueries({
+                      queryKey: ["gardenDetails", gardenData.id],
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ["gardenDashboard", gardenData.user_id],
+                    });
+
                     refetch();
                   } catch (err) {
                     console.error("Error deleting plant:", err);
@@ -309,10 +344,11 @@ const GardenDetails = () => {
         >
           {/* Plant Image */}
           {plant.images?.[0] ? (
-            <Image
-              source={{ uri: plant.images[0] }}
-              className="w-12 h-12 rounded-full"
+            <CachedImage
+              uri={plant.images[0]}
+              style={{ width: 48, height: 48 }}
               resizeMode="cover"
+              rounded={true}
             />
           ) : (
             <View className="w-12 h-12 rounded-full bg-cream-100 items-center justify-center">
@@ -342,7 +378,7 @@ const GardenDetails = () => {
 
   // Render empty state with more visual appeal
   const renderEmptyState = () => (
-    <View className="bg-white items-center px-6 py-10 mt-4">
+    <View className="items-center px-6 py-10 mt-4">
       <Ionicons
         name="leaf-outline"
         size={64}
@@ -357,7 +393,7 @@ const GardenDetails = () => {
         schedules, and watch them thrive!
       </Text>
       <TouchableOpacity
-        className="bg-brand-500 rounded-lg px-6 py-3"
+        className="bg-primary rounded-lg px-6 py-3"
         onPress={handleAddPlant}
       >
         <View className="flex-row items-center justify-center">
@@ -371,7 +407,7 @@ const GardenDetails = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       {/* Header with Garden Name and Navigation */}
       <View className="pt-5 pb-2 px-5">
         <View className="flex-row justify-between items-center mb-2">
@@ -406,16 +442,26 @@ const GardenDetails = () => {
           </View>
         </View>
 
-        {/* Garden Title */}
-        <Text className="text-2xl text-foreground font-bold mb-2">
-          {gardenData.name}
-        </Text>
+        {/* Garden Title with Delete Button */}
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-2xl text-foreground font-bold">
+            {gardenData.name}
+          </Text>
+
+          {/* Delete Garden Button - More subtle in header */}
+          <TouchableOpacity
+            className="bg-destructive rounded-lg py-2 px-4 flex-row items-center justify-center"
+            onPress={handleDeleteGarden}
+          >
+            <Ionicons name="trash-outline" size={20} color="#fffefa" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Garden Stats Overview */}
       {dashboardData && (
         <View className="px-5 py-4">
-          <View className="flex-row justify-between p-4 bg-cream-50 rounded-xl shadow-sm">
+          <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border-2 border-cream-300">
             <View className="items-center flex-1">
               <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
                 <Ionicons name="leaf" size={24} color="#77B860" />
@@ -464,7 +510,7 @@ const GardenDetails = () => {
       )}
 
       {/* Plants List */}
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1 pb-32">
         {plants.length === 0 ? (
           renderEmptyState()
         ) : (
@@ -510,20 +556,7 @@ const GardenDetails = () => {
           </View>
         )}
       </ScrollView>
-
-      {/* Delete Garden Button - Fixed at bottom */}
-      <View className="px-5 py-4 border-t border-cream-200 bg-background">
-        <TouchableOpacity
-          className="bg-destructive rounded-lg py-3 flex-row items-center justify-center"
-          onPress={handleDeleteGarden}
-        >
-          <Ionicons name="trash-outline" size={20} color="#fffefa" />
-          <Text className="text-white ml-2 font-medium text-base">
-            Delete Garden
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </PageContainer>
   );
 };
 

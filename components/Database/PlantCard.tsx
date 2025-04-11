@@ -76,6 +76,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
           uri={plant.first_image || ""}
           style={{ width: "100%", height: 120 }}
           resizeMode="cover"
+          cacheKey={`plant-card-${plant.slug}-image`}
         />
         <View className="p-3 flex-1 justify-between">
           <View>

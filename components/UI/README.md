@@ -14,8 +14,14 @@ import { LoadingSpinner } from "../components/UI/LoadingSpinner";
 // Default usage
 <LoadingSpinner />
 
-// With custom message
-<LoadingSpinner message="Watering plants..." />
+// With custom message and background
+<LoadingSpinner
+  message="Watering plants..."
+  backgroundColor="bg-cream-50"
+/>
+
+// With custom color
+<LoadingSpinner color="#047857" />
 ```
 
 #### Compact inline loading:
@@ -27,7 +33,7 @@ import { CompactSpinner } from "../components/UI/LoadingSpinner";
 <CompactSpinner />
 
 // With custom size and color
-<CompactSpinner size={32} color="#1e40af" />
+<CompactSpinner size={32} color="#047857" />
 ```
 
 ### Implementation Details
@@ -48,9 +54,23 @@ If needed, you can also import the actual animation components directly:
 ```tsx
 import { PlantGrowthLoader, CompactPlantLoader } from "../components/UI/PlantGrowthLoader";
 
-// Full screen version with custom color
-<PlantGrowthLoader color="#10b981" message="Growing..." />
+// Full screen version with custom color and background
+<PlantGrowthLoader
+  color="#047857"
+  message="Growing..."
+  backgroundColor="bg-cream-50"
+/>
 
 // Compact version
-<CompactPlantLoader size={40} color="#10b981" />
+<CompactPlantLoader size={40} color="#047857" />
 ```
+
+### Color Standards
+
+The app uses a consistent color scheme for loading states:
+
+- Primary brand green: `#047857`
+- Background colors:
+  - Transparent (default): `bg-transparent`
+  - Light cream: `bg-cream-50`
+  - White: `bg-white`

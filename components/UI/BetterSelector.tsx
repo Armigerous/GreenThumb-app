@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   BackHandler,
   Platform,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -34,10 +35,27 @@ export default function BetterSelector<T extends boolean = true>({
   multiple = true as T,
 }: BetterSelectorProps<T>) {
   const [modalVisible, setModalVisible] = useState(false);
+  const slideAnim = React.useRef(new Animated.Value(0)).current;
 
   // Handle closing the modal
   const handleClose = () => {
-    setModalVisible(false);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalVisible(false);
+    });
+  };
+
+  // Handle opening the modal
+  const handleOpen = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
   // Add effect to handle back button press and outside taps
@@ -123,8 +141,8 @@ export default function BetterSelector<T extends boolean = true>({
       </Text>
 
       <TouchableOpacity
-        onPress={() => setModalVisible(true)}
-        className="flex-row items-center justify-between px-4 py-3.5 bg-white border border-cream-300 rounded-lg shadow-sm"
+        onPress={handleOpen}
+        className="flex-row items-center justify-between px-4 py-3.5 bg-white border border-cream-300 rounded-lg"
       >
         <Text
           className={`${
@@ -141,13 +159,25 @@ export default function BetterSelector<T extends boolean = true>({
       <Modal
         visible={modalVisible}
         transparent={true}
-        animationType="slide"
+        animationType="none"
         onRequestClose={handleClose}
       >
         <TouchableWithoutFeedback onPress={handleClose}>
           <View className="flex-1 bg-black/50 justify-end">
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View className="bg-white rounded-t-xl max-h-[80%]">
+              <Animated.View
+                className="bg-white rounded-t-xl max-h-[80%]"
+                style={{
+                  transform: [
+                    {
+                      translateY: slideAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [600, 0],
+                      }),
+                    },
+                  ],
+                }}
+              >
                 {/* Modal header */}
                 <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
                   <TouchableOpacity
@@ -191,7 +221,7 @@ export default function BetterSelector<T extends boolean = true>({
                   )}
                   contentContainerStyle={{ paddingBottom: 20 }}
                 />
-              </View>
+              </Animated.View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>

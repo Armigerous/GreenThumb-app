@@ -14,13 +14,9 @@ export default function PreferencesSection({
   updateFormValues,
 }: PreferencesSectionProps) {
   return (
-    <View className="space-y-5 px-4">
+    <View className="space-y-5">
       {/* Maintenance */}
-      <CollapsibleSection
-        title="Maintenance"
-        icon="construct-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Maintenance" icon="construct-outline">
         <View className="mt-2">
           <BetterSelector
             label="Maintenance Level"
@@ -33,12 +29,32 @@ export default function PreferencesSection({
         </View>
       </CollapsibleSection>
 
+      {/* Space & Requirements */}
+      <CollapsibleSection title="Space & Requirements" icon="resize-outline">
+        <View className="mt-2 space-y-4">
+          <BetterSelector
+            label="Available Space"
+            placeholder="Select available space"
+            items={LOOKUP_TABLES.available_space_to_plant}
+            value={formValues.available_space_to_plant_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("available_space_to_plant_ids", value)
+            }
+          />
+          <BetterSelector
+            label="Resistance Challenges"
+            placeholder="Select resistance challenges"
+            items={LOOKUP_TABLES.resistance_to_challenges}
+            value={formValues.resistance_to_challenges_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("resistance_to_challenges_ids", value)
+            }
+          />
+        </View>
+      </CollapsibleSection>
+
       {/* User Preferences */}
-      <CollapsibleSection
-        title="Garden Preferences"
-        icon="options-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Garden Preferences" icon="options-outline">
         <View className="p-4 bg-cream-50 border border-cream-300 rounded-lg mt-2">
           <View className="flex-row justify-between items-center mb-6">
             <View className="flex-1 mr-4">

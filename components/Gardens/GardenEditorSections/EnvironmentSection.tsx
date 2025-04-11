@@ -14,13 +14,9 @@ export default function EnvironmentSection({
   updateFormValues,
 }: EnvironmentSectionProps) {
   return (
-    <View className="space-y-5 px-4">
-      {/* Sunlight Requirements */}
-      <CollapsibleSection
-        title="Sunlight"
-        icon="sunny-outline"
-        initiallyExpanded={true}
-      >
+    <View className="space-y-5">
+      {/* Sunlight */}
+      <CollapsibleSection title="Sunlight" icon="sunny-outline">
         <View className="mt-2">
           {/* Note: sunlight_ids in the form maps to light_ids in the database */}
           <BetterSelector
@@ -35,12 +31,8 @@ export default function EnvironmentSection({
         </View>
       </CollapsibleSection>
 
-      {/* Soil Information */}
-      <CollapsibleSection
-        title="Soil Characteristics"
-        icon="layers-outline"
-        initiallyExpanded={true}
-      >
+      {/* Soil Characteristics */}
+      <CollapsibleSection title="Soil Characteristics" icon="layers-outline">
         <View className="mt-2 space-y-1">
           <BetterSelector
             label="Soil Texture"
@@ -74,20 +66,34 @@ export default function EnvironmentSection({
         </View>
       </CollapsibleSection>
 
-      {/* Available Space */}
-      <CollapsibleSection
-        title="Available Space"
-        icon="resize-outline"
-        initiallyExpanded={true}
-      >
-        <View className="mt-2">
+      {/* Location */}
+      <CollapsibleSection title="Location" icon="location-outline">
+        <View className="mt-2 space-y-4">
           <BetterSelector
-            label="Available Space"
-            placeholder="Select available space"
-            items={LOOKUP_TABLES.available_space_to_plant}
-            value={formValues.available_space_to_plant_ids}
+            label="USDA Hardiness Zone"
+            placeholder="Select hardiness zone"
+            items={LOOKUP_TABLES.usda_zone}
+            value={formValues.usda_zone_ids}
             onChange={(value: number[]) =>
-              updateFormValues("available_space_to_plant_ids", value)
+              updateFormValues("usda_zone_ids", value)
+            }
+          />
+          <BetterSelector
+            label="NC Region"
+            placeholder="Select NC region"
+            items={LOOKUP_TABLES.nc_regions}
+            value={formValues.nc_region_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("nc_region_ids", value)
+            }
+          />
+          <BetterSelector
+            label="Landscape Location"
+            placeholder="Select landscape locations"
+            items={LOOKUP_TABLES.landscape_location}
+            value={formValues.landscape_location_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("landscape_location_ids", value)
             }
           />
         </View>

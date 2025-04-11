@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 export default function GardensScreen() {
   const { user } = useUser();
@@ -62,79 +63,89 @@ export default function GardensScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 px-4 pt-4">
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
-          <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
-          <TouchableOpacity
-            className="bg-primary border border-brand-700 rounded-lg p-2 flex-row items-center"
-            onPress={() => router.push("/(home)/gardens/new")}
-          >
-            <Text className="text-primary-foreground font-medium mr-2">
-              New Garden
+    <PageContainer scroll={true} padded={false}>
+      {/* Header */}
+      <View className="flex-row justify-between items-center mb-6 px-4 pt-4">
+        <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
+        <TouchableOpacity
+          className="bg-primary rounded-lg px-4 py-2 flex-row items-center"
+          onPress={() => router.push("/(home)/gardens/new")}
+        >
+          <Text className="text-primary-foreground font-medium mr-2">
+            New Garden
+          </Text>
+          <Ionicons name="add" size={24} color="#fffefa" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Overall Health Summary */}
+      {overallHealth && (
+        <View className="flex-row justify-between mb-6 px-4">
+          <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
+            <Text className="text-xs text-cream-600 mb-1">Total Plants</Text>
+            <Text className="text-xl font-bold text-foreground">
+              {overallHealth.totalPlantsCount}
             </Text>
-            <Ionicons name="add" size={24} color="#fffefa" />
-          </TouchableOpacity>
-        </View>
+          </View>
 
-        {/* Overall Health Summary */}
-        {overallHealth && (
-          <View className="flex-row justify-between mb-6">
-            <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
-              <Text className="text-xs text-cream-600 mb-1">Total Plants</Text>
-              <Text className="text-xl font-bold text-foreground">
-                {overallHealth.totalPlantsCount}
+          <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
+            <Text className="text-xs text-cream-600 mb-1">Need Care</Text>
+            <Text className="text-xl font-bold text-destructive">
+              {overallHealth.plantsNeedingCare}
+            </Text>
+          </View>
+
+          <View className="flex-1 bg-cream-50 rounded-lg p-3 ml-2 shadow-sm">
+            <Text className="text-xs text-cream-600 mb-1">Health Score</Text>
+            <View className="flex-row items-center">
+              <Text
+                className={`text-xl font-bold ${
+                  overallHealth.healthPercentage >= 80
+                    ? "text-brand-600"
+                    : overallHealth.healthPercentage >= 50
+                    ? "text-accent-600"
+                    : "text-destructive"
+                }`}
+              >
+                {overallHealth.healthPercentage}%
               </Text>
-            </View>
-
-            <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
-              <Text className="text-xs text-cream-600 mb-1">Need Care</Text>
-              <Text className="text-xl font-bold text-destructive">
-                {overallHealth.plantsNeedingCare}
-              </Text>
-            </View>
-
-            <View className="flex-1 bg-cream-50 rounded-lg p-3 ml-2 shadow-sm">
-              <Text className="text-xs text-cream-600 mb-1">Health Score</Text>
-              <View className="flex-row items-center">
-                <Text
-                  className={`text-xl font-bold ${
-                    overallHealth.healthPercentage >= 80
-                      ? "text-brand-600"
-                      : overallHealth.healthPercentage >= 50
-                      ? "text-accent-600"
-                      : "text-destructive"
-                  }`}
-                >
-                  {overallHealth.healthPercentage}%
-                </Text>
-              </View>
             </View>
           </View>
-        )}
+        </View>
+      )}
 
-        {/* Gardens List */}
+      {/* Gardens List */}
+      <View className="px-4">
         {gardens && gardens.length > 0 ? (
           gardens.map((garden) => (
             <GardenCard key={garden.garden_id} garden={garden} />
           ))
         ) : (
           <View className="flex-1 justify-center items-center py-8">
-            <Text className="text-cream-600 text-center mb-4">
-              You haven't created any gardens yet
-            </Text>
-            <TouchableOpacity
-              className="bg-primary rounded-lg px-6 py-3"
-              onPress={() => router.push("/(home)/gardens/new")}
-            >
-              <Text className="text-primary-foreground font-medium">
-                Create Your First Garden
+            <View className="flex-col items-center justify-center gap-4">
+              <View className="bg-brand-50 rounded-full p-4">
+                <Ionicons name="leaf" size={62} color="#5E994B" />
+              </View>
+              <Text className="text-foreground text-center font-bold text-lg capitalize">
+                No Gardens Yet
               </Text>
-            </TouchableOpacity>
+              <Text className="text-foreground text-center px-8">
+                Create your first garden to track and nurture your plants in one
+                place
+              </Text>
+              <TouchableOpacity
+                className="bg-primary rounded-lg px-6 py-3 flex-row items-center gap-2"
+                onPress={() => router.push("/(home)/gardens/new")}
+              >
+                <Text className="text-primary-foreground font-medium">
+                  Create Your First Garden
+                </Text>
+                <Ionicons name="arrow-forward" size={18} color="#fffefa" />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </PageContainer>
   );
 }

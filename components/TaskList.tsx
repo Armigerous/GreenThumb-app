@@ -4,11 +4,12 @@ import { Task } from "./Task";
 
 interface TaskListProps {
   tasks: TaskWithDetails[];
-  onToggleComplete: (id: number) => void;
+  onToggleComplete?: (id: number) => void;
   showGardenName?: boolean;
   groupByGarden?: boolean;
   maxTasks?: number;
   className?: string;
+  queryKey?: string[];
 }
 
 /**
@@ -22,6 +23,7 @@ export function TaskList({
   groupByGarden = false,
   maxTasks,
   className = "",
+  queryKey,
 }: TaskListProps) {
   // If no tasks, show empty state
   if (!tasks || tasks.length === 0) {
@@ -69,6 +71,7 @@ export function TaskList({
                     task={task}
                     onToggleComplete={onToggleComplete}
                     showGardenName={false}
+                    queryKey={queryKey}
                   />
                 </View>
               ))}
@@ -99,6 +102,7 @@ export function TaskList({
             task={task}
             onToggleComplete={onToggleComplete}
             showGardenName={showGardenName}
+            queryKey={queryKey}
           />
         </View>
       ))}

@@ -16,11 +16,7 @@ export default function AestheticsSection({
   return (
     <View className="space-y-5 px-4">
       {/* Flower Characteristics */}
-      <CollapsibleSection
-        title="Flower Characteristics"
-        icon="flower-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Flower Characteristics" icon="flower-outline">
         <View className="mt-2 space-y-1">
           <BetterSelector
             label="Flower Colors"
@@ -59,11 +55,7 @@ export default function AestheticsSection({
       </CollapsibleSection>
 
       {/* Leaf Characteristics */}
-      <CollapsibleSection
-        title="Leaf Characteristics"
-        icon="leaf-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Leaf Characteristics" icon="leaf-outline">
         <View className="mt-2 space-y-1">
           <BetterSelector
             label="Leaf Colors"
@@ -103,11 +95,7 @@ export default function AestheticsSection({
 
       {/* Fall Color */}
       {LOOKUP_TABLES.fall_color && (
-        <CollapsibleSection
-          title="Fall Colors"
-          icon="leaf-outline"
-          initiallyExpanded={true}
-        >
+        <CollapsibleSection title="Fall Colors" icon="leaf-outline">
           <View className="mt-2">
             <BetterSelector
               label="Fall Colors"
@@ -123,11 +111,7 @@ export default function AestheticsSection({
       )}
 
       {/* Texture */}
-      <CollapsibleSection
-        title="Texture"
-        icon="apps-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Texture" icon="apps-outline">
         <View className="mt-2">
           <BetterSelector
             label="Texture Preference"

@@ -14,32 +14,43 @@ export default function DesignSection({
   updateFormValues,
 }: DesignSectionProps) {
   return (
-    <View className="space-y-5 px-4">
-      {/* Location Types */}
-      <CollapsibleSection
-        title="Landscape Location"
-        icon="location-outline"
-        initiallyExpanded={true}
-      >
-        <View className="mt-2">
-          <BetterSelector
-            label="Location"
-            placeholder="Select landscape locations"
-            items={LOOKUP_TABLES.landscape_location}
-            value={formValues.landscape_location_ids || []}
-            onChange={(value: number[]) =>
-              updateFormValues("landscape_location_ids", value)
-            }
-          />
-        </View>
-      </CollapsibleSection>
+    <View className="space-y-5">
+      {/* Plant Types */}
+      {LOOKUP_TABLES.plant_type && (
+        <CollapsibleSection title="Plant Types" icon="leaf-outline">
+          <View className="mt-2">
+            <BetterSelector
+              label="Plant Types"
+              placeholder="Select plant types"
+              items={LOOKUP_TABLES.plant_type}
+              value={formValues.plant_type_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("plant_type_ids", value)
+              }
+            />
+          </View>
+        </CollapsibleSection>
+      )}
+
+      {/* Plant Form/Habit */}
+      {LOOKUP_TABLES.habit_form && (
+        <CollapsibleSection title="Plant Form/Habit" icon="git-branch-outline">
+          <View className="mt-2">
+            <BetterSelector
+              label="Plant Form/Habit"
+              placeholder="Select plant forms"
+              items={LOOKUP_TABLES.habit_form}
+              value={formValues.habit_form_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("habit_form_ids", value)
+              }
+            />
+          </View>
+        </CollapsibleSection>
+      )}
 
       {/* Garden Themes */}
-      <CollapsibleSection
-        title="Garden Theme"
-        icon="color-palette-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Garden Theme" icon="color-palette-outline">
         <View className="mt-2">
           <BetterSelector
             label="Garden Themes"
@@ -53,13 +64,98 @@ export default function DesignSection({
         </View>
       </CollapsibleSection>
 
+      {/* Plant Aesthetics */}
+      <CollapsibleSection title="Plant Aesthetics" icon="flower-outline">
+        <View className="mt-2 space-y-4">
+          <BetterSelector
+            label="Flower Colors"
+            placeholder="Select flower colors"
+            items={LOOKUP_TABLES.flower_color}
+            value={formValues.flower_color_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("flower_color_ids", value)
+            }
+          />
+          {LOOKUP_TABLES.flower_bloom_time && (
+            <BetterSelector
+              label="Flower Bloom Time"
+              placeholder="Select bloom times"
+              items={LOOKUP_TABLES.flower_bloom_time}
+              value={formValues.flower_bloom_time_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("flower_bloom_time_ids", value)
+              }
+            />
+          )}
+          {LOOKUP_TABLES.flower_value_to_gardener && (
+            <BetterSelector
+              label="Flower Value to Gardener"
+              placeholder="Select flower values"
+              items={LOOKUP_TABLES.flower_value_to_gardener}
+              value={formValues.flower_value_to_gardener_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("flower_value_to_gardener_ids", value)
+              }
+            />
+          )}
+          <BetterSelector
+            label="Leaf Colors"
+            placeholder="Select leaf colors"
+            items={LOOKUP_TABLES.leaf_color}
+            value={formValues.leaf_color_ids}
+            onChange={(value: number[]) =>
+              updateFormValues("leaf_color_ids", value)
+            }
+          />
+          {LOOKUP_TABLES.leaf_feel && (
+            <BetterSelector
+              label="Leaf Feel"
+              placeholder="Select leaf textures"
+              items={LOOKUP_TABLES.leaf_feel}
+              value={formValues.leaf_feel_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("leaf_feel_ids", value)
+              }
+            />
+          )}
+          {LOOKUP_TABLES.leaf_value && (
+            <BetterSelector
+              label="Leaf Value"
+              placeholder="Select leaf values"
+              items={LOOKUP_TABLES.leaf_value}
+              value={formValues.leaf_value_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("leaf_value_ids", value)
+              }
+            />
+          )}
+          {LOOKUP_TABLES.fall_color && (
+            <BetterSelector
+              label="Fall Colors"
+              placeholder="Select fall colors"
+              items={LOOKUP_TABLES.fall_color}
+              value={formValues.fall_color_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("fall_color_ids", value)
+              }
+            />
+          )}
+          <BetterSelector
+            label="Texture Preference"
+            placeholder="Select texture preference"
+            items={LOOKUP_TABLES.texture}
+            value={formValues.texture_id}
+            onChange={(value: number | null) =>
+              updateFormValues("texture_id", value)
+            }
+            multiple={false}
+          />
+        </View>
+      </CollapsibleSection>
+
       {/* Design Features */}
       {LOOKUP_TABLES.design_feature && (
-        <CollapsibleSection
-          title="Design Features"
-          icon="grid-outline"
-          initiallyExpanded={true}
-        >
+        <CollapsibleSection title="Design Features" icon="grid-outline">
           <View className="mt-2">
             <BetterSelector
               label="Design Features"

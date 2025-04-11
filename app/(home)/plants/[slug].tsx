@@ -1,7 +1,6 @@
 import { ErrorBoundary } from "@/components/Database/Plant/ErrorBoundary";
 import { ErrorView } from "@/components/Database/Plant/ErrorView";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";
-import { addPlantToStoredList } from "@/lib/backgroundService";
 import { usePlantDetails } from "@/lib/queries";
 import { PlantData, PlantImage } from "@/types/plant";
 import { TabType } from "@/types/tab";
@@ -17,8 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
+import CachedImage from "@/components/Database/CachedImage";
 
 // Tab bar component
 const TabBar = ({
@@ -108,15 +108,6 @@ export default function PlantDetailScreen() {
     error: queryError,
   } = usePlantDetails(slug);
 
-  // Add this plant to the stored list for background updates
-  useEffect(() => {
-    if (slug && typeof slug === "string") {
-      addPlantToStoredList(slug).catch((err) => {
-        console.error("Failed to add plant to stored list:", err);
-      });
-    }
-  }, [slug]);
-
   useEffect(() => {
     if (plant) {
       // Use the first common name or scientific name for the title
@@ -169,7 +160,7 @@ export default function PlantDetailScreen() {
   // Wrap the main content with ErrorBoundary
   return (
     <ErrorBoundary>
-      <SafeAreaView className="flex-1 bg-cream-50" edges={["top"]}>
+      <PageContainer scroll={false} padded={false} safeArea={false}>
         <View className="flex-1">
           <ScrollView
             contentContainerStyle={{ paddingBottom: bottomPadding }}
@@ -260,11 +251,10 @@ export default function PlantDetailScreen() {
                     keyExtractor={(item, index) => `image-${index}`}
                     renderItem={({ item }) => (
                       <View className="mr-2">
-                        <Image
-                          source={{ uri: item.img || undefined }}
-                          className="h-[120px] w-[180px] rounded-lg"
+                        <CachedImage
+                          uri={item.img || ""}
+                          style={{ height: 120, width: 180, borderRadius: 8 }}
                           resizeMode="cover"
-                          alt={item.alt_text || "Plant image"}
                         />
                         {item.caption && (
                           <Text className="text-xs text-cream-500 mt-1 w-[180px]">
@@ -280,9 +270,6 @@ export default function PlantDetailScreen() {
 
               {/* Quick Actions - Add to Garden */}
               <QuickActions plant={plant} />
-
-              {/* Tabs for content sections */}
-              <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
 
               {/* Tab Content - Reduced margin top from mt-6 to mt-2 to reduce the gap */}
               <View className="mt-2 mb-4">
@@ -775,8 +762,13 @@ export default function PlantDetailScreen() {
               </View>
             </View>
           </ScrollView>
+
+          {/* Tab Bar at the bottom */}
+          <View className="absolute bottom-0 left-0 right-0">
+            <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
+          </View>
         </View>
-      </SafeAreaView>
+      </PageContainer>
     </ErrorBoundary>
   );
 }

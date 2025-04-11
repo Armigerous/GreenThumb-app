@@ -44,7 +44,6 @@ const cuteNames = [
   "Lily",
   "Charlie",
   "Sophie",
-  "Max",
   "Ruby",
   "Bella",
   "Toby",
