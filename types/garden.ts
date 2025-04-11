@@ -347,3 +347,25 @@ export interface GardenDatabase {
   /** Optional longitude coordinate of the garden location */
   longitude?: number;
 }
+
+/**
+ * Represents a task summary from the garden_tasks_summary view
+ */
+export interface GardenTaskSummary {
+  /** ID of the garden this task belongs to */
+  garden_id: number;
+  /** Unique identifier for the task */
+  task_id: number;
+  /** Type of task to be performed */
+  task_type: string;
+  /** The due date for the task */
+  due_date: string;
+  /** Whether the task has been completed */
+  completed: boolean;
+  /** ID of the plant this task is for */
+  plant_id: string;
+  /** Nickname of the plant this task is for */
+  plant_nickname: string;
+  /** Current status of the plant */
+  plant_status: string;
+}

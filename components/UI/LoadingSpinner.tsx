@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { PlantGrowthLoader, CompactPlantLoader } from "./PlantGrowthLoader";
 
 /**
@@ -10,19 +10,29 @@ import { PlantGrowthLoader, CompactPlantLoader } from "./PlantGrowthLoader";
  *
  * @param message - Optional message to display below the spinner
  * @param iconSize - Size of the loading spinner (defaults to 40)
+ * @param color - Color of the loading animation (defaults to brand green)
+ * @param backgroundColor - Background color class for the container
  */
 interface LoadingSpinnerProps {
   message?: string;
   iconSize?: number;
+  color?: string;
+  backgroundColor?: string;
 }
 
 export function LoadingSpinner({
   message = "Loading...",
   iconSize = 40,
+  color = "#047857", // Brand green color
+  backgroundColor = "bg-transparent",
 }: LoadingSpinnerProps) {
   return (
-    <View className="flex-1 justify-center items-center bg-cream-50">
-      <PlantGrowthLoader message={message} color="#047857" />
+    <View className="flex-1 justify-center items-center">
+      <PlantGrowthLoader
+        message={message}
+        color={color}
+        backgroundColor={backgroundColor}
+      />
     </View>
   );
 }
@@ -37,7 +47,7 @@ interface CompactSpinnerProps {
 
 export function CompactSpinner({
   size = 24,
-  color = "#047857",
+  color = "#047857", // Brand green color
 }: CompactSpinnerProps) {
   return <CompactPlantLoader size={size} color={color} />;
 }

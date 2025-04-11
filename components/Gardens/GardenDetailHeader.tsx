@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import type { Garden, GardenDashboard } from "@/types/garden";
+import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 
 type GardenDetailHeaderProps = {
   garden: Garden;
@@ -85,12 +86,12 @@ export default function GardenDetailHeader({
                 {dashboardData.health_percentage}% Healthy
               </Text>
             </View>
-            <View className="bg-cream-200 h-2 rounded-full overflow-hidden">
-              <View
-                className="bg-brand-500 h-full rounded-full"
-                style={{ width: `${dashboardData.health_percentage}%` }}
-              />
-            </View>
+            <AnimatedProgressBar
+              percentage={dashboardData.health_percentage}
+              color="#77B860" // brand-500
+              height={8}
+              duration={500}
+            />
           </View>
         </View>
       ) : (

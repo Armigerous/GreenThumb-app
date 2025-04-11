@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 // Onboarding slides data
 const slides = [
@@ -163,7 +164,7 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       <View className="flex-row justify-end items-center px-5 pt-2">
         <TouchableOpacity
           onPress={() => router.push("/(auth)/sign-in")}
@@ -203,48 +204,43 @@ export default function WelcomeScreen() {
               (index + 1) * width,
             ];
 
-            const dotWidth = scrollX.interpolate({
-              inputRange,
-              outputRange: [8, 16, 8],
-              extrapolate: "clamp",
-            });
-
-            const opacity = scrollX.interpolate({
+            const dotOpacity = scrollX.interpolate({
               inputRange,
               outputRange: [0.3, 1, 0.3],
               extrapolate: "clamp",
             });
 
+            const dotWidth = scrollX.interpolate({
+              inputRange,
+              outputRange: [10, 20, 10],
+              extrapolate: "clamp",
+            });
+
             return (
               <Animated.View
-                key={index.toString()}
-                className="h-2 rounded-full bg-primary"
-                style={{ width: dotWidth, opacity }}
+                key={index}
+                className="h-2.5 rounded-full bg-primary"
+                style={{
+                  width: dotWidth,
+                  opacity: dotOpacity,
+                }}
               />
             );
           })}
         </View>
 
-        <View className="px-5 mt-auto pb-8">
+        {/* Get Started Button */}
+        <View className="items-center mb-8 px-5">
           <TouchableOpacity
-            className="bg-primary py-4 rounded-xl w-full items-center mb-4"
             onPress={handleGetStarted}
+            className="w-full bg-primary py-4 rounded-xl"
           >
-            <Text className="text-primary-foreground text-base font-bold">
-              Start Your Plant Journey
+            <Text className="text-center text-primary-foreground font-bold text-lg">
+              Get Started
             </Text>
           </TouchableOpacity>
-
-          <View className="flex-row justify-center items-center">
-            <Text className="text-foreground opacity-80">
-              Already have an account?{" "}
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/sign-in")}>
-              <Text className="text-primary font-semibold">Sign In</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

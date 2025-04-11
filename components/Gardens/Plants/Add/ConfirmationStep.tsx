@@ -4,6 +4,7 @@ import { UserPlant, GardenDashboard } from "@/types/garden";
 import { PlantData } from "@/types/plant";
 import SubmitButton from "./SubmitButton";
 import ErrorMessage from "./ErrorMessage";
+import AnimatedProgressBar from "../../../UI/AnimatedProgressBar";
 
 /**
  * ConfirmationStep component for reviewing and confirming plant details
@@ -139,12 +140,12 @@ export default function ConfirmationStep({
               ? `Adding your plant... ${uploadProgress}%`
               : "Plant added successfully!"}
           </Text>
-          <View className="h-2 bg-cream-200 rounded-lg overflow-hidden">
-            <View
-              className="h-full bg-brand-500"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </View>
+          <AnimatedProgressBar
+            percentage={uploadProgress}
+            color="#77B860" // brand-500
+            height={8}
+            duration={300}
+          />
         </View>
       )}
 

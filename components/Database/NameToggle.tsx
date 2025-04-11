@@ -24,7 +24,7 @@ const NameToggle: React.FC<NameToggleProps> = ({
         activeOpacity={0.7}
       >
         <View
-          className={`w-5 h-5 rounded-full bg-cream-50 justify-center items-center shadow-sm ${
+          className={`w-5 h-5 rounded-full bg-cream-50 justify-center items-center ${
             useCommonNames ? "translate-x-6" : "translate-x-0"
           }`}
         >

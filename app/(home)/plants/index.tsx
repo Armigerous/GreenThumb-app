@@ -9,11 +9,14 @@ import {
   Text,
   View,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAtom } from "jotai";
 import { activeFiltersAtom } from "@/atoms/filters";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 export default function PlantDatabaseScreen() {
   const router = useRouter();
@@ -57,45 +60,49 @@ export default function PlantDatabaseScreen() {
   }, [router]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="pt-5 px-5">
-        <Text className="text-2xl text-foreground font-bold mb-4">
-          Plant Database
-        </Text>
-
-        {/* Search Bar */}
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search plants..."
-        />
-
-        {/* Name Toggle and Filter Selector in a row */}
-        <View className="flex-row justify-between items-center">
-          <NameToggle
-            useCommonNames={useCommonNames}
-            onToggle={handleNameTypeToggle}
-          />
-          <TouchableOpacity
-            className="flex-row items-center justify-center bg-primary px-3 py-2 rounded-lg"
-            onPress={handleOpenFilter}
-          >
-            <Feather name="filter" color="#fffefa" size={16} />
-            <Text className="ml-2 text-sm font-medium text-primary-foreground">
-              Filter
+    <PageContainer scroll={false} padded={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View className="flex-1">
+          <View className="pt-5 px-5">
+            <Text className="text-2xl text-foreground font-bold mb-4">
+              Plant Database
             </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      {/* Search Results */}
-      <SearchResults
-        query={debouncedQuery}
-        page={page}
-        filters={activeFilters}
-        nameType={useCommonNames ? "common" : "scientific"}
-        onPageChange={handlePageChange}
-      />
-    </SafeAreaView>
+            {/* Search Bar */}
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search plants..."
+            />
+
+            {/* Name Toggle and Filter Selector in a row */}
+            <View className="flex-row justify-between items-center">
+              <NameToggle
+                useCommonNames={useCommonNames}
+                onToggle={handleNameTypeToggle}
+              />
+              <TouchableOpacity
+                className="flex-row items-center justify-center bg-primary px-3 py-2 rounded-lg"
+                onPress={handleOpenFilter}
+              >
+                <Feather name="filter" color="#fffefa" size={16} />
+                <Text className="ml-2 text-sm font-medium text-primary-foreground">
+                  Filter
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Search Results */}
+          <SearchResults
+            query={debouncedQuery}
+            page={page}
+            filters={activeFilters}
+            nameType={useCommonNames ? "common" : "scientific"}
+            onPageChange={handlePageChange}
+          />
+        </View>
+      </TouchableWithoutFeedback>
+    </PageContainer>
   );
 }

@@ -3,11 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function GardensLayout() {
   return (
-    <Stack
-      screenOptions={{
-        contentStyle: { backgroundColor: "#fff8e8" },
-      }}
-    >
+    <Stack>
       <Stack.Screen
         name="index"
         options={{

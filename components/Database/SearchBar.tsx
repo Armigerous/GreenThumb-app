@@ -14,7 +14,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Search plants...",
 }) => {
   return (
-    <View className="flex-row items-center bg-cream-100 rounded-xl px-3 py-2.5 mb-4 border border-cream-300">
+    <View className="flex-row items-center bg-cream-50 rounded-xl px-3 py-2.5 mb-4 border border-cream-300">
       <Ionicons name="search" size={20} color="#161513" />
       <TextInput
         className="flex-1 ml-2 text-cream-800"

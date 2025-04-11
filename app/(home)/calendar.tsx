@@ -28,6 +28,7 @@ import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
 import { TaskList } from "@/components/TaskList";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -178,7 +179,7 @@ export default function CalendarScreen() {
   }, [tasks]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       {/* Header */}
       <View className="px-5 pt-5">
         <View className="flex-row justify-between items-center mb-4">
@@ -336,6 +337,6 @@ export default function CalendarScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

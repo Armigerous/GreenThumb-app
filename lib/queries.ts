@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
 import type { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
-import type { Garden, GardenDashboard, PlantTask, TaskWithDetails } from "@/types/garden";
+import type { Garden, GardenDashboard, PlantTask, TaskWithDetails, GardenTaskSummary } from "@/types/garden";
 import { useEffect } from "react";
 import {
   shouldUpdateCache,
@@ -353,6 +353,23 @@ export function useUserPlantDetails(userPlantId: string) {
         throw new Error("Plant not found");
       }
 
+      // Fetch tasks from the garden_tasks_summary view
+      const { data: tasks, error: tasksError } = await supabase
+        .from("garden_tasks_summary")
+        .select(`
+          task_id,
+          task_type,
+          due_date,
+          completed,
+          plant_status
+        `)
+        .eq("plant_id", userPlantId)
+        .order("due_date", { ascending: true });
+
+      if (tasksError) {
+        console.error("Error fetching plant tasks:", tasksError);
+      }
+
       // Now get the garden information for this plant
       const { data: garden, error: gardenError } = await supabase
         .from("user_gardens")
@@ -382,9 +399,19 @@ export function useUserPlantDetails(userPlantId: string) {
         console.error("Error fetching plant info:", plantInfoError);
       }
 
+      // Transform tasks to match the PlantTask interface
+      const plantTasks = tasks?.map(task => ({
+        id: task.task_id,
+        user_plant_id: userPlantId,
+        task_type: task.task_type,
+        due_date: task.due_date,
+        completed: task.completed
+      })) || [];
+
       // Combine and transform the data
       return {
         ...userPlant,
+        plant_tasks: plantTasks,
         garden_name: garden?.name || 'Unknown Garden',
         scientific_name: plantInfo?.scientific_name || 'Unknown Species',
         common_names: plantInfo?.common_names || [],
@@ -544,5 +571,44 @@ export function useTasksForDate(date: Date, userId?: string) {
     queryFn: () => getTasksForDate(date, userId),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     enabled: !!userId, // Only run the query if we have a user ID
+  });
+}
+
+/**
+ * Fetches garden tasks summary for a specific garden
+ * @param gardenId The ID of the garden to fetch tasks for
+ * @returns A promise that resolves to an array of GardenTaskSummary objects
+ */
+export async function getGardenTasksSummary(gardenId: number): Promise<GardenTaskSummary[]> {
+  try {
+    const { data, error } = await supabase
+      .from('garden_tasks_summary')
+      .select('*')
+      .eq('garden_id', gardenId)
+      .order('due_date', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching garden tasks summary:', error);
+      throw new Error(`Error fetching garden tasks summary: ${error.message}`);
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Unexpected error fetching garden tasks summary:', error);
+    throw error;
+  }
+}
+
+/**
+ * Hook to fetch and use garden tasks summary data
+ * @param gardenId The ID of the garden to fetch tasks for
+ * @returns A query result containing the garden tasks summary data
+ */
+export function useGardenTasksSummary(gardenId: number) {
+  return useQuery<GardenTaskSummary[], Error>({
+    queryKey: ['gardenTasksSummary', gardenId],
+    queryFn: () => getGardenTasksSummary(gardenId),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!gardenId, // Only run the query if we have a garden ID
   });
 }

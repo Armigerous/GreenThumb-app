@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import CachedImage from "@/components/Database/CachedImage";
 
 /**
  * PlantImageSelector component for handling plant image selection
@@ -148,9 +149,9 @@ export default function PlantImageSelector({
     <View className="items-center mb-6">
       {/* Image preview */}
       <View className="h-32 w-32 rounded-xl overflow-hidden bg-cream-100 mb-2">
-        <Image
-          source={{ uri: displayImage }}
-          className="h-full w-full"
+        <CachedImage
+          uri={displayImage}
+          style={{ height: "100%", width: "100%" }}
           resizeMode="cover"
         />
       </View>

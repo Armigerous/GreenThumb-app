@@ -114,7 +114,7 @@ const Pagination = memo(
     const pageNumbers = getPageNumbers();
 
     return (
-      <View className={`py-4 px-4 bg-white shadow-sm rounded-lg ${className}`}>
+      <View className={`py-4 px-4 bg-white rounded-lg ${className}`}>
         <View className="flex-row items-center justify-center">
           {/* Previous button */}
           <TouchableOpacity

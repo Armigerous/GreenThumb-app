@@ -8,7 +8,7 @@ export default function AuthRoutesLayout() {
 
   if (!isLoaded) {
     return (
-      <View className="flex-1 justify-center items-center bg-background">
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#5E994B" />
       </View>
     );

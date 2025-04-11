@@ -1,8 +1,15 @@
-import { View, Text, SafeAreaView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import NewGardenForm from "@/components/Gardens/NewGardenForm";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 export default function NewGarden() {
   const router = useRouter();
@@ -10,15 +17,31 @@ export default function NewGarden() {
   useSupabaseAuth();
 
   const handleSuccess = () => {
-    router.back();
+    // Navigate back to the gardens index
+    router.replace("/(home)/gardens");
   };
 
   const handleCancel = () => {
-    router.back();
+    // Show confirmation dialog before canceling
+    Alert.alert(
+      "Cancel Creating Garden",
+      "Are you sure you want to cancel? Any unsaved changes will be lost.",
+      [
+        {
+          text: "Keep Editing",
+          style: "cancel",
+        },
+        {
+          text: "Cancel",
+          style: "destructive",
+          onPress: () => router.replace("/(home)/gardens"),
+        },
+      ]
+    );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       <View className="flex-row justify-between items-center pt-5 px-5">
         <TouchableOpacity
           onPress={handleCancel}
@@ -40,6 +63,6 @@ export default function NewGarden() {
       <View className="flex-1 px-5">
         <NewGardenForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </View>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

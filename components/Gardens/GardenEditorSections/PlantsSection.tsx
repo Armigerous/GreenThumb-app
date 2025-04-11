@@ -17,11 +17,7 @@ export default function PlantsSection({
     <View className="space-y-5 px-4">
       {/* Plant Types */}
       {LOOKUP_TABLES.plant_type && (
-        <CollapsibleSection
-          title="Plant Types"
-          icon="leaf-outline"
-          initiallyExpanded={true}
-        >
+        <CollapsibleSection title="Plant Types" icon="leaf-outline">
           <View className="mt-2">
             <BetterSelector
               label="Plant Types"
@@ -38,11 +34,7 @@ export default function PlantsSection({
 
       {/* Plant Form/Habit */}
       {LOOKUP_TABLES.habit_form && (
-        <CollapsibleSection
-          title="Plant Form/Habit"
-          icon="git-branch-outline"
-          initiallyExpanded={true}
-        >
+        <CollapsibleSection title="Plant Form/Habit" icon="git-branch-outline">
           <View className="mt-2">
             <BetterSelector
               label="Plant Form/Habit"
@@ -58,11 +50,7 @@ export default function PlantsSection({
       )}
 
       {/* Growth Rate */}
-      <CollapsibleSection
-        title="Growth"
-        icon="trending-up-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Growth" icon="trending-up-outline">
         <View className="mt-2">
           <BetterSelector
             label="Growth Rate"
@@ -76,11 +64,7 @@ export default function PlantsSection({
       </CollapsibleSection>
 
       {/* Wildlife */}
-      <CollapsibleSection
-        title="Wildlife & Challenges"
-        icon="paw-outline"
-        initiallyExpanded={true}
-      >
+      <CollapsibleSection title="Wildlife & Challenges" icon="paw-outline">
         <View className="mt-2 space-y-1">
           <BetterSelector
             label="Attracts Wildlife"

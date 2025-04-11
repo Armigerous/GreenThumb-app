@@ -6,8 +6,6 @@ export default function PlantsLayout() {
   return (
     <Stack
       screenOptions={{
-        contentStyle: { backgroundColor: "#fff8e8" },
-        headerStyle: { backgroundColor: "#fff8e8" },
         headerShadowVisible: false,
       }}
     >
@@ -23,7 +21,6 @@ export default function PlantsLayout() {
           headerShown: false,
           headerBackTitle: "Plants",
           presentation: "card",
-          contentStyle: { backgroundColor: "#fff8e8" },
           headerLeft: ({ tintColor }) => (
             <Ionicons
               name="arrow-back"

@@ -1,24 +1,24 @@
-import {
-  Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  Switch,
-  Linking,
-} from "react-native";
-import { useUser, useAuth } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
-import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 export default function ProfileScreen() {
   const { user } = useUser();
@@ -184,7 +184,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <PageContainer scroll={false} padded={false}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-5 pt-5">
           <Text className="text-2xl font-bold text-foreground mb-6">
@@ -348,12 +348,12 @@ export default function ProfileScreen() {
             )}
 
             <TouchableOpacity
-              className="flex-row items-center justify-center py-4 mt-6 bg-red-50 border border-destructive rounded-lg"
+              className="flex-row items-center justify-center py-4 mt-6 bg-destructive rounded-lg"
               onPress={handleLogout}
               disabled={isLoading}
             >
-              <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-              <Text className="text-base text-destructive font-medium ml-3">
+              <Ionicons name="log-out-outline" size={24} color="#fffefa" />
+              <Text className="text-base text-destructive-foreground font-medium ml-3">
                 {isLoading ? "Logging out..." : "Logout"}
               </Text>
             </TouchableOpacity>
@@ -364,6 +364,6 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </PageContainer>
   );
 }

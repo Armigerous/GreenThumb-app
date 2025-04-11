@@ -382,7 +382,7 @@ export default function GardenSelectionStep({
       </ScrollView>
 
       {/* Navigation buttons */}
-      <View className="flex-row justify-between items-center py-4 px-4">
+      <View className="flex-row justify-between items-center py-4">
         <TouchableOpacity
           className="flex-row items-center justify-center py-3 px-5 rounded-xl border border-cream-400 bg-cream-200"
           onPress={() => router.push(`/(home)/plants/${plantSlug}`)}
@@ -407,7 +407,7 @@ export default function GardenSelectionStep({
                 color="#5E994B"
                 style={{ marginRight: 4 }}
               />
-              <Text className="text-sm text-brand-600">
+              <Text className="text-sm text-primary">
                 {selectedGarden.name}
               </Text>
             </View>

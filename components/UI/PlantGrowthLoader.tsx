@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 interface PlantGrowthLoaderProps {
   message?: string;
   color?: string;
+  backgroundColor?: string;
 }
 
 /**
@@ -12,7 +13,8 @@ interface PlantGrowthLoaderProps {
  */
 export function PlantGrowthLoader({
   message = "Growing...",
-  color = "#5E994B",
+  color = "#047857", // Brand green color
+  backgroundColor = "bg-transparent", // Cream 50
 }: PlantGrowthLoaderProps) {
   // Animation values
   const seedSize = useRef(new Animated.Value(0)).current;
@@ -134,7 +136,7 @@ export function PlantGrowthLoader({
   });
 
   return (
-    <View className="flex-1 justify-center items-center bg-cream-50">
+    <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
       <View className="h-24 w-24 items-center justify-center">
         {/* Seed */}
         <Animated.View
@@ -185,7 +187,7 @@ export function PlantGrowthLoader({
         </Animated.View>
       </View>
 
-      <Text className="mt-3 text-base text-cream-600">{message}</Text>
+      <Text className="mt-3 text-base text-cream-700">{message}</Text>
     </View>
   );
 }
@@ -200,7 +202,7 @@ interface CompactPlantLoaderProps {
 
 export function CompactPlantLoader({
   size = 24,
-  color = "#5E994B",
+  color = "#047857", // Brand green color
 }: CompactPlantLoaderProps) {
   // Animation values
   const seedSize = useRef(new Animated.Value(0)).current;

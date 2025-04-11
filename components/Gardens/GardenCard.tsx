@@ -1,36 +1,28 @@
 import { GardenDashboard } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { format } from "date-fns";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 
+/**
+ * GardenCard displays summary information about a garden
+ * Uses color-coding to indicate the health status of plants
+ */
 export default function GardenCard({ garden }: { garden: GardenDashboard }) {
   const router = useRouter();
 
   // Determine the garden health status color
   const getHealthStatusColor = () => {
-    if (!garden.total_plants) return "#161513"; // Default gray
-
+    if (!garden.total_plants) return "#484540"; // Darker gray for better contrast
     const healthPercentage = Number(garden.health_percentage);
-    if (healthPercentage >= 80) return "#77B860"; // Green for healthy
-    if (healthPercentage >= 50) return "#bea100"; // Yellow/amber for needs attention
-    return "#E50000"; // Red for critical
+    if (healthPercentage >= 80) return "#5E994B"; // Darker green for better contrast - brand-600
+    if (healthPercentage >= 50) return "#9e8600"; // Darker amber for better contrast - accent-500
+    return "#E50000"; // Red for critical (already high contrast)
   };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "MMM d, yyyy");
-    } catch (e) {
-      return "Unknown date";
-    }
-  };
-
-  // Get the next upcoming task
-  const nextTask = garden.upcoming_tasks?.[0];
 
   return (
     <TouchableOpacity
-      className="bg-white border border-cream-300 rounded-xl shadow-sm mb-5 overflow-hidden"
+      className="bg-white border border-cream-300 rounded-xl p-4 mb-4"
       onPress={() =>
         router.push({
           pathname: "/(home)/gardens/[id]",
@@ -38,174 +30,36 @@ export default function GardenCard({ garden }: { garden: GardenDashboard }) {
         })
       }
     >
-      <View className="p-5">
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-foreground text-xl font-bold">
+      <View>
+        {/* Garden Name and Alert Badge */}
+        <View className="flex-row justify-between items-start mb-2">
+          <Text className="text-lg font-semibold text-foreground flex-1 mr-2">
             {garden.name}
           </Text>
           {garden.plants_needing_care > 0 && (
-            <View className="bg-accent-100 rounded-full px-3.5 py-1.5">
-              <Text className="text-xs text-accent-700 font-medium">
-                {garden.plants_needing_care}{" "}
-                {garden.plants_needing_care === 1 ? "plant" : "plants"} need
-                care
+            <View className="bg-accent-200 rounded-full px-2.5 py-1">
+              <Text className="text-xs text-accent-800 font-medium">
+                {garden.plants_needing_care} needs care
               </Text>
             </View>
           )}
         </View>
 
-        {/* Updated date */}
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="time-outline" size={16} color="#6b7280" />
-          <Text className="text-cream-600 text-xs ml-1.5">
-            Updated {formatDate(garden.updated_at)}
-          </Text>
-        </View>
+        {/* Plant Count */}
+        <Text className="text-sm text-cream-700 mb-3">
+          {garden.total_plants || 0} Plants
+        </Text>
 
-        {/* Health summary bar */}
-        {garden.total_plants > 0 && (
-          <View className="mb-4">
-            <View className="flex-row justify-between items-center mb-1.5">
-              <Text className="text-cream-700 text-xs">Garden Health</Text>
-              <Text
-                className="text-xs font-medium"
-                style={{ color: getHealthStatusColor() }}
-              >
-                {garden.health_percentage}%
-              </Text>
-            </View>
-            <View className="h-2.5 bg-cream-100 rounded-full overflow-hidden">
-              <View
-                className="h-full rounded-full"
-                style={{
-                  width: `${garden.health_percentage}%`,
-                  backgroundColor: getHealthStatusColor(),
-                }}
-              />
-            </View>
-          </View>
-        )}
-
-        <View className="flex-row items-center mb-4">
-          <View className="flex-row items-center">
-            <Ionicons name="leaf" size={18} color="#77B860" />
-            <Text className="text-brand-600 text-sm font-medium ml-1.5">
-              {garden.total_plants} Plants
-            </Text>
-          </View>
-
-          {garden.total_plants > 0 && (
-            <View className="flex-row ml-5">
-              {garden.healthy_plants > 0 && (
-                <View className="flex-row items-center mr-3">
-                  <View className="bg-brand-500 h-2.5 rounded-full w-2.5 mr-1.5" />
-                  <Text className="text-brand-700 text-xs">
-                    {garden.healthy_plants}
-                  </Text>
-                </View>
-              )}
-              {garden.plants_needing_care > 0 && (
-                <View className="flex-row items-center mr-2.5">
-                  <View className="bg-accent-500 h-2.5 rounded-full w-2.5 mr-1.5" />
-                  <Text className="text-xs text-accent-700">
-                    {garden.plants_needing_care}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-
-        {/* Next upcoming task if available */}
-        {nextTask && (
-          <View className="bg-blue-50 p-4 rounded-lg mb-4">
-            <View className="flex-row justify-between items-center mb-1.5">
-              <Text className="text-blue-700 text-sm font-medium">
-                Next Task
-              </Text>
-              <Text className="text-blue-600 text-xs">
-                Due {formatDate(nextTask.due_date)}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name={
-                  nextTask.task_type === "Water"
-                    ? "water"
-                    : nextTask.task_type === "Fertilize"
-                    ? "flask"
-                    : "leaf"
-                }
-                size={16}
-                color="#3b82f6"
-              />
-              <Text className="text-blue-700 text-xs ml-1.5">
-                {nextTask.task_type} {nextTask.plant_nickname}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {garden.total_plants > 0 ? (
-          <View>
-            {/* Preview of plants needing attention first */}
-            {garden.plants &&
-              garden.plants
-                .filter((p) => p.status !== "Healthy")
-                .slice(0, 2)
-                .map((plant) => (
-                  <View
-                    key={plant.id}
-                    className="flex-row bg-cream-50 p-3 rounded-lg items-center mb-2.5"
-                  >
-                    {plant.images?.[0] && (
-                      <Image
-                        source={{ uri: plant.images[0] }}
-                        className="h-10 rounded-full w-10 mr-3"
-                      />
-                    )}
-                    <View className="flex-1">
-                      <Text className="text-cream-800 text-sm font-medium">
-                        {plant.nickname}
-                      </Text>
-                      <Text className="text-cream-600 text-xs">
-                        Needs attention
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name={
-                        plant.status === "Dead" || plant.status === "Wilting"
-                          ? "alert-circle"
-                          : "water"
-                      }
-                      size={18}
-                      color={
-                        plant.status === "Dead" || plant.status === "Wilting"
-                          ? "#dc2626"
-                          : "#d97706"
-                      }
-                    />
-                  </View>
-                ))}
-
-            {/* Show remaining healthy plants count if any */}
-            {garden.healthy_plants > 0 && (
-              <View className="flex-row bg-brand-50 justify-between p-3.5 rounded-lg items-center">
-                <Text className="text-brand-700 text-sm">
-                  {garden.healthy_plants} healthy{" "}
-                  {garden.healthy_plants === 1 ? "plant" : "plants"}
-                </Text>
-                <Ionicons name="checkmark-circle" size={18} color="#059669" />
-              </View>
-            )}
-          </View>
-        ) : (
-          <View className="bg-cream-50 p-4 rounded-lg">
-            <Text className="text-center text-cream-600 text-sm">
-              Add your first plant to get started
-            </Text>
-          </View>
-        )}
+        {/* Health Progress Bar */}
+        <AnimatedProgressBar
+          percentage={garden.health_percentage}
+          color={getHealthStatusColor()}
+          height={8}
+          duration={500}
+        />
+        <Text className="text-xs text-cream-700 mt-1">
+          {garden.health_percentage}%
+        </Text>
       </View>
     </TouchableOpacity>
   );

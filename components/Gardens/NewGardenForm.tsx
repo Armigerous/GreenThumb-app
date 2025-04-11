@@ -1,22 +1,20 @@
+import { supabase } from "@/lib/supabaseClient";
+import { useUser } from "@clerk/clerk-expo";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import {
-  View,
+  Keyboard,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  Dimensions,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import { useState, useCallback } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { useUser } from "@clerk/clerk-expo";
-import { supabase } from "@/lib/supabaseClient";
-import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
-import BetterSelector from "@/components/UI/BetterSelector";
-import CollapsibleSection from "@/components/UI/CollapsibleSection";
-import { useQueryClient } from "@tanstack/react-query";
+import DesignSection from "./GardenEditorSections/DesignSection";
+import EnvironmentSection from "./GardenEditorSections/EnvironmentSection";
+import PreferencesSection from "./GardenEditorSections/PreferencesSection";
+import { LoadingSpinner } from "../UI/LoadingSpinner";
 
 type NewGardenFormProps = {
   onSuccess: () => void;
@@ -249,238 +247,31 @@ export default function NewGardenForm({
                 autoFocus
               />
             </View>
-
-            {/* Location */}
-            <View className="my-4">
-              <CollapsibleSection
-                title="Location"
-                icon="location-outline"
-                initiallyExpanded={true}
-              >
-                <Text className="text-lg text-foreground font-medium mb-3">
-                  Location
-                </Text>
-                <View className="space-y-4">
-                  <BetterSelector
-                    label="USDA Hardiness Zone"
-                    placeholder="Select hardiness zone"
-                    items={LOOKUP_TABLES.usda_zone}
-                    value={formValues.usda_zone_ids}
-                    onChange={(value: number[]) =>
-                      updateFormValues("usda_zone_ids", value)
-                    }
-                  />
-                  <BetterSelector
-                    label="NC Region"
-                    placeholder="Select NC region"
-                    items={LOOKUP_TABLES.nc_regions}
-                    value={formValues.nc_region_ids}
-                    onChange={(value: number[]) =>
-                      updateFormValues("nc_region_ids", value)
-                    }
-                  />
-                </View>
-              </CollapsibleSection>
-            </View>
           </View>
         );
 
       case "environment":
         return (
-          <View className="space-y-5">
-            <CollapsibleSection
-              title="Sunlight"
-              icon="sunny-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2">
-                <BetterSelector
-                  label="Light Requirements"
-                  placeholder="Select sunlight conditions"
-                  items={LOOKUP_TABLES.light}
-                  value={formValues.sunlight_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("sunlight_ids", value)
-                  }
-                />
-              </View>
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              title="Soil Properties"
-              icon="layers-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2 space-y-4">
-                <BetterSelector
-                  label="Soil Texture"
-                  placeholder="Select soil texture"
-                  items={LOOKUP_TABLES.soil_texture}
-                  value={formValues.soil_texture_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("soil_texture_ids", value)
-                  }
-                />
-                <BetterSelector
-                  label="Soil pH"
-                  placeholder="Select soil pH"
-                  items={LOOKUP_TABLES.soil_ph}
-                  value={formValues.soil_ph_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("soil_ph_ids", value)
-                  }
-                />
-                <BetterSelector
-                  label="Soil Drainage"
-                  placeholder="Select soil drainage"
-                  items={LOOKUP_TABLES.soil_drainage}
-                  value={formValues.soil_drainage_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("soil_drainage_ids", value)
-                  }
-                />
-              </View>
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              title="Landscape Location"
-              icon="map-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2">
-                <BetterSelector
-                  label="Location"
-                  placeholder="Select landscape locations"
-                  items={LOOKUP_TABLES.landscape_location}
-                  value={formValues.landscape_location_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("landscape_location_ids", value)
-                  }
-                />
-              </View>
-            </CollapsibleSection>
-          </View>
+          <EnvironmentSection
+            formValues={formValues}
+            updateFormValues={updateFormValues}
+          />
         );
 
       case "design":
         return (
-          <View className="space-y-5">
-            <CollapsibleSection
-              title="Garden Theme"
-              icon="color-palette-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2">
-                <BetterSelector
-                  label="Garden Themes"
-                  placeholder="Select garden themes"
-                  items={LOOKUP_TABLES.landscape_theme}
-                  value={formValues.landscape_theme_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("landscape_theme_ids", value)
-                  }
-                />
-              </View>
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              title="Plant Aesthetics"
-              icon="flower-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2 space-y-4">
-                <BetterSelector
-                  label="Flower Colors"
-                  placeholder="Select flower colors"
-                  items={LOOKUP_TABLES.flower_color}
-                  value={formValues.flower_color_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("flower_color_ids", value)
-                  }
-                />
-                <BetterSelector
-                  label="Leaf Colors"
-                  placeholder="Select leaf colors"
-                  items={LOOKUP_TABLES.leaf_color}
-                  value={formValues.leaf_color_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("leaf_color_ids", value)
-                  }
-                />
-                <BetterSelector
-                  label="Texture Preference"
-                  placeholder="Select texture preference"
-                  items={LOOKUP_TABLES.texture}
-                  value={formValues.texture_id}
-                  onChange={(value: number | null) =>
-                    updateFormValues("texture_id", value)
-                  }
-                  multiple={false}
-                />
-              </View>
-            </CollapsibleSection>
-          </View>
+          <DesignSection
+            formValues={formValues}
+            updateFormValues={updateFormValues}
+          />
         );
 
       case "preferences":
         return (
-          <View className="space-y-5">
-            <CollapsibleSection
-              title="Maintenance"
-              icon="construct-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2 space-y-4">
-                <BetterSelector
-                  label="Maintenance Level"
-                  placeholder="Select maintenance level"
-                  items={LOOKUP_TABLES.maintenance}
-                  value={formValues.maintenance_id}
-                  onChange={(value: number | null) =>
-                    updateFormValues("maintenance_id", value)
-                  }
-                  multiple={false}
-                />
-                <BetterSelector
-                  label="Growth Rate"
-                  placeholder="Select growth rate preference"
-                  items={LOOKUP_TABLES.growth_rate}
-                  value={formValues.growth_rate_id}
-                  onChange={(value: number | null) =>
-                    updateFormValues("growth_rate_id", value)
-                  }
-                  multiple={false}
-                />
-              </View>
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              title="Space & Requirements"
-              icon="resize-outline"
-              initiallyExpanded={true}
-            >
-              <View className="mt-2 space-y-4">
-                <BetterSelector
-                  label="Available Space"
-                  placeholder="Select available space"
-                  items={LOOKUP_TABLES.available_space_to_plant}
-                  value={formValues.available_space_to_plant_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("available_space_to_plant_ids", value)
-                  }
-                />
-                <BetterSelector
-                  label="Resistance Challenges"
-                  placeholder="Select resistance challenges"
-                  items={LOOKUP_TABLES.resistance_to_challenges}
-                  value={formValues.resistance_to_challenges_ids}
-                  onChange={(value: number[]) =>
-                    updateFormValues("resistance_to_challenges_ids", value)
-                  }
-                />
-              </View>
-            </CollapsibleSection>
-          </View>
+          <PreferencesSection
+            formValues={formValues}
+            updateFormValues={updateFormValues}
+          />
         );
 
       default:
@@ -558,7 +349,7 @@ export default function NewGardenForm({
               disabled={calculateStepCompletion() < 50 || isSubmitting}
             >
               {isSubmitting ? (
-                <ActivityIndicator size="small" color="white" />
+                <LoadingSpinner />
               ) : (
                 <Text className="text-white font-medium">Create Garden</Text>
               )}
