@@ -33,6 +33,7 @@ export default function BasicInfoSection({
             value={formValues.name || ""}
             onChangeText={(text) => updateFormValues("name", text)}
             placeholder="Enter garden name"
+            placeholderTextColor="#BBBBBB"
           />
         </View>
       </CollapsibleSection>

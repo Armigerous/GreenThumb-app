@@ -1,6 +1,7 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { ViewStyle, ScrollView, View, SafeAreaView } from "react-native";
 import { BackgroundGradient } from "./BackgroundGradient";
+import AnimatedTransition from "./AnimatedTransition";
 
 /**
  * PageContainer component
@@ -15,6 +16,8 @@ import { BackgroundGradient } from "./BackgroundGradient";
  * @param gradientColors - Custom gradient colors
  * @param padded - Whether to add standard padding to the content (defaults to true)
  * @param safeArea - Whether to use SafeAreaView (defaults to true)
+ * @param isLoading - Whether data is loading (only used for rare full-screen loading situations)
+ * @param animate - Whether to animate the content (defaults to true)
  */
 interface PageContainerProps {
   children: ReactNode;
@@ -23,6 +26,8 @@ interface PageContainerProps {
   gradientColors?: [string, string] | [string, string, ...string[]];
   padded?: boolean;
   safeArea?: boolean;
+  isLoading?: boolean;
+  animate?: boolean;
 }
 
 export function PageContainer({
@@ -32,6 +37,8 @@ export function PageContainer({
   gradientColors,
   padded = true,
   safeArea = true,
+  isLoading = false,
+  animate = true,
 }: PageContainerProps) {
   // Determine the inner content container based on whether scrolling is enabled
   const ContentContainer = scroll ? ScrollView : View;
@@ -46,13 +53,27 @@ export function PageContainer({
     </ContentContainer>
   );
 
-  // Apply the BackgroundGradient and optionally the SafeAreaView
+  // Apply the BackgroundGradient and optionally the SafeAreaView with animation
+  const animatedContent = animate ? (
+    <AnimatedTransition
+      initialY={10}
+      duration={300}
+      delay={100}
+      enabled={animate}
+      className="flex-1"
+    >
+      {content}
+    </AnimatedTransition>
+  ) : (
+    content
+  );
+
   return (
     <BackgroundGradient customColors={gradientColors}>
       {safeArea ? (
-        <SafeAreaView className="flex-1">{content}</SafeAreaView>
+        <SafeAreaView className="flex-1">{animatedContent}</SafeAreaView>
       ) : (
-        content
+        animatedContent
       )}
     </BackgroundGradient>
   );

@@ -583,6 +583,7 @@ export default function GardenConditionsEditor({
                 onChangeText={(text) => updateFormValues("name", text)}
                 className="border border-cream-300 rounded-lg p-3 bg-cream-50"
                 placeholder="Garden Name"
+                placeholderTextColor="#BBBBBB"
               />
             </View>
 

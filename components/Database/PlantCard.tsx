@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { PlantCardData } from "../../types/plant";
 import { useRouter } from "expo-router";
-import CachedImage from "./CachedImage";
+import CachedImage from "../CachedImage";
 
 interface PlantCardProps {
   plant: PlantCardData;

@@ -5,10 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
+  Animated,
+  Easing,
 } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   format,
@@ -29,6 +31,7 @@ import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
 import { TaskList } from "@/components/TaskList";
 import { PageContainer } from "@/components/UI/PageContainer";
+import AnimatedTransition from "@/components/UI/AnimatedTransition";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -39,6 +42,21 @@ export default function CalendarScreen() {
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const queryClient = useQueryClient();
 
+  // Animation values
+  const weekSlideAnim = useRef(new Animated.Value(0)).current;
+  const todayBounceAnim = useRef(new Animated.Value(1)).current;
+  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(
+    null
+  );
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [previousDayIndex, setPreviousDayIndex] = useState<number | null>(null);
+  const dayScaleAnims = useRef(
+    Array(7)
+      .fill(0)
+      .map(() => new Animated.Value(1))
+  ).current;
+  const tasksOpacity = useRef(new Animated.Value(0)).current;
+
   // Use the hook to fetch tasks for the selected date
   const {
     data: tasks,
@@ -46,6 +64,20 @@ export default function CalendarScreen() {
     isError,
     refetch,
   } = useTasksForDate(selectedDay, user?.id);
+
+  // Animate tasks loading
+  useEffect(() => {
+    if (!isLoading && tasks) {
+      Animated.timing(tasksOpacity, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      tasksOpacity.setValue(0);
+    }
+  }, [isLoading, tasks, tasksOpacity]);
 
   // Refetch tasks when the screen comes into focus
   useFocusEffect(
@@ -139,11 +171,124 @@ export default function CalendarScreen() {
     return days;
   }, [weekStartDate]);
 
+  // Animation for week navigation
+  const animateWeekChange = (direction: "left" | "right") => {
+    // Set direction for slide animation
+    setSlideDirection(direction);
+
+    // Start with the slide in the appropriate direction
+    weekSlideAnim.setValue(direction === "left" ? -1 : 1);
+
+    // Animate sliding in from the direction
+    Animated.timing(weekSlideAnim, {
+      toValue: 0,
+      duration: 350,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+
+    // Fade out tasks while changing week
+    Animated.timing(tasksOpacity, {
+      toValue: 0,
+      duration: 200,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Function to animate day selection
+  const animateDaySelection = (index: number) => {
+    // Scale down all day buttons first
+    dayScaleAnims.forEach((anim, i) => {
+      if (i !== index) {
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }).start();
+      }
+    });
+
+    // Then bounce the selected day
+    Animated.sequence([
+      Animated.timing(dayScaleAnims[index], {
+        toValue: 0.9,
+        duration: 100,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+      Animated.timing(dayScaleAnims[index], {
+        toValue: 1.1,
+        duration: 150,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      }),
+      Animated.timing(dayScaleAnims[index], {
+        toValue: 1,
+        duration: 100,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Store current index for next animation
+    setPreviousDayIndex(index);
+  };
+
   // Navigation functions
-  const goToPreviousWeek = () => setWeekStartDate(subWeeks(weekStartDate, 1));
-  const goToNextWeek = () => setWeekStartDate(addWeeks(weekStartDate, 1));
+  const goToPreviousWeek = () => {
+    animateWeekChange("right");
+    setWeekStartDate(subWeeks(weekStartDate, 1));
+  };
+
+  const goToNextWeek = () => {
+    animateWeekChange("left");
+    setWeekStartDate(addWeeks(weekStartDate, 1));
+  };
+
   const goToToday = () => {
     const today = new Date();
+
+    // Find direction to animate
+    const currentWeekStart = startOfWeek(weekStartDate, { weekStartsOn: 0 });
+    const todayWeekStart = startOfWeek(today, { weekStartsOn: 0 });
+
+    // Determine animation direction based on target date
+    if (todayWeekStart > currentWeekStart) {
+      animateWeekChange("left");
+    } else if (todayWeekStart < currentWeekStart) {
+      animateWeekChange("right");
+    }
+
+    // Apply bounce animation to today button
+    Animated.sequence([
+      Animated.timing(todayBounceAnim, {
+        toValue: 0.9,
+        duration: 100,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+      Animated.timing(todayBounceAnim, {
+        toValue: 1.1,
+        duration: 150,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      }),
+      Animated.timing(todayBounceAnim, {
+        toValue: 0.9,
+        duration: 100,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+      Animated.timing(todayBounceAnim, {
+        toValue: 1,
+        duration: 100,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     setSelectedDay(today);
     setWeekStartDate(startOfWeek(today, { weekStartsOn: 0 }));
   };
@@ -159,6 +304,14 @@ export default function CalendarScreen() {
 
   const selectMonth = (monthIndex: number) => {
     const newDate = setMonth(selectedDay, monthIndex);
+
+    // Determine animation direction based on selected month
+    if (monthIndex > getMonth(selectedDay)) {
+      animateWeekChange("left");
+    } else if (monthIndex < getMonth(selectedDay)) {
+      animateWeekChange("right");
+    }
+
     setSelectedDay(newDate);
     setWeekStartDate(startOfWeek(newDate, { weekStartsOn: 0 }));
     setIsMonthPickerVisible(false);
@@ -177,6 +330,14 @@ export default function CalendarScreen() {
       return acc;
     }, {});
   }, [tasks]);
+
+  // Handle initial animation
+  useEffect(() => {
+    if (isFirstLoad) {
+      weekSlideAnim.setValue(0); // Start at 0 for no initial animation
+      setIsFirstLoad(false);
+    }
+  }, [isFirstLoad, weekSlideAnim]);
 
   return (
     <PageContainer scroll={false} padded={false}>
@@ -204,18 +365,20 @@ export default function CalendarScreen() {
           <Ionicons name="chevron-back" size={24} color="#374151" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={goToToday}
-          className="flex-row items-center px-3 py-1 rounded-lg bg-brand-50 border border-brand-100"
-        >
-          <Ionicons
-            name="calendar"
-            size={16}
-            color="#059669"
-            className="mr-1"
-          />
-          <Text className="text-brand-600 font-medium">Today</Text>
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: todayBounceAnim }] }}>
+          <TouchableOpacity
+            onPress={goToToday}
+            className="flex-row items-center px-3 py-1 rounded-lg bg-brand-50 border border-brand-100"
+          >
+            <Ionicons
+              name="calendar"
+              size={16}
+              color="#059669"
+              className="mr-1"
+            />
+            <Text className="text-brand-600 font-medium">Today</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
         <TouchableOpacity onPress={goToNextWeek} className="p-2">
           <Ionicons name="chevron-forward" size={24} color="#374151" />
@@ -224,44 +387,69 @@ export default function CalendarScreen() {
 
       {/* Week View */}
       <View className="px-5">
-        <View className="flex-row justify-between mb-6">
+        <Animated.View
+          className="flex-row justify-between mb-6"
+          style={{
+            transform: [
+              {
+                translateX: weekSlideAnim.interpolate({
+                  inputRange: [-1, 0, 1],
+                  outputRange: ["-5%", "0%", "5%"],
+                }),
+              },
+            ],
+            opacity: weekSlideAnim.interpolate({
+              inputRange: [-1, -0.8, 0, 0.8, 1],
+              outputRange: [0, 1, 1, 1, 0],
+            }),
+          }}
+        >
           {weekDays.map((day, index) => (
-            <TouchableOpacity
+            <Animated.View
               key={index}
-              className={`items-center justify-center w-12 h-16 rounded-lg ${
-                isSameDay(day, selectedDay)
-                  ? "bg-brand-500 border border-brand-600"
-                  : isSameDay(day, new Date())
-                  ? "bg-brand-100 border border-brand-200"
-                  : "bg-cream-50 border border-cream-300"
-              }`}
-              onPress={() => setSelectedDay(day)}
+              style={{
+                transform: [{ scale: dayScaleAnims[index] }],
+              }}
             >
-              <Text
-                className={`text-xs font-medium ${
+              <TouchableOpacity
+                className={`items-center justify-center w-12 h-16 rounded-lg ${
                   isSameDay(day, selectedDay)
-                    ? "text-white"
+                    ? "bg-brand-500 border border-brand-600"
                     : isSameDay(day, new Date())
-                    ? "text-brand-600"
-                    : "text-cream-500"
+                    ? "bg-brand-100 border border-brand-200"
+                    : "bg-cream-50 border border-cream-300"
                 }`}
+                onPress={() => {
+                  setSelectedDay(day);
+                  animateDaySelection(index);
+                }}
               >
-                {format(day, "EEE")}
-              </Text>
-              <Text
-                className={`text-lg font-bold ${
-                  isSameDay(day, selectedDay)
-                    ? "text-white"
-                    : isSameDay(day, new Date())
-                    ? "text-brand-600"
-                    : "text-foreground"
-                }`}
-              >
-                {format(day, "d")}
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  className={`text-xs font-medium ${
+                    isSameDay(day, selectedDay)
+                      ? "text-white"
+                      : isSameDay(day, new Date())
+                      ? "text-brand-600"
+                      : "text-cream-500"
+                  }`}
+                >
+                  {format(day, "EEE")}
+                </Text>
+                <Text
+                  className={`text-lg font-bold ${
+                    isSameDay(day, selectedDay)
+                      ? "text-white"
+                      : isSameDay(day, new Date())
+                      ? "text-brand-600"
+                      : "text-foreground"
+                  }`}
+                >
+                  {format(day, "d")}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
-        </View>
+        </Animated.View>
       </View>
 
       {/* Tasks Section */}
@@ -274,7 +462,9 @@ export default function CalendarScreen() {
       <ScrollView className="flex-1 px-5">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
-            <LoadingSpinner message="Loading tasks..." />
+            <AnimatedTransition initialY={5} duration={300}>
+              <LoadingSpinner message="Loading tasks..." />
+            </AnimatedTransition>
           </View>
         ) : isError ? (
           <View className="bg-red-50 rounded-xl p-8 items-center justify-center">
@@ -284,12 +474,14 @@ export default function CalendarScreen() {
             </Text>
           </View>
         ) : (
-          <TaskList
-            tasks={tasks || []}
-            onToggleComplete={handleToggleComplete}
-            showGardenName={false}
-            groupByGarden={true}
-          />
+          <Animated.View style={{ opacity: tasksOpacity }}>
+            <TaskList
+              tasks={tasks || []}
+              onToggleComplete={handleToggleComplete}
+              showGardenName={false}
+              groupByGarden={true}
+            />
+          </Animated.View>
         )}
       </ScrollView>
 

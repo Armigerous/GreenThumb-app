@@ -1,4 +1,4 @@
-import CachedImage from "@/components/Database/CachedImage";
+import CachedImage from "@/components/CachedImage";
 import { ErrorBoundary } from "@/components/Database/Plant/ErrorBoundary";
 import { ErrorView } from "@/components/Database/Plant/ErrorView";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";

@@ -51,22 +51,120 @@ export const debugAuthStatus = async () => {
  * @param userId - The user ID for ownership
  * @param retryCount - Current retry attempt (default: 0)
  * @param maxRetries - Maximum number of retry attempts (default: 2)
+ * @param base64Data - Optional base64 data to use directly (default: null)
  * @returns Promise with the public URL of the uploaded image or null if failed
  */
 export const uploadImage = async (
   uri: string,
   userId: string,
   retryCount = 0,
-  maxRetries = 2
+  maxRetries = 2,
+  base64Data: string | null = null
 ): Promise<string | null> => {
   // Debug auth status before attempting upload
   await debugAuthStatus();
 
   try {
-    console.log(`Fetching image data from URI: ${uri}`);
+    console.log(`Starting image upload process with URI: ${uri}`);
+    console.log(`Base64 data provided: ${base64Data ? 'Yes (length: ' + base64Data.length + ')' : 'No'}`);
 
+    // If base64Data is provided, use it directly - this is the preferred method for React Native
+    if (base64Data) {
+      console.log("Using provided base64 data for direct upload");
+
+      // Create a unique file path for the image with user_id to enforce ownership
+      if (!userId) {
+        console.error("No user ID available for upload");
+        throw new Error("User ID is required for upload");
+      }
+
+      // Extract file extension from URI
+      let fileExt = uri.split(".").pop()?.toLowerCase();
+      if (!fileExt || fileExt.length > 5 || !fileExt.match(/^[a-z0-9]+$/)) {
+        fileExt = "jpg"; // Default to jpg if extension is invalid
+      }
+
+      // Generate a UUID for the file name
+      const fileUUID = generateUUID();
+      const fileName = `${fileUUID}.${fileExt}`;
+      const filePath = `plant-images/${userId}/${fileName}`;
+
+      console.log(`Uploading base64 data to path: ${filePath}`);
+      console.log(`Generated UUID for file: ${fileUUID}`);
+      console.log(`File extension: ${fileExt}`);
+      console.log(`Base64 data length: ${base64Data.length}`);
+
+      try {
+        // Check if base64 data is valid
+        if (!base64Data || base64Data.trim() === '') {
+          throw new Error("Base64 data is empty or invalid");
+        }
+
+        // Sometimes base64 data includes the data URL prefix - remove it if present
+        let cleanBase64 = base64Data;
+        if (base64Data.includes(',')) {
+          cleanBase64 = base64Data.split(',')[1];
+          console.log("Removed data URL prefix from base64 data");
+        }
+
+        // Convert base64 to ArrayBuffer for Supabase
+        const arrayBuffer = decode(cleanBase64);
+        console.log(
+          `Converted to ArrayBuffer, size: ${arrayBuffer.byteLength} bytes`
+        );
+
+        if (arrayBuffer.byteLength === 0) {
+          throw new Error("Generated ArrayBuffer has 0 bytes - data may be invalid");
+        }
+
+        // Upload using ArrayBuffer
+        console.log(`Uploading to storage bucket: user-uploads/${filePath}`);
+        const { data, error: uploadError } = await supabase.storage
+          .from("user-uploads")
+          .upload(filePath, arrayBuffer, {
+            contentType: `image/${fileExt}`,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("Error uploading base64 data:", uploadError);
+          throw uploadError;
+        }
+
+        console.log(`Base64 data upload successful! Path: ${filePath}`);
+        console.log(`Storage upload data:`, data);
+
+        // Create a signed URL with a long expiration
+        console.log(`Creating signed URL for: ${filePath}`);
+        const { data: signedUrlData, error: signedUrlError } =
+          await supabase.storage
+            .from("user-uploads")
+            .createSignedUrl(filePath, 315360000); // ~10 years in seconds
+
+        if (signedUrlError) {
+          console.error("Error creating signed URL:", signedUrlError);
+          throw signedUrlError;
+        }
+
+        // Verify URL was created
+        console.log(`Signed URL created successfully: ${signedUrlData?.signedUrl ? "Yes" : "No"}`);
+        
+        if (signedUrlData?.signedUrl) {
+          console.log(`Returning image URL: ${signedUrlData.signedUrl}`);
+          // Extract file name from the URL for debugging
+          const fileName = signedUrlData.signedUrl.split('/').pop()?.split('?')[0];
+          console.log(`File name in signed URL: ${fileName}`);
+        }
+
+        return signedUrlData?.signedUrl || null;
+      } catch (innerError) {
+        console.error("Error in base64 upload process:", innerError);
+        throw innerError;
+      }
+    }
     // For local file URIs, we need to handle them differently
-    if (uri.startsWith("file://")) {
+    // Only used as fallback if no base64 data provided
+    else if (uri.startsWith("file://")) {
       // For local files, we'll use a different approach
       console.log("Using file:// URI approach");
 
@@ -287,5 +385,61 @@ export const uploadImage = async (
     }
 
     return null;
+  }
+};
+
+/**
+ * Deletes an image from Supabase storage using its URL
+ * 
+ * @param imageUrl - The URL of the image to delete
+ * @returns Promise<boolean> - True if successful, false if failed
+ */
+export const deleteImageFromStorage = async (imageUrl: string): Promise<boolean> => {
+  try {
+    if (!imageUrl) {
+      console.log("No image URL provided for deletion");
+      return false;
+    }
+
+    console.log(`Attempting to delete image: ${imageUrl}`);
+    
+    // Check if this is a Supabase storage URL (user uploaded)
+    // Skip deletion if it's an external URL (e.g., from the plant database)
+    if (!imageUrl.includes('supabase.co/storage')) {
+      console.log("Not a Supabase storage URL, skipping deletion");
+      return true; // Return true to indicate "success" even though we didn't delete
+    }
+    
+    // Extract the path from the URL
+    // URLs look like https://...supabase.co/storage/v1/object/public/user-uploads/plant-images/user-id/file-uuid.jpg
+    // or with signed URLs: https://...supabase.co/storage/v1/object/signed/user-uploads/plant-images/user-id/file-uuid.jpg?token=...
+    
+    // First split by the bucket name
+    const parts = imageUrl.split('user-uploads/');
+    if (parts.length < 2) {
+      console.error("Invalid image URL format, cannot extract path");
+      return false;
+    }
+    
+    // Get everything after the bucket name, but before any query parameters
+    let filePath = parts[1].split('?')[0];
+    
+    console.log(`Extracted file path: ${filePath}`);
+    
+    // Delete the file from Supabase storage
+    const { error } = await supabase.storage
+      .from('user-uploads')
+      .remove([filePath]);
+    
+    if (error) {
+      console.error("Error deleting image from storage:", error);
+      return false;
+    }
+    
+    console.log(`Successfully deleted image: ${filePath}`);
+    return true;
+  } catch (error) {
+    console.error("Error in deleteImageFromStorage:", error);
+    return false;
   }
 }; 

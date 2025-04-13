@@ -1,4 +1,4 @@
-import { View, Text, Animated } from "react-native";
+import { View, Text, Animated, useWindowDimensions } from "react-native";
 import { useMemo, useRef, useEffect } from "react";
 
 /**
@@ -32,6 +32,9 @@ export default function ProgressIndicator({
   accentColor = "primary",
   inactiveColor = "cream-50",
 }: ProgressIndicatorProps) {
+  // Get window dimensions to calculate optimal label width
+  const { width } = useWindowDimensions();
+
   // Animation value for progress bar width
   const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -60,8 +63,22 @@ export default function ProgressIndicator({
     }
   }, [currentStep, progressPercentage, animate, progressAnim]);
 
+  // Constants for precise calculations
+  const CIRCLE_SIZE = 12; // 3w x 3h = 12px diameter
+  const CIRCLE_RADIUS = CIRCLE_SIZE / 2;
+
+  // Calculate optimal label width based on total steps and screen width
+  // Account for padding (8px on each side) and some spacing between labels
+  const availableWidth = width - 16; // 8px padding on each side
+  const optimalLabelWidth = useMemo(() => {
+    // For 2 steps, we want wider labels. For 3+ steps, we need narrower labels
+    if (totalSteps <= 2) return Math.min(120, availableWidth / 2);
+    if (totalSteps === 3) return Math.min(100, availableWidth / 3);
+    return Math.min(90, availableWidth / totalSteps);
+  }, [totalSteps, availableWidth]);
+
   return (
-    <View className="px-4 mb-6">
+    <View className="mb-6 py-4">
       {/* Progress container - contains both the bar and indicators */}
       <View className="mb-3 relative">
         {/* Base progress bar (inactive) */}
@@ -100,12 +117,12 @@ export default function ProgressIndicator({
             return (
               <View
                 key={index}
-                className={`absolute h-3 w-3 rounded-full border border-${accentColor}  ${
+                className={`absolute h-3 w-3 rounded-full border border-${accentColor} ${
                   isActive ? `bg-${accentColor}` : `bg-${inactiveColor}`
                 }`}
                 style={{
                   left: `${position}%`,
-                  transform: [{ translateX: -6 }],
+                  transform: [{ translateX: -CIRCLE_RADIUS }],
                 }}
               />
             );
@@ -114,7 +131,7 @@ export default function ProgressIndicator({
       </View>
 
       {/* Step labels with precise alignment */}
-      <View className="flex-row relative mt-2">
+      <View className="relative my-1">
         {stepLabels.map((label, index) => {
           const isActive = index + 1 <= currentStep;
           const isFirst = index === 0;
@@ -133,7 +150,16 @@ export default function ProgressIndicator({
               className="absolute"
               style={{
                 left: `${position}%`,
-                transform: [{ translateX: isFirst ? 0 : isLast ? -100 : -50 }],
+                width: optimalLabelWidth,
+                transform: [
+                  {
+                    translateX: isFirst
+                      ? 0
+                      : isLast
+                      ? -optimalLabelWidth
+                      : -optimalLabelWidth / 2,
+                  },
+                ],
               }}
             >
               <Text
@@ -144,8 +170,9 @@ export default function ProgressIndicator({
                 }`}
                 style={{
                   textAlign: isFirst ? "left" : isLast ? "right" : "center",
-                  width: 80,
                 }}
+                numberOfLines={2}
+                ellipsizeMode="tail"
               >
                 {label}
               </Text>

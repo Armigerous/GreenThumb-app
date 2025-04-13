@@ -21,7 +21,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
-        placeholderTextColor="#161513"
+        placeholderTextColor="#BBBBBB"
         cursorColor="#5E994B"
       />
       {value.length > 0 && (

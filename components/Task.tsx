@@ -146,15 +146,33 @@ export function Task({
     if (isTomorrow(date)) return "Tomorrow";
     if (isThisWeek(date)) return format(date, "EEEE"); // Day of week
 
-    // Custom check for next week
-    const nextWeekStart = addWeeks(new Date(), 1);
-    const nextWeekEnd = addWeeks(nextWeekStart, 1);
+    // Fix the next week logic
+    const nextWeekStart = new Date();
+    // Move to the beginning of next week (next Monday)
+    nextWeekStart.setDate(
+      nextWeekStart.getDate() + ((8 - nextWeekStart.getDay()) % 7)
+    );
+    nextWeekStart.setHours(0, 0, 0, 0);
+
+    const nextWeekEnd = new Date(nextWeekStart);
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 6); // End of next week (Sunday)
+    nextWeekEnd.setHours(23, 59, 59, 999);
+
     if (isAfter(date, nextWeekStart) && isBefore(date, nextWeekEnd)) {
       return `Next ${format(date, "EEEE")}`;
     }
 
-    if (isThisMonth(date)) return format(date, "MMM d");
-    return format(date, "MMM d, yyyy");
+    // Standardize date formats for consistency
+    const currentYear = new Date().getFullYear();
+    const dateYear = date.getFullYear();
+
+    // If in the current year, don't show the year
+    if (dateYear === currentYear) {
+      return format(date, "MMM d"); // Apr 27
+    }
+
+    // If in a different year, include the year
+    return format(date, "MMM d, yyyy"); // Apr 27, 2026
   };
 
   // Get the appropriate icon based on task type

@@ -17,7 +17,9 @@ import {
 import { SwipeableRow } from "@/components/UI/SwipeableRow";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageContainer } from "@/components/UI/PageContainer";
-import CachedImage from "@/components/Database/CachedImage";
+import CachedImage from "@/components/CachedImage";
+import { deleteImageFromStorage } from "@/lib/services/imageUpload";
+import SubmitButton from "@/components/UI/SubmitButton";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -163,7 +165,60 @@ const GardenDetails = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              // First delete all plants in the garden
+              // Get all plants in this garden to delete their images
+              const { data: gardenPlants, error: fetchError } = await supabase
+                .from("user_plants")
+                .select("*")
+                .eq("garden_id", gardenData.id);
+
+              if (fetchError) throw fetchError;
+
+              // Delete all plant images from storage
+              if (gardenPlants && gardenPlants.length > 0) {
+                console.log(
+                  `Deleting images for ${gardenPlants.length} plants in garden ${gardenData.id}`
+                );
+
+                // Collect all image deletion promises
+                const allImageDeletionPromises = [];
+
+                // Process each plant
+                for (const plant of gardenPlants) {
+                  if (plant.images && plant.images.length > 0) {
+                    // Add deletion promises for each image
+                    const plantImagePromises = plant.images.map(
+                      (imageUrl: string) => deleteImageFromStorage(imageUrl)
+                    );
+                    allImageDeletionPromises.push(...plantImagePromises);
+                  }
+                }
+
+                // Wait for all image deletions to complete
+                if (allImageDeletionPromises.length > 0) {
+                  await Promise.all(allImageDeletionPromises);
+                }
+              }
+
+              // Delete all tasks related to plants in this garden first to avoid FK constraint violations
+              if (gardenPlants && gardenPlants.length > 0) {
+                const plantIds = gardenPlants.map((plant) => plant.id);
+
+                console.log(
+                  `Deleting tasks for ${plantIds.length} plants in garden ${gardenData.id}`
+                );
+
+                const { error: tasksError } = await supabase
+                  .from("plant_tasks")
+                  .delete()
+                  .in("user_plant_id", plantIds);
+
+                if (tasksError) {
+                  console.error("Error deleting plant tasks:", tasksError);
+                  // Continue with deletion anyway
+                }
+              }
+
+              // Then delete all plants in the garden
               const { error: plantsError } = await supabase
                 .from("user_plants")
                 .delete()
@@ -185,7 +240,7 @@ const GardenDetails = () => {
               });
 
               Alert.alert("Success", "Garden deleted successfully");
-              router.back();
+              router.push("/(home)/gardens");
             } catch (err) {
               console.error("Error deleting garden:", err);
               Alert.alert(
@@ -307,6 +362,22 @@ const GardenDetails = () => {
                 style: "destructive",
                 onPress: async () => {
                   try {
+                    // Delete all plant images from storage first
+                    if (plant.images && plant.images.length > 0) {
+                      console.log(
+                        `Deleting ${plant.images.length} images for plant ${plant.id}`
+                      );
+
+                      // Process all image deletions concurrently
+                      const imageDeletionPromises = plant.images.map(
+                        (imageUrl: string) => deleteImageFromStorage(imageUrl)
+                      );
+
+                      // Wait for all image deletions to complete
+                      await Promise.all(imageDeletionPromises);
+                    }
+
+                    // Then delete the plant from the database
                     const { error } = await supabase
                       .from("user_plants")
                       .delete()
@@ -392,78 +463,73 @@ const GardenDetails = () => {
         Add your first plant to start your gardening journey. Track growth, care
         schedules, and watch them thrive!
       </Text>
-      <TouchableOpacity
-        className="bg-primary rounded-lg px-6 py-3"
+      <SubmitButton
         onPress={handleAddPlant}
+        iconName="add-circle-outline"
+        iconPosition="left"
       >
-        <View className="flex-row items-center justify-center">
-          <Ionicons name="add-circle-outline" size={20} color="white" />
-          <Text className="text-white font-bold ml-2 text-base">
-            Plant Something New
-          </Text>
-        </View>
-      </TouchableOpacity>
+        Plant Something New
+      </SubmitButton>
     </View>
   );
 
   return (
-    <PageContainer scroll={false} padded={false} safeArea={false}>
+    <PageContainer scroll={false} padded={false} safeArea={true}>
+      {/* Header with Garden Name and Navigation */}
+      <View className="flex-row justify-between items-center mb-2 px-6">
+        <SubmitButton
+          onPress={() => router.push("/(home)/gardens")}
+          iconName="arrow-back"
+          iconPosition="left"
+          type="outline"
+          color="secondary"
+        >
+          Back
+        </SubmitButton>
+
+        <SubmitButton
+          onPress={handleDeleteGarden}
+          color="destructive"
+          iconName="trash-outline"
+        >
+          Delete Garden
+        </SubmitButton>
+      </View>
+
+      {/* Content area with normal gradient background */}
       <View className="flex-1">
-        {/* Header with Garden Name and Navigation */}
-        <View className="bg-white border-b border-cream-100 pt-12">
-          <View className="px-5">
-            <View className="flex-row justify-between items-center mb-2">
-              <TouchableOpacity
-                onPress={() => router.back()}
-                className="flex-row items-center"
-              >
-                <Ionicons name="arrow-back" size={24} color="#2e2c29" />
-                <Text className="text-foreground text-base ml-2">Back</Text>
-              </TouchableOpacity>
+        {/* Garden Title with Delete Button */}
+        <View className="flex-col justify-between items-center mb-2">
+          <Text className="text-2xl text-foreground font-bold mb-1">
+            Welcome back to {gardenData.name}
+          </Text>
+          <Text className="text-cream-600 text-base mb-3 px-4 text-center">
+            Your plants are happy to see you today!
+          </Text>
+        </View>
+        <View className="flex-row justify-between px-6 mt-4">
+          {/* Delete Garden Button - More subtle in header */}
 
-              <View className="flex-row">
-                <TouchableOpacity
-                  className="bg-accent-200 rounded-lg py-2 px-4 mr-2 flex-row items-center"
-                  onPress={handleConditionsPress}
-                >
-                  <Ionicons name="sunny-outline" size={18} color="#2e2c29" />
-                  <Text className="text-foreground ml-2 font-medium">
-                    Conditions
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-primary rounded-lg py-2 px-4 flex-row items-center"
-                  onPress={handleAddPlant}
-                >
-                  <Ionicons name="add" size={18} color="#fffefa" />
-                  <Text className="text-primary-foreground ml-2 font-medium">
-                    Add Plant
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Garden Title with Delete Button */}
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-2xl text-foreground font-bold">
-                {gardenData.name}
-              </Text>
-
-              {/* Delete Garden Button - More subtle in header */}
-              <TouchableOpacity
-                className="bg-destructive rounded-lg py-2 px-4 flex-row items-center justify-center"
-                onPress={handleDeleteGarden}
-              >
-                <Ionicons name="trash-outline" size={20} color="#fffefa" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <SubmitButton
+            onPress={handleConditionsPress}
+            color="secondary"
+            iconName="sunny-outline"
+            iconPosition="left"
+          >
+            Conditions
+          </SubmitButton>
+          <SubmitButton
+            onPress={handleAddPlant}
+            iconName="add"
+            iconPosition="left"
+          >
+            Add Plant
+          </SubmitButton>
         </View>
 
         {/* Garden Stats Overview */}
         {dashboardData && (
-          <View className="px-5 py-4">
+          <View className="px-6 py-4">
             <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border-2 border-cream-300">
               <View className="items-center flex-1">
                 <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">

@@ -1,10 +1,11 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { UserPlant } from "@/types/garden";
 import { PlantData } from "@/types/plant";
-import PlantImageSelector from "./PlantImageSelector";
 import PlantStatusSelector from "./PlantStatusSelector";
-import SubmitButton from "./SubmitButton";
-import { useEffect } from "react";
+import SubmitButton from "../../../UI/SubmitButton";
+import { Ionicons } from "@expo/vector-icons";
+import ImagePicker from "./ImagePicker";
+import { useState } from "react";
 
 /**
  * PlantDetailsStep component for customizing plant details
@@ -73,6 +74,9 @@ const cuteNames = [
   "Gracie Moon",
   "Moonpie",
   "Pumpkin",
+  "Chunky",
+  "Bubbles",
+  "Heath",
 ];
 
 const getRandomCuteName = () => {
@@ -91,54 +95,99 @@ export default function PlantDetailsStep({
   onBack,
   onNext,
 }: PlantDetailsStepProps) {
+  const [isImageUploading, setIsImageUploading] = useState(false);
+
   // Get the first image from the plant data to display as default
   const defaultPlantImage =
     plant?.images && plant.images.length > 0 && plant.images[0]?.img
       ? plant.images[0]?.img
       : null;
 
-  // Set a random cute name when component mounts
-  useEffect(() => {
+  // Function to set a random nickname
+  const handleRandomizeName = () => {
     setNickname(getRandomCuteName());
-  }, []);
+  };
+
+  // Handler for image selection that tracks upload status
+  const handleImageSelected = (imageUrl: string | null) => {
+    setImage(imageUrl);
+  };
 
   return (
-    <View className="px-4">
-      <Text className="text-xl font-bold mb-4">Customize Your Plant</Text>
-      <Text className="text-cream-600 mb-6">
-        Add details to personalize your plant:
-      </Text>
+    <View className="px-4 flex-1 flex">
+      <View className="flex-1">
+        <Text className="text-xl font-bold mb-4">Customize Your Plant</Text>
+        <Text className="text-cream-600 mb-6">
+          Add details to personalize your plant:
+        </Text>
 
-      {/* Plant Image Selector */}
-      <PlantImageSelector
-        image={image}
-        defaultImage={defaultPlantImage}
-        onImageChange={setImage}
-      />
+        {/* Plant Image Selector */}
+        <View className="mb-6 items-center">
+          <ImagePicker
+            currentImage={image || defaultPlantImage}
+            onImageSelected={handleImageSelected}
+            aspect={[1, 1]}
+            onUploadStatusChange={setIsImageUploading}
+          />
 
-      {/* Nickname Input */}
-      <View className="mb-6">
-        <Text className="text-base font-medium mb-2">Nickname</Text>
-        <TextInput
-          className="bg-white border border-cream-400 rounded-lg p-3 text-foreground"
-          value={nickname}
-          onChangeText={setNickname}
-          placeholder="Give your plant a name"
-          placeholderTextColor="#9e9a90"
-          maxLength={50}
+          {/* Option to reset to default image */}
+          {image && defaultPlantImage && (
+            <TouchableOpacity
+              className="mt-2 py-1 px-3 bg-cream-100 rounded-lg self-center"
+              onPress={() => setImage(null)}
+              disabled={isImageUploading}
+            >
+              <Text className="text-sm text-cream-700">Use Default Image</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Nickname Input with Randomize button */}
+        <View className="mb-6">
+          <Text className="text-base font-medium mb-2">Nickname</Text>
+          <View className="flex-row items-center">
+            <TextInput
+              className="bg-white border border-cream-400 rounded-lg p-3 text-foreground flex-1 mr-2"
+              value={nickname}
+              onChangeText={setNickname}
+              placeholder="Give your plant a name"
+              placeholderTextColor="#9e9a90"
+              maxLength={50}
+            />
+            <TouchableOpacity
+              onPress={handleRandomizeName}
+              className="bg-cream-100 p-3 rounded-lg"
+            >
+              <Ionicons name="shuffle" size={24} color="#2A5D39" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Plant Status Selector */}
+        <PlantStatusSelector
+          selectedStatus={status}
+          onStatusChange={setStatus}
         />
       </View>
 
-      {/* Plant Status Selector */}
-      <PlantStatusSelector selectedStatus={status} onStatusChange={setStatus} />
-
       {/* Navigation buttons */}
-      <View className="flex-row justify-between py-4">
-        <SubmitButton onPress={onBack} color="secondary">
+      <View className="flex-row justify-between items-center py-6 mt-auto">
+        <SubmitButton
+          onPress={onBack}
+          color="secondary"
+          isDisabled={isImageUploading}
+          iconName="arrow-back"
+          iconPosition="left"
+        >
           Back
         </SubmitButton>
-        <SubmitButton onPress={onNext} isDisabled={!nickname.trim()}>
-          Next
+        <SubmitButton
+          onPress={onNext}
+          isDisabled={!nickname.trim() || isImageUploading}
+          iconName={isImageUploading ? undefined : "arrow-forward"}
+          iconPosition="right"
+        >
+          {isImageUploading ? "Uploading..." : "Next"}
         </SubmitButton>
       </View>
     </View>

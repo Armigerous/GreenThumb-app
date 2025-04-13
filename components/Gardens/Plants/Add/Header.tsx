@@ -35,7 +35,7 @@ export default function Header({
   };
 
   return (
-    <View className="pt-5 px-4 flex-row items-center mb-4">
+    <View className="pt-5 flex-row items-center mb-4">
       <TouchableOpacity onPress={handleBackPress} className="mr-4">
         <Ionicons name="arrow-back" size={24} color="#2e2c29" />
       </TouchableOpacity>

@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { UserPlant } from "@/types/garden";
 import { supabase } from "@/lib/supabaseClient";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImagePicker } from "@/components/UI/ImagePicker";
+import ImagePicker from "@/components/Gardens/Plants/Add/ImagePicker";
 import { useUser } from "@clerk/clerk-expo";
 
 // Enable LayoutAnimation for Android

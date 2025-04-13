@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "../../../UI/SubmitButton";
 
 /**
  * Advanced skeleton loading component for UI elements with pulse animation
@@ -282,121 +282,123 @@ export default function GardenSelectionStep({
   }
 
   return (
-    <View className="px-4 py-2 flex-1">
-      <Text className="text-xl font-bold mb-3">Select a Garden</Text>
-      <View className="mb-4">
-        <Text className="text-cream-600">
-          Choose which garden you want to add your{" "}
-          <Text className="text-foreground font-medium">
-            {plantName.replace(/'/g, "'")}
-          </Text>{" "}
-          to:
-        </Text>
+    <View className="px-4 flex-1 flex">
+      <View className="flex-1">
+        <Text className="text-xl font-bold mb-3">Select a Garden</Text>
+        <View className="mb-4">
+          <Text className="text-cream-600">
+            Choose which garden you want to add your{" "}
+            <Text className="text-foreground font-medium">
+              {plantName.replace(/'/g, "'")}
+            </Text>{" "}
+            to:
+          </Text>
+        </View>
+
+        {/* Garden search - for when users have many gardens */}
+        {gardens && gardens.length > 3 && (
+          <View className="mb-4 bg-cream-50 rounded-xl p-2 flex-row items-center border border-cream-200">
+            <Ionicons
+              name="search"
+              size={20}
+              color="#9CA3AF"
+              className="ml-2"
+            />
+            <TextInput
+              className="flex-1 ml-2 text-foreground"
+              placeholder="Search gardens..."
+              placeholderTextColor="#BBBBBB"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              accessibilityLabel="Search gardens"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setSearchQuery("")}
+                accessibilityLabel="Clear search"
+              >
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* Garden selection list with animated appearance */}
+        <ScrollView
+          className="flex-1"
+          accessibilityLabel="Garden selection list"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View style={{ opacity: fadeAnim }}>
+            {filteredGardens.length > 0 ? (
+              filteredGardens.map((garden) => (
+                <TouchableOpacity
+                  key={garden.garden_id}
+                  className={`mb-3 p-4 rounded-xl border ${
+                    selectedGarden?.garden_id === garden.garden_id
+                      ? "border-brand-500 bg-brand-50"
+                      : "border-cream-200 bg-white"
+                  }`}
+                  onPress={() => handleSelectGarden(garden)}
+                  accessibilityRole="radio"
+                  accessibilityState={{
+                    checked: selectedGarden?.garden_id === garden.garden_id,
+                  }}
+                  accessibilityLabel={`Select garden ${garden.name} with ${
+                    garden.total_plants || 0
+                  } plants`}
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-1">
+                      <Text
+                        className="text-lg font-medium text-foreground"
+                        numberOfLines={1}
+                      >
+                        {garden.name}
+                      </Text>
+                      <View className="flex-row items-center mt-1">
+                        <Ionicons
+                          name="leaf-outline"
+                          size={14}
+                          color="#9CA3AF"
+                          style={{ marginRight: 4 }}
+                        />
+                        <Text className="text-sm text-cream-500">
+                          {garden.total_plants || 0} plants
+                        </Text>
+                      </View>
+                    </View>
+                    {selectedGarden?.garden_id === garden.garden_id && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color="#5E994B"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View className="py-8 flex items-center">
+                <Text className="text-cream-500 text-center">
+                  No gardens match your search.
+                </Text>
+              </View>
+            )}
+          </Animated.View>
+        </ScrollView>
       </View>
 
-      {/* Garden search - for when users have many gardens */}
-      {gardens && gardens.length > 3 && (
-        <View className="mb-4 bg-cream-50 rounded-xl p-2 flex-row items-center border border-cream-200">
-          <Ionicons name="search" size={20} color="#9CA3AF" className="ml-2" />
-          <TextInput
-            className="flex-1 ml-2 text-foreground"
-            placeholder="Search gardens..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            accessibilityLabel="Search gardens"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchQuery("")}
-              accessibilityLabel="Clear search"
-            >
-              <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
-      {/* Garden selection list with animated appearance */}
-      <ScrollView
-        className="mb-4 flex-1"
-        accessibilityLabel="Garden selection list"
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View style={{ opacity: fadeAnim }}>
-          {filteredGardens.length > 0 ? (
-            filteredGardens.map((garden) => (
-              <TouchableOpacity
-                key={garden.garden_id}
-                className={`mb-3 p-4 rounded-xl border ${
-                  selectedGarden?.garden_id === garden.garden_id
-                    ? "border-brand-500 bg-brand-50"
-                    : "border-cream-200 bg-white"
-                }`}
-                onPress={() => handleSelectGarden(garden)}
-                accessibilityRole="radio"
-                accessibilityState={{
-                  checked: selectedGarden?.garden_id === garden.garden_id,
-                }}
-                accessibilityLabel={`Select garden ${garden.name} with ${
-                  garden.total_plants || 0
-                } plants`}
-              >
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-1">
-                    <Text
-                      className="text-lg font-medium text-foreground"
-                      numberOfLines={1}
-                    >
-                      {garden.name}
-                    </Text>
-                    <View className="flex-row items-center mt-1">
-                      <Ionicons
-                        name="leaf-outline"
-                        size={14}
-                        color="#9CA3AF"
-                        style={{ marginRight: 4 }}
-                      />
-                      <Text className="text-sm text-cream-500">
-                        {garden.total_plants || 0} plants
-                      </Text>
-                    </View>
-                  </View>
-                  {selectedGarden?.garden_id === garden.garden_id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color="#5E994B"
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <View className="py-8 flex items-center">
-              <Text className="text-cream-500 text-center">
-                No gardens match your search.
-              </Text>
-            </View>
-          )}
-        </Animated.View>
-      </ScrollView>
-
       {/* Navigation buttons */}
-      <View className="flex-row justify-between items-center py-4">
-        <TouchableOpacity
-          className="flex-row items-center justify-center py-3 px-5 rounded-xl border border-cream-400 bg-cream-200"
+      <View className="flex-row justify-between items-center py-6 mt-auto">
+        <SubmitButton
           onPress={() => router.push(`/(home)/plants/${plantSlug}`)}
-          accessibilityRole="button"
-          accessibilityLabel="Cancel and return to the plant page"
+          color="secondary"
+          iconName="close"
+          iconPosition="left"
         >
-          <Ionicons
-            name="arrow-back-outline"
-            size={18}
-            color="#6B7280"
-            style={{ marginRight: 4 }}
-          />
-          <Text className="font-medium text-cream-700">Cancel</Text>
-        </TouchableOpacity>
+          Cancel
+        </SubmitButton>
 
         <View className="flex-row">
           {selectedGarden && (
@@ -417,8 +419,10 @@ export default function GardenSelectionStep({
             isDisabled={!selectedGarden}
             color={selectedGarden ? "primary" : "secondary"}
             loadingLabel="Processing..."
+            iconName="arrow-forward"
+            iconPosition="right"
           >
-            Continue
+            Next
           </SubmitButton>
         </View>
       </View>

@@ -8,6 +8,7 @@ export default function GardensLayout() {
         name="index"
         options={{
           headerShown: false,
+          animation: "slide_from_left",
         }}
       />
       <Stack.Screen

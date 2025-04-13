@@ -447,6 +447,7 @@ export default function FilterModal({
             <TextInput
               className="flex-1 ml-2 text-base"
               placeholder="Search filters..."
+              placeholderTextColor="#BBBBBB"
               value={searchTerm}
               onChangeText={setSearchTerm}
             />
