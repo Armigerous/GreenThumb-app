@@ -10,6 +10,7 @@ interface TaskListProps {
   maxTasks?: number;
   className?: string;
   queryKey?: string[];
+  isOverdue?: boolean;
 }
 
 /**
@@ -24,11 +25,12 @@ export function TaskList({
   maxTasks,
   className = "",
   queryKey,
+  isOverdue = false,
 }: TaskListProps) {
   // If no tasks, show empty state
   if (!tasks || tasks.length === 0) {
     return (
-      <View className="bg-background rounded-xl p-6 items-center border border-cream-300">
+      <View className="bg-background p-6 items-center border border-cream-300 rounded-xl">
         <Text className="text-base text-cream-600 text-center">
           No tasks to display
         </Text>
@@ -51,61 +53,67 @@ export function TaskList({
     );
 
     return (
-      <View className={`space-y-6 ${className}`}>
-        {Object.entries(groupedTasks).map(([gardenName, gardenTasks]) => (
-          <View key={gardenName}>
-            <Text className="text-sm font-medium text-foreground mb-2">
-              {gardenName}
-            </Text>
-            <View className="bg-background rounded-xl shadow-sm overflow-hidden">
-              {gardenTasks.map((task, index) => (
-                <View
-                  key={task.id}
-                  className={
-                    index < gardenTasks.length - 1
-                      ? "border-b border-cream-100 py-1"
-                      : "py-1"
-                  }
-                >
+      <View className={className}>
+        {Object.entries(groupedTasks).map(
+          ([gardenName, gardenTasks], groupIndex) => (
+            <View
+              key={gardenName}
+              className="mb-4 bg-white rounded-xl border border-cream-200"
+            >
+              <Text className="text-sm font-medium text-cream-700 p-4">
+                {gardenName}
+              </Text>
+              {gardenTasks.slice(0, maxTasks).map((task, index) => (
+                <View key={task.id}>
                   <Task
                     task={task}
                     onToggleComplete={onToggleComplete}
-                    showGardenName={false}
+                    showGardenName={showGardenName}
                     queryKey={queryKey}
+                    isOverdue={isOverdue}
                   />
+                  {index < gardenTasks.length - 1 && (
+                    <View className="h-[1px] bg-cream-200 mx-4" />
+                  )}
                 </View>
               ))}
+              {gardenTasks.length > (maxTasks || gardenTasks.length) && (
+                <Text className="text-sm text-cream-600 p-4">
+                  +{gardenTasks.length - (maxTasks || gardenTasks.length)} more
+                  tasks
+                </Text>
+              )}
             </View>
-          </View>
-        ))}
+          )
+        )}
       </View>
     );
   }
 
-  // For non-grouped tasks, apply maxTasks limit if specified
-  const displayTasks = maxTasks ? tasks.slice(0, maxTasks) : tasks;
-
+  // If not grouping, just show the tasks
   return (
     <View
-      className={`bg-background rounded-xl shadow-sm overflow-hidden ${className}`}
+      className={`${className} bg-white rounded-xl border border-cream-200`}
     >
-      {displayTasks.map((task, index) => (
-        <View
-          key={task.id}
-          className={
-            index < displayTasks.length - 1
-              ? "border-b border-cream-100 py-1"
-              : "py-1"
-          }
-        >
+      {tasks.slice(0, maxTasks).map((task, index) => (
+        <View key={task.id}>
           <Task
             task={task}
             onToggleComplete={onToggleComplete}
             showGardenName={showGardenName}
             queryKey={queryKey}
+            isOverdue={isOverdue}
           />
+          {index < tasks.length - 1 && (
+            <View className="h-[1px] bg-cream-200 mx-4" />
+          )}
         </View>
       ))}
+      {tasks.length > (maxTasks || tasks.length) && (
+        <Text className="text-sm text-cream-600 p-4">
+          +{tasks.length - (maxTasks || tasks.length)} more tasks
+        </Text>
+      )}
     </View>
   );
 }

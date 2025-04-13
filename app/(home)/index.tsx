@@ -477,7 +477,11 @@ export default function Page() {
               }}
             >
               <LinearGradient
-                colors={["#3F6933", "#77B860"]} // Enhanced contrast
+                colors={
+                  overdueTasks.length > 0
+                    ? ["#ef4444", "#f87171"]
+                    : ["#3F6933", "#77B860"]
+                } // Red gradient for overdue tasks
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{ padding: 24, borderRadius: 12 }}
@@ -500,8 +504,10 @@ export default function Page() {
             {/* TODAY'S TASKS SECTION (Now first) */}
             <View className="mb-6">
               <SectionHeader
-                title="Today's Tasks"
-                icon="calendar"
+                title={
+                  overdueTasks.length > 0 ? "Missed Tasks" : "Today's Tasks"
+                }
+                icon={overdueTasks.length > 0 ? "alert-circle" : "calendar"}
                 onSeeAll={() => router.push("/(home)/calendar")}
                 badge={getTasksBadge()}
               />
@@ -517,6 +523,36 @@ export default function Page() {
                     Error loading tasks
                   </Text>
                 </View>
+              ) : overdueTasks.length > 0 ? (
+                <AnimatedSection delay={200}>
+                  <View className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200">
+                    <Text className="text-red-700 font-medium mb-2">
+                      You have {overdueTasks.length} missed{" "}
+                      {overdueTasks.length === 1 ? "task" : "tasks"}!
+                    </Text>
+                    <Text className="text-red-600 text-sm">
+                      These tasks were due yesterday or earlier and still need
+                      to be completed.
+                    </Text>
+                  </View>
+                  <TaskList
+                    tasks={overdueTasks}
+                    onToggleComplete={handleCompleteTask}
+                    showGardenName={true}
+                    maxTasks={3}
+                    isOverdue={true}
+                  />
+                  {overdueTasks.length > 3 && (
+                    <TouchableOpacity
+                      className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
+                      onPress={() => router.push("/(home)/calendar")}
+                    >
+                      <Text className="text-red-600 font-medium">
+                        +{overdueTasks.length - 3} more missed tasks
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </AnimatedSection>
               ) : todaysTasks && todaysTasks.length > 0 ? (
                 <AnimatedSection delay={200}>
                   <TaskList

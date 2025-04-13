@@ -22,7 +22,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
     if (!plant || !plant.slug) {
       console.error("Invalid plant data:", plant);
       return (
-        <View className="bg-white rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4">
+        <View className="bg-white border border-cream-300 rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4">
           <View className="p-3 flex-1 justify-center items-center">
             <Text className="text-destructive">Invalid plant data</Text>
           </View>
@@ -68,7 +68,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
 
     return (
       <TouchableOpacity
-        className="bg-white rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4"
+        className="bg-white border border-cream-300 rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4"
         onPress={handlePress}
         activeOpacity={0.7}
       >

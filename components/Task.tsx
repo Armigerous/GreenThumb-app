@@ -1,27 +1,26 @@
-import { View, Text, TouchableOpacity, Animated, Alert } from "react-native";
+import { supabase } from "@/lib/supabaseClient";
+import { TaskWithDetails } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  format,
-  isToday,
-  isTomorrow,
-  isThisWeek,
-  isThisMonth,
   addWeeks,
+  format,
   isAfter,
   isBefore,
-  differenceInHours,
+  isThisMonth,
+  isThisWeek,
+  isToday,
+  isTomorrow,
 } from "date-fns";
-import { TaskWithDetails } from "@/types/garden";
 import { useRef } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
+import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
 
 interface TaskProps {
   task: TaskWithDetails;
   onToggleComplete?: (id: number) => void; // Make this optional
   showGardenName?: boolean;
   queryKey?: string[]; // Add queryKey for cache invalidation
+  isOverdue?: boolean; // Add isOverdue prop
 }
 
 export function Task({
@@ -29,6 +28,7 @@ export function Task({
   onToggleComplete,
   showGardenName = false,
   queryKey,
+  isOverdue = false,
 }: TaskProps) {
   // Add animation reference for this specific task
   const checkboxAnimationValue = useRef(new Animated.Value(1)).current;
@@ -185,83 +185,114 @@ export function Task({
     }
   };
 
-  // Determine task urgency based on due date
+  // Get task urgency based on due date
   const getTaskUrgency = (date: Date): { color: string; label: string } => {
-    const now = new Date();
-    const hoursUntilDue = differenceInHours(date, now);
-
-    if (hoursUntilDue < 0) {
+    // If task is overdue, show it as urgent
+    if (isOverdue) {
       return { color: "#ef4444", label: "Overdue" }; // red-500
-    } else if (hoursUntilDue < 24) {
-      return { color: "#f97316", label: "Urgent" }; // orange-500
-    } else if (hoursUntilDue < 72) {
-      return { color: "#eab308", label: "Soon" }; // yellow-500
-    } else {
-      return { color: "#10b981", label: "Upcoming" }; // emerald-500
     }
+
+    // If task is due today, show it as urgent
+    if (isToday(date)) {
+      return { color: "#f97316", label: "Today" }; // orange-500
+    }
+
+    // If task is due tomorrow, show it as upcoming
+    if (isTomorrow(date)) {
+      return { color: "#eab308", label: "Tomorrow" }; // yellow-500
+    }
+
+    // If task is due this week, show it as upcoming
+    if (isThisWeek(date)) {
+      return { color: "#10b981", label: "This Week" }; // emerald-500
+    }
+
+    // If task is due this month, show it as upcoming
+    if (isThisMonth(date)) {
+      return { color: "#3b82f6", label: "This Month" }; // blue-500
+    }
+
+    // If task is due later, show it as upcoming
+    return { color: "#6b7280", label: "Later" }; // gray-500
   };
 
   // Get urgency information for this task
   const urgency = getTaskUrgency(dueDate);
 
   return (
-    <TouchableOpacity
-      onPress={handleToggleComplete}
-      activeOpacity={0.7}
-      className="p-4 flex-row items-center justify-between bg-cream-50 rounded-xl border border-cream-300"
-    >
-      <View className="flex-row items-center flex-1">
-        <View className="min-w-[48px] min-h-[48px] items-center justify-center">
-          <Animated.View
-            style={{
-              transform: [{ scale: checkboxAnimationValue }],
-            }}
-            className={`w-7 h-7 rounded-lg border-2 items-center justify-center ${
-              task.completed ? "bg-brand-500" : "border-cream-300"
-            }`}
-          >
-            {task.completed && (
-              <Ionicons name="checkmark" size={16} color="white" />
-            )}
-          </Animated.View>
-        </View>
+    <TouchableOpacity onPress={handleToggleComplete} className="p-4">
+      <View className="flex-row items-center">
+        {/* Checkbox */}
+        <Animated.View
+          className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
+            task.completed
+              ? "bg-brand-500"
+              : isOverdue
+              ? "bg-red-100"
+              : "bg-cream-100"
+          }`}
+          style={{
+            transform: [{ scale: checkboxAnimationValue }],
+          }}
+        >
+          {task.completed && (
+            <Ionicons name="checkmark" size={16} color="white" />
+          )}
+        </Animated.View>
+
+        {/* Task Content */}
         <View className="flex-1">
-          <View className="flex-row items-center">
-            <Ionicons
-              name={getTaskIcon(task.task_type)}
-              size={16}
-              color={getTaskColor(task.task_type)}
-              style={{ marginRight: 6 }}
-            />
-            <Text
-              className={`text-base font-medium ${
-                task.completed
-                  ? "text-cream-400 line-through"
-                  : "text-foreground"
+          <View className="flex-row justify-between items-start">
+            <View className="flex-row items-center">
+              <Ionicons
+                name={getTaskIcon(task.task_type)}
+                size={18}
+                color={isOverdue ? "#ef4444" : getTaskColor(task.task_type)}
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                className={`text-base font-medium ${
+                  task.completed
+                    ? "text-cream-500 line-through"
+                    : isOverdue
+                    ? "text-red-700"
+                    : "text-foreground"
+                }`}
+              >
+                {task.task_type} {task.plant?.nickname || "Unknown Plant"}
+              </Text>
+            </View>
+            <View
+              className={`px-2 py-1 rounded-lg ${
+                isOverdue
+                  ? "bg-red-100"
+                  : task.completed
+                  ? "bg-brand-100"
+                  : "bg-cream-100"
               }`}
             >
-              {task.task_type} {plantNickname}
-            </Text>
-          </View>
-          <View className="flex-row items-center mt-1">
-            <Text className="text-xs text-cream-500">
-              {showGardenName && `${gardenName} • `}
-              {getRelativeTime(dueDate)} at {format(dueDate, "h:mm a")}
-            </Text>
-            {!task.completed && (
-              <View
-                className="ml-2 px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: `${urgency.color}20` }}
+              <Text
+                className={`text-xs font-medium ${
+                  isOverdue
+                    ? "text-red-700"
+                    : task.completed
+                    ? "text-brand-700"
+                    : "text-cream-700"
+                }`}
               >
-                <Text
-                  className="text-xs font-medium"
-                  style={{ color: urgency.color }}
-                >
-                  {urgency.label}
-                </Text>
-              </View>
-            )}
+                {isOverdue
+                  ? "Overdue"
+                  : getRelativeTime(new Date(task.due_date))}
+              </Text>
+            </View>
           </View>
+
+          {/* Garden Info - only show if requested */}
+          {showGardenName && task.plant?.garden?.name && (
+            <Text className="text-sm text-cream-600 mt-1">
+              in {task.plant.garden.name}
+            </Text>
+          )}
         </View>
       </View>
     </TouchableOpacity>

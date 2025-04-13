@@ -205,7 +205,7 @@ const GardenDetails = () => {
 
   if (error || !gardenData) {
     return (
-      <PageContainer>
+      <PageContainer scroll={false} padded={false}>
         <View className="pt-5 px-5">
           <Text className="text-destructive text-lg">
             Error loading garden details. Please try again.
@@ -407,155 +407,159 @@ const GardenDetails = () => {
   );
 
   return (
-    <PageContainer scroll={false} padded={false}>
-      {/* Header with Garden Name and Navigation */}
-      <View className="pt-5 pb-2 px-5">
-        <View className="flex-row justify-between items-center mb-2">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="flex-row items-center"
-          >
-            <Ionicons name="arrow-back" size={24} color="#2e2c29" />
-            <Text className="text-foreground text-base ml-2">Back</Text>
-          </TouchableOpacity>
-
-          <View className="flex-row">
-            <TouchableOpacity
-              className="bg-accent-200 rounded-lg py-2 px-4 mr-2 flex-row items-center"
-              onPress={handleConditionsPress}
-            >
-              <Ionicons name="sunny-outline" size={18} color="#2e2c29" />
-              <Text className="text-foreground ml-2 font-medium">
-                Conditions
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-primary rounded-lg py-2 px-4 flex-row items-center"
-              onPress={handleAddPlant}
-            >
-              <Ionicons name="add" size={18} color="#fffefa" />
-              <Text className="text-primary-foreground ml-2 font-medium">
-                Add Plant
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Garden Title with Delete Button */}
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-2xl text-foreground font-bold">
-            {gardenData.name}
-          </Text>
-
-          {/* Delete Garden Button - More subtle in header */}
-          <TouchableOpacity
-            className="bg-destructive rounded-lg py-2 px-4 flex-row items-center justify-center"
-            onPress={handleDeleteGarden}
-          >
-            <Ionicons name="trash-outline" size={20} color="#fffefa" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Garden Stats Overview */}
-      {dashboardData && (
-        <View className="px-5 py-4">
-          <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border-2 border-cream-300">
-            <View className="items-center flex-1">
-              <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                <Ionicons name="leaf" size={24} color="#77B860" />
-              </View>
-              <Text className="text-xl font-bold text-brand-700">
-                {dashboardData.total_plants}
-              </Text>
-              <Text className="text-cream-600 text-xs">PLANTS</Text>
-            </View>
-
-            <View className="items-center flex-1">
-              <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                <Ionicons
-                  name="water"
-                  size={24}
-                  color={
-                    dashboardData.plants_needing_care > 0
-                      ? "#d97706"
-                      : "#9e9a90"
-                  }
-                />
-              </View>
-              <Text
-                className={`text-xl font-bold ${
-                  dashboardData.plants_needing_care > 0
-                    ? "text-yellow-600"
-                    : "text-foreground"
-                }`}
+    <PageContainer scroll={false} padded={false} safeArea={false}>
+      <View className="flex-1">
+        {/* Header with Garden Name and Navigation */}
+        <View className="bg-white border-b border-cream-100 pt-12">
+          <View className="px-5">
+            <View className="flex-row justify-between items-center mb-2">
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="flex-row items-center"
               >
-                {dashboardData.plants_needing_care}
-              </Text>
-              <Text className="text-foreground text-xs">NEED CARE</Text>
+                <Ionicons name="arrow-back" size={24} color="#2e2c29" />
+                <Text className="text-foreground text-base ml-2">Back</Text>
+              </TouchableOpacity>
+
+              <View className="flex-row">
+                <TouchableOpacity
+                  className="bg-accent-200 rounded-lg py-2 px-4 mr-2 flex-row items-center"
+                  onPress={handleConditionsPress}
+                >
+                  <Ionicons name="sunny-outline" size={18} color="#2e2c29" />
+                  <Text className="text-foreground ml-2 font-medium">
+                    Conditions
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="bg-primary rounded-lg py-2 px-4 flex-row items-center"
+                  onPress={handleAddPlant}
+                >
+                  <Ionicons name="add" size={18} color="#fffefa" />
+                  <Text className="text-primary-foreground ml-2 font-medium">
+                    Add Plant
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View className="items-center flex-1">
-              <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                <Ionicons name="heart" size={24} color="#77B860" />
-              </View>
-              <Text className="text-xl font-bold text-primary">
-                {dashboardData.health_percentage}%
+            {/* Garden Title with Delete Button */}
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-2xl text-foreground font-bold">
+                {gardenData.name}
               </Text>
-              <Text className="text-foreground text-xs">HEALTH</Text>
+
+              {/* Delete Garden Button - More subtle in header */}
+              <TouchableOpacity
+                className="bg-destructive rounded-lg py-2 px-4 flex-row items-center justify-center"
+                onPress={handleDeleteGarden}
+              >
+                <Ionicons name="trash-outline" size={20} color="#fffefa" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      )}
 
-      {/* Plants List */}
-      <ScrollView className="flex-1 pb-32">
-        {plants.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <View className="mb-8">
-            {criticalPlants.length > 0 && (
-              <View className="mb-4">
-                <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                  <Text className="text-destructive font-medium">
-                    Needs Immediate Care
-                  </Text>
+        {/* Garden Stats Overview */}
+        {dashboardData && (
+          <View className="px-5 py-4">
+            <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border-2 border-cream-300">
+              <View className="items-center flex-1">
+                <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                  <Ionicons name="leaf" size={24} color="#77B860" />
                 </View>
-                {criticalPlants.map((plant) => (
-                  <View key={plant.id}>{renderPlantCard(plant)}</View>
-                ))}
+                <Text className="text-xl font-bold text-brand-700">
+                  {dashboardData.total_plants}
+                </Text>
+                <Text className="text-cream-600 text-xs">PLANTS</Text>
               </View>
-            )}
 
-            {needsAttentionPlants.length > 0 && (
-              <View className="mb-4">
-                <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                  <Text className="text-yellow-700 font-medium">
-                    Due for Care
-                  </Text>
+              <View className="items-center flex-1">
+                <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                  <Ionicons
+                    name="water"
+                    size={24}
+                    color={
+                      dashboardData.plants_needing_care > 0
+                        ? "#d97706"
+                        : "#9e9a90"
+                    }
+                  />
                 </View>
-                {needsAttentionPlants.map((plant) => (
-                  <View key={plant.id}>{renderPlantCard(plant)}</View>
-                ))}
+                <Text
+                  className={`text-xl font-bold ${
+                    dashboardData.plants_needing_care > 0
+                      ? "text-yellow-600"
+                      : "text-foreground"
+                  }`}
+                >
+                  {dashboardData.plants_needing_care}
+                </Text>
+                <Text className="text-foreground text-xs">NEED CARE</Text>
               </View>
-            )}
 
-            {healthyPlants.length > 0 && (
-              <View className="mb-4">
-                <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                  <Text className="text-brand-700 font-medium">
-                    Looking Good
-                  </Text>
+              <View className="items-center flex-1">
+                <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                  <Ionicons name="heart" size={24} color="#77B860" />
                 </View>
-                {healthyPlants.map((plant) => (
-                  <View key={plant.id}>{renderPlantCard(plant)}</View>
-                ))}
+                <Text className="text-xl font-bold text-primary">
+                  {dashboardData.health_percentage}%
+                </Text>
+                <Text className="text-foreground text-xs">HEALTH</Text>
               </View>
-            )}
+            </View>
           </View>
         )}
-      </ScrollView>
+
+        {/* Plants List */}
+        <ScrollView className="flex-1 pb-32">
+          {plants.length === 0 ? (
+            renderEmptyState()
+          ) : (
+            <View className="mb-8">
+              {criticalPlants.length > 0 && (
+                <View className="mb-4">
+                  <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                    <Text className="text-destructive font-medium">
+                      Needs Immediate Care
+                    </Text>
+                  </View>
+                  {criticalPlants.map((plant) => (
+                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                  ))}
+                </View>
+              )}
+
+              {needsAttentionPlants.length > 0 && (
+                <View className="mb-4">
+                  <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                    <Text className="text-yellow-700 font-medium">
+                      Due for Care
+                    </Text>
+                  </View>
+                  {needsAttentionPlants.map((plant) => (
+                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                  ))}
+                </View>
+              )}
+
+              {healthyPlants.length > 0 && (
+                <View className="mb-4">
+                  <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                    <Text className="text-brand-700 font-medium">
+                      Looking Good
+                    </Text>
+                  </View>
+                  {healthyPlants.map((plant) => (
+                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </View>
     </PageContainer>
   );
 };
