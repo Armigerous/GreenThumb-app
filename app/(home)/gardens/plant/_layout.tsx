@@ -19,6 +19,7 @@ export default function PlantLayout() {
         name="[id]"
         options={{
           headerShown: false,
+          animation: "slide_from_right",
         }}
       />
       <Stack.Screen

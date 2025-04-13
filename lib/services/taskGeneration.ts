@@ -51,6 +51,8 @@ export async function generatePlantTasks(
     }
 
     console.log("Tasks generated successfully:", data.tasks.length);
+    // The Edge Function already stored these tasks in the database
+    // So we just return them without trying to insert them again
     return data.tasks;
   } catch (error) {
     console.error("Error in generatePlantTasks:", error);

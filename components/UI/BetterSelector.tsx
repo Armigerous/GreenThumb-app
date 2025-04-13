@@ -24,6 +24,7 @@ type BetterSelectorProps<T extends boolean = true> = {
   value: T extends true ? number[] : number | null;
   onChange: (value: T extends true ? number[] : number | null) => void;
   multiple?: T;
+  labelHidden?: boolean;
 };
 
 export default function BetterSelector<T extends boolean = true>({
@@ -33,6 +34,7 @@ export default function BetterSelector<T extends boolean = true>({
   value,
   onChange,
   multiple = true as T,
+  labelHidden = false,
 }: BetterSelectorProps<T>) {
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(0)).current;
@@ -136,9 +138,11 @@ export default function BetterSelector<T extends boolean = true>({
 
   return (
     <View className="mb-5">
-      <Text className="text-foreground font-medium mb-1.5 text-base">
-        {label}
-      </Text>
+      {!labelHidden && (
+        <Text className="text-foreground font-medium mb-1.5 text-base">
+          {label}
+        </Text>
+      )}
 
       <TouchableOpacity
         onPress={handleOpen}
@@ -148,7 +152,7 @@ export default function BetterSelector<T extends boolean = true>({
           className={`${
             (multiple ? (value as number[])?.length || 0 : value)
               ? "text-gray-800"
-              : "text-gray-400"
+              : "text-gray-300"
           } text-base`}
         >
           {getDisplayValue()}

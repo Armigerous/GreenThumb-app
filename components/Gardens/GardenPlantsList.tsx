@@ -10,7 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { format, isValid, parseISO, differenceInDays } from "date-fns";
 import type { UserPlant } from "@/types/garden";
-import CachedImage from "@/components/Database/CachedImage";
+import CachedImage from "@/components/CachedImage";
 
 type PlantSection = {
   title: string;

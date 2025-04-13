@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { Image as ExpoImage, ImageContentFit } from "expo-image";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  View,
   ActivityIndicator,
-  Image as RNImage,
   ImageResizeMode,
   Platform,
-  NativeSyntheticEvent,
-  ImageErrorEventData,
+  Image as RNImage,
+  StyleSheet,
+  View,
 } from "react-native";
-import { Image as ExpoImage, ImageContentFit } from "expo-image";
-import { supabase } from "@/lib/supabaseClient";
 
 // Define the possible resize modes for the image
 type ResizeMode = "cover" | "contain" | "stretch" | "center";
@@ -29,6 +27,8 @@ interface CachedImageProps {
   rounded?: boolean;
   /** Optional cache key to ensure consistent caching */
   cacheKey?: string;
+  /** Prevent URL transformation (use exactly as provided) */
+  preventTransform?: boolean;
 }
 
 // Default fallback image URL
@@ -51,6 +51,54 @@ const isExpoImageAvailable = (): boolean => {
   }
 };
 
+// Function to handle unsupported image formats
+const isSupportedImageFormat = (uri: string): boolean => {
+  if (!uri) return false;
+
+  // Check if the image is an MPO file (unsupported format)
+  if (uri.toLowerCase().endsWith(".mpo")) {
+    return false;
+  }
+
+  return true;
+};
+
+// Try different image formats and strategies
+const tryAlternativeFormats = (uri: string, attempt: number = 0): string => {
+  const formats = [".jpg", ".jpeg", ".png", ".webp"];
+  const baseUri = uri.replace(/\.[^.]+$/, ""); // Remove extension
+
+  if (attempt < formats.length) {
+    // Try different extensions
+    return baseUri + formats[attempt];
+  } else if (attempt === formats.length) {
+    // Try without extension as last resort
+    return baseUri;
+  } else if (attempt === formats.length + 1) {
+    // Try lowercase plant name with jpg
+    // Extract the filename from the URL path
+    const urlParts = uri.split("/");
+    const filename = urlParts[urlParts.length - 1];
+
+    // Try to extract plant name (typically before first underscore)
+    const plantNameMatch = filename.match(/^([^_]+)/);
+    if (plantNameMatch && plantNameMatch[1]) {
+      const plantName = plantNameMatch[1];
+
+      // Replace the original plant name with lowercase version
+      const lowercasePlantName = plantName.toLowerCase();
+      const newFilename = filename.replace(plantName, lowercasePlantName);
+
+      // Replace the filename in the URL
+      urlParts[urlParts.length - 1] = newFilename.replace(/\.[^.]+$/, ".jpg");
+      return urlParts.join("/");
+    }
+  }
+
+  // Fallback to original
+  return uri;
+};
+
 const CachedImage: React.FC<CachedImageProps> = ({
   uri,
   fallbackUri = DEFAULT_FALLBACK_URI,
@@ -58,17 +106,27 @@ const CachedImage: React.FC<CachedImageProps> = ({
   resizeMode = "cover",
   rounded = false,
   cacheKey,
+  preventTransform = false,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [imageUri, setImageUri] = useState<string>(uri || fallbackUri);
+  const [imageUri, setImageUri] = useState<string>(
+    isSupportedImageFormat(uri) ? uri : fallbackUri
+  );
   const [retryCount, setRetryCount] = useState(0);
   const isMounted = useRef(true);
-  const processedUriRef = useRef<string | null>(null);
+  const originalUri = useRef<string>(uri);
+  const isProcessing = useRef<boolean>(false);
 
   // Function to get a signed URL for Supabase storage images
   const getSignedUrl = async (path: string): Promise<string | null> => {
     try {
+      // Only create a new signed URL if the path doesn't already have a token
+      if (path.includes("token=")) {
+        console.log("URL already has a token, skipping signed URL creation");
+        return path;
+      }
+
       // Extract the path from the Supabase URL or path
       const cleanPath = path.replace(/^user-uploads\//, "");
 
@@ -93,6 +151,11 @@ const CachedImage: React.FC<CachedImageProps> = ({
     try {
       // If it's a full Supabase URL
       if (input.includes("supabase.co")) {
+        // Skip extraction if URL already has a token
+        if (input.includes("token=")) {
+          return input;
+        }
+
         const urlObj = new URL(input);
         // Extract the path after /storage/v1/object/public/user-uploads/
         const pathParts = urlObj.pathname.split("/");
@@ -137,57 +200,104 @@ const CachedImage: React.FC<CachedImageProps> = ({
 
   // Validate and process the URI when it changes
   useEffect(() => {
+    // Skip processing if the URI hasn't changed
+    if (originalUri.current === uri && imageUri !== fallbackUri) {
+      return;
+    }
+
+    originalUri.current = uri;
+
+    // Prevent concurrent processing
+    if (isProcessing.current) {
+      console.log("Already processing a URI, skipping");
+      return;
+    }
+
     const processUri = async () => {
-      if (!uri) {
+      isProcessing.current = true;
+
+      // Skip unsupported image formats entirely
+      if (!uri || !isSupportedImageFormat(uri)) {
+        console.log("Skipping unsupported image format:", uri);
         setImageUri(fallbackUri);
+        setIsLoading(false);
+        isProcessing.current = false;
+        return;
+      }
+
+      // If preventTransform is true, use the URI directly
+      if (preventTransform) {
+        setImageUri(uri);
+        setIsLoading(false);
+        isProcessing.current = false;
         return;
       }
 
       // Check if the URI is valid
       if (!uri.startsWith("http") && !uri.startsWith("file://")) {
         setImageUri(fallbackUri);
+        isProcessing.current = false;
         return;
       }
 
       // Check if we've already processed this URI
       const key = generateCacheKey(uri);
       if (uriCache.has(key)) {
+        console.log(`Using cached URI for ${key}`);
         setImageUri(uriCache.get(key)!);
         setIsLoading(false);
+        isProcessing.current = false;
+        return;
+      }
+
+      // Skip signed URL creation for URIs that already have tokens
+      if (uri.includes("token=")) {
+        console.log("URI already has a token, using as is");
+        setImageUri(uri);
+        uriCache.set(key, uri);
+        isProcessing.current = false;
         return;
       }
 
       // Handle Supabase storage URLs
       if (uri.includes("supabase.co") || uri.includes("plant-images/")) {
-        // If the URL already has a token, use it as is
-        if (uri.includes("token=")) {
-          setImageUri(uri);
-          uriCache.set(key, uri);
-          return;
-        }
-
         // Extract the path from the Supabase URL or path
         const path = extractSupabasePath(uri);
 
         if (path) {
-          // Get a signed URL
-          const signedUrl = await getSignedUrl(path);
-          if (signedUrl) {
-            setImageUri(signedUrl);
-            uriCache.set(key, signedUrl);
-            return;
+          if (path === uri) {
+            // If the path is the same as the URI, it's already a signed URL
+            setImageUri(uri);
+            uriCache.set(key, uri);
+          } else {
+            // Get a signed URL
+            const signedUrl = await getSignedUrl(path);
+            if (signedUrl) {
+              setImageUri(signedUrl);
+              uriCache.set(key, signedUrl);
+            } else {
+              // Fall back to the original URI
+              setImageUri(uri);
+              uriCache.set(key, uri);
+            }
           }
+        } else {
+          // If path extraction failed, use the URI as is
+          setImageUri(uri);
+          uriCache.set(key, uri);
         }
+      } else {
+        // For non-Supabase URLs, use as is
+        setImageUri(uri);
+        uriCache.set(key, uri);
       }
 
-      // For non-Supabase URLs, use as is
-      setImageUri(uri);
-      uriCache.set(key, uri);
+      isProcessing.current = false;
     };
 
     // Reset loading state when URI changes
     setIsLoading(true);
-    processedUriRef.current = uri;
+    setHasError(false);
 
     processUri();
 
@@ -195,37 +305,16 @@ const CachedImage: React.FC<CachedImageProps> = ({
     return () => {
       isMounted.current = false;
     };
-  }, [uri, fallbackUri, cacheKey]);
+  }, [uri, fallbackUri, cacheKey, preventTransform]);
 
   // Handle image loading errors
   const handleImageError = (error: any) => {
     if (!isMounted.current) return;
 
     console.error(`CachedImage: Error loading image: ${imageUri}`, error);
-
-    if (retryCount < MAX_RETRIES) {
-      setRetryCount((prev) => prev + 1);
-
-      // For Supabase URLs, try to get a fresh signed URL
-      if (
-        imageUri.includes("supabase.co") ||
-        imageUri.includes("plant-images/")
-      ) {
-        const path = extractSupabasePath(imageUri);
-        if (path) {
-          getSignedUrl(path).then((signedUrl) => {
-            if (signedUrl && isMounted.current) {
-              setImageUri(signedUrl);
-              uriCache.set(generateCacheKey(uri), signedUrl);
-            }
-          });
-        }
-      }
-    } else {
-      setIsLoading(false);
-      setHasError(true);
-      setImageUri(fallbackUri);
-    }
+    setIsLoading(false);
+    setHasError(true);
+    setImageUri(fallbackUri);
   };
 
   // Handle successful image load

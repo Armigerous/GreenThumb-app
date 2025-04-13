@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useEffect, useState } from "react";
 
 // Custom tab bar component
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -32,10 +33,40 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           if (!isFocused && !event.defaultPrevented) {
             // Special case for gardens tab - always navigate to index
             if (route.name === "gardens") {
-              navigation.navigate("gardens", { screen: "index" });
+              // Reset the gardens stack to just the index screen
+              navigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: route.name,
+                    params: { screen: "index" },
+                  },
+                ],
+              });
             } else {
               navigation.navigate(route.name);
             }
+          } else if (isFocused && route.name === "gardens") {
+            // Get the current route information to check if we're already on index
+            const currentRoute = state.routes[state.index];
+            const childState = currentRoute.state as any;
+
+            // Only reset if we're not already on gardens/index
+            if (
+              childState &&
+              (childState.index !== 0 || childState.routes[0].name !== "index")
+            ) {
+              navigation.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: route.name,
+                    params: { screen: "index" },
+                  },
+                ],
+              });
+            }
+            // Otherwise, do nothing if already on gardens/index to prevent flickering
           }
         };
 
@@ -81,6 +112,20 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 export default function HomeLayout() {
+  // Track if this is the first render to disable animations on first load
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
+  useEffect(() => {
+    // After first render, enable animations for future tab changes
+    if (isInitialRender) {
+      const timer = setTimeout(() => {
+        setIsInitialRender(false);
+      }, 300); // Short delay to ensure first screen renders completely
+
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialRender]);
+
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}

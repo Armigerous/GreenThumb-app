@@ -15,6 +15,8 @@ import DesignSection from "./GardenEditorSections/DesignSection";
 import EnvironmentSection from "./GardenEditorSections/EnvironmentSection";
 import PreferencesSection from "./GardenEditorSections/PreferencesSection";
 import { LoadingSpinner } from "../UI/LoadingSpinner";
+import HelpIcon from "../UI/HelpIcon";
+import ProgressIndicator from "../UI/ProgressIndicator";
 
 type NewGardenFormProps = {
   onSuccess: () => void;
@@ -25,7 +27,7 @@ type NewGardenFormProps = {
 const STEPS = [
   {
     id: "basic",
-    title: "Basic Information",
+    title: "Basic Info",
     description: "Let's start with the basics of your garden",
   },
   {
@@ -236,14 +238,21 @@ export default function NewGardenForm({
           <View className="space-y-6">
             {/* Garden Name */}
             <View>
-              <Text className="text-lg text-foreground font-medium mb-3">
-                Garden Name
-              </Text>
+              <View className="flex-row items-center mb-1">
+                <Text className="text-lg text-foreground font-medium">
+                  Garden Name
+                </Text>
+                <HelpIcon
+                  title="Garden Name"
+                  explanation="Your garden profile helps us provide personalized plant recommendations and gardening advice. Start by giving your garden a name that will help you identify it."
+                />
+              </View>
               <TextInput
                 className="border border-cream-300 rounded-lg p-3.5 bg-cream-50"
                 value={formValues.name}
                 onChangeText={(text) => updateFormValues("name", text)}
                 placeholder="Enter garden name"
+                placeholderTextColor="#BBBBBB"
                 autoFocus
               />
             </View>
@@ -282,13 +291,23 @@ export default function NewGardenForm({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className="flex-1">
-        {/* Progress bar */}
-        <View className="h-1 bg-cream-200 mb-6">
-          <View
-            className="h-full bg-brand-500"
-            style={{
-              width: `${((currentStep + 1) / STEPS.length) * 100}%`,
-            }}
+        {/* Progress indicator */}
+        <ProgressIndicator
+          currentStep={currentStep + 1}
+          totalSteps={STEPS.length}
+          stepLabels={STEPS.map((step) => step.title)}
+          accentColor="brand-500"
+          inactiveColor="cream-200"
+        />
+
+        {/* Introduction */}
+        <View className="flex-row items-center mb-6">
+          <Text className="text-foreground font-medium text-base">
+            About Garden Profiles
+          </Text>
+          <HelpIcon
+            title="Garden Profile Purpose"
+            explanation="Creating a garden profile helps us understand your garden's conditions, your design preferences, and maintenance needs. This information will be used to recommend plants that are well-suited to your specific garden environment."
           />
         </View>
 
