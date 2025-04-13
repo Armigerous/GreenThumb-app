@@ -1,6 +1,9 @@
+import CachedImage from "@/components/Database/CachedImage";
 import { ErrorBoundary } from "@/components/Database/Plant/ErrorBoundary";
 import { ErrorView } from "@/components/Database/Plant/ErrorView";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
 import { usePlantDetails } from "@/lib/queries";
 import { PlantData, PlantImage } from "@/types/plant";
 import { TabType } from "@/types/tab";
@@ -8,7 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   ScrollView,
@@ -16,9 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { PageContainer } from "@/components/UI/PageContainer";
-import CachedImage from "@/components/Database/CachedImage";
 
 // Tab bar component
 const TabBar = ({
@@ -159,18 +158,15 @@ export default function PlantDetailScreen() {
 
   // Wrap the main content with ErrorBoundary
   return (
-    <ErrorBoundary>
-      <PageContainer scroll={false} padded={false} safeArea={false}>
+    <PageContainer scroll={false} padded={false} safeArea={false}>
+      <ErrorBoundary>
         <View className="flex-1">
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: bottomPadding }}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Back Button - Now inside ScrollView to make it scrollable */}
-            <View className="flex-row justify-between items-center px-5 py-3 bg-cream-50">
+          {/* Fixed Header */}
+          <View className="bg-white border-b border-cream-100 pt-12">
+            <View className="flex-row justify-between items-center px-5 py-4">
               <TouchableOpacity
                 onPress={() => router.back()}
-                className="flex-row items-center bg-white/80 rounded-xl px-4 py-2"
+                className="flex-row items-center"
               >
                 <Ionicons name="arrow-back" size={24} color="#2e2c29" />
                 <Text className="text-foreground text-lg font-medium ml-2">
@@ -178,6 +174,12 @@ export default function PlantDetailScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: bottomPadding }}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Plant Image */}
             <View className="w-full h-[300px]">
               <Image
@@ -768,7 +770,7 @@ export default function PlantDetailScreen() {
             <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
           </View>
         </View>
-      </PageContainer>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </PageContainer>
   );
 }

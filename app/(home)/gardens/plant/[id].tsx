@@ -28,6 +28,7 @@ import EditPlantModal from "@/components/Gardens/Plants/EditPlantModal";
 
 // Define task time period types for better type safety
 type TaskTimePeriod =
+  | "missed"
   | "today"
   | "tomorrow"
   | "this_week"
@@ -273,6 +274,7 @@ export default function UserPlantDetailScreen() {
 
     // Initialize all groups with empty arrays
     const groups: Record<TaskTimePeriod, TaskWithDetails[]> = {
+      missed: [],
       today: [],
       tomorrow: [],
       this_week: [],
@@ -289,7 +291,10 @@ export default function UserPlantDetailScreen() {
         const dueDate = new Date(task.due_date);
         let group: TaskTimePeriod = "later";
 
-        if (dueDate <= now) {
+        // Check if task is missed (due date is before today and not completed)
+        if (dueDate < now && !task.completed) {
+          group = "missed";
+        } else if (dueDate <= now) {
           group = "today";
         } else if (dueDate <= tomorrow) {
           group = "tomorrow";
@@ -317,11 +322,13 @@ export default function UserPlantDetailScreen() {
     .map(([period]) => period as TaskTimePeriod);
 
   // If the active tab doesn't have tasks, switch to the first tab with tasks
-  if (
-    timePeriodsWithTasks.length > 0 &&
-    !timePeriodsWithTasks.includes(activeTaskTab)
-  ) {
-    setActiveTaskTab(timePeriodsWithTasks[0]);
+  // Prioritize showing missed tasks first
+  if (timePeriodsWithTasks.length > 0) {
+    if (timePeriodsWithTasks.includes("missed")) {
+      setActiveTaskTab("missed");
+    } else if (!timePeriodsWithTasks.includes(activeTaskTab)) {
+      setActiveTaskTab(timePeriodsWithTasks[0]);
+    }
   }
 
   // Find the next upcoming task
@@ -429,13 +436,13 @@ export default function UserPlantDetailScreen() {
   const lastCareLog = getLastCareLog();
 
   return (
-    <PageContainer scroll={false} padded={false}>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header with Back Button and Edit Button */}
-        <View className="flex-row justify-between items-center px-5 py-4 bg-cream-50">
+    <PageContainer scroll={false} padded={false} safeArea={false}>
+      {/* Fixed Header */}
+      <View className="bg-white border-b border-cream-100 pt-12">
+        <View className="flex-row justify-between items-center px-5 py-4">
           <TouchableOpacity
             onPress={handleBack}
-            className="flex-row items-center bg-white/80 rounded-xl px-4 py-2"
+            className="flex-row items-center"
           >
             <Ionicons name="arrow-back" size={24} color="#2e2c29" />
             <Text className="text-foreground text-lg font-medium ml-2">
@@ -445,17 +452,18 @@ export default function UserPlantDetailScreen() {
 
           <TouchableOpacity
             onPress={() => setIsEditModalVisible(true)}
-            className="bg-primary rounded-xl px-4 py-2 flex-row items-center"
+            className="bg-primary rounded-lg px-3 py-2 items-center justify-center flex-row"
           >
             <Ionicons name="create-outline" size={20} color="white" />
             <Text className="text-white font-medium ml-2">Edit</Text>
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* 1. Plant Identity Section */}
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-5 py-4">
-          {/* Hero Card */}
-          <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
+          {/* 1. Plant Identity Card */}
+          <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
             {/* Plant Image */}
             <View className="w-full h-[250px]">
               {plantData?.images && plantData.images.length > 0 ? (
@@ -473,12 +481,12 @@ export default function UserPlantDetailScreen() {
 
             {/* Plant Info */}
             <View className="p-5">
-              <View className="flex-row justify-between items-start mb-3">
+              <View className="flex-row justify-between items-start mb-4">
                 <View className="flex-1">
                   <Text className="text-2xl font-bold text-foreground">
                     {plantData.nickname}
                   </Text>
-                  <Text className="text-cream-600 text-base">
+                  <Text className="text-cream-600 text-base mt-1">
                     {plantData.scientific_name}
                   </Text>
                 </View>
@@ -495,7 +503,7 @@ export default function UserPlantDetailScreen() {
               </View>
 
               {/* Garden Context */}
-              <View className="flex-row items-center mb-3">
+              <View className="flex-row items-center mb-4">
                 <Ionicons name="flower-outline" size={18} color="#5E994B" />
                 <Text className="text-foreground ml-2">
                   In {plantData.garden_name}
@@ -527,40 +535,48 @@ export default function UserPlantDetailScreen() {
             </View>
           </View>
 
-          {/* 2. Quick Action Buttons */}
-          <View className="flex-row justify-between mb-6">
-            <TouchableOpacity
-              className="bg-blue-500 rounded-xl py-3 px-4 flex-1 mr-2 items-center"
-              onPress={() => {
-                setCareType("Watered");
-                setShowCareForm(true);
-              }}
-            >
-              <Ionicons name="water" size={24} color="white" />
-              <Text className="text-white font-medium mt-1">Water</Text>
-            </TouchableOpacity>
+          {/* 2. Quick Actions Card */}
+          <View className="bg-white rounded-2xl shadow-sm p-5 mb-6">
+            <Text className="text-lg font-bold text-foreground mb-4">
+              Quick Actions
+            </Text>
 
-            <TouchableOpacity
-              className="bg-green-500 rounded-xl py-3 px-4 flex-1 mx-2 items-center"
-              onPress={() => {
-                setCareType("Fertilized");
-                setShowCareForm(true);
-              }}
-            >
-              <Ionicons name="leaf" size={24} color="white" />
-              <Text className="text-white font-medium mt-1">Fertilize</Text>
-            </TouchableOpacity>
+            <View className="flex-row justify-between">
+              <TouchableOpacity
+                className="bg-brand-100 rounded-xl py-3 px-4 flex-1 mr-2 items-center"
+                onPress={() => {
+                  setCareType("Watered");
+                  setShowCareForm(true);
+                }}
+              >
+                <Ionicons name="water" size={24} color="#059669" />
+                <Text className="text-brand-700 font-medium mt-1">Water</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              className="bg-purple-500 rounded-xl py-3 px-4 flex-1 ml-2 items-center"
-              onPress={() => {
-                setCareType("Harvested");
-                setShowCareForm(true);
-              }}
-            >
-              <Ionicons name="cut" size={24} color="white" />
-              <Text className="text-white font-medium mt-1">Harvest</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-brand-100 rounded-xl py-3 px-4 flex-1 mx-2 items-center"
+                onPress={() => {
+                  setCareType("Fertilized");
+                  setShowCareForm(true);
+                }}
+              >
+                <Ionicons name="leaf" size={24} color="#059669" />
+                <Text className="text-brand-700 font-medium mt-1">
+                  Fertilize
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-brand-100 rounded-xl py-3 px-4 flex-1 ml-2 items-center"
+                onPress={() => {
+                  setCareType("Harvested");
+                  setShowCareForm(true);
+                }}
+              >
+                <Ionicons name="cut" size={24} color="#059669" />
+                <Text className="text-brand-700 font-medium mt-1">Harvest</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Care Form Modal */}
@@ -601,286 +617,323 @@ export default function UserPlantDetailScreen() {
           )}
 
           {/* 3. Tasks Section */}
-          <CollapsibleSection
-            title="Tasks"
-            icon="checkmark-circle-outline"
-            initiallyExpanded={true}
-          >
-            {/* Task Summary */}
-            {tasksWithDetails.length > 0 && (
-              <View className="mt-3 mb-4 bg-cream-100 rounded-xl p-4">
-                <Text className="text-sm font-medium text-foreground mb-2">
-                  Task Summary
+          <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+            <View className="p-5 border-b border-cream-100">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={20}
+                  color="#059669"
+                />
+                <Text className="text-foreground font-medium ml-2.5 text-base">
+                  Tasks
                 </Text>
-                <View className="flex-row flex-wrap">
-                  {Object.entries(groupedTasks).map(([period, tasks]) => {
-                    if (tasks.length === 0) return null;
-
-                    // Get the appropriate icon for each period
-                    const getPeriodIcon = (
-                      period: string
-                    ): keyof typeof Ionicons.glyphMap => {
-                      switch (period) {
-                        case "today":
-                          return "today";
-                        case "tomorrow":
-                          return "calendar";
-                        case "this_week":
-                          return "calendar-outline";
-                        case "next_week":
-                          return "calendar-number";
-                        case "this_month":
-                          return "calendar-number-outline";
-                        default:
-                          return "time";
-                      }
-                    };
-
-                    // Get the appropriate color for each period
-                    const getPeriodColor = (period: string): string => {
-                      switch (period) {
-                        case "today":
-                          return "#ef4444"; // red-500
-                        case "tomorrow":
-                          return "#f97316"; // orange-500
-                        case "this_week":
-                          return "#eab308"; // yellow-500
-                        case "next_week":
-                          return "#10b981"; // emerald-500
-                        case "this_month":
-                          return "#3b82f6"; // blue-500
-                        default:
-                          return "#6b7280"; // gray-500
-                      }
-                    };
-
-                    return (
-                      <View
-                        key={period}
-                        className="w-1/2 mb-2 flex-row items-center"
-                      >
-                        <View
-                          className="w-6 h-6 rounded-full items-center justify-center mr-2"
-                          style={{
-                            backgroundColor: `${getPeriodColor(period)}20`,
-                          }}
-                        >
-                          <Ionicons
-                            name={getPeriodIcon(period)}
-                            size={14}
-                            color={getPeriodColor(period)}
-                          />
-                        </View>
-                        <Text className="text-sm text-cream-700">
-                          {period === "today" && "Today: "}
-                          {period === "tomorrow" && "Tomorrow: "}
-                          {period === "this_week" && "This Week: "}
-                          {period === "next_week" && "Next Week: "}
-                          {period === "this_month" && "This Month: "}
-                          {period === "later" && "Later: "}
-                          <Text className="font-medium ml-1">
-                            {tasks.length}
-                          </Text>
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
               </View>
-            )}
+            </View>
 
-            {/* Task Tab Navigation */}
-            {timePeriodsWithTasks.length > 0 && (
-              <View className="mt-3 mb-4">
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className="flex-row"
-                >
-                  {timePeriodsWithTasks.map((period) => (
-                    <TouchableOpacity
-                      key={period}
-                      onPress={() => setActiveTaskTab(period)}
-                      className={`mr-2 px-4 py-2 rounded-full ${
-                        activeTaskTab === period
-                          ? "bg-brand-500"
-                          : "bg-cream-100"
-                      }`}
-                    >
-                      <Text
-                        className={`text-sm font-medium ${
+            <View className="p-5">
+              {/* Task Summary */}
+              {tasksWithDetails.length > 0 && (
+                <View className="mb-4 bg-cream-50 rounded-xl p-4">
+                  <Text className="text-sm font-medium text-foreground mb-2">
+                    Task Summary
+                  </Text>
+                  <View className="flex-row flex-wrap">
+                    {Object.entries(groupedTasks).map(([period, tasks]) => {
+                      if (tasks.length === 0) return null;
+
+                      // Get the appropriate icon for each period
+                      const getPeriodIcon = (
+                        period: string
+                      ): keyof typeof Ionicons.glyphMap => {
+                        switch (period) {
+                          case "missed":
+                            return "alert-circle";
+                          case "today":
+                            return "today";
+                          case "tomorrow":
+                            return "calendar";
+                          case "this_week":
+                            return "calendar-outline";
+                          case "next_week":
+                            return "calendar-number";
+                          case "this_month":
+                            return "calendar-number-outline";
+                          default:
+                            return "time";
+                        }
+                      };
+
+                      // Get the appropriate color for each period
+                      const getPeriodColor = (period: string): string => {
+                        switch (period) {
+                          case "missed":
+                            return "#ef4444"; // red-500
+                          case "today":
+                            return "#f97316"; // orange-500
+                          case "tomorrow":
+                            return "#f97316"; // orange-500
+                          case "this_week":
+                            return "#eab308"; // yellow-500
+                          case "next_week":
+                            return "#10b981"; // emerald-500
+                          case "this_month":
+                            return "#3b82f6"; // blue-500
+                          default:
+                            return "#6b7280"; // gray-500
+                        }
+                      };
+
+                      return (
+                        <View
+                          key={period}
+                          className="w-1/2 mb-2 flex-row items-center"
+                        >
+                          <View
+                            className="w-6 h-6 rounded-full items-center justify-center mr-2"
+                            style={{
+                              backgroundColor: `${getPeriodColor(period)}20`,
+                            }}
+                          >
+                            <Ionicons
+                              name={getPeriodIcon(period)}
+                              size={14}
+                              color={getPeriodColor(period)}
+                            />
+                          </View>
+                          <Text className="text-sm text-cream-700">
+                            {period === "missed" && "Missed: "}
+                            {period === "today" && "Today: "}
+                            {period === "tomorrow" && "Tomorrow: "}
+                            {period === "this_week" && "This Week: "}
+                            {period === "next_week" && "Next Week: "}
+                            {period === "this_month" && "This Month: "}
+                            {period === "later" && "Later: "}
+                            <Text className="font-medium ml-1">
+                              {tasks.length}
+                            </Text>
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* Task Tab Navigation */}
+              {timePeriodsWithTasks.length > 0 && (
+                <View className="mb-4">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="flex-row"
+                  >
+                    {timePeriodsWithTasks.map((period) => (
+                      <TouchableOpacity
+                        key={period}
+                        onPress={() => setActiveTaskTab(period)}
+                        className={`mr-2 px-4 py-2 rounded-full ${
                           activeTaskTab === period
-                            ? "text-white"
-                            : "text-cream-700"
+                            ? period === "missed"
+                              ? "bg-red-500"
+                              : "bg-brand-500"
+                            : "bg-cream-100"
                         }`}
                       >
-                        {period === "today" && "Today"}
-                        {period === "tomorrow" && "Tomorrow"}
-                        {period === "this_week" && "This Week"}
-                        {period === "next_week" && "Next Week"}
-                        {period === "this_month" && "This Month"}
-                        {period === "later" && "Later"}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-
-            {/* Task List for Active Tab */}
-            <View className="mt-3 space-y-6">
-              {groupedTasks[activeTaskTab]?.length > 0 ? (
-                <TaskList
-                  tasks={groupedTasks[activeTaskTab]}
-                  showGardenName={false}
-                  queryKey={["userPlantDetails", id]}
-                />
-              ) : (
-                <View className="py-6 items-center">
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={32}
-                    color="#9e9a90"
-                  />
-                  <Text className="text-cream-600 mt-2 text-center">
-                    No tasks for this period
-                  </Text>
+                        <Text
+                          className={`text-sm font-medium ${
+                            activeTaskTab === period
+                              ? "text-white"
+                              : "text-cream-700"
+                          }`}
+                        >
+                          {period === "missed" && "Missed"}
+                          {period === "today" && "Today"}
+                          {period === "tomorrow" && "Tomorrow"}
+                          {period === "this_week" && "This Week"}
+                          {period === "next_week" && "Next Week"}
+                          {period === "this_month" && "This Month"}
+                          {period === "later" && "Later"}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
               )}
 
-              {/* No Tasks Message */}
-              {tasksWithDetails.length === 0 && (
-                <View className="py-6 items-center">
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={32}
-                    color="#9e9a90"
+              {/* Task List for Active Tab */}
+              <View className="space-y-6">
+                {groupedTasks[activeTaskTab]?.length > 0 ? (
+                  <TaskList
+                    tasks={groupedTasks[activeTaskTab]}
+                    showGardenName={false}
+                    queryKey={["userPlantDetails", id]}
                   />
-                  <Text className="text-cream-600 mt-2 text-center">
-                    No tasks for this plant
-                  </Text>
-                </View>
-              )}
-
-              {/* All Tasks Completed Message */}
-              {plantTasks.length > 0 &&
-                plantTasks.every((task) => task.completed) && (
+                ) : (
                   <View className="py-6 items-center">
                     <Ionicons
-                      name="checkmark-circle"
+                      name="checkmark-circle-outline"
                       size={32}
-                      color="#059669"
+                      color="#9e9a90"
                     />
                     <Text className="text-cream-600 mt-2 text-center">
-                      All tasks completed! Great job!
+                      No tasks for this period
                     </Text>
                   </View>
                 )}
+
+                {/* No Tasks Message */}
+                {tasksWithDetails.length === 0 && (
+                  <View className="py-6 items-center">
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={32}
+                      color="#9e9a90"
+                    />
+                    <Text className="text-cream-600 mt-2 text-center">
+                      No tasks for this plant
+                    </Text>
+                  </View>
+                )}
+
+                {/* All Tasks Completed Message */}
+                {plantTasks.length > 0 &&
+                  plantTasks.every((task) => task.completed) && (
+                    <View className="py-6 items-center">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={32}
+                        color="#059669"
+                      />
+                      <Text className="text-cream-600 mt-2 text-center">
+                        All tasks completed! Great job!
+                      </Text>
+                    </View>
+                  )}
+              </View>
             </View>
-          </CollapsibleSection>
+          </View>
 
           {/* 4. Care History Timeline */}
-          <CollapsibleSection
-            title="Care History"
-            icon="time-outline"
-            initiallyExpanded={true}
-          >
-            {plantData?.care_logs && plantData.care_logs.length > 0 ? (
-              <View className="mt-3">
-                {plantData.care_logs
-                  .sort(
-                    (a: PlantCareLog, b: PlantCareLog) =>
-                      new Date(b.taken_care_at).getTime() -
-                      new Date(a.taken_care_at).getTime()
-                  )
-                  .map((log: PlantCareLog, index: number) => (
-                    <View
-                      key={log.id || index}
-                      className="mb-4 pb-4 border-b border-cream-100"
-                    >
-                      <View className="flex-row items-start">
-                        <View className="w-8 h-8 rounded-full bg-brand-100 items-center justify-center mr-3 mt-1">
-                          {log.care_type === "Watered" && (
-                            <Ionicons name="water" size={16} color="#059669" />
-                          )}
-                          {log.care_type === "Fertilized" && (
-                            <Ionicons name="leaf" size={16} color="#059669" />
-                          )}
-                          {log.care_type === "Harvested" && (
-                            <Ionicons name="cut" size={16} color="#059669" />
-                          )}
-                          {log.care_type === "Other" && (
-                            <Ionicons
-                              name="ellipsis-horizontal"
-                              size={16}
-                              color="#059669"
-                            />
-                          )}
-                        </View>
-
-                        <View className="flex-1">
-                          <View className="flex-row justify-between items-start">
-                            <Text className="text-foreground font-medium">
-                              {log.care_type}
-                            </Text>
-                            <Text className="text-cream-600 text-sm">
-                              {formatDate(log.taken_care_at)}
-                            </Text>
-                          </View>
-
-                          {log.care_notes && (
-                            <Text className="text-cream-600 mt-1">
-                              {log.care_notes}
-                            </Text>
-                          )}
-                        </View>
-                      </View>
-                    </View>
-                  ))}
-              </View>
-            ) : (
-              <View className="mt-3 py-4 items-center">
-                <Ionicons name="calendar-outline" size={32} color="#9e9a90" />
-                <Text className="text-cream-600 mt-2 text-center">
-                  No care history recorded yet
+          <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+            <View className="p-5 border-b border-cream-100">
+              <View className="flex-row items-center">
+                <Ionicons name="time-outline" size={20} color="#059669" />
+                <Text className="text-foreground font-medium ml-2.5 text-base">
+                  Care History
                 </Text>
               </View>
-            )}
-          </CollapsibleSection>
+            </View>
+
+            <View className="p-5">
+              {plantData?.care_logs && plantData.care_logs.length > 0 ? (
+                <View>
+                  {plantData.care_logs
+                    .sort(
+                      (a: PlantCareLog, b: PlantCareLog) =>
+                        new Date(b.taken_care_at).getTime() -
+                        new Date(a.taken_care_at).getTime()
+                    )
+                    .map((log: PlantCareLog, index: number) => (
+                      <View
+                        key={log.id || index}
+                        className="mb-4 pb-4 border-b border-cream-100"
+                      >
+                        <View className="flex-row items-start">
+                          <View className="w-8 h-8 rounded-full bg-brand-100 items-center justify-center mr-3 mt-1">
+                            {log.care_type === "Watered" && (
+                              <Ionicons
+                                name="water"
+                                size={16}
+                                color="#059669"
+                              />
+                            )}
+                            {log.care_type === "Fertilized" && (
+                              <Ionicons name="leaf" size={16} color="#059669" />
+                            )}
+                            {log.care_type === "Harvested" && (
+                              <Ionicons name="cut" size={16} color="#059669" />
+                            )}
+                            {log.care_type === "Other" && (
+                              <Ionicons
+                                name="ellipsis-horizontal"
+                                size={16}
+                                color="#059669"
+                              />
+                            )}
+                          </View>
+
+                          <View className="flex-1">
+                            <View className="flex-row justify-between items-start">
+                              <Text className="text-foreground font-medium">
+                                {log.care_type}
+                              </Text>
+                              <Text className="text-cream-600 text-sm">
+                                {formatDate(log.taken_care_at)}
+                              </Text>
+                            </View>
+
+                            {log.care_notes && (
+                              <Text className="text-cream-600 mt-1">
+                                {log.care_notes}
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                </View>
+              ) : (
+                <View className="py-4 items-center">
+                  <Ionicons name="calendar-outline" size={32} color="#9e9a90" />
+                  <Text className="text-cream-600 mt-2 text-center">
+                    No care history recorded yet
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
 
           {/* 5. Progress Photos */}
-          <CollapsibleSection
-            title="Progress Photos"
-            icon="images-outline"
-            initiallyExpanded={true}
-          >
-            {plantData?.images && plantData.images.length > 0 ? (
-              <View className="flex-row flex-wrap gap-2">
-                {plantData.images.map(
-                  (
-                    image: { url: string; created_at: string },
-                    index: number
-                  ) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => handleImagePress(image.url)}
-                      className="w-[calc(50%-4px)] aspect-square rounded-lg overflow-hidden"
-                    >
-                      <CachedImage
-                        uri={image.url}
-                        style={{ width: "100%", height: "100%" }}
-                        resizeMode="cover"
-                      />
-                    </TouchableOpacity>
-                  )
-                )}
+          <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+            <View className="p-5 border-b border-cream-100">
+              <View className="flex-row items-center">
+                <Ionicons name="images-outline" size={20} color="#059669" />
+                <Text className="text-foreground font-medium ml-2.5 text-base">
+                  Progress Photos
+                </Text>
               </View>
-            ) : (
-              <Text className="text-gray-500 italic">
-                No progress photos yet
-              </Text>
-            )}
-          </CollapsibleSection>
+            </View>
+
+            <View className="p-5">
+              {plantData?.images && plantData.images.length > 0 ? (
+                <View className="flex-row flex-wrap gap-2">
+                  {plantData.images.map(
+                    (
+                      image: { url: string; created_at: string },
+                      index: number
+                    ) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => handleImagePress(image.url)}
+                        className="w-[calc(50%-4px)] aspect-square rounded-lg overflow-hidden"
+                      >
+                        <CachedImage
+                          uri={image.url}
+                          style={{ width: "100%", height: "100%" }}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    )
+                  )}
+                </View>
+              ) : (
+                <Text className="text-gray-500 italic">
+                  No progress photos yet
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
       </ScrollView>
 
