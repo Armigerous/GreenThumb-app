@@ -19,6 +19,7 @@ interface SubmitButtonProps {
   width?: "auto" | "full";
   size?: "sm" | "md" | "lg";
   className?: string;
+  iconOnly?: boolean;
 }
 
 export default function SubmitButton({
@@ -35,6 +36,7 @@ export default function SubmitButton({
   width = "auto",
   size = "md",
   className = "",
+  iconOnly = false,
 }: SubmitButtonProps) {
   // Determine button styles based on variant and states
   let buttonClass = "";
@@ -43,11 +45,11 @@ export default function SubmitButton({
 
   const isButtonDisabled = isDisabled || isLoading;
 
-  // Size classes
+  // Size classes with special handling for icon-only mode
   const sizeClasses = {
-    sm: "py-2 px-4",
-    md: "py-3 px-6",
-    lg: "py-4 px-8",
+    sm: iconOnly ? "p-2" : "py-2 px-4",
+    md: iconOnly ? "p-3" : "py-3 px-6",
+    lg: iconOnly ? "p-4" : "py-4 px-8",
   };
 
   // Width classes
@@ -71,15 +73,15 @@ export default function SubmitButton({
   } else if (color === "secondary") {
     if (type === "outline") {
       buttonClass = isButtonDisabled
-        ? "bg-transparent border border-cream-300 opacity-70"
-        : "bg-transparent border border-cream-400";
+        ? "bg-transparent border border-cream-500 opacity-70"
+        : "bg-transparent border border-cream-500";
       textClass = isButtonDisabled ? "text-cream-400" : "text-cream-600";
       spinnerColor = "#047857";
     } else {
       buttonClass = isButtonDisabled
-        ? "border border-cream-400 bg-cream-300 opacity-70"
-        : "border border-cream-400 bg-cream-200";
-      textClass = isButtonDisabled ? "text-cream-500" : "text-foreground";
+        ? "border border-accent-400 bg-accent-300 opacity-70"
+        : "border border-accent-400 bg-accent-200";
+      textClass = isButtonDisabled ? "text-accent-500" : "text-foreground";
       spinnerColor = "#047857"; // Brand color for better visibility on light background
     }
   } else if (color === "destructive") {
@@ -140,24 +142,25 @@ export default function SubmitButton({
           </View>
         ) : (
           <View className="flex-row items-center justify-center">
-            {iconName && iconPosition === "left" && (
+            {iconName && (iconPosition === "left" || iconOnly) && (
               <Ionicons
                 name={iconName}
-                size={iconSize}
+                size={iconOnly ? iconSize + 4 : iconSize}
                 color={getIconColor()}
-                style={{ marginRight: 6 }}
+                style={{ marginRight: iconOnly ? 0 : 6 }}
               />
             )}
 
-            {typeof children === "string" ? (
-              <Text className={`font-medium ${textClass} text-center`}>
-                {children}
-              </Text>
-            ) : (
-              children
-            )}
+            {!iconOnly &&
+              (typeof children === "string" ? (
+                <Text className={`font-medium ${textClass} text-center`}>
+                  {children}
+                </Text>
+              ) : (
+                children
+              ))}
 
-            {iconName && iconPosition === "right" && (
+            {iconName && iconPosition === "right" && !iconOnly && (
               <Ionicons
                 name={iconName}
                 size={iconSize}

@@ -239,7 +239,7 @@ export function Task({
 
   return (
     <TouchableOpacity onPress={handleToggleComplete} className="p-4">
-      <View className="flex-row items-center">
+      <View className="flex-row items-center ">
         {/* Checkbox */}
         <Animated.View
           className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
@@ -247,7 +247,7 @@ export function Task({
               ? "bg-brand-500"
               : isOverdue
               ? "bg-red-100"
-              : "bg-cream-100"
+              : "bg-white border border-cream-300"
           }`}
           style={{
             transform: [{ scale: checkboxAnimationValue }],
@@ -259,7 +259,7 @@ export function Task({
         </Animated.View>
 
         {/* Task Content */}
-        <View className="flex-1">
+        <View className="flex-1 ">
           <View className="flex-row justify-between items-start">
             <View className="flex-row items-center">
               <Ionicons

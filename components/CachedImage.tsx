@@ -23,7 +23,7 @@ interface CachedImageProps {
   style?: View["props"]["style"];
   /** Optional resize mode for the image */
   resizeMode?: ResizeMode;
-  /** Whether to make the image circular (rounded-full) */
+  /** Whether to make the image rounded (rounded-lg) */
   rounded?: boolean;
   /** Optional cache key to ensure consistent caching */
   cacheKey?: string;
@@ -342,9 +342,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
   // Use React Native's Image as a fallback
   if (!isExpoImageAvailable()) {
     return (
-      <View
-        style={[style, rounded && { borderRadius: 9999, overflow: "hidden" }]}
-      >
+      <View style={[style, rounded && { borderRadius: 8, overflow: "hidden" }]}>
         <RNImage
           style={StyleSheet.absoluteFill}
           source={{ uri: imageUri }}
@@ -361,7 +359,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundColor: "#f3f4f6",
-                ...(rounded && { borderRadius: 9999 }),
+                ...(rounded && { borderRadius: 8 }),
               },
             ]}
           >
@@ -374,9 +372,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
 
   // Use Expo Image for better caching in development builds
   return (
-    <View
-      style={[style, rounded && { borderRadius: 9999, overflow: "hidden" }]}
-    >
+    <View style={[style, rounded && { borderRadius: 8, overflow: "hidden" }]}>
       <ExpoImage
         style={StyleSheet.absoluteFill}
         source={imageUri}
@@ -396,7 +392,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
               justifyContent: "center",
               alignItems: "center",
               backgroundColor: "#f3f4f6",
-              ...(rounded && { borderRadius: 9999 }),
+              ...(rounded && { borderRadius: 8 }),
             },
           ]}
         >

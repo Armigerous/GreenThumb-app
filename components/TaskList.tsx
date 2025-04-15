@@ -58,7 +58,7 @@ export function TaskList({
           ([gardenName, gardenTasks], groupIndex) => (
             <View
               key={gardenName}
-              className="mb-4 bg-white rounded-xl border border-cream-200"
+              className="mb-4 bg-white rounded-xl border border-cream-300"
             >
               <Text className="text-sm font-medium text-cream-700 p-4">
                 {gardenName}
@@ -93,7 +93,7 @@ export function TaskList({
   // If not grouping, just show the tasks
   return (
     <View
-      className={`${className} bg-white rounded-xl border border-cream-200`}
+      className={`${className} bg-white rounded-xl border border-cream-300`}
     >
       {tasks.slice(0, maxTasks).map((task, index) => (
         <View key={task.id}>

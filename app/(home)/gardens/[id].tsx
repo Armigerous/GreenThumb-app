@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   Alert,
   Dimensions,
@@ -13,6 +13,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Animated,
+  Easing,
 } from "react-native";
 import { SwipeableRow } from "@/components/UI/SwipeableRow";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,9 +22,52 @@ import { PageContainer } from "@/components/UI/PageContainer";
 import CachedImage from "@/components/CachedImage";
 import { deleteImageFromStorage } from "@/lib/services/imageUpload";
 import SubmitButton from "@/components/UI/SubmitButton";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
+
+// Animation component for staggered entrance
+const AnimatedSection = ({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) => {
+  const translateY = useRef(new Animated.Value(20)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 500,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 500,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [delay, translateY, opacity]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity,
+        transform: [{ translateY }],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+};
 
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
@@ -35,6 +80,10 @@ const GardenDetails = () => {
     refetch,
   } = useGardenDetails(Number(id));
 
+  // Animation references
+  const headerScaleAnim = useRef(new Animated.Value(0.95)).current;
+  const headerOpacityAnim = useRef(new Animated.Value(0)).current;
+
   // Fetch garden tasks summary
   const { data: gardenTasks, isLoading: tasksLoading } = useGardenTasksSummary(
     Number(id)
@@ -46,6 +95,44 @@ const GardenDetails = () => {
       refetch();
     }, [refetch])
   );
+
+  // Trigger header animation when data is loaded
+  useEffect(() => {
+    if (!isLoading && !tasksLoading && gardenData) {
+      Animated.parallel([
+        Animated.timing(headerScaleAnim, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(headerOpacityAnim, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isLoading, tasksLoading, gardenData, headerScaleAnim, headerOpacityAnim]);
+
+  // Get personalized garden message
+  const getGardenMessage = () => {
+    if (!gardenData) return "Welcome to your garden!";
+
+    const totalPlants = gardenData.dashboard?.total_plants || 0;
+    const plantsNeedingCare = gardenData.dashboard?.plants_needing_care || 0;
+
+    if (totalPlants === 0) {
+      return "Your garden is ready for new life. Add your first plant to begin!";
+    }
+
+    if (plantsNeedingCare > 0) {
+      return `${plantsNeedingCare} of your plants need attention today.`;
+    }
+
+    return "Your plants are happy to see you today!";
+  };
 
   const handleConditionsPress = () => {
     // Navigate to garden conditions page
@@ -342,141 +429,145 @@ const GardenDetails = () => {
     },
   } as const;
 
-  // Render a more iOS-like plant card
-  const renderPlantCard = (plant: UserPlant) => {
+  // Render a more iOS-like plant card with animation
+  const renderPlantCard = (plant: UserPlant, index: number) => {
     const status = statusConfig[plant.status as keyof typeof statusConfig];
 
     return (
-      <SwipeableRow
-        onDelete={() => {
-          Alert.alert(
-            "Delete Plant",
-            `Are you sure you want to delete ${plant.nickname}?`,
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-              },
-              {
-                text: "Delete",
-                style: "destructive",
-                onPress: async () => {
-                  try {
-                    // Delete all plant images from storage first
-                    if (plant.images && plant.images.length > 0) {
-                      console.log(
-                        `Deleting ${plant.images.length} images for plant ${plant.id}`
-                      );
-
-                      // Process all image deletions concurrently
-                      const imageDeletionPromises = plant.images.map(
-                        (imageUrl: string) => deleteImageFromStorage(imageUrl)
-                      );
-
-                      // Wait for all image deletions to complete
-                      await Promise.all(imageDeletionPromises);
-                    }
-
-                    // Then delete the plant from the database
-                    const { error } = await supabase
-                      .from("user_plants")
-                      .delete()
-                      .eq("id", plant.id);
-
-                    if (error) throw error;
-
-                    // Invalidate both the garden details query and the garden dashboard query
-                    queryClient.invalidateQueries({
-                      queryKey: ["gardenDetails", gardenData.id],
-                    });
-                    queryClient.invalidateQueries({
-                      queryKey: ["gardenDashboard", gardenData.user_id],
-                    });
-
-                    refetch();
-                  } catch (err) {
-                    console.error("Error deleting plant:", err);
-                    Alert.alert(
-                      "Error",
-                      "Could not delete plant. Please try again."
-                    );
-                  }
+      <AnimatedSection delay={100 + index * 50}>
+        <SwipeableRow
+          onDelete={() => {
+            Alert.alert(
+              "Delete Plant",
+              `Are you sure you want to delete ${plant.nickname}?`,
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
                 },
-              },
-            ]
-          );
-        }}
-        onEdit={() => handleEditPlant(plant)}
-        onWater={() => handleWaterPlant(plant)}
-      >
-        <TouchableOpacity
-          onPress={() => handlePlantPress(plant)}
-          className="bg-white flex-row items-center px-4 py-3 border-b border-cream-300"
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      // Delete all plant images from storage first
+                      if (plant.images && plant.images.length > 0) {
+                        console.log(
+                          `Deleting ${plant.images.length} images for plant ${plant.id}`
+                        );
+
+                        // Process all image deletions concurrently
+                        const imageDeletionPromises = plant.images.map(
+                          (imageUrl: string) => deleteImageFromStorage(imageUrl)
+                        );
+
+                        // Wait for all image deletions to complete
+                        await Promise.all(imageDeletionPromises);
+                      }
+
+                      // Then delete the plant from the database
+                      const { error } = await supabase
+                        .from("user_plants")
+                        .delete()
+                        .eq("id", plant.id);
+
+                      if (error) throw error;
+
+                      // Invalidate both the garden details query and the garden dashboard query
+                      queryClient.invalidateQueries({
+                        queryKey: ["gardenDetails", gardenData.id],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["gardenDashboard", gardenData.user_id],
+                      });
+
+                      refetch();
+                    } catch (err) {
+                      console.error("Error deleting plant:", err);
+                      Alert.alert(
+                        "Error",
+                        "Could not delete plant. Please try again."
+                      );
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+          onEdit={() => handleEditPlant(plant)}
+          onWater={() => handleWaterPlant(plant)}
         >
-          {/* Plant Image */}
-          {plant.images?.[0] ? (
-            <CachedImage
-              uri={plant.images[0]}
-              style={{ width: 48, height: 48 }}
-              resizeMode="cover"
-              rounded={true}
-            />
-          ) : (
-            <View className="w-12 h-12 rounded-full bg-cream-100 items-center justify-center">
-              <Ionicons name="leaf-outline" size={24} color="#9e9a90" />
-            </View>
-          )}
+          <TouchableOpacity
+            onPress={() => handlePlantPress(plant)}
+            className="bg-white flex-row items-center px-4 py-3 border-b border-cream-300"
+          >
+            {/* Plant Image */}
+            {plant.images?.[0] ? (
+              <CachedImage
+                uri={plant.images[0]}
+                style={{ width: 48, height: 48 }}
+                resizeMode="cover"
+                rounded={true}
+              />
+            ) : (
+              <View className="w-12 h-12 rounded-full bg-cream-100 items-center justify-center">
+                <Ionicons name="leaf-outline" size={24} color="#9e9a90" />
+              </View>
+            )}
 
-          {/* Plant Info */}
-          <View className="flex-1 ml-4">
-            <Text className="text-lg text-foreground font-medium">
-              {plant.nickname}
-            </Text>
-            <View className="flex-row items-center">
-              <Ionicons name={status.icon} size={16} color={status.color} />
-              <Text className={`text-sm ml-1 ${status.text}`}>
-                {status.description}
+            {/* Plant Info */}
+            <View className="flex-1 ml-4">
+              <Text className="text-lg text-foreground font-medium">
+                {plant.nickname}
               </Text>
+              <View className="flex-row items-center">
+                <Ionicons name={status.icon} size={16} color={status.color} />
+                <Text className={`text-sm ml-1 ${status.text}`}>
+                  {status.description}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          {/* Right Arrow */}
-          <Ionicons name="chevron-forward" size={20} color="#9e9a90" />
-        </TouchableOpacity>
-      </SwipeableRow>
+            {/* Right Arrow */}
+            <Ionicons name="chevron-forward" size={20} color="#9e9a90" />
+          </TouchableOpacity>
+        </SwipeableRow>
+      </AnimatedSection>
     );
   };
 
   // Render empty state with more visual appeal
   const renderEmptyState = () => (
-    <View className="items-center px-6 py-10 mt-4">
-      <Ionicons
-        name="leaf-outline"
-        size={64}
-        color="#77B860"
-        className="mb-4"
-      />
-      <Text className="text-center text-foreground text-xl font-bold mb-2">
-        Your Garden Awaits
-      </Text>
-      <Text className="text-center text-cream-600 mb-6 px-4">
-        Add your first plant to start your gardening journey. Track growth, care
-        schedules, and watch them thrive!
-      </Text>
-      <SubmitButton
-        onPress={handleAddPlant}
-        iconName="add-circle-outline"
-        iconPosition="left"
-      >
-        Plant Something New
-      </SubmitButton>
-    </View>
+    <AnimatedSection delay={300}>
+      <View className="items-center px-6 py-10 mt-4">
+        <Ionicons
+          name="leaf-outline"
+          size={64}
+          color="#77B860"
+          className="mb-4"
+        />
+        <Text className="text-center text-foreground text-xl font-bold mb-2">
+          Your Garden Awaits
+        </Text>
+        <Text className="text-center text-cream-600 mb-6 px-4">
+          Add your first plant to start your gardening journey. Track growth,
+          care schedules, and watch them thrive!
+        </Text>
+        <SubmitButton
+          onPress={handleAddPlant}
+          iconName="add-circle-outline"
+          iconPosition="left"
+        >
+          Plant Something New
+        </SubmitButton>
+      </View>
+    </AnimatedSection>
   );
 
   return (
     <PageContainer scroll={false} padded={false} safeArea={true}>
       {/* Header with Garden Name and Navigation */}
-      <View className="flex-row justify-between items-center mb-2 px-6">
+      <View className="flex-row justify-between items-center px-6">
         <SubmitButton
           onPress={() => router.push("/(home)/gardens")}
           iconName="arrow-back"
@@ -491,91 +582,114 @@ const GardenDetails = () => {
           onPress={handleDeleteGarden}
           color="destructive"
           iconName="trash-outline"
+          iconOnly={true}
         >
-          Delete Garden
+          {""}
         </SubmitButton>
       </View>
 
       {/* Content area with normal gradient background */}
       <View className="flex-1">
-        {/* Garden Title with Delete Button */}
-        <View className="flex-col justify-between items-center mb-2">
-          <Text className="text-2xl text-foreground font-bold mb-1">
-            Welcome back to {gardenData.name}
-          </Text>
-          <Text className="text-cream-600 text-base mb-3 px-4 text-center">
-            Your plants are happy to see you today!
-          </Text>
-        </View>
-        <View className="flex-row justify-between px-6 mt-4">
-          {/* Delete Garden Button - More subtle in header */}
+        {/* Garden Header with Gradient */}
+        <Animated.View
+          className="rounded-xl overflow-hidden shadow-md mx-6 my-4"
+          style={{
+            opacity: headerOpacityAnim,
+            transform: [{ scale: headerScaleAnim }],
+            shadowColor: "#333333",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 5,
+          }}
+        >
+          <LinearGradient
+            colors={["#3F6933", "#77B860"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ padding: 24, borderRadius: 12 }}
+          >
+            <Text className="text-2xl font-bold text-primary-foreground mb-2">
+              Welcome to {gardenData?.name}
+            </Text>
+            <Text className="text-lg text-primary-foreground mb-2">
+              {getGardenMessage()}
+            </Text>
+          </LinearGradient>
+        </Animated.View>
 
-          <SubmitButton
-            onPress={handleConditionsPress}
-            color="secondary"
-            iconName="sunny-outline"
-            iconPosition="left"
-          >
-            Conditions
-          </SubmitButton>
-          <SubmitButton
-            onPress={handleAddPlant}
-            iconName="add"
-            iconPosition="left"
-          >
-            Add Plant
-          </SubmitButton>
-        </View>
+        {/* Garden Actions */}
+        <AnimatedSection delay={200}>
+          <View className="flex-row justify-between px-6 mb-4">
+            <SubmitButton
+              onPress={handleConditionsPress}
+              color="secondary"
+              iconName="sunny-outline"
+              iconPosition="left"
+            >
+              Conditions
+            </SubmitButton>
+            <SubmitButton
+              onPress={handleAddPlant}
+              iconName="add"
+              iconPosition="left"
+            >
+              Add Plant
+            </SubmitButton>
+          </View>
+        </AnimatedSection>
 
         {/* Garden Stats Overview */}
         {dashboardData && (
-          <View className="px-6 py-4">
-            <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border-2 border-cream-300">
-              <View className="items-center flex-1">
-                <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                  <Ionicons name="leaf" size={24} color="#77B860" />
+          <AnimatedSection delay={300}>
+            <View className="px-6">
+              <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border border-cream-300">
+                <View className="items-center flex-1">
+                  <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                    <Ionicons name="leaf" size={24} color="#77B860" />
+                  </View>
+                  <Text className="text-xl font-bold text-brand-700">
+                    {dashboardData.total_plants}
+                  </Text>
+                  <Text className="text-cream-600 text-xs">PLANTS</Text>
                 </View>
-                <Text className="text-xl font-bold text-brand-700">
-                  {dashboardData.total_plants}
-                </Text>
-                <Text className="text-cream-600 text-xs">PLANTS</Text>
-              </View>
 
-              <View className="items-center flex-1">
-                <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                  <Ionicons
-                    name="water"
-                    size={24}
-                    color={
+                <View className="items-center flex-1">
+                  <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                    <Ionicons
+                      name="water"
+                      size={24}
+                      color={
+                        dashboardData.plants_needing_care > 0
+                          ? "#d97706"
+                          : "#9e9a90"
+                      }
+                    />
+                  </View>
+                  <Text
+                    className={`text-xl font-bold ${
                       dashboardData.plants_needing_care > 0
-                        ? "#d97706"
-                        : "#9e9a90"
-                    }
-                  />
+                        ? "text-yellow-600"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {dashboardData.plants_needing_care}
+                  </Text>
+                  <Text className="text-foreground text-xs">NEED CARE</Text>
                 </View>
-                <Text
-                  className={`text-xl font-bold ${
-                    dashboardData.plants_needing_care > 0
-                      ? "text-yellow-600"
-                      : "text-foreground"
-                  }`}
-                >
-                  {dashboardData.plants_needing_care}
-                </Text>
-                <Text className="text-foreground text-xs">NEED CARE</Text>
-              </View>
 
-              <View className="items-center flex-1">
-                <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                  <Ionicons name="heart" size={24} color="#77B860" />
+                <View className="items-center flex-1">
+                  <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
+                    <Ionicons name="heart" size={24} color="#77B860" />
+                  </View>
+                  <Text className="text-xl font-bold text-primary">
+                    {dashboardData.health_percentage}%
+                  </Text>
+                  <Text className="text-foreground text-xs">HEALTH</Text>
                 </View>
-                <Text className="text-xl font-bold text-primary">
-                  {dashboardData.health_percentage}%
-                </Text>
-                <Text className="text-foreground text-xs">HEALTH</Text>
               </View>
             </View>
-          </View>
+          </AnimatedSection>
         )}
 
         {/* Plants List */}
@@ -585,40 +699,55 @@ const GardenDetails = () => {
           ) : (
             <View className="mb-8">
               {criticalPlants.length > 0 && (
-                <View className="mb-4">
-                  <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                    <Text className="text-destructive font-medium">
-                      Needs Immediate Care
-                    </Text>
-                  </View>
-                  {criticalPlants.map((plant) => (
-                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                <View className="my-4">
+                  <AnimatedSection delay={400}>
+                    <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                      <Text className="text-destructive font-medium">
+                        Needs Immediate Care
+                      </Text>
+                    </View>
+                  </AnimatedSection>
+                  {criticalPlants.map((plant, index) => (
+                    <View key={plant.id}>{renderPlantCard(plant, index)}</View>
                   ))}
                 </View>
               )}
 
               {needsAttentionPlants.length > 0 && (
-                <View className="mb-4">
-                  <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                    <Text className="text-yellow-700 font-medium">
-                      Due for Care
-                    </Text>
-                  </View>
-                  {needsAttentionPlants.map((plant) => (
-                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                <View className="my-4">
+                  <AnimatedSection delay={500}>
+                    <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                      <Text className="text-yellow-700 font-medium">
+                        Due for Care
+                      </Text>
+                    </View>
+                  </AnimatedSection>
+                  {needsAttentionPlants.map((plant, index) => (
+                    <View key={plant.id}>
+                      {renderPlantCard(plant, criticalPlants.length + index)}
+                    </View>
                   ))}
                 </View>
               )}
 
               {healthyPlants.length > 0 && (
-                <View className="mb-4">
-                  <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                    <Text className="text-brand-700 font-medium">
-                      Looking Good
-                    </Text>
-                  </View>
-                  {healthyPlants.map((plant) => (
-                    <View key={plant.id}>{renderPlantCard(plant)}</View>
+                <View className="my-4">
+                  <AnimatedSection delay={600}>
+                    <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
+                      <Text className="text-brand-700 font-medium">
+                        Looking Good
+                      </Text>
+                    </View>
+                  </AnimatedSection>
+                  {healthyPlants.map((plant, index) => (
+                    <View key={plant.id}>
+                      {renderPlantCard(
+                        plant,
+                        criticalPlants.length +
+                          needsAttentionPlants.length +
+                          index
+                      )}
+                    </View>
                   ))}
                 </View>
               )}

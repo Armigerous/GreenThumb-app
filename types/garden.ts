@@ -7,15 +7,18 @@ export type UUID = string;
  * Represents a log entry for plant care activities.
  *
  * This interface maps to the `plant_care_logs` table, which stores structured logs
- * of plant care activities such as watering, fertilizing, pruning, etc.
+ * of plant care activities.
+ * 
+ * A free-form plant diary, not a checklist.
+
  */
 export interface PlantCareLog {
   /** Unique identifier for the care log (primary key) */
   id: number;
   /** Foreign key referencing the specific plant instance (user_plants) */
   user_plant_id: UUID;
-  /** Type of care activity performed */
-  care_type: "Watered" | "Fertilized" | "Harvested" | "Other";
+  /** The image uploaded for this care log */
+  image: string;
   /** Optional notes about the care activity */
   care_notes?: string;
   /** Timestamp when this care activity was performed */
