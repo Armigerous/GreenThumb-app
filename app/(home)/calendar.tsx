@@ -65,9 +65,15 @@ export default function CalendarScreen() {
     refetch,
   } = useTasksForDate(selectedDay, user?.id);
 
+  // Add a state to track day change loading separately
+  const [isDayChanging, setIsDayChanging] = useState(false);
+
   // Animate tasks loading
   useEffect(() => {
     if (!isLoading && tasks) {
+      // Reset day changing state when data loads
+      setIsDayChanging(false);
+
       Animated.timing(tasksOpacity, {
         toValue: 1,
         duration: 300,
@@ -78,6 +84,22 @@ export default function CalendarScreen() {
       tasksOpacity.setValue(0);
     }
   }, [isLoading, tasks, tasksOpacity]);
+
+  // Function to safely change the selected day with proper animation
+  const handleDayChange = (day: Date, index: number) => {
+    // Don't do anything if it's the same day
+    if (isSameDay(day, selectedDay)) return;
+
+    // Set day changing state to true
+    setIsDayChanging(true);
+
+    // Immediately fade out tasks when changing days
+    tasksOpacity.setValue(0);
+
+    // Only after tasks are hidden, change the day and animate the selection
+    setSelectedDay(day);
+    animateDaySelection(index);
+  };
 
   // Refetch tasks when the screen comes into focus
   useFocusEffect(
@@ -238,17 +260,26 @@ export default function CalendarScreen() {
 
   // Navigation functions
   const goToPreviousWeek = () => {
+    // Fade out tasks immediately when changing weeks
+    tasksOpacity.setValue(0);
+
     animateWeekChange("right");
     setWeekStartDate(subWeeks(weekStartDate, 1));
   };
 
   const goToNextWeek = () => {
+    // Fade out tasks immediately when changing weeks
+    tasksOpacity.setValue(0);
+
     animateWeekChange("left");
     setWeekStartDate(addWeeks(weekStartDate, 1));
   };
 
   const goToToday = () => {
     const today = new Date();
+
+    // Fade out tasks immediately
+    tasksOpacity.setValue(0);
 
     // Find direction to animate
     const currentWeekStart = startOfWeek(weekStartDate, { weekStartsOn: 0 });
@@ -303,6 +334,9 @@ export default function CalendarScreen() {
   }, [selectedDay]);
 
   const selectMonth = (monthIndex: number) => {
+    // Fade out tasks immediately
+    tasksOpacity.setValue(0);
+
     const newDate = setMonth(selectedDay, monthIndex);
 
     // Determine animation direction based on selected month
@@ -419,10 +453,7 @@ export default function CalendarScreen() {
                     ? "bg-brand-100 border border-brand-200"
                     : "bg-cream-50 border border-cream-300"
                 }`}
-                onPress={() => {
-                  setSelectedDay(day);
-                  animateDaySelection(index);
-                }}
+                onPress={() => handleDayChange(day, index)}
               >
                 <Text
                   className={`text-xs font-medium ${
@@ -460,7 +491,7 @@ export default function CalendarScreen() {
       </View>
 
       <ScrollView className="flex-1 px-5">
-        {isLoading ? (
+        {isLoading || isDayChanging ? (
           <View className="flex-1 items-center justify-center">
             <AnimatedTransition initialY={5} duration={300}>
               <LoadingSpinner message="Loading tasks..." />
@@ -476,6 +507,7 @@ export default function CalendarScreen() {
         ) : (
           <Animated.View style={{ opacity: tasksOpacity }}>
             <TaskList
+              key={format(selectedDay, "yyyy-MM-dd")} // Force remount when day changes
               tasks={tasks || []}
               onToggleComplete={handleToggleComplete}
               showGardenName={false}
