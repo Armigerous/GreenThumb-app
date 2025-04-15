@@ -36,6 +36,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
 import GardenCard from "../../components/Gardens/GardenCard";
+import { TaskCompletionCelebration } from "@/components/UI/TaskCompletionCelebration";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -129,7 +130,7 @@ function AnimatedSection({
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    const animation = Animated.parallel([
       Animated.timing(translateY, {
         toValue: 0,
         duration: 500,
@@ -144,8 +145,14 @@ function AnimatedSection({
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-    ]).start();
-  }, []);
+    ]);
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, [delay, opacity, translateY]);
 
   return (
     <Animated.View
@@ -159,6 +166,9 @@ function AnimatedSection({
   );
 }
 
+// Add this after imports and before the component
+const CELEBRATION_DURATION = 4000; // 4 seconds
+
 export default function Page() {
   const { user } = useUser();
   const router = useRouter();
@@ -167,6 +177,15 @@ export default function Page() {
   // Animation references
   const headerScaleAnim = useRef(new Animated.Value(0.95)).current;
   const headerOpacityAnim = useRef(new Animated.Value(0)).current;
+
+  // State for task completion celebration
+  const [showTaskCelebration, setShowTaskCelebration] = useState(false);
+  const prevOverdueTaskCount = useRef<number | null>(null);
+
+  // State to track if we just completed all overdue tasks
+  const [justCompletedAllOverdueTasks, setJustCompletedAllOverdueTasks] =
+    useState(false);
+  const celebrationTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize Supabase with Clerk token
   useSupabaseAuth();
@@ -216,6 +235,52 @@ export default function Page() {
   const upcomingTasksCount = useMemo(() => {
     return tomorrowTasks?.length || 0;
   }, [tomorrowTasks]);
+
+  // Watch for when overdue tasks go from some to zero
+  useEffect(() => {
+    // If we had overdue tasks before, but now we don't, show celebration
+    if (
+      prevOverdueTaskCount.current !== null &&
+      prevOverdueTaskCount.current > 0 &&
+      overdueTasks.length === 0
+    ) {
+      setShowTaskCelebration(true);
+      setJustCompletedAllOverdueTasks(true);
+
+      // Clear any existing timer
+      if (celebrationTimer.current) {
+        clearTimeout(celebrationTimer.current);
+      }
+
+      // Automatically hide celebration after delay
+      celebrationTimer.current = setTimeout(() => {
+        setShowTaskCelebration(false);
+
+        // Keep the "just completed" state for a bit longer to show special message
+        setTimeout(() => {
+          setJustCompletedAllOverdueTasks(false);
+        }, 1000);
+      }, CELEBRATION_DURATION);
+
+      return () => {
+        if (celebrationTimer.current) {
+          clearTimeout(celebrationTimer.current);
+        }
+      };
+    }
+
+    // Update previous count
+    prevOverdueTaskCount.current = overdueTasks.length;
+  }, [overdueTasks.length]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (celebrationTimer.current) {
+        clearTimeout(celebrationTimer.current);
+      }
+    };
+  }, []);
 
   // Trigger header animation when data is loaded
   useEffect(() => {
@@ -394,8 +459,41 @@ export default function Page() {
   // Function to handle marking a task as complete
   const handleCompleteTask = useCallback(
     (taskId: number) => {
-      const taskToUpdate = todaysTasks?.find((task) => task.id === taskId);
+      // Check if this is an overdue task
+      const isOverdueTask = overdueTasks.some((task) => task.id === taskId);
+      const taskToUpdate = isOverdueTask
+        ? overdueTasks.find((task) => task.id === taskId)
+        : todaysTasks?.find((task) => task.id === taskId);
+
       if (!taskToUpdate) return;
+
+      // Check if this is the last overdue task being completed
+      if (
+        isOverdueTask &&
+        overdueTasks.length === 1 &&
+        !taskToUpdate.completed
+      ) {
+        // Clear any existing timer
+        if (celebrationTimer.current) {
+          clearTimeout(celebrationTimer.current);
+        }
+
+        // Schedule the celebration to show after the API call succeeds
+        setTimeout(() => {
+          setShowTaskCelebration(true);
+          setJustCompletedAllOverdueTasks(true);
+
+          // Hide celebration after delay
+          celebrationTimer.current = setTimeout(() => {
+            setShowTaskCelebration(false);
+
+            // Keep the "just completed" state for a bit longer
+            setTimeout(() => {
+              setJustCompletedAllOverdueTasks(false);
+            }, 1000);
+          }, CELEBRATION_DURATION);
+        }, 500);
+      }
 
       // Configure layout animation
       configureLayoutAnimation();
@@ -406,7 +504,7 @@ export default function Page() {
         completed: !taskToUpdate.completed,
       });
     },
-    [todaysTasks, toggleTaskMutation, configureLayoutAnimation]
+    [todaysTasks, overdueTasks, toggleTaskMutation, configureLayoutAnimation]
   );
 
   // Handle changes to task lists with animation
@@ -430,7 +528,7 @@ export default function Page() {
     return <LoadingSpinner message="Loading your garden..." />;
   }
 
-  // Get personalized suggestions for when all tasks are done
+  // Determine personalized suggestions for when all tasks are done
   const getPersonalizedSuggestion = () => {
     if (!gardens || gardens.length === 0) {
       return {
@@ -531,22 +629,36 @@ export default function Page() {
             >
               <LinearGradient
                 colors={
-                  overdueTasks.length > 0
-                    ? ["#ef4444", "#f87171"]
-                    : ["#3F6933", "#77B860"]
-                } // Red gradient for overdue tasks
+                  justCompletedAllOverdueTasks
+                    ? ["#16a34a", "#77B860"] // Green celebration gradient
+                    : overdueTasks.length > 0
+                    ? ["#ef4444", "#f87171"] // Red gradient for overdue tasks
+                    : ["#3F6933", "#77B860"] // Normal green gradient
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{ padding: 24, borderRadius: 12 }}
               >
                 <Text className="text-3xl font-bold text-primary-foreground mb-2">
-                  {getTimeOfDay()}, {user?.firstName}
+                  {justCompletedAllOverdueTasks
+                    ? "Congratulations!"
+                    : `${getTimeOfDay()}, ${user?.firstName}`}
                 </Text>
                 <Text className="text-lg text-primary-foreground mb-3">
-                  {getPersonalizedMessage()}
+                  {justCompletedAllOverdueTasks
+                    ? "You're all caught up with your garden tasks!"
+                    : getPersonalizedMessage()}
                 </Text>
                 <View className="flex-row items-center gap-2">
-                  <Ionicons name="calendar" size={16} color="#fffefa" />
+                  <Ionicons
+                    name={
+                      justCompletedAllOverdueTasks
+                        ? "checkmark-circle"
+                        : "calendar"
+                    }
+                    size={16}
+                    color="#fffefa"
+                  />
                   <Text className="text-sm text-primary-foreground">
                     {formattedDate}
                   </Text>
@@ -606,7 +718,13 @@ export default function Page() {
                       onPress={() => router.push("/(home)/calendar")}
                     >
                       <Text className="text-red-600 font-medium">
-                        +{overdueTasks.length - 3} more missed tasks
+                        {overdueTasks.length == 4
+                          ? "+" +
+                            (overdueTasks.length - 3) +
+                            " more missed task"
+                          : "+" +
+                            (overdueTasks.length - 3) +
+                            " more missed tasks"}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -630,7 +748,9 @@ export default function Page() {
                       onPress={() => router.push("/(home)/calendar")}
                     >
                       <Text className="text-brand-600 font-medium">
-                        +{todaysTasks.length - 3} more tasks
+                        {todaysTasks.length == 4
+                          ? "+" + (todaysTasks.length - 3) + " more task"
+                          : "+" + (todaysTasks.length - 3) + " more tasks"}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -864,6 +984,13 @@ export default function Page() {
             </AnimatedSection>
           </View>
         </ScrollView>
+
+        {/* Task completion celebration overlay */}
+        <TaskCompletionCelebration
+          visible={showTaskCelebration}
+          type="overdueComplete"
+          onClose={() => setShowTaskCelebration(false)}
+        />
       </SignedIn>
 
       <SignedOut>
