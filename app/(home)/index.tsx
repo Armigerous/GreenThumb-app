@@ -78,7 +78,7 @@ function SectionHeader({
       style={{ opacity: fadeAnim }}
     >
       <View className="flex-row items-center gap-2">
-        <View className="w-8 h-8 rounded-full bg-brand-100 items-center justify-center">
+        <View className="w-8 h-8 rounded-lg bg-brand-100 items-center justify-center">
           <Ionicons name={icon} size={18} color="#5E994B" />
         </View>
         <View className="flex-row items-center">
@@ -87,7 +87,7 @@ function SectionHeader({
           {/* Show badge if provided */}
           {badge && badge.count > 0 && (
             <View
-              className={`ml-2 py-1 px-2 rounded-full ${
+              className={`ml-2 py-1 px-2 rounded-lg ${
                 badge.type === "warning" ? "bg-orange-100" : "bg-blue-100"
               }`}
             >
@@ -796,7 +796,7 @@ export default function Page() {
                   }}
                   onPress={() => router.push("/(home)/plants")}
                 >
-                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
                     <Ionicons name="leaf" size={24} color="#5E994B" />
                   </View>
                   <Text className="text-sm font-medium text-foreground">
@@ -815,7 +815,7 @@ export default function Page() {
                   }}
                   onPress={() => router.push("/(home)/gardens/new")}
                 >
-                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
                     <Ionicons name="grid" size={24} color="#5E994B" />
                   </View>
                   <Text className="text-sm font-medium text-foreground">
@@ -834,7 +834,7 @@ export default function Page() {
                   }}
                   onPress={() => router.push("/(home)/calendar")}
                 >
-                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
                     <Ionicons name="calendar" size={24} color="#5E994B" />
                   </View>
                   <Text className="text-sm font-medium text-foreground">
@@ -853,7 +853,7 @@ export default function Page() {
                   }}
                   onPress={() => router.push("/(home)/gardens")}
                 >
-                  <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center mb-2">
+                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
                     <Ionicons name="eye" size={24} color="#5E994B" />
                   </View>
                   <Text className="text-sm font-medium text-foreground">
