@@ -12,7 +12,7 @@ import {
   isToday,
   isTomorrow,
 } from "date-fns";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
 
 interface TaskProps {
@@ -20,7 +20,7 @@ interface TaskProps {
   onToggleComplete?: (id: number) => void; // Make this optional
   showGardenName?: boolean;
   queryKey?: string[]; // Add queryKey for cache invalidation
-  isOverdue?: boolean; // Add isOverdue prop
+  isOverdue?: boolean; // Simple boolean flag
 }
 
 export function Task({
@@ -30,9 +30,40 @@ export function Task({
   queryKey,
   isOverdue = false,
 }: TaskProps) {
-  // Add animation reference for this specific task
+  // Add state for local UI updates - initialize from the task prop
+  const [localCompleted, setLocalCompleted] = useState(task.completed);
+
+  // Track if we're currently animating to prevent double taps
+  const isAnimating = useRef(false);
+  const initialRender = useRef(true);
+
+  // Add animation references for this specific task
   const checkboxAnimationValue = useRef(new Animated.Value(1)).current;
+  const textOpacityValue = useRef(
+    new Animated.Value(localCompleted ? 0.6 : 0)
+  ).current;
+  const strikethroughWidth = useRef(
+    new Animated.Value(localCompleted ? 100 : 0)
+  ).current;
   const queryClient = useQueryClient();
+
+  // Update local state when task prop changes (e.g., from server)
+  useEffect(() => {
+    // Skip the effect on the first render
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    // Only update if we're not in the middle of an animation
+    if (task.completed !== localCompleted && !isAnimating.current) {
+      setLocalCompleted(task.completed);
+
+      // Immediately update visual state without animation
+      textOpacityValue.setValue(task.completed ? 0.6 : 0);
+      strikethroughWidth.setValue(task.completed ? 100 : 0);
+    }
+  }, [task.completed]);
 
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({
@@ -55,7 +86,7 @@ export function Task({
       // If a custom onToggleComplete is provided, use that instead
       if (onToggleComplete) {
         onToggleComplete(id);
-        return;
+        return { previousData: null };
       }
 
       // Otherwise, handle the update with optimistic updates
@@ -91,12 +122,21 @@ export function Task({
         // Return a context object with the snapshotted value
         return { previousData };
       }
+
+      return { previousData: null };
     },
     onError: (err, variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousData && queryKey) {
         queryClient.setQueryData(queryKey, context.previousData);
       }
+
+      // Revert the local state as well
+      setLocalCompleted(!variables.completed);
+
+      // Run animations in reverse
+      animateTaskCompletion(!variables.completed);
+
       console.error("Error updating task:", err);
       Alert.alert("Error", "Could not update task status.");
     },
@@ -107,29 +147,70 @@ export function Task({
           queryKey,
         });
       }
+
+      // Invalidate garden dashboard queries to refresh garden health
+      queryClient.invalidateQueries({
+        queryKey: ["gardenDashboard"],
+      });
+
+      // End animation state after a short delay to ensure smooth transition
+      setTimeout(() => {
+        isAnimating.current = false;
+      }, 200);
     },
   });
 
-  // Function to handle marking a task as complete
-  const handleToggleComplete = async () => {
-    // Create animation sequence
+  // Animate task completion with checkbox and text effects
+  const animateTaskCompletion = (completed: boolean) => {
+    // Mark as animating to prevent double taps
+    isAnimating.current = true;
+
+    // Checkbox animation - immediate visual feedback
     Animated.sequence([
       Animated.timing(checkboxAnimationValue, {
-        toValue: 0.8,
-        duration: 100,
+        toValue: 0.95,
+        duration: 30, // Very quick
         useNativeDriver: true,
       }),
-      Animated.timing(checkboxAnimationValue, {
+      Animated.spring(checkboxAnimationValue, {
         toValue: 1,
-        duration: 100,
+        friction: 8, // Higher friction for faster stabilization
+        tension: 50,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Execute the mutation with optimistic updates
+    // Text strikethrough animation - faster but still visible
+    Animated.parallel([
+      Animated.timing(strikethroughWidth, {
+        toValue: completed ? 100 : 0,
+        duration: 120, // Faster
+        useNativeDriver: false,
+      }),
+      Animated.timing(textOpacityValue, {
+        toValue: completed ? 0.6 : 0,
+        duration: 120, // Keep in sync with strikethrough
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
+
+  // Function to handle marking a task as complete
+  const handleToggleComplete = () => {
+    // Prevent multiple rapid clicks
+    if (isAnimating.current) return;
+
+    // Update local state immediately for a responsive feel
+    const newCompletedState = !localCompleted;
+    setLocalCompleted(newCompletedState);
+
+    // Trigger animations immediately
+    animateTaskCompletion(newCompletedState);
+
+    // Execute the mutation with optimistic updates (immediately)
     toggleTaskMutation.mutate({
       id: task.id,
-      completed: !task.completed,
+      completed: newCompletedState,
     });
   };
 
@@ -238,12 +319,16 @@ export function Task({
   const urgency = getTaskUrgency(dueDate);
 
   return (
-    <TouchableOpacity onPress={handleToggleComplete} className="p-4">
-      <View className="flex-row items-center ">
+    <TouchableOpacity
+      onPress={handleToggleComplete}
+      className="p-4"
+      activeOpacity={0.7}
+    >
+      <View className="flex-row items-center">
         {/* Checkbox */}
         <Animated.View
           className={`w-6 h-6 rounded-lg mr-3 items-center justify-center ${
-            task.completed
+            localCompleted
               ? "bg-brand-500"
               : isOverdue
               ? "bg-red-100"
@@ -253,13 +338,13 @@ export function Task({
             transform: [{ scale: checkboxAnimationValue }],
           }}
         >
-          {task.completed && (
+          {localCompleted && (
             <Ionicons name="checkmark" size={16} color="white" />
           )}
         </Animated.View>
 
         {/* Task Content */}
-        <View className="flex-1 ">
+        <View className="flex-1">
           <View className="flex-row justify-between items-start">
             <View className="flex-row items-center">
               <Ionicons
@@ -268,23 +353,43 @@ export function Task({
                 color={isOverdue ? "#ef4444" : getTaskColor(task.task_type)}
                 style={{ marginRight: 4 }}
               />
-              <Text
-                className={`text-base font-medium ${
-                  task.completed
-                    ? "text-cream-500 line-through"
-                    : isOverdue
-                    ? "text-red-700"
-                    : "text-foreground"
-                }`}
-              >
-                {task.task_type} {task.plant?.nickname || "Unknown Plant"}
-              </Text>
+
+              {/* Text with animated strikethrough */}
+              <View style={{ position: "relative" }}>
+                <Text
+                  className={`text-base font-medium ${
+                    isOverdue && !localCompleted
+                      ? "text-red-700"
+                      : "text-foreground"
+                  }`}
+                  style={{
+                    opacity: localCompleted ? 0.6 : 1,
+                  }}
+                >
+                  {task.task_type} {task.plant?.nickname || "Unknown Plant"}
+                </Text>
+
+                {/* Animated strikethrough line */}
+                <Animated.View
+                  style={{
+                    position: "absolute",
+                    width: strikethroughWidth.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ["0%", "100%"],
+                    }),
+                    height: 1,
+                    backgroundColor: isOverdue ? "#ef4444" : "#6b7280",
+                    top: "50%",
+                    opacity: textOpacityValue,
+                  }}
+                />
+              </View>
             </View>
             <View
               className={`px-2 py-1 rounded-lg ${
                 isOverdue
                   ? "bg-red-100"
-                  : task.completed
+                  : localCompleted
                   ? "bg-brand-100"
                   : "bg-cream-100"
               }`}
@@ -293,7 +398,7 @@ export function Task({
                 className={`text-xs font-medium ${
                   isOverdue
                     ? "text-red-700"
-                    : task.completed
+                    : localCompleted
                     ? "text-brand-700"
                     : "text-cream-700"
                 }`}

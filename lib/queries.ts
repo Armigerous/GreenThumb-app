@@ -248,33 +248,6 @@ export function useGardenDashboard(userId?: string) {
   });
 }
 
-// Update existing garden queries to use proper types
-export function useUserGardens(userId?: string) {
-  const queryClient = useQueryClient();
-
-  return useQuery<Garden[], Error>({
-    queryKey: ["userGardens", userId],
-    queryFn: async () => {
-      if (!userId) throw new Error("User ID is required");
-
-      const { data: gardens, error } = await supabase
-        .from("secure_user_gardens_view")
-        .select("*")
-        .eq("user_id", userId)
-        .order("updated_at", { ascending: false });
-
-      if (error) {
-        console.error("Supabase error fetching gardens:", error);
-        throw new Error(error.message);
-      }
-
-      return gardens || [];
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
-}
-
 export function useGardenDetails(gardenId: number) {
   const queryClient = useQueryClient();
 
@@ -289,7 +262,7 @@ export function useGardenDetails(gardenId: number) {
         { data: dashboard, error: dashboardError },
       ] = await Promise.all([
         supabase
-          .from("secure_user_gardens_view")  // Use the secure view instead of the materialized view directly
+          .from("user_gardens")  // Use the user_gardens table directly instead of the secure view
           .select("*")
           .eq("id", gardenId)
           .single(),

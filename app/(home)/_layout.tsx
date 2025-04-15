@@ -1,9 +1,12 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
+import OverdueTasksModal from "@/components/UI/OverdueTasksModal";
+import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
+import { useUser } from "@clerk/clerk-expo";
 
 // Custom tab bar component
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -114,6 +117,11 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 export default function HomeLayout() {
   // Track if this is the first render to disable animations on first load
   const [isInitialRender, setIsInitialRender] = useState(true);
+  const { user } = useUser();
+
+  // Get overdue task notifications
+  const { notifications, showModal, setShowModal, checkNotifications } =
+    useOverdueTasksNotifications();
 
   useEffect(() => {
     // After first render, enable animations for future tab changes
@@ -126,61 +134,93 @@ export default function HomeLayout() {
     }
   }, [isInitialRender]);
 
+  // For debugging, log whenever the modal state changes
+  useEffect(() => {
+    console.log("Modal visible state changed:", showModal);
+    console.log("Notifications:", notifications);
+  }, [showModal, notifications]);
+
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-      }}
-    >
-      <Tabs.Screen
-        name="gardens"
-        options={{
-          title: "Gardens",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="leaf" size={size} color={color} />
-          ),
-        }}
-      />
+    <>
+      {/* Debug Button - only in development */}
+      {process.env.NODE_ENV === "development" && (
+        <TouchableOpacity
+          className="bg-black/50 rounded-lg mt-safe z-1000 px-4 py-2"
+          onPress={() => {
+            console.log("Forcing notification check...");
+            checkNotifications();
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 12 }}>
+            Check Notifications
+          </Text>
+        </TouchableOpacity>
+      )}
 
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: "Calendar",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
-          ),
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: false,
         }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="plants"
-        options={{
-          title: "Plants",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
-          ),
-        }}
-      />
+      >
+        <Tabs.Screen
+          name="gardens"
+          options={{
+            title: "Gardens",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="leaf" size={size} color={color} />
+            ),
+          }}
+        />
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="calendar"
+          options={{
+            title: "Calendar",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="calendar" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="home" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="plants"
+          options={{
+            title: "Plants",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="book" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="person" size={size} color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+
+      {/* Overdue Tasks Notification Modal */}
+      {user && notifications.length > 0 && (
+        <OverdueTasksModal
+          isVisible={showModal}
+          onClose={() => setShowModal(false)}
+          notifications={notifications}
+        />
+      )}
+    </>
   );
 }

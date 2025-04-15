@@ -50,6 +50,18 @@ export default function GardenCard({
     return () => clearTimeout(animationTimer);
   }, []);
 
+  // Reset and restart health animation when garden data changes
+  useEffect(() => {
+    setStartHealthAnimation(false);
+
+    // Small delay to ensure the animation reset is visible
+    const resetTimer = setTimeout(() => {
+      setStartHealthAnimation(true);
+    }, 50);
+
+    return () => clearTimeout(resetTimer);
+  }, [garden.health_percentage]);
+
   // Determine the garden health status color
   const getHealthStatusColor = () => {
     if (!garden.total_plants) return "#484540"; // Darker gray for better contrast

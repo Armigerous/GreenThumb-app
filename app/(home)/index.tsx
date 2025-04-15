@@ -8,6 +8,9 @@ import {
   ScrollView,
   Animated,
   Easing,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
@@ -33,6 +36,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
 import GardenCard from "../../components/Gardens/GardenCard";
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === "android") {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
 // Create a reusable section header component with icon
 function SectionHeader({
@@ -298,6 +308,17 @@ export default function Page() {
     };
   }, [gardens]);
 
+  // Configure spring animation for layout changes
+  const configureLayoutAnimation = useCallback(() => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(
+        300,
+        LayoutAnimation.Types.easeInEaseOut,
+        LayoutAnimation.Properties.opacity
+      )
+    );
+  }, []);
+
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({
     mutationFn: async ({
@@ -316,6 +337,9 @@ export default function Page() {
       return { id, completed };
     },
     onMutate: async ({ id, completed }) => {
+      // Configure layout animation before state updates
+      configureLayoutAnimation();
+
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ["tasks", format(today, "yyyy-MM-dd"), user?.id],
@@ -339,6 +363,9 @@ export default function Page() {
       return { previousTasks };
     },
     onError: (err, variables, context) => {
+      // Configure layout animation before state updates
+      configureLayoutAnimation();
+
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousTasks) {
         queryClient.setQueryData(
@@ -349,18 +376,29 @@ export default function Page() {
       console.error("Error updating task:", err);
     },
     onSettled: () => {
+      // Configure layout animation before state updates
+      configureLayoutAnimation();
+
       // Always refetch after error or success to make sure our local data is in sync with the server
       queryClient.invalidateQueries({
         queryKey: ["tasks", format(today, "yyyy-MM-dd"), user?.id],
+      });
+
+      // Invalidate garden dashboard queries to refresh garden health
+      queryClient.invalidateQueries({
+        queryKey: ["gardenDashboard"],
       });
     },
   });
 
   // Function to handle marking a task as complete
   const handleCompleteTask = useCallback(
-    async (taskId: number) => {
+    (taskId: number) => {
       const taskToUpdate = todaysTasks?.find((task) => task.id === taskId);
       if (!taskToUpdate) return;
+
+      // Configure layout animation
+      configureLayoutAnimation();
 
       // Execute the mutation with optimistic updates
       toggleTaskMutation.mutate({
@@ -368,8 +406,22 @@ export default function Page() {
         completed: !taskToUpdate.completed,
       });
     },
-    [todaysTasks, toggleTaskMutation]
+    [todaysTasks, toggleTaskMutation, configureLayoutAnimation]
   );
+
+  // Handle changes to task lists with animation
+  useEffect(() => {
+    // Animate layout changes when tasks list changes
+    if (!gardensLoading && !tasksLoading) {
+      configureLayoutAnimation();
+    }
+  }, [
+    overdueTasks,
+    todaysTasks,
+    configureLayoutAnimation,
+    gardensLoading,
+    tasksLoading,
+  ]);
 
   const isLoading = gardensLoading || tasksLoading;
   const hasError = gardensError || tasksError;
@@ -542,6 +594,11 @@ export default function Page() {
                     showGardenName={true}
                     maxTasks={3}
                     isOverdue={true}
+                    queryKey={[
+                      "tasks",
+                      format(yesterday, "yyyy-MM-dd"),
+                      user?.id || "anonymous",
+                    ]}
                   />
                   {overdueTasks.length > 3 && (
                     <TouchableOpacity
@@ -561,6 +618,11 @@ export default function Page() {
                     onToggleComplete={handleCompleteTask}
                     showGardenName={true}
                     maxTasks={3}
+                    queryKey={[
+                      "tasks",
+                      format(today, "yyyy-MM-dd"),
+                      user?.id || "anonymous",
+                    ]}
                   />
                   {todaysTasks.length > 3 && (
                     <TouchableOpacity
