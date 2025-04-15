@@ -87,6 +87,23 @@ export function TaskList({
     });
   }, []);
 
+  // Reset state when tasks prop changes completely (like when switching dates)
+  useEffect(() => {
+    // Reset the tasks state with initialTasks
+    setTasks(initialTasks);
+
+    // Reset completed tasks tracking
+    completedTaskIds.clear();
+    initialTasks.forEach((task) => {
+      if (task.completed) {
+        completedTaskIds.add(task.id);
+      }
+    });
+
+    // Clear removing tasks animations
+    setRemovingTasks({});
+  }, [initialTasks]); // This will run when initialTasks reference changes completely
+
   // Update tasks when props change, BUT preserve order
   useEffect(() => {
     const currentTaskIds = new Set(tasks.map((t) => t.id));
