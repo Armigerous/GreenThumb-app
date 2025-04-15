@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { differenceInDays, format, isValid, parseISO } from "date-fns";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Alert,
   ScrollView,
@@ -26,6 +26,8 @@ import {
   View,
 } from "react-native";
 import EditPlantModal from "@/components/Gardens/Plants/EditPlantModal";
+import AddJournalEntryModal from "@/components/Gardens/Plants/AddCareLogModal";
+import { useUser } from "@clerk/clerk-expo";
 
 // Define task time period types for better type safety
 type TaskTimePeriod =
@@ -47,9 +49,12 @@ export default function UserPlantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useUser();
 
   // State for edit modal
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  // State for journal entry modal
+  const [isJournalModalVisible, setIsJournalModalVisible] = useState(false);
 
   // Fetch plant details using our custom hook
   const {
@@ -58,13 +63,6 @@ export default function UserPlantDetailScreen() {
     error,
     refetch,
   } = useUserPlantDetails(id);
-
-  // State for care form visibility
-  const [showCareForm, setShowCareForm] = useState(false);
-  const [careType, setCareType] = useState<
-    "Watered" | "Fertilized" | "Harvested" | "Other"
-  >("Watered");
-  const [careNotes, setCareNotes] = useState("");
 
   // State for task tab navigation
   const [activeTaskTab, setActiveTaskTab] = useState<TaskTimePeriod>("today");
@@ -79,121 +77,57 @@ export default function UserPlantDetailScreen() {
     router.push(`/(home)/gardens/${plantData?.garden_id}`);
   };
 
-  // Handle quick care actions
-  const handleQuickCare = async (
-    type: "Watered" | "Fertilized" | "Harvested" | "Other"
-  ) => {
-    if (!plantData) return;
-
-    try {
-      // Create a new care log entry
-      const now = new Date().toISOString();
-      const careLog: PlantCareLog = {
-        id: Date.now(), // Temporary ID for UI
-        user_plant_id: plantData.id,
-        care_type: type,
-        taken_care_at: now,
-        care_notes: `Plant ${type.toLowerCase()} via quick action`,
-      };
-
-      // Get existing care logs and add new one
-      const existingLogs = plantData.care_logs || [];
-      const updatedLogs = [...existingLogs, careLog];
-
-      // Update plant status based on care type
-      let newStatus = plantData.status;
-      if (type === "Watered" && plantData.status === "Needs Water") {
-        newStatus = "Healthy";
-      }
-
-      // Update the plant in the database
-      const { error } = await supabase
-        .from("user_plants")
-        .update({
-          status: newStatus,
-          care_logs: updatedLogs,
-          updated_at: now,
-        })
-        .eq("id", plantData.id);
-
-      if (error) {
-        console.error(`Error ${type.toLowerCase()} plant:`, error);
-        Alert.alert(
-          "Error",
-          `Could not update plant ${type.toLowerCase()} status.`
-        );
-        return;
-      }
-
-      // Show success message
-      Alert.alert(
-        "Success",
-        `${plantData.nickname} has been ${type.toLowerCase()}!`
-      );
-
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({
-        queryKey: ["userPlantDetails", id],
-      });
-
-      // Refetch plant data
-      refetch();
-    } catch (err) {
-      console.error(`${type} plant error:`, err);
-      Alert.alert(
-        "Error",
-        `Failed to ${type.toLowerCase()} plant. Please try again.`
-      );
-    }
-  };
-
   // Handle adding a new care log with notes
-  const handleAddCareLog = async () => {
-    if (!plantData || !careNotes.trim()) return;
+  const handleAddCareLog = async (notes: string, imageUrl: string | null) => {
+    if (!plantData || !notes.trim() || !user) return;
 
     try {
-      // Create a new care log entry
       const now = new Date().toISOString();
-      const careLog: PlantCareLog = {
-        id: Date.now(), // Temporary ID for UI
-        user_plant_id: plantData.id,
-        care_type: careType,
-        taken_care_at: now,
-        care_notes: careNotes,
-      };
 
-      // Get existing care logs and add new one
-      const existingLogs = plantData.care_logs || [];
-      const updatedLogs = [...existingLogs, careLog];
-
-      // Update plant status based on care type
-      let newStatus = plantData.status;
-      if (careType === "Watered" && plantData.status === "Needs Water") {
-        newStatus = "Healthy";
-      }
-
-      // Update the plant in the database
-      const { error } = await supabase
-        .from("user_plants")
-        .update({
-          status: newStatus,
-          care_logs: updatedLogs,
-          updated_at: now,
+      // First, insert into plant_care_logs table to get a proper ID
+      const { data: careLogData, error: careLogError } = await supabase
+        .from("plant_care_logs")
+        .insert({
+          user_plant_id: plantData.id,
+          image: imageUrl || "",
+          care_notes: notes,
+          taken_care_at: now,
         })
-        .eq("id", plantData.id);
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Error adding care log:", error);
-        Alert.alert("Error", "Could not add care log.");
+      if (careLogError) {
+        console.error("Error inserting care log:", careLogError);
+        Alert.alert("Error", "Could not add journal entry.");
         return;
       }
 
-      // Reset form and close it
-      setCareNotes("");
-      setShowCareForm(false);
+      // Get the inserted care log
+      const newCareLog = careLogData as PlantCareLog;
+
+      // Update user_plants to track the new image if one was provided
+      if (imageUrl) {
+        // Get existing images
+        const existingImages = plantData.images || [];
+        const updatedImages = [...existingImages, imageUrl];
+
+        // Update the plant with the new image
+        const { error: updateError } = await supabase
+          .from("user_plants")
+          .update({
+            images: updatedImages,
+            updated_at: now,
+          })
+          .eq("id", plantData.id);
+
+        if (updateError) {
+          console.error("Error updating plant images:", updateError);
+          // Continue anyway since the care log was saved
+        }
+      }
 
       // Show success message
-      Alert.alert("Success", "Care log added successfully!");
+      Alert.alert("Success", "Journal entry added successfully!");
 
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({
@@ -204,7 +138,7 @@ export default function UserPlantDetailScreen() {
       refetch();
     } catch (err) {
       console.error("Add care log error:", err);
-      Alert.alert("Error", "Failed to add care log. Please try again.");
+      Alert.alert("Error", "Failed to add journal entry. Please try again.");
     }
   };
 
@@ -322,15 +256,22 @@ export default function UserPlantDetailScreen() {
     .filter(([_, tasks]) => tasks.length > 0)
     .map(([period]) => period as TaskTimePeriod);
 
-  // If the active tab doesn't have tasks, switch to the first tab with tasks
-  // Prioritize showing missed tasks first
-  if (timePeriodsWithTasks.length > 0) {
-    if (timePeriodsWithTasks.includes("missed")) {
-      setActiveTaskTab("missed");
-    } else if (!timePeriodsWithTasks.includes(activeTaskTab)) {
-      setActiveTaskTab(timePeriodsWithTasks[0]);
+  // Use useEffect to handle tab selection logic
+  useEffect(() => {
+    // Only set default tab on initial load or when tasks change, not when user manually selects a tab
+    if (
+      timePeriodsWithTasks.length > 0 &&
+      !timePeriodsWithTasks.includes(activeTaskTab)
+    ) {
+      // If there are missed tasks, default to that tab
+      if (timePeriodsWithTasks.includes("missed")) {
+        setActiveTaskTab("missed");
+      } else {
+        // Otherwise default to the first available tab
+        setActiveTaskTab(timePeriodsWithTasks[0]);
+      }
     }
-  }
+  }, [timePeriodsWithTasks]);
 
   // Find the next upcoming task
   const nextUpcomingTask = tasksWithDetails
@@ -439,13 +380,14 @@ export default function UserPlantDetailScreen() {
   return (
     <PageContainer scroll={false} padded={false} safeArea={false}>
       {/* Fixed Header */}
-      <View className="bg-white pt-safe border-b border-cream-100">
-        <View className="flex-row justify-between items-center px-5 py-4">
+      <View className="pt-safe">
+        <View className="flex-row justify-between items-center px-5">
           <SubmitButton
             onPress={handleBack}
-            color="secondary"
             iconName="arrow-back"
             iconPosition="left"
+            type="outline"
+            color="secondary"
           >
             Back
           </SubmitButton>
@@ -514,13 +456,11 @@ export default function UserPlantDetailScreen() {
                 {/* Last Care & Next Task */}
                 <View className="flex-row justify-between">
                   <View className="flex-1 mr-2">
-                    <Text className="text-cream-600 text-sm">Last Care</Text>
+                    <Text className="text-cream-600 text-sm">Last Entry</Text>
                     <Text className="text-foreground font-medium">
                       {lastCareLog
-                        ? `${lastCareLog.care_type} - ${formatDate(
-                            lastCareLog.taken_care_at
-                          )}`
-                        : "No care recorded"}
+                        ? `${formatDate(lastCareLog.taken_care_at)}`
+                        : "No entries yet"}
                     </Text>
                   </View>
 
@@ -536,89 +476,25 @@ export default function UserPlantDetailScreen() {
               </View>
             </View>
 
-            {/* 2. Quick Actions Card */}
-            <View className="bg-white rounded-2xl shadow-sm p-5 mb-6">
-              <Text className="text-lg font-bold text-foreground mb-4">
-                Quick Actions
-              </Text>
-
-              <View className="flex-row justify-between">
-                <TouchableOpacity
-                  className="bg-brand-100 rounded-xl py-3 px-4 flex-1 mr-2 items-center"
-                  onPress={() => {
-                    setCareType("Watered");
-                    setShowCareForm(true);
-                  }}
-                >
-                  <Ionicons name="water" size={24} color="#059669" />
-                  <Text className="text-brand-700 font-medium mt-1">Water</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-brand-100 rounded-xl py-3 px-4 flex-1 mx-2 items-center"
-                  onPress={() => {
-                    setCareType("Fertilized");
-                    setShowCareForm(true);
-                  }}
-                >
-                  <Ionicons name="leaf" size={24} color="#059669" />
-                  <Text className="text-brand-700 font-medium mt-1">
-                    Fertilize
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-brand-100 rounded-xl py-3 px-4 flex-1 ml-2 items-center"
-                  onPress={() => {
-                    setCareType("Harvested");
-                    setShowCareForm(true);
-                  }}
-                >
-                  <Ionicons name="cut" size={24} color="#059669" />
-                  <Text className="text-brand-700 font-medium mt-1">
-                    Harvest
-                  </Text>
-                </TouchableOpacity>
-              </View>
+            {/* Add Entry Button */}
+            <View className="mb-6">
+              <TouchableOpacity
+                className="bg-primary rounded-xl py-3 px-4 items-center flex-row justify-center"
+                onPress={() => setIsJournalModalVisible(true)}
+              >
+                <Ionicons name="journal-outline" size={20} color="#ffffff" />
+                <Text className="text-white font-medium ml-2">
+                  Add Journal Entry
+                </Text>
+              </TouchableOpacity>
             </View>
 
-            {/* Care Form Modal */}
-            {showCareForm && (
-              <View className="bg-white rounded-2xl p-5 mb-6 shadow-sm">
-                <Text className="text-lg font-bold text-foreground mb-3">
-                  Log {careType}
-                </Text>
-
-                <View className="mb-4">
-                  <Text className="text-cream-600 mb-1">Notes</Text>
-                  <TextInput
-                    className="border border-cream-300 rounded-lg p-3 text-foreground"
-                    placeholder="Add notes about this care activity..."
-                    placeholderTextColor="#BBBBBB"
-                    value={careNotes}
-                    onChangeText={setCareNotes}
-                    multiline
-                    numberOfLines={3}
-                  />
-                </View>
-
-                <View className="flex-row justify-end">
-                  <TouchableOpacity
-                    className="bg-cream-200 rounded-lg py-2 px-4 mr-2"
-                    onPress={() => setShowCareForm(false)}
-                  >
-                    <Text className="text-cream-700 font-medium">Cancel</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    className="bg-primary rounded-lg py-2 px-4"
-                    onPress={handleAddCareLog}
-                  >
-                    <Text className="text-white font-medium">Save</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
+            {/* Journal Entry Modal */}
+            <AddJournalEntryModal
+              isVisible={isJournalModalVisible}
+              onClose={() => setIsJournalModalVisible(false)}
+              onSubmit={handleAddCareLog}
+            />
 
             {/* 3. Tasks Section */}
             <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
@@ -821,7 +697,7 @@ export default function UserPlantDetailScreen() {
                 <View className="flex-row items-center">
                   <Ionicons name="time-outline" size={20} color="#059669" />
                   <Text className="text-foreground font-medium ml-2.5 text-base">
-                    Care History
+                    Plant Journal
                   </Text>
                 </View>
               </View>
@@ -842,50 +718,34 @@ export default function UserPlantDetailScreen() {
                         >
                           <View className="flex-row items-start">
                             <View className="w-8 h-8 rounded-full bg-brand-100 items-center justify-center mr-3 mt-1">
-                              {log.care_type === "Watered" && (
-                                <Ionicons
-                                  name="water"
-                                  size={16}
-                                  color="#059669"
-                                />
-                              )}
-                              {log.care_type === "Fertilized" && (
-                                <Ionicons
-                                  name="leaf"
-                                  size={16}
-                                  color="#059669"
-                                />
-                              )}
-                              {log.care_type === "Harvested" && (
-                                <Ionicons
-                                  name="cut"
-                                  size={16}
-                                  color="#059669"
-                                />
-                              )}
-                              {log.care_type === "Other" && (
-                                <Ionicons
-                                  name="ellipsis-horizontal"
-                                  size={16}
-                                  color="#059669"
-                                />
-                              )}
+                              <Ionicons
+                                name="journal-outline"
+                                size={16}
+                                color="#059669"
+                              />
                             </View>
 
                             <View className="flex-1">
                               <View className="flex-row justify-between items-start">
-                                <Text className="text-foreground font-medium">
-                                  {log.care_type}
-                                </Text>
                                 <Text className="text-cream-600 text-sm">
                                   {formatDate(log.taken_care_at)}
                                 </Text>
                               </View>
 
                               {log.care_notes && (
-                                <Text className="text-cream-600 mt-1">
+                                <Text className="text-foreground mt-1">
                                   {log.care_notes}
                                 </Text>
+                              )}
+
+                              {log.image && log.image.length > 0 && (
+                                <View className="mt-3 rounded-lg overflow-hidden">
+                                  <CachedImage
+                                    uri={log.image}
+                                    style={{ width: "100%", height: 150 }}
+                                    resizeMode="cover"
+                                  />
+                                </View>
                               )}
                             </View>
                           </View>
@@ -895,12 +755,12 @@ export default function UserPlantDetailScreen() {
                 ) : (
                   <View className="py-4 items-center">
                     <Ionicons
-                      name="calendar-outline"
+                      name="journal-outline"
                       size={32}
                       color="#9e9a90"
                     />
                     <Text className="text-cream-600 mt-2 text-center">
-                      No care history recorded yet
+                      No journal entries yet
                     </Text>
                   </View>
                 )}

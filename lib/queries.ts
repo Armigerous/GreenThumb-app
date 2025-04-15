@@ -337,7 +337,6 @@ export function useUserPlantDetails(userPlantId: string) {
           nickname,
           status,
           images,
-          care_logs,
           created_at,
           updated_at
         `)
@@ -351,6 +350,23 @@ export function useUserPlantDetails(userPlantId: string) {
 
       if (!userPlant) {
         throw new Error("Plant not found");
+      }
+
+      // Fetch care logs from the plant_care_logs table
+      const { data: careLogs, error: careLogsError } = await supabase
+        .from("plant_care_logs")
+        .select(`
+          id,
+          user_plant_id,
+          image,
+          care_notes,
+          taken_care_at
+        `)
+        .eq("user_plant_id", userPlantId)
+        .order("taken_care_at", { ascending: false });
+
+      if (careLogsError) {
+        console.error("Error fetching plant care logs:", careLogsError);
       }
 
       // Fetch tasks from the garden_tasks_summary view
@@ -411,6 +427,7 @@ export function useUserPlantDetails(userPlantId: string) {
       // Combine and transform the data
       return {
         ...userPlant,
+        care_logs: careLogs || [],
         plant_tasks: plantTasks,
         garden_name: garden?.name || 'Unknown Garden',
         scientific_name: plantInfo?.scientific_name || 'Unknown Species',
@@ -608,6 +625,52 @@ export function useGardenTasksSummary(gardenId: number) {
   return useQuery<GardenTaskSummary[], Error>({
     queryKey: ['gardenTasksSummary', gardenId],
     queryFn: () => getGardenTasksSummary(gardenId),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!gardenId, // Only run the query if we have a garden ID
+  });
+}
+
+/**
+ * Fetches the number of missed tasks for a garden
+ * A missed task is defined as a task that is overdue (due date is in the past) and not completed
+ * 
+ * @param gardenId The ID of the garden to check for missed tasks
+ * @returns A promise that resolves to the number of missed tasks
+ */
+export async function getGardenMissedTasksCount(gardenId: number): Promise<number> {
+  try {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    
+    const { data, error } = await supabase
+      .from('garden_tasks_summary')
+      .select('task_id')
+      .eq('garden_id', gardenId)
+      .eq('completed', false)
+      .lt('due_date', formattedDate);
+    
+    if (error) {
+      console.error('Error fetching missed tasks:', error);
+      throw new Error(`Error fetching missed tasks: ${error.message}`);
+    }
+    
+    return data?.length || 0;
+  } catch (error) {
+    console.error('Unexpected error fetching missed tasks:', error);
+    throw error;
+  }
+}
+
+/**
+ * Hook to get the count of missed tasks for a garden
+ * 
+ * @param gardenId The ID of the garden to check for missed tasks
+ * @returns A query result containing the count of missed tasks
+ */
+export function useGardenMissedTasksCount(gardenId: number) {
+  return useQuery<number, Error>({
+    queryKey: ['gardenMissedTasks', gardenId],
+    queryFn: () => getGardenMissedTasksCount(gardenId),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     enabled: !!gardenId, // Only run the query if we have a garden ID
   });

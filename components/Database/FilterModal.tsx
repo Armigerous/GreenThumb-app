@@ -164,7 +164,7 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
         >
           <View className="bg-white rounded-lg overflow-hidden">
             {/* Header */}
-            <View className="p-4 border-b border-cream-400/50 bg-brand-600/5">
+            <View className="p-4 border-b border-cream-300/50 bg-brand-600/5">
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center flex-1">
                   <View className="bg-brand-600/10 p-2 rounded-full">
@@ -234,7 +234,7 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
             </ScrollView>
 
             {/* Apply Button */}
-            <View className="flex-row p-4 gap-2 border-t border-cream-400/30">
+            <View className="flex-row p-4 gap-2 border-t border-cream-300/30">
               <TouchableOpacity
                 className="flex-1 py-3 bg-cream-400/40 rounded-lg items-center"
                 onPress={onClose}
@@ -430,7 +430,7 @@ export default function FilterModal({
       onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1">
-        <View className="flex-row justify-between items-center p-4 border-b border-cream-400">
+        <View className="flex-row justify-between items-center p-4 border-b border-cream-300">
           <TouchableOpacity onPress={onClose}>
             <Feather name="x" size={24} color="#000" />
           </TouchableOpacity>
@@ -441,7 +441,7 @@ export default function FilterModal({
         </View>
 
         {/* Search Bar */}
-        <View className="px-4 py-2 border-b border-cream-400">
+        <View className="px-4 py-2 border-b border-cream-300">
           <View className="flex-row items-center bg-cream-100 rounded-xl px-3 py-2.5 mb-4 border border-cream-300">
             <Feather name="search" size={18} color="#666" />
             <TextInput
@@ -460,7 +460,7 @@ export default function FilterModal({
         </View>
 
         {/* Premade Filters */}
-        <View className="p-4 border-b border-cream-400">
+        <View className="p-4 border-b border-cream-300">
           <View className="flex-row justify-between items-center mb-2">
             <Text className="text-lg font-semibold">Quick Filters</Text>
             {activeFilterDetails && (
@@ -652,7 +652,7 @@ export default function FilterModal({
         {/* Filter Sections */}
         <ScrollView className="flex-1">
           {filteredSections.map((section) => (
-            <View key={section.id} className="border-b border-cream-400">
+            <View key={section.id} className="border-b border-cream-300">
               <TouchableOpacity
                 className="flex-row justify-between items-center p-4"
                 onPress={() => toggleSection(section.id)}
@@ -730,7 +730,7 @@ export default function FilterModal({
                                   className={`w-5 h-5 rounded border flex items-center justify-center ${
                                     selectedOptions[optionKey]
                                       ? "bg-brand-600 border-brand-600"
-                                      : "border-cream-400"
+                                      : "border-cream-300"
                                   }`}
                                 >
                                   {selectedOptions[optionKey] && (
@@ -756,7 +756,7 @@ export default function FilterModal({
         </ScrollView>
 
         {/* Footer Buttons */}
-        <View className="p-4 border-t border-cream-400">
+        <View className="p-4 border-t border-cream-300">
           {/* Selected Filters Summary */}
           {Object.keys(selectedOptions).filter((key) => selectedOptions[key])
             .length > 0 && (
@@ -808,7 +808,7 @@ export default function FilterModal({
 
               {/* Show active quick filter if applicable */}
               {activeQuickFilter && (
-                <View className="mt-2 pt-2 border-t border-cream-400/50">
+                <View className="mt-2 pt-2 border-t border-cream-300/50">
                   <View className="flex-row items-center">
                     <Text className="text-xs text-gray-600">Quick Filter:</Text>
                     <View className="flex-row items-center ml-1 bg-brand-600/10 px-2 py-0.5 rounded-full">

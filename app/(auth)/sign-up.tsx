@@ -421,21 +421,21 @@ export default function SignUpScreen() {
               </View>
               <View className="flex-row justify-between w-full gap-4">
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignUpWithGoogle}
                   disabled={isLoading}
                 >
                   <GoogleIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignUpWithApple}
                   disabled={isLoading}
                 >
                   <AppleIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignUpWithFacebook}
                   disabled={isLoading}
                 >

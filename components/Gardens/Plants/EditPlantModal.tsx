@@ -13,6 +13,9 @@ import {
   InteractionManager,
   LayoutAnimation,
   UIManager,
+  KeyboardAvoidingView,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { UserPlant } from "@/types/garden";
@@ -54,6 +57,10 @@ export default function EditPlantModal({
 
   // Create a single animation value for better synchronization
   const animation = useRef(new Animated.Value(0)).current;
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  // Get screen height for gesture calculations
+  const screenHeight = Dimensions.get("window").height;
 
   // Derived animations for better synchronization
   const slideAnim = animation.interpolate({
@@ -65,6 +72,34 @@ export default function EditPlantModal({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 0.7, 1],
   });
+
+  // Create pan responder for swipe gestures
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        // Only allow downward swipe
+        if (gestureState.dy > 0) {
+          pan.setValue({ x: 0, y: gestureState.dy });
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // If swiped down more than 20% of screen height, close the modal
+        if (gestureState.dy > screenHeight * 0.2) {
+          handleClose();
+        } else {
+          // Otherwise, spring back to original position
+          Animated.spring(pan, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: true,
+            tension: 40,
+            friction: 7,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   // Track if animation is in progress
   const animationInProgress = useRef(false);
@@ -106,6 +141,9 @@ export default function EditPlantModal({
   // Handle modal visibility with improved animation
   useEffect(() => {
     if (isVisible) {
+      // Reset pan value
+      pan.setValue({ x: 0, y: 0 });
+
       // Make modal visible first
       setModalVisible(true);
 
@@ -118,11 +156,9 @@ export default function EditPlantModal({
           // Use a single animation for better synchronization
           Animated.spring(animation, {
             toValue: 1,
-            tension: 70,
-            friction: 12,
+            tension: 65,
+            friction: 11,
             useNativeDriver: true,
-            restSpeedThreshold: 10,
-            restDisplacementThreshold: 0.01,
           }).start(() => {
             animationInProgress.current = false;
           });
@@ -134,7 +170,7 @@ export default function EditPlantModal({
       // Single animation for closing
       Animated.timing(animation, {
         toValue: 0,
-        duration: 250,
+        duration: 200,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start(() => {
@@ -240,99 +276,113 @@ export default function EditPlantModal({
           onPress={handleClose}
           style={{ flex: 1, justifyContent: "flex-end" }}
         >
-          <Animated.View
-            style={{
-              transform: [{ translateY: slideAnim }],
-              backgroundColor: "white",
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              padding: 20,
-              // Add shadow for iOS
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -3 },
-              shadowOpacity: 0.1,
-              shadowRadius: 5,
-              // Add elevation for Android
-              elevation: 5,
-            }}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+            style={{ width: "100%" }}
           >
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
+            <Animated.View
+              {...panResponder.panHandlers}
+              style={{
+                transform: [{ translateY: slideAnim }, { translateY: pan.y }],
+                backgroundColor: "white",
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                padding: 20,
+                // Add shadow for iOS
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: -3 },
+                shadowOpacity: 0.1,
+                shadowRadius: 5,
+                // Add elevation for Android
+                elevation: 5,
+                marginBottom: 0,
+              }}
             >
-              {/* Header */}
-              {modalContent}
+              {/* Drag indicator at the top */}
+              <View className="items-center mb-4">
+                <View className="w-12 h-1.5 bg-cream-300 rounded-full" />
+              </View>
 
-              <ScrollView
-                className="max-h-[80vh]"
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-                removeClippedSubviews={false}
-                scrollEventThrottle={16}
-                overScrollMode="never"
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={(e) => e.stopPropagation()}
               >
-                {/* Image Picker */}
-                <View className="mb-6">
-                  <Text className="text-cream-600 mb-2">Plant Photo</Text>
-                  <ImagePicker
-                    currentImage={image}
-                    onImageSelected={setImage}
-                    aspect={[4, 3]}
-                  />
-                </View>
+                {/* Header */}
+                {modalContent}
 
-                {/* Nickname Input */}
-                <View className="mb-6">
-                  <Text className="text-cream-600 mb-2">Nickname</Text>
-                  <TextInput
-                    className="border border-cream-300 rounded-lg p-3 text-foreground"
-                    value={nickname}
-                    onChangeText={setNickname}
-                    placeholder="Give your plant a nickname"
-                  />
-                </View>
-
-                {/* Status Selection */}
-                <View className="mb-6">
-                  <Text className="text-cream-600 mb-2">Status</Text>
-                  <View className="flex-row flex-wrap gap-2">
-                    {plantStatuses.map((plantStatus) => (
-                      <TouchableOpacity
-                        key={plantStatus}
-                        onPress={() => setStatus(plantStatus)}
-                        className={`px-4 py-2 rounded-lg ${
-                          status === plantStatus
-                            ? "bg-brand-500"
-                            : "bg-cream-100"
-                        }`}
-                      >
-                        <Text
-                          className={`${
-                            status === plantStatus
-                              ? "text-white"
-                              : "text-cream-700"
-                          } font-medium`}
-                        >
-                          {plantStatus}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
-                {/* Save Button */}
-                <TouchableOpacity
-                  className="bg-primary py-4 rounded-xl mb-4"
-                  onPress={handleSave}
-                  disabled={isSaving}
+                <ScrollView
+                  className="max-h-[80vh]"
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                  removeClippedSubviews={false}
+                  scrollEventThrottle={16}
+                  overScrollMode="never"
+                  keyboardShouldPersistTaps="handled"
                 >
-                  <Text className="text-center text-primary-foreground font-bold text-lg">
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </Text>
-                </TouchableOpacity>
-              </ScrollView>
-            </TouchableOpacity>
-          </Animated.View>
+                  {/* Image Picker */}
+                  <View className="mb-6">
+                    <Text className="text-cream-600 mb-2">Plant Photo</Text>
+                    <ImagePicker
+                      currentImage={image}
+                      onImageSelected={setImage}
+                      aspect={[4, 3]}
+                    />
+                  </View>
+
+                  {/* Nickname Input */}
+                  <View className="mb-6">
+                    <Text className="text-cream-600 mb-2">Nickname</Text>
+                    <TextInput
+                      className="border border-cream-300 rounded-lg p-3 text-foreground"
+                      value={nickname}
+                      onChangeText={setNickname}
+                      placeholder="Give your plant a nickname"
+                    />
+                  </View>
+
+                  {/* Status Selection */}
+                  <View className="mb-6">
+                    <Text className="text-cream-600 mb-2">Status</Text>
+                    <View className="flex-row flex-wrap gap-2">
+                      {plantStatuses.map((plantStatus) => (
+                        <TouchableOpacity
+                          key={plantStatus}
+                          onPress={() => setStatus(plantStatus)}
+                          className={`px-4 py-2 rounded-lg ${
+                            status === plantStatus
+                              ? "bg-brand-500"
+                              : "bg-cream-100"
+                          }`}
+                        >
+                          <Text
+                            className={`${
+                              status === plantStatus
+                                ? "text-white"
+                                : "text-cream-700"
+                            } font-medium`}
+                          >
+                            {plantStatus}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* Save Button */}
+                  <TouchableOpacity
+                    className="bg-primary py-4 rounded-xl mb-4"
+                    onPress={handleSave}
+                    disabled={isSaving}
+                  >
+                    <Text className="text-center text-primary-foreground font-bold text-lg">
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </TouchableOpacity>
+            </Animated.View>
+          </KeyboardAvoidingView>
         </TouchableOpacity>
       </Animated.View>
     </Modal>

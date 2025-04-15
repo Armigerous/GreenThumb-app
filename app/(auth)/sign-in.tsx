@@ -401,21 +401,21 @@ export default function Page() {
               </View>
               <View className="flex-row justify-between w-full gap-4">
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignInWithGoogle}
                   disabled={isLoading}
                 >
                   <GoogleIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignInWithApple}
                   disabled={isLoading}
                 >
                   <AppleIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-400 flex-1 h-12 items-center justify-center"
+                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
                   onPress={onSignInWithFacebook}
                   disabled={isLoading}
                 >

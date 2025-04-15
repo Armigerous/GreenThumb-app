@@ -147,7 +147,7 @@ export default function PlantDetailsStep({
           <Text className="text-base font-medium mb-2">Nickname</Text>
           <View className="flex-row items-center">
             <TextInput
-              className="bg-white border border-cream-400 rounded-lg p-3 text-foreground flex-1 mr-2"
+              className="bg-white border border-cream-300 rounded-lg p-3 text-foreground flex-1 mr-2"
               value={nickname}
               onChangeText={setNickname}
               placeholder="Give your plant a name"

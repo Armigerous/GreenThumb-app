@@ -146,7 +146,7 @@ export default function GardensScreen() {
                   delay={350 + index * 100}
                   initialY={15}
                 >
-                  <GardenCard garden={garden} />
+                  <GardenCard garden={garden} maxWidth={120} />
                 </AnimatedTransition>
               ))
             ) : (

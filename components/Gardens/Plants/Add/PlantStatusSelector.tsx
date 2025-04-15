@@ -79,7 +79,7 @@ export default function PlantStatusSelector({
             className={`mr-2 mb-2 p-2 rounded-lg border flex-row items-center ${
               selectedStatus === option.value
                 ? "border-brand-500 bg-brand-50"
-                : "border-cream-400 bg-white"
+                : "border-cream-300 bg-white"
             }`}
             onPress={() => onStatusChange(option.value)}
           >

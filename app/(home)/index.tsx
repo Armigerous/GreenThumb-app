@@ -32,6 +32,7 @@ import { TaskList } from "@/components/TaskList";
 import { LinearGradient } from "expo-linear-gradient";
 import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
+import GardenCard from "../../components/Gardens/GardenCard";
 
 // Create a reusable section header component with icon
 function SectionHeader({
@@ -650,76 +651,41 @@ export default function Page() {
                   {gardens && gardens.length > 0 ? (
                     <>
                       {gardens.slice(0, 2).map((garden) => (
-                        <TouchableOpacity
+                        <View
                           key={garden.garden_id}
-                          className="flex-1 min-w-[45%] bg-white border border-cream-300 rounded-xl p-4 shadow-sm"
+                          className="flex-1 min-w-[45%] mb-4"
+                        >
+                          <GardenCard garden={garden} maxWidth={90} />
+                        </View>
+                      ))}
+
+                      {/* New Garden Card */}
+                      <View className="flex-1 min-w-[45%] mb-4">
+                        <TouchableOpacity
+                          className="flex-1 h-full border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm"
                           style={{
                             shadowColor: "#77B860",
                             shadowOffset: { width: 0, height: 1 },
                             shadowOpacity: 0.1,
                             shadowRadius: 2,
-                            elevation: 2,
+                            elevation: 1,
                           }}
-                          onPress={() =>
-                            router.push({
-                              pathname: "/(home)/gardens/[id]",
-                              params: { id: garden.garden_id },
-                            })
-                          }
+                          onPress={() => router.push("/(home)/gardens/new")}
                         >
-                          <View>
-                            <Text className="text-lg font-semibold text-foreground mb-2">
-                              {garden.name}
-                            </Text>
-                            <Text className="text-sm text-cream-700 mb-3">
-                              {garden.total_plants || 0} Plants
-                            </Text>
-
-                            {/* Health Progress Bar with enhanced animation */}
-                            <AnimatedProgressBar
-                              percentage={garden.health_percentage}
-                              color={
-                                garden.health_percentage >= 80
-                                  ? "#5E994B"
-                                  : garden.health_percentage >= 50
-                                  ? "#9e8600"
-                                  : "#E50000"
-                              }
-                              height={8}
-                              duration={500}
-                            />
-                            <Text className="text-xs text-cream-700">
-                              {garden.health_percentage}%
+                          <View className="items-center">
+                            <View className="w-10 h-10 items-center justify-center mb-2">
+                              <Ionicons name="add" size={24} color="#5E994B" />
+                            </View>
+                            <Text className="text-primary font-medium">
+                              New Garden
                             </Text>
                           </View>
                         </TouchableOpacity>
-                      ))}
-
-                      {/* New Garden Card */}
-                      <TouchableOpacity
-                        className="flex-1 min-w-[45%] border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm"
-                        style={{
-                          shadowColor: "#77B860",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.1,
-                          shadowRadius: 2,
-                          elevation: 1,
-                        }}
-                        onPress={() => router.push("/(home)/gardens/new")}
-                      >
-                        <View className="items-center">
-                          <View className="w-10 h-10 items-center justify-center mb-2">
-                            <Ionicons name="add" size={24} color="#5E994B" />
-                          </View>
-                          <Text className="text-primary font-medium">
-                            New Garden
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
+                      </View>
                     </>
                   ) : (
                     <TouchableOpacity
-                      className="w-full border border-dashed border-cream-400 rounded-xl p-6 items-center shadow-sm"
+                      className="w-full border border-dashed border-cream-300 rounded-xl p-6 items-center shadow-sm"
                       style={{
                         shadowColor: "#77B860",
                         shadowOffset: { width: 0, height: 1 },
@@ -758,7 +724,7 @@ export default function Page() {
             <AnimatedSection delay={400}>
               <View className="flex-row flex-wrap justify-between">
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-brand-100"
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-cream-300"
                   style={{
                     shadowColor: "#77B860",
                     shadowOffset: { width: 0, height: 2 },
@@ -777,7 +743,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-brand-100"
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-cream-300"
                   style={{
                     shadowColor: "#77B860",
                     shadowOffset: { width: 0, height: 2 },
@@ -796,7 +762,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-brand-100"
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-cream-300"
                   style={{
                     shadowColor: "#77B860",
                     shadowOffset: { width: 0, height: 2 },
@@ -815,7 +781,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-brand-100"
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-cream-300"
                   style={{
                     shadowColor: "#77B860",
                     shadowOffset: { width: 0, height: 2 },
