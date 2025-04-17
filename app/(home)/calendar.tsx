@@ -101,6 +101,29 @@ export default function CalendarScreen() {
     animateDaySelection(index);
   };
 
+  // Initial animation setup
+  useEffect(() => {
+    if (isFirstLoad) {
+      weekSlideAnim.setValue(0); // Start at 0 for no initial animation
+
+      // Ensure empty state is smooth on first load too
+      if (tasks && tasks.length === 0) {
+        // Already have data and it's empty, fade in the empty state
+        tasksOpacity.setValue(0);
+        setTimeout(() => {
+          Animated.timing(tasksOpacity, {
+            toValue: 1,
+            duration: 400,
+            easing: Easing.ease,
+            useNativeDriver: true,
+          }).start();
+        }, 300);
+      }
+
+      setIsFirstLoad(false);
+    }
+  }, [isFirstLoad, weekSlideAnim, tasks, tasksOpacity]);
+
   // Refetch tasks when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -365,14 +388,6 @@ export default function CalendarScreen() {
     }, {});
   }, [tasks]);
 
-  // Handle initial animation
-  useEffect(() => {
-    if (isFirstLoad) {
-      weekSlideAnim.setValue(0); // Start at 0 for no initial animation
-      setIsFirstLoad(false);
-    }
-  }, [isFirstLoad, weekSlideAnim]);
-
   return (
     <PageContainer scroll={false} padded={false}>
       {/* Header */}
@@ -505,7 +520,7 @@ export default function CalendarScreen() {
             </Text>
           </View>
         ) : (
-          <Animated.View style={{ opacity: tasksOpacity }}>
+          <Animated.View style={{ opacity: tasksOpacity }} className="flex-1">
             <TaskList
               key={format(selectedDay, "yyyy-MM-dd")} // Force remount when day changes
               tasks={tasks || []}

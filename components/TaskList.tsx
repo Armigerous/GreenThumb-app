@@ -67,7 +67,9 @@ export function TaskList({
   // Track empty state animation
   const emptyStateOpacity = useRef(new Animated.Value(0)).current;
   const emptyStateScale = useRef(new Animated.Value(0.95)).current;
-  const [showEmptyState, setShowEmptyState] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(
+    initialTasks.length === 0
+  );
 
   // Success animation state
   const [showSuccess, setShowSuccess] = useState(false);
@@ -124,13 +126,36 @@ export function TaskList({
     }
   }, []);
 
-  // Initialize completedTaskIds on mount
+  // Initialize completedTaskIds on mount and setup empty state if needed
   useEffect(() => {
     initialTasks.forEach((task) => {
       if (task.completed) {
         completedTaskIds.add(task.id);
       }
     });
+
+    // Show empty state immediately if there are no tasks
+    if (initialTasks.length === 0) {
+      setShowEmptyState(true);
+      // Animate in the empty state
+      Animated.parallel([
+        Animated.timing(emptyStateOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(emptyStateScale, {
+          toValue: 1,
+          friction: 8,
+          tension: 50,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Make sure empty state is hidden if we have tasks
+      setShowEmptyState(false);
+      emptyStateOpacity.setValue(0);
+    }
   }, []);
 
   // Reset state when tasks prop changes completely (like when switching dates)
@@ -149,8 +174,26 @@ export function TaskList({
     // Clear removing tasks animations
     setRemovingTasks({});
 
-    // Hide empty state when new tasks arrive
-    if (initialTasks.length > 0) {
+    // Handle empty states properly:
+    // If there are no tasks at all, show empty state immediately
+    if (initialTasks.length === 0) {
+      setShowEmptyState(true);
+      // Animate in the empty state
+      Animated.parallel([
+        Animated.timing(emptyStateOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(emptyStateScale, {
+          toValue: 1,
+          friction: 8,
+          tension: 50,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Hide empty state when new tasks arrive
       setShowEmptyState(false);
       Animated.timing(emptyStateOpacity, {
         toValue: 0,
@@ -551,10 +594,12 @@ export function TaskList({
     ]
   );
 
-  // If no tasks, show empty state
+  // If no tasks or all tasks are being removed, show empty state
   if (
     !tasks ||
-    (tasks.length === 0 && Object.keys(removingTasks).length === 0) ||
+    tasks.length === 0 ||
+    (Object.keys(removingTasks).length > 0 &&
+      Object.keys(removingTasks).length === tasks.length) ||
     showEmptyState
   ) {
     return (
