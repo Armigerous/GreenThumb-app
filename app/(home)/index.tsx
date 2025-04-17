@@ -37,6 +37,7 @@ import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
 import GardenCard from "../../components/Gardens/GardenCard";
 import { TaskCompletionCelebration } from "@/components/UI/TaskCompletionCelebration";
+import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -223,15 +224,54 @@ export default function Page() {
 
   const { data: tomorrowTasks } = useTasksForDate(tomorrow, user?.id);
 
-  // Check for overdue tasks (tasks from yesterday or earlier that aren't completed)
-  const yesterday = useMemo(() => subDays(startOfDay(new Date()), 1), []);
-  const { data: yesterdayTasks } = useTasksForDate(yesterday, user?.id);
+  // Use the same hook as our notification system for overdue tasks
+  const [allOverdueTasks, setAllOverdueTasks] = useState<TaskWithDetails[]>([]);
+  const { notifications, checkNotifications } = useOverdueTasksNotifications();
+  const hasCheckedNotificationsRef = useRef(false);
 
-  // Count of overdue and upcoming tasks for badges
-  const overdueTasks = useMemo(() => {
-    return yesterdayTasks?.filter((task) => !task.completed) || [];
-  }, [yesterdayTasks]);
+  // Process all overdue tasks from notifications on mount and when notifications change
+  useEffect(() => {
+    if (notifications && notifications.length > 0) {
+      // Extract and flatten all tasks from all gardens
+      const overdueTasksFromNotifications: TaskWithDetails[] = [];
 
+      notifications.forEach((garden) => {
+        if (garden.tasks && garden.tasks.length > 0) {
+          garden.tasks.forEach((task) => {
+            // Convert notification task format to TaskWithDetails format
+            overdueTasksFromNotifications.push({
+              id: task.task_id,
+              user_plant_id: "", // Add required property with empty string as placeholder UUID
+              task_type: task.task_type as "Water" | "Fertilize" | "Harvest",
+              due_date: task.due_date,
+              completed: false, // All tasks in notifications are uncompleted
+              plant: {
+                nickname: task.plant_nickname,
+                garden: {
+                  name: garden.garden_name,
+                },
+              },
+            });
+          });
+        }
+      });
+
+      setAllOverdueTasks(overdueTasksFromNotifications);
+    } else {
+      setAllOverdueTasks([]);
+    }
+  }, [notifications]);
+
+  // Only fetch overdue tasks on initial mount, never again on this screen
+  // User will need to navigate away and back to refresh data
+  useEffect(() => {
+    if (user?.id && !hasCheckedNotificationsRef.current) {
+      checkNotifications();
+      hasCheckedNotificationsRef.current = true;
+    }
+  }, [user?.id, checkNotifications]);
+
+  // Count of upcoming tasks for badges
   const upcomingTasksCount = useMemo(() => {
     return tomorrowTasks?.length || 0;
   }, [tomorrowTasks]);
@@ -242,7 +282,7 @@ export default function Page() {
     if (
       prevOverdueTaskCount.current !== null &&
       prevOverdueTaskCount.current > 0 &&
-      overdueTasks.length === 0
+      allOverdueTasks.length === 0
     ) {
       setShowTaskCelebration(true);
       setJustCompletedAllOverdueTasks(true);
@@ -270,8 +310,8 @@ export default function Page() {
     }
 
     // Update previous count
-    prevOverdueTaskCount.current = overdueTasks.length;
-  }, [overdueTasks.length]);
+    prevOverdueTaskCount.current = allOverdueTasks.length;
+  }, [allOverdueTasks.length]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -321,9 +361,9 @@ export default function Page() {
       return "Let's start your plant journey today!";
 
     // Overdue tasks take priority in messaging
-    if (overdueTasks.length > 0)
-      return `You have ${overdueTasks.length} overdue ${
-        overdueTasks.length === 1 ? "task" : "tasks"
+    if (allOverdueTasks.length > 0)
+      return `You have ${allOverdueTasks.length} overdue ${
+        allOverdueTasks.length === 1 ? "task" : "tasks"
       } that need attention.`;
 
     // Plants
@@ -460,9 +500,9 @@ export default function Page() {
   const handleCompleteTask = useCallback(
     (taskId: number) => {
       // Check if this is an overdue task
-      const isOverdueTask = overdueTasks.some((task) => task.id === taskId);
+      const isOverdueTask = allOverdueTasks.some((task) => task.id === taskId);
       const taskToUpdate = isOverdueTask
-        ? overdueTasks.find((task) => task.id === taskId)
+        ? allOverdueTasks.find((task) => task.id === taskId)
         : todaysTasks?.find((task) => task.id === taskId);
 
       if (!taskToUpdate) return;
@@ -470,7 +510,7 @@ export default function Page() {
       // Check if this is the last overdue task being completed
       if (
         isOverdueTask &&
-        overdueTasks.length === 1 &&
+        allOverdueTasks.length === 1 &&
         !taskToUpdate.completed
       ) {
         // Clear any existing timer
@@ -504,7 +544,7 @@ export default function Page() {
         completed: !taskToUpdate.completed,
       });
     },
-    [todaysTasks, overdueTasks, toggleTaskMutation, configureLayoutAnimation]
+    [todaysTasks, allOverdueTasks, toggleTaskMutation, configureLayoutAnimation]
   );
 
   // Handle changes to task lists with animation
@@ -514,7 +554,7 @@ export default function Page() {
       configureLayoutAnimation();
     }
   }, [
-    overdueTasks,
+    allOverdueTasks,
     todaysTasks,
     configureLayoutAnimation,
     gardensLoading,
@@ -570,7 +610,7 @@ export default function Page() {
 
   // Helper function to determine task badges
   const getTasksBadge = () => {
-    const overdueCount = overdueTasks.length;
+    const overdueCount = allOverdueTasks.length;
     if (overdueCount > 0) {
       return { count: overdueCount, type: "warning" as const };
     }
@@ -582,12 +622,12 @@ export default function Page() {
 
   // Get summary for when there are no tasks today
   const getNoTasksSummary = () => {
-    if (overdueTasks.length > 0) {
+    if (allOverdueTasks.length > 0) {
       return {
         icon: "alert-circle-outline" as const,
         color: "#ef4444",
-        text: `You have ${overdueTasks.length} overdue ${
-          overdueTasks.length === 1 ? "task" : "tasks"
+        text: `You have ${allOverdueTasks.length} overdue ${
+          allOverdueTasks.length === 1 ? "task" : "tasks"
         }`,
         action: "View Overdue",
         actionColor: "#ef4444",
@@ -631,7 +671,7 @@ export default function Page() {
                 colors={
                   justCompletedAllOverdueTasks
                     ? ["#16a34a", "#77B860"] // Green celebration gradient
-                    : overdueTasks.length > 0
+                    : allOverdueTasks.length > 0
                     ? ["#ef4444", "#f87171"] // Red gradient for overdue tasks
                     : ["#3F6933", "#77B860"] // Normal green gradient
                 }
@@ -670,9 +710,9 @@ export default function Page() {
             <View className="mb-6">
               <SectionHeader
                 title={
-                  overdueTasks.length > 0 ? "Missed Tasks" : "Today's Tasks"
+                  allOverdueTasks.length > 0 ? "Missed Tasks" : "Today's Tasks"
                 }
-                icon={overdueTasks.length > 0 ? "alert-circle" : "calendar"}
+                icon={allOverdueTasks.length > 0 ? "alert-circle" : "calendar"}
                 onSeeAll={() => router.push("/(home)/calendar")}
                 badge={getTasksBadge()}
               />
@@ -688,12 +728,12 @@ export default function Page() {
                     Error loading tasks
                   </Text>
                 </View>
-              ) : overdueTasks.length > 0 ? (
+              ) : allOverdueTasks.length > 0 ? (
                 <AnimatedSection delay={200}>
                   <View className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200">
                     <Text className="text-red-700 font-medium mb-2">
-                      You have {overdueTasks.length} missed{" "}
-                      {overdueTasks.length === 1 ? "task" : "tasks"}!
+                      You have {allOverdueTasks.length} missed{" "}
+                      {allOverdueTasks.length === 1 ? "task" : "tasks"}!
                     </Text>
                     <Text className="text-red-600 text-sm">
                       These tasks were due yesterday or earlier and still need
@@ -701,29 +741,29 @@ export default function Page() {
                     </Text>
                   </View>
                   <TaskList
-                    tasks={overdueTasks}
+                    tasks={allOverdueTasks}
                     onToggleComplete={handleCompleteTask}
                     showGardenName={true}
                     maxTasks={3}
                     isOverdue={true}
                     queryKey={[
                       "tasks",
-                      format(yesterday, "yyyy-MM-dd"),
+                      format(today, "yyyy-MM-dd"),
                       user?.id || "anonymous",
                     ]}
                   />
-                  {overdueTasks.length > 3 && (
+                  {allOverdueTasks.length > 3 && (
                     <TouchableOpacity
                       className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
                       onPress={() => router.push("/(home)/calendar")}
                     >
                       <Text className="text-red-600 font-medium">
-                        {overdueTasks.length == 4
+                        {allOverdueTasks.length == 4
                           ? "+" +
-                            (overdueTasks.length - 3) +
+                            (allOverdueTasks.length - 3) +
                             " more missed task"
                           : "+" +
-                            (overdueTasks.length - 3) +
+                            (allOverdueTasks.length - 3) +
                             " more missed tasks"}
                       </Text>
                     </TouchableOpacity>
