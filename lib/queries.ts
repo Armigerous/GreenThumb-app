@@ -559,7 +559,10 @@ export function useTasksForDate(date: Date, userId?: string) {
   return useQuery<TaskWithDetails[], Error>({
     queryKey: ['tasks', formattedDate, userId],
     queryFn: () => getTasksForDate(date, userId),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours (was cacheTime in older versions)
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when internet reconnects
     enabled: !!userId, // Only run the query if we have a user ID
   });
 }
