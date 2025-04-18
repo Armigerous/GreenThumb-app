@@ -38,32 +38,38 @@ export default function GardensScreen() {
   }
 
   /**
-   * Calculate overall health across all gardens
+   * Calculate overall health metrics across all gardens
    * @param gardens Array of user's gardens
-   * @returns Object with health statistics
+   * @returns Object with health statistics including average health percentage
    */
   const calculateOverallHealth = (gardens: GardenDashboard[] | undefined) => {
     if (!gardens || gardens.length === 0) return null;
 
-    let totalHealthyPlants = 0;
     let totalPlantsCount = 0;
+    let totalHealthScores = 0;
+    let totalGardensWithScore = 0;
 
     gardens.forEach((garden) => {
-      totalHealthyPlants += garden.healthy_plants || 0;
       totalPlantsCount += garden.total_plants || 0;
+
+      // Use the health_percentage property directly from each garden
+      // Only include gardens that have plants
+      if (garden.total_plants && garden.total_plants > 0) {
+        totalHealthScores += garden.health_percentage || 0;
+        totalGardensWithScore++;
+      }
     });
 
-    if (totalPlantsCount === 0) return null;
-
-    const healthPercentage = Math.round(
-      (totalHealthyPlants / totalPlantsCount) * 100
-    );
+    // Calculate average health score across all gardens
+    const avgHealthPercentage =
+      totalGardensWithScore > 0
+        ? Math.round(totalHealthScores / totalGardensWithScore)
+        : 0;
 
     return {
-      totalHealthyPlants,
       totalPlantsCount,
-      healthPercentage,
-      plantsNeedingCare: totalPlantsCount - totalHealthyPlants,
+      gardenCount: gardens.length,
+      avgHealthPercentage,
     };
   };
 
@@ -109,9 +115,9 @@ export default function GardensScreen() {
                 </View>
 
                 <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 mb-1">Need Care</Text>
-                  <Text className="text-xl font-bold text-destructive">
-                    {overallHealth.plantsNeedingCare}
+                  <Text className="text-xs text-cream-600 mb-1">Gardens</Text>
+                  <Text className="text-xl font-bold text-foreground">
+                    {overallHealth.gardenCount}
                   </Text>
                 </View>
 
@@ -122,14 +128,14 @@ export default function GardensScreen() {
                   <View className="flex-row items-center">
                     <Text
                       className={`text-xl font-bold ${
-                        overallHealth.healthPercentage >= 80
+                        overallHealth.avgHealthPercentage >= 80
                           ? "text-brand-600"
-                          : overallHealth.healthPercentage >= 50
+                          : overallHealth.avgHealthPercentage >= 50
                           ? "text-accent-600"
                           : "text-destructive"
                       }`}
                     >
-                      {overallHealth.healthPercentage}%
+                      {overallHealth.avgHealthPercentage}%
                     </Text>
                   </View>
                 </View>

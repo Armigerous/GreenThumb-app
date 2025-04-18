@@ -100,11 +100,37 @@ export function useOverdueTasksNotifications() {
     }
   }, [isUserLoaded, user]);
 
+  /**
+   * Checks if a specific garden has any overdue tasks
+   * @param gardenId - The ID of the garden to check
+   * @returns Boolean indicating if the garden has overdue tasks
+   */
+  const hasGardenOverdueTasks = (gardenId: number): boolean => {
+    const gardenNotification = notifications.find(
+      (notification) => notification.garden_id === gardenId
+    );
+    return !!gardenNotification && gardenNotification.overdue_tasks_count > 0;
+  };
+
+  /**
+   * Gets the count of overdue tasks for a specific garden
+   * @param gardenId - The ID of the garden to check
+   * @returns The number of overdue tasks or 0 if none
+   */
+  const getGardenOverdueTasksCount = (gardenId: number): number => {
+    const gardenNotification = notifications.find(
+      (notification) => notification.garden_id === gardenId
+    );
+    return gardenNotification?.overdue_tasks_count || 0;
+  };
+
   return {
     loading,
     notifications,
     showModal,
     setShowModal,
+    hasGardenOverdueTasks,
+    getGardenOverdueTasksCount,
     checkNotifications: () => {
       hasCheckedRef.current = false; // Reset the check flag
       fetchGardenHealthImpact(); // Fetch garden health impact
