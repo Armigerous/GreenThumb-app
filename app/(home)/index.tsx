@@ -90,12 +90,12 @@ function SectionHeader({
           {badge && badge.count > 0 && (
             <View
               className={`ml-2 py-1 px-2 rounded-lg ${
-                badge.type === "warning" ? "bg-orange-100" : "bg-blue-100"
+                badge.type === "warning" ? "bg-red-100" : "bg-brand-100"
               }`}
             >
               <Text
                 className={`text-xs font-medium ${
-                  badge.type === "warning" ? "text-orange-600" : "text-blue-600"
+                  badge.type === "warning" ? "text-destructive" : "text-primary"
                 }`}
               >
                 {badge.count}
@@ -730,12 +730,12 @@ export default function Page() {
                 </View>
               ) : allOverdueTasks.length > 0 ? (
                 <AnimatedSection delay={200}>
-                  <View className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200">
-                    <Text className="text-red-700 font-medium mb-2">
+                  <View className="bg-red-50 rounded-xl p-4 mb-4">
+                    <Text className="text-destructive font-bold mb-2">
                       You have {allOverdueTasks.length} missed{" "}
                       {allOverdueTasks.length === 1 ? "task" : "tasks"}!
                     </Text>
-                    <Text className="text-red-600 text-sm">
+                    <Text className="text-destructive text-sm">
                       These tasks were due yesterday or earlier and still need
                       to be completed.
                     </Text>
@@ -946,14 +946,7 @@ export default function Page() {
             <AnimatedSection delay={400}>
               <View className="flex-row flex-wrap justify-between">
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-cream-300"
-                  style={{
-                    shadowColor: "#77B860",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                    elevation: 2,
-                  }}
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
                   onPress={() => router.push("/(home)/plants")}
                 >
                   <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
@@ -965,14 +958,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4 shadow-sm border border-cream-300"
-                  style={{
-                    shadowColor: "#77B860",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                    elevation: 2,
-                  }}
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
                   onPress={() => router.push("/(home)/gardens/new")}
                 >
                   <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
@@ -984,14 +970,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-cream-300"
-                  style={{
-                    shadowColor: "#77B860",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                    elevation: 2,
-                  }}
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
                   onPress={() => router.push("/(home)/calendar")}
                 >
                   <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
@@ -1003,14 +982,7 @@ export default function Page() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] shadow-sm border border-cream-300"
-                  style={{
-                    shadowColor: "#77B860",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                    elevation: 2,
-                  }}
+                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
                   onPress={() => router.push("/(home)/gardens")}
                 >
                   <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">

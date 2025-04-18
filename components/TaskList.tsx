@@ -604,7 +604,7 @@ export function TaskList({
   ) {
     return (
       <Animated.View
-        className="bg-background p-6 items-center border border-cream-300 rounded-xl"
+        className="bg-background p-6 items-center rounded-xl"
         style={{
           opacity: emptyStateOpacity,
           transform: [{ scale: emptyStateScale }],
@@ -635,10 +635,7 @@ export function TaskList({
       <View className={className}>
         {Object.entries(groupedTasks).map(
           ([gardenName, gardenTasks], groupIndex) => (
-            <View
-              key={gardenName}
-              className="mb-4 bg-white rounded-xl border border-cream-300"
-            >
+            <View key={gardenName} className="mb-4 bg-white rounded-xl">
               <Text className="text-sm font-medium text-cream-700 p-4">
                 {gardenName}
               </Text>
@@ -771,9 +768,7 @@ export function TaskList({
 
   // If not grouping, just show the tasks in their original order
   return (
-    <View
-      className={`${className} bg-white rounded-xl border border-cream-300 relative`}
-    >
+    <View className={`${className} bg-white rounded-xl relative`}>
       {/* Render tasks from state */}
       {tasks.slice(0, maxTasks).map((task, index) => {
         // Skip tasks that are being animated out

@@ -30,12 +30,23 @@ interface OverdueTasksModalProps {
   isVisible: boolean;
   onClose: () => void;
   notifications: GardenNotification[];
+  // Optional garden ID to filter and show only one garden's tasks
+  gardenId?: number;
 }
 
+/**
+ * Modal component that displays overdue tasks grouped by garden
+ * Can optionally filter to show tasks for only a specific garden
+ * @param isVisible - Controls modal visibility
+ * @param onClose - Function to close the modal
+ * @param notifications - Array of garden notifications with overdue tasks
+ * @param gardenId - Optional ID to filter and show only one garden's tasks
+ */
 export default function OverdueTasksModal({
   isVisible,
   onClose,
   notifications,
+  gardenId,
 }: OverdueTasksModalProps) {
   const router = useRouter();
 
@@ -44,8 +55,18 @@ export default function OverdueTasksModal({
     if (isVisible) {
       console.log("OverdueTasksModal is now visible");
       console.log("Current notifications:", notifications);
+      if (gardenId) {
+        console.log("Filtering for garden ID:", gardenId);
+      }
     }
-  }, [isVisible, notifications]);
+  }, [isVisible, notifications, gardenId]);
+
+  // Filter notifications if a garden ID is provided
+  const filteredNotifications = gardenId
+    ? notifications.filter(
+        (notification) => notification.garden_id === gardenId
+      )
+    : notifications;
 
   // Handle navigation to a specific garden
   const handleViewGarden = (gardenId: number) => {
@@ -74,8 +95,32 @@ export default function OverdueTasksModal({
     }
   };
 
+  // Get task icon based on task type
+  const getTaskIcon = (
+    taskType: string
+  ): "water" | "leaf" | "cut" | "basket" | "checkmark-circle" => {
+    switch (taskType.toLowerCase()) {
+      case "water":
+        return "water";
+      case "fertilize":
+        return "leaf";
+      case "prune":
+        return "cut";
+      case "harvest":
+        return "basket";
+      default:
+        return "checkmark-circle";
+    }
+  };
+
+  // Calculate total overdue tasks across all gardens
+  const totalOverdueTasks = filteredNotifications.reduce(
+    (total, garden) => total + garden.overdue_tasks_count,
+    0
+  );
+
   // If we have no notifications, don't render the modal
-  if (!notifications || notifications.length === 0) {
+  if (!filteredNotifications || filteredNotifications.length === 0) {
     console.log("No notifications to display");
     return null;
   }
@@ -95,7 +140,9 @@ export default function OverdueTasksModal({
                 <Ionicons name="alert-circle" size={24} color="#ef4444" />
               </View>
               <Text className="text-xl font-bold text-foreground">
-                Garden Health Alert
+                {gardenId
+                  ? filteredNotifications[0]?.garden_name || "Garden"
+                  : "Garden Health Alert"}
               </Text>
             </View>
 
@@ -104,8 +151,18 @@ export default function OverdueTasksModal({
             </TouchableOpacity>
           </View>
 
+          {/* Summary information */}
+          <View className="mb-4 bg-red-50 p-3 rounded-lg">
+            <Text className="text-red-800 font-medium">
+              {totalOverdueTasks} overdue{" "}
+              {totalOverdueTasks === 1 ? "task" : "tasks"} across{" "}
+              {filteredNotifications.length}{" "}
+              {filteredNotifications.length === 1 ? "garden" : "gardens"}
+            </Text>
+          </View>
+
           <ScrollView showsVerticalScrollIndicator={false}>
-            {notifications.map((notification) => (
+            {filteredNotifications.map((notification) => (
               <View key={notification.garden_id} className="pb-4">
                 <Text className="text-lg font-semibold text-foreground mb-2">
                   {notification.garden_name}
@@ -134,13 +191,7 @@ export default function OverdueTasksModal({
                     >
                       <View className="w-8 h-8 bg-red-100 rounded-lg items-center justify-center mr-2">
                         <Ionicons
-                          name={
-                            task.task_type === "Water"
-                              ? "water"
-                              : task.task_type === "Fertilize"
-                              ? "leaf"
-                              : "checkmark-circle"
-                          }
+                          name={getTaskIcon(task.task_type)}
                           size={16}
                           color="#ef4444"
                         />

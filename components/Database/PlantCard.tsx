@@ -68,7 +68,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
 
     return (
       <TouchableOpacity
-        className="bg-white border border-cream-300 rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4"
+        className="bg-white rounded-xl overflow-hidden h-[220px] w-[48%] mb-4"
         onPress={handlePress}
         activeOpacity={0.7}
       >
