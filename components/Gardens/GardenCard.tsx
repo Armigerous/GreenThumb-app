@@ -97,7 +97,7 @@ export default function GardenCard({
   return (
     <>
       <TouchableOpacity
-        className="bg-white rounded-xl p-4"
+        className="bg-white rounded-xl p-2"
         onPress={() =>
           router.push({
             pathname: "/(home)/gardens/[id]",
@@ -108,62 +108,70 @@ export default function GardenCard({
         <View className="flex-row">
           {/* Plant Image - Only shown on gardens page */}
           {isGardensPage && (
-            <View className="mr-4 self-center rounded-lg overflow-hidden">
+            <View className="mr-2 self-center rounded-md overflow-hidden h-24 w-24">
               {firstPlantImage ? (
                 <CachedImage
                   uri={firstPlantImage}
-                  style={{ width: 64, height: 64, borderRadius: 8 }}
+                  style={{
+                    height: "100%",
+                    borderRadius: 8,
+                    aspectRatio: "1/1",
+                  }}
                   resizeMode="cover"
                 />
               ) : (
-                <View className="w-16 h-16 bg-cream-100 items-center justify-center">
+                <View className="w-24 h-24 bg-cream-100 items-center justify-center">
                   <Ionicons name="leaf-outline" size={28} color="#9e9a90" />
                 </View>
               )}
             </View>
           )}
 
-          <View className="flex-1">
+          <View className="flex-1 px-2 flex-col justify-between">
             {/* Garden Name and Alert Badges */}
-            <View className="flex-row justify-between items-start mb-2">
-              <View className="flex-row items-center flex-1 mr-2">
-                <Text className="text-lg font-semibold text-foreground flex-1 mr-2">
-                  {garden.name}
-                </Text>
-                {/* Overdue Task Indicator Dot */}
-                {hasOverdueTasks && (
-                  <TouchableOpacity
-                    onPress={handleOverdueIndicatorPress}
-                    hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                  >
-                    <View className="w-3 h-3">
-                      {overdueTasksCount > 0 && (
-                        <View className="absolute -top-1 -right-1 bg-destructive w-4 h-4 items-center justify-center rounded-md">
-                          <Text className="text-[8px] text-cream-50 font-bold">
-                            {overdueTasksCount > 9 ? "9+" : overdueTasksCount}
-                          </Text>
-                        </View>
-                      )}
+            <View>
+              <View className="flex-row justify-between items-start">
+                <View className="flex-row items-center flex-1 mr-2">
+                  <Text className="text-lg font-semibold text-foreground flex-1">
+                    {garden.name}
+                  </Text>
+                  {/* Overdue Task Indicator Dot */}
+                  {hasOverdueTasks && (
+                    <TouchableOpacity
+                      onPress={handleOverdueIndicatorPress}
+                      hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                    >
+                      <View className="w-3 h-3">
+                        {overdueTasksCount > 0 && (
+                          <View className="absolute -top-1 -right-1 bg-destructive w-4 h-4 items-center justify-center rounded-md">
+                            <Text className="text-[8px] text-cream-50 font-bold">
+                              {overdueTasksCount > 9 ? "9+" : overdueTasksCount}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View className="flex-row">
+                  {/* Plants Needing Care Badge */}
+                  {garden.plants_needing_care > 0 && (
+                    <View className="bg-accent-200 rounded-full px-2.5 py-1">
+                      <Text className="text-xs text-accent-800 font-medium">
+                        {garden.plants_needing_care} needs care
+                      </Text>
                     </View>
-                  </TouchableOpacity>
-                )}
+                  )}
+                </View>
               </View>
-              <View className="flex-row">
-                {/* Plants Needing Care Badge */}
-                {garden.plants_needing_care > 0 && (
-                  <View className="bg-accent-200 rounded-full px-2.5 py-1">
-                    <Text className="text-xs text-accent-800 font-medium">
-                      {garden.plants_needing_care} needs care
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
 
-            {/* Plant Count */}
-            <Text className="text-sm text-cream-700 mb-2">
-              {garden.total_plants || 0} Plants
-            </Text>
+              {/* Plant Count */}
+              <Text className="text-sm text-cream-700 mb-2">
+                {garden.total_plants === 1
+                  ? "1 Plant"
+                  : `${garden.total_plants} Plants`}
+              </Text>
+            </View>
 
             {/* Health Progress Bar and Percentage Side by Side */}
             <View className="flex-row items-center">
@@ -202,11 +210,3 @@ export default function GardenCard({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  progressBarContainer: {
-    flex: 1,
-    maxWidth: "80%", // Default max width for home page
-    marginRight: 8,
-  },
-});
