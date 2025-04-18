@@ -279,16 +279,17 @@ export default function SignUpScreen() {
       </View>
 
       <View className="flex-1 p-5">
-        <View className="w-full h-44 justify-center items-center">
+        <View className="w-full h-64 justify-center items-center">
           <Image
-            source={require("@/assets/images/sign-up.png")}
-            className="w-1/2 h-full"
+            source={require("@/assets/images/sign-up-replace.png")}
+            className="w-1/2 h-full rounded-2xl overflow-hidden"
+            style={{ aspectRatio: 1 }}
             resizeMode="contain"
           />
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          Create an Account
+          Let's begin something meaningful together!
         </Text>
 
         {error && (
@@ -304,7 +305,7 @@ export default function SignUpScreen() {
                 <TouchableOpacity
                   onPress={() => toggleIdentifierType(false)}
                   className={`py-2 px-4 rounded-lg ${
-                    !isPhone ? "bg-primary" : "bg-cream-200"
+                    !isPhone ? "bg-primary" : "bg-transparent"
                   }`}
                 >
                   <Text
@@ -318,7 +319,7 @@ export default function SignUpScreen() {
                 <TouchableOpacity
                   onPress={() => toggleIdentifierType(true)}
                   className={`py-2 px-4 rounded-lg ${
-                    isPhone ? "bg-primary" : "bg-cream-200"
+                    isPhone ? "bg-primary" : "bg-transparent"
                   }`}
                 >
                   <Text

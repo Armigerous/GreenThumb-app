@@ -17,28 +17,28 @@ import { PageContainer } from "@/components/UI/PageContainer";
 const slides = [
   {
     id: "1",
-    image: require("@/assets/images/logo.png"),
+    image: require("@/assets/images/logo-transparent.png"),
     title: "Welcome to The GreenThumb",
     description:
       "Your personal plant care companion that helps you grow and nurture your green friends",
   },
   {
     id: "2",
-    image: require("@/assets/images/track-your-plants.png"),
+    image: require("@/assets/images/track-your-plants-replace.png"),
     title: "Track Your Plants",
     description:
       "Keep detailed records of your plants' growth, watering schedules, and care requirements",
   },
   {
     id: "3",
-    image: require("@/assets/images/expert-care.png"),
+    image: require("@/assets/images/expert-care-replace.png"),
     title: "Expert Care Guidance",
     description:
       "Get personalized plant care tips and reminders to keep your plants thriving",
   },
   {
     id: "4",
-    image: require("@/assets/images/key-features.png"),
+    image: require("@/assets/images/key-features-replace.png"),
     title: "Key Features",
     description: "Everything you need to be a successful plant parent",
     isFeatureSlide: true,
@@ -51,8 +51,6 @@ const features = [
   { icon: "leaf-outline" as const, text: "Custom Gardens" },
   { icon: "information-circle-outline" as const, text: "Expert Care Tips" },
   { icon: "search-outline" as const, text: "Plant Database" },
-  { icon: "notifications-outline" as const, text: "Reminders" },
-  { icon: "image-outline" as const, text: "Plant Gallery" },
 ];
 
 export default function WelcomeScreen() {
@@ -113,12 +111,13 @@ export default function WelcomeScreen() {
             </Text>
 
             {/* Feature icons with illustration background */}
-            <View className="relative w-full justify-center items-center mb-3">
+            <View className="relative w-full justify-center items-center mb-4">
               {/* Background illustration */}
               <Image
                 source={item.image}
-                className="w-full h-[180px]"
+                className="h-[350px] rounded-2xl overflow-hidden mb-6"
                 resizeMode="contain"
+                style={{ aspectRatio: 1 }}
               />
 
               {/* Features overlaid in a grid */}
@@ -126,7 +125,7 @@ export default function WelcomeScreen() {
                 {features.map((feature, index) => (
                   <View
                     key={index}
-                    className="flex-row items-center bg-cream-50/90 rounded-lg px-4 py-3 m-2 shadow-sm w-[45%] border border-cream-200"
+                    className="flex-row items-center bg-white rounded-lg px-4 py-2 m-2 w-[45%]"
                   >
                     <Ionicons name={feature.icon} size={22} color="#5E994B" />
                     <Text className="text-sm text-foreground ml-2 font-medium">
@@ -143,11 +142,12 @@ export default function WelcomeScreen() {
 
     return (
       <View className="w-full items-center justify-center" style={{ width }}>
-        <View className="w-full h-[250px] justify-center items-center mb-4">
+        <View className="w-full h-[350px] justify-center items-center mb-4">
           <Image
             source={item.image}
-            className="w-4/5 h-4/5"
+            className="w-full h-full rounded-2xl"
             resizeMode="contain"
+            style={{ aspectRatio: 1 }}
           />
         </View>
 
@@ -230,7 +230,7 @@ export default function WelcomeScreen() {
         </View>
 
         {/* Get Started Button */}
-        <View className="items-center mb-8 px-5">
+        <View className="items-center mb-8 px-6">
           <TouchableOpacity
             onPress={handleGetStarted}
             className="w-full bg-primary py-4 rounded-xl"

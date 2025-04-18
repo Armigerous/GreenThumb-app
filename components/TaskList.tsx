@@ -5,6 +5,7 @@ import {
   Platform,
   UIManager,
   Animated,
+  Image,
 } from "react-native";
 import { TaskWithDetails } from "@/types/garden";
 import { Task } from "./Task";
@@ -18,6 +19,31 @@ if (Platform.OS === "android") {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
 }
+
+// Collection of friendly messages to display when no tasks are available
+// These provide a more engaging experience than a simple "No tasks" message
+const EMPTY_STATE_MESSAGES: string[] = [
+  "Your garden's all good today 🌞",
+  "Today's a rest day for your plants.",
+  "Everything's thriving — no care needed.",
+  "Looks like your plants are in chill mode 🌿",
+  "No tasks today — your garden's in harmony.",
+  "Your plants are soaking up the good vibes ✨",
+  "All quiet in the garden — enjoy the peace.",
+  "Nothing to do — nature's handling it today.",
+  "Your care paid off — everything's happy 🌼",
+  "Sun's out, soil's right — all is well.",
+  "Just sunshine and growth today.",
+  "You've earned a break — your garden agrees.",
+  "No tasks — only green vibes today.",
+  "Everything's under control. Deep breath in…",
+  "All signs point to a healthy garden.",
+  "Ahh… a perfect garden day with no chores.",
+  "Your plants are loving the calm.",
+  "It's one of those rare, care-free days 🌱",
+  "Garden looks great — you can relax today.",
+  "Just stillness, sunshine, and strong roots.",
+];
 
 interface TaskListProps {
   tasks: TaskWithDetails[];
@@ -71,6 +97,9 @@ export function TaskList({
     initialTasks.length === 0
   );
 
+  // Random message for empty state
+  const [emptyStateMessage, setEmptyStateMessage] = useState<string>("");
+
   // Success animation state
   const [showSuccess, setShowSuccess] = useState(false);
   const successOpacity = useRef(new Animated.Value(0)).current;
@@ -86,6 +115,13 @@ export function TaskList({
 
   // Get query client at the component level, not inside the callback
   const queryClient = useQueryClient();
+
+  // Function to get a random message from our collection
+  // This ensures variety in the user experience when there are no tasks
+  const getRandomEmptyStateMessage = useCallback((): string => {
+    const randomIndex = Math.floor(Math.random() * EMPTY_STATE_MESSAGES.length);
+    return EMPTY_STATE_MESSAGES[randomIndex];
+  }, []);
 
   // Configure smooth layout animations
   const configureLayoutAnimation = useCallback(() => {
@@ -134,6 +170,9 @@ export function TaskList({
       }
     });
 
+    // Select a random message for empty state
+    setEmptyStateMessage(getRandomEmptyStateMessage());
+
     // Show empty state immediately if there are no tasks
     if (initialTasks.length === 0) {
       setShowEmptyState(true);
@@ -177,6 +216,8 @@ export function TaskList({
     // Handle empty states properly:
     // If there are no tasks at all, show empty state immediately
     if (initialTasks.length === 0) {
+      // Select a new random message when switching to empty state
+      setEmptyStateMessage(getRandomEmptyStateMessage());
       setShowEmptyState(true);
       // Animate in the empty state
       Animated.parallel([
@@ -367,6 +408,8 @@ export function TaskList({
 
   // Animate transition to empty state
   const animateToEmptyState = useCallback(() => {
+    // Select a new random message when transitioning to empty state
+    setEmptyStateMessage(getRandomEmptyStateMessage());
     setShowEmptyState(true);
 
     // Reset values before animating in
@@ -387,7 +430,7 @@ export function TaskList({
         useNativeDriver: true,
       }),
     ]).start();
-  }, [emptyStateOpacity, emptyStateScale]);
+  }, [emptyStateOpacity, emptyStateScale, getRandomEmptyStateMessage]);
 
   // Handle task completion with animation
   const handleTaskComplete = useCallback(
@@ -610,8 +653,16 @@ export function TaskList({
           transform: [{ scale: emptyStateScale }],
         }}
       >
-        <Text className="text-base text-cream-600 text-center">
-          No tasks to display
+        <Image
+          source={require("@/assets/images/no-tasks.png")}
+          className="h-60 mb-4 rounded-lg overflow-hidden"
+          resizeMode="contain"
+          style={{
+            aspectRatio: 3 / 2,
+          }}
+        />
+        <Text className="text-lg text-foreground font-medium text-center leading-tight">
+          {emptyStateMessage}
         </Text>
       </Animated.View>
     );

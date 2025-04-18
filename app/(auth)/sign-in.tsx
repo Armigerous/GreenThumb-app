@@ -274,16 +274,17 @@ export default function Page() {
       </View>
 
       <View className="flex-1 p-5">
-        <View className="w-full h-44 justify-center items-center">
+        <View className="w-full h-64 justify-center items-center">
           <Image
-            source={require("@/assets/images/sign-in.png")}
-            className="w-1/2 h-full"
+            source={require("@/assets/images/sign-in-replace.png")}
+            className="w-1/2 h-full rounded-2xl overflow-hidden"
             resizeMode="contain"
+            style={{ aspectRatio: 1 }}
           />
         </View>
 
         <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          Welcome Back!
+          You're back - your garden missed you!
         </Text>
 
         {error && (
@@ -299,7 +300,7 @@ export default function Page() {
                 <TouchableOpacity
                   onPress={() => handleIdentifierTypeChange(false)}
                   className={`py-2 px-4 rounded-lg ${
-                    !isPhone ? "bg-primary" : "bg-cream-200"
+                    !isPhone ? "bg-primary" : "bg-transparent"
                   }`}
                 >
                   <Text
@@ -313,7 +314,7 @@ export default function Page() {
                 <TouchableOpacity
                   onPress={() => handleIdentifierTypeChange(true)}
                   className={`py-2 px-4 rounded-lg ${
-                    isPhone ? "bg-primary" : "bg-cream-200"
+                    isPhone ? "bg-primary" : "bg-transparent"
                   }`}
                 >
                   <Text
