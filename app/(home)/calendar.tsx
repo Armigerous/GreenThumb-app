@@ -1,37 +1,35 @@
-import {
-  Text,
-  View,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-  Animated,
-  Easing,
-} from "react-native";
+import { TaskList } from "@/components/TaskList";
+import AnimatedTransition from "@/components/UI/AnimatedTransition";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
+import { useTasksForDate, getTasksForDate } from "@/lib/queries";
+import { supabase } from "@/lib/supabaseClient";
+import { TaskWithDetails } from "@/types/garden";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  format,
-  isSameDay,
-  addWeeks,
-  subWeeks,
-  startOfWeek,
   addDays,
+  addWeeks,
+  format,
   getMonth,
   getYear,
+  isSameDay,
   setMonth,
+  startOfWeek,
+  subWeeks,
 } from "date-fns";
-import { TaskWithDetails } from "@/types/garden";
-import { useTasksForDate } from "@/lib/queries";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
-import { TaskList } from "@/components/TaskList";
-import { PageContainer } from "@/components/UI/PageContainer";
-import AnimatedTransition from "@/components/UI/AnimatedTransition";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -39,6 +37,16 @@ export default function CalendarScreen() {
   const [weekStartDate, setWeekStartDate] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 0 })
   );
+
+  // Generate days for the week view - moved up to avoid reference before declaration
+  const weekDays = useMemo(() => {
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      days.push(addDays(weekStartDate, i));
+    }
+    return days;
+  }, [weekStartDate]);
+
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const queryClient = useQueryClient();
 
@@ -67,6 +75,71 @@ export default function CalendarScreen() {
 
   // Add a state to track day change loading separately
   const [isDayChanging, setIsDayChanging] = useState(false);
+
+  // Helper function to prefetch tasks for a specific date
+  const prefetchTasksForDate = useCallback(
+    (date: Date) => {
+      if (!user?.id) return;
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const formattedDate = `${year}-${month}-${day}`;
+
+      // Only prefetch if not already in cache or if data is not fresh
+      const existingQuery = queryClient.getQueryState([
+        "tasks",
+        formattedDate,
+        user.id,
+      ]);
+
+      if (
+        !existingQuery ||
+        existingQuery.status === "error" ||
+        existingQuery.fetchStatus === "idle"
+      ) {
+        queryClient.prefetchQuery({
+          queryKey: ["tasks", formattedDate, user.id],
+          queryFn: () => getTasksForDate(date, user.id),
+          staleTime: 1000 * 60 * 30, // Match the staleTime from useTasksForDate
+        });
+      }
+    },
+    [queryClient, user?.id]
+  );
+
+  // Helper function to prefetch tasks for a full week
+  const prefetchWeekTasks = useCallback(
+    (startDate: Date) => {
+      if (!user?.id) return;
+
+      // Prefetch entire week at once
+      for (let i = 0; i < 7; i++) {
+        const day = addDays(startDate, i);
+        prefetchTasksForDate(day);
+      }
+
+      // Also prefetch the same day in adjacent weeks for smoother navigation
+      const nextWeekDay = addWeeks(startDate, 1);
+      const prevWeekDay = subWeeks(startDate, 1);
+
+      prefetchTasksForDate(nextWeekDay);
+      prefetchTasksForDate(prevWeekDay);
+    },
+    [user?.id, prefetchTasksForDate]
+  );
+
+  // Prefetch initial data when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      // Prefetch current week
+      prefetchWeekTasks(weekStartDate);
+
+      // Prefetch next and previous weeks
+      prefetchWeekTasks(addWeeks(weekStartDate, 1));
+      prefetchWeekTasks(subWeeks(weekStartDate, 1));
+    }
+  }, [user?.id, prefetchWeekTasks, weekStartDate]);
 
   // Animate tasks loading
   useEffect(() => {
@@ -99,6 +172,24 @@ export default function CalendarScreen() {
     // Only after tasks are hidden, change the day and animate the selection
     setSelectedDay(day);
     animateDaySelection(index);
+
+    // Check if we already have data for this day before invalidating
+    const formattedDate = format(day, "yyyy-MM-dd");
+    const existingQuery = queryClient.getQueryState([
+      "tasks",
+      formattedDate,
+      user?.id,
+    ]);
+
+    // Only invalidate cache if no valid data exists
+    if (!existingQuery || existingQuery.status === "error") {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", formattedDate, user?.id],
+      });
+    }
+
+    // Always refetch to ensure we have the latest data
+    refetch();
   };
 
   // Initial animation setup
@@ -155,43 +246,55 @@ export default function CalendarScreen() {
       return { id, completed };
     },
     onMutate: async ({ id, completed }) => {
+      // Create formatted date string for consistent cache keys
+      const formattedDate = format(selectedDay, "yyyy-MM-dd");
+      const queryKey = ["tasks", formattedDate, user?.id];
+
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: ["tasks", format(selectedDay, "yyyy-MM-dd"), user?.id],
+        queryKey: queryKey,
       });
 
       // Snapshot the previous value
-      const previousTasks = queryClient.getQueryData([
-        "tasks",
-        format(selectedDay, "yyyy-MM-dd"),
-        user?.id,
-      ]);
+      const previousTasks = queryClient.getQueryData(queryKey);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(
-        ["tasks", format(selectedDay, "yyyy-MM-dd"), user?.id],
-        (old: TaskWithDetails[] | undefined) =>
-          old?.map((task) => (task.id === id ? { ...task, completed } : task))
+      queryClient.setQueryData(queryKey, (old: TaskWithDetails[] | undefined) =>
+        old?.map((task) => (task.id === id ? { ...task, completed } : task))
       );
 
       // Return a context object with the snapshotted value
-      return { previousTasks };
+      return { previousTasks, queryKey };
     },
     onError: (err, variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousTasks) {
-        queryClient.setQueryData(
-          ["tasks", format(selectedDay, "yyyy-MM-dd"), user?.id],
-          context.previousTasks
-        );
+      if (context?.previousTasks && context.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousTasks);
       }
       console.error("Error updating task:", err);
     },
-    onSettled: () => {
-      // Always refetch after error or success to make sure our local data is in sync with the server
-      queryClient.invalidateQueries({
-        queryKey: ["tasks", format(selectedDay, "yyyy-MM-dd"), user?.id],
-      });
+    onSuccess: (data, variables, context) => {
+      // On success, don't invalidate - our optimistic update is already correct
+      // Just update the UI to show task completed successfully
+
+      // If this is the last task in the date, make sure to refresh to properly show "no tasks" UI
+      if (context?.queryKey && tasks && tasks.length === 1) {
+        // Only refetch if this was the last task
+        queryClient.invalidateQueries({
+          queryKey: context.queryKey,
+        });
+      }
+    },
+    onSettled: (data, error, variables, context) => {
+      // Only do a background refetch after a delay to ensure data is consistent
+      if (context?.queryKey) {
+        setTimeout(() => {
+          queryClient.invalidateQueries({
+            queryKey: context.queryKey,
+            refetchType: "all",
+          });
+        }, 1000);
+      }
     },
   });
 
@@ -206,15 +309,6 @@ export default function CalendarScreen() {
       completed: !taskToUpdate.completed,
     });
   };
-
-  // Generate days for the week view
-  const weekDays = useMemo(() => {
-    const days: Date[] = [];
-    for (let i = 0; i < 7; i++) {
-      days.push(addDays(weekStartDate, i));
-    }
-    return days;
-  }, [weekStartDate]);
 
   // Animation for week navigation
   const animateWeekChange = (direction: "left" | "right") => {
@@ -283,30 +377,98 @@ export default function CalendarScreen() {
 
   // Navigation functions
   const goToPreviousWeek = () => {
+    // Set day changing state to true
+    setIsDayChanging(true);
+
     // Fade out tasks immediately when changing weeks
     tasksOpacity.setValue(0);
 
     animateWeekChange("right");
-    setWeekStartDate(subWeeks(weekStartDate, 1));
+
+    // Update both the week start date and the selected day
+    const newWeekStartDate = subWeeks(weekStartDate, 1);
+    const newSelectedDay = subWeeks(selectedDay, 1);
+
+    setWeekStartDate(newWeekStartDate);
+    setSelectedDay(newSelectedDay);
+
+    // Prefetch the previous week of tasks for smoother navigation
+    prefetchWeekTasks(subWeeks(newWeekStartDate, 1));
+
+    // No need to invalidate if we have the data already - just refetch
+    const formattedDate = format(newSelectedDay, "yyyy-MM-dd");
+    const existingQuery = queryClient.getQueryState([
+      "tasks",
+      formattedDate,
+      user?.id,
+    ]);
+
+    // Only invalidate if we don't have valid data
+    if (!existingQuery || existingQuery.status === "error") {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", formattedDate, user?.id],
+      });
+    }
+
+    // Always refetch to ensure we have the latest data
+    refetch();
   };
 
   const goToNextWeek = () => {
+    // Set day changing state to true
+    setIsDayChanging(true);
+
     // Fade out tasks immediately when changing weeks
     tasksOpacity.setValue(0);
 
     animateWeekChange("left");
-    setWeekStartDate(addWeeks(weekStartDate, 1));
+
+    // Update both the week start date and the selected day
+    const newWeekStartDate = addWeeks(weekStartDate, 1);
+    const newSelectedDay = addWeeks(selectedDay, 1);
+
+    setWeekStartDate(newWeekStartDate);
+    setSelectedDay(newSelectedDay);
+
+    // Prefetch the next week of tasks for smoother navigation
+    prefetchWeekTasks(addWeeks(newWeekStartDate, 1));
+
+    // No need to invalidate if we have the data already - just refetch
+    const formattedDate = format(newSelectedDay, "yyyy-MM-dd");
+    const existingQuery = queryClient.getQueryState([
+      "tasks",
+      formattedDate,
+      user?.id,
+    ]);
+
+    // Only invalidate if we don't have valid data
+    if (!existingQuery || existingQuery.status === "error") {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", formattedDate, user?.id],
+      });
+    }
+
+    // Always refetch to ensure we have the latest data
+    refetch();
   };
 
   const goToToday = () => {
     const today = new Date();
+    const todayWeekStart = startOfWeek(today, { weekStartsOn: 0 });
+
+    // Check if we're already viewing today - if so, don't do anything
+    if (isSameDay(today, selectedDay)) {
+      return;
+    }
+
+    // Set day changing state to true
+    setIsDayChanging(true);
 
     // Fade out tasks immediately
     tasksOpacity.setValue(0);
 
     // Find direction to animate
     const currentWeekStart = startOfWeek(weekStartDate, { weekStartsOn: 0 });
-    const todayWeekStart = startOfWeek(today, { weekStartsOn: 0 });
 
     // Determine animation direction based on target date
     if (todayWeekStart > currentWeekStart) {
@@ -344,7 +506,19 @@ export default function CalendarScreen() {
     ]).start();
 
     setSelectedDay(today);
-    setWeekStartDate(startOfWeek(today, { weekStartsOn: 0 }));
+    setWeekStartDate(todayWeekStart);
+
+    // Prefetch adjacent weeks for today
+    prefetchWeekTasks(addWeeks(todayWeekStart, 1));
+    prefetchWeekTasks(subWeeks(todayWeekStart, 1));
+
+    // Always invalidate today's data to ensure it's fresh
+    // For today specifically, we want the latest data
+    const formattedDate = format(today, "yyyy-MM-dd");
+    queryClient.invalidateQueries({
+      queryKey: ["tasks", formattedDate, user?.id],
+    });
+    refetch();
   };
 
   // Month selection
@@ -357,10 +531,14 @@ export default function CalendarScreen() {
   }, [selectedDay]);
 
   const selectMonth = (monthIndex: number) => {
+    // Set day changing state to true
+    setIsDayChanging(true);
+
     // Fade out tasks immediately
     tasksOpacity.setValue(0);
 
     const newDate = setMonth(selectedDay, monthIndex);
+    const newWeekStart = startOfWeek(newDate, { weekStartsOn: 0 });
 
     // Determine animation direction based on selected month
     if (monthIndex > getMonth(selectedDay)) {
@@ -370,8 +548,31 @@ export default function CalendarScreen() {
     }
 
     setSelectedDay(newDate);
-    setWeekStartDate(startOfWeek(newDate, { weekStartsOn: 0 }));
+    setWeekStartDate(newWeekStart);
     setIsMonthPickerVisible(false);
+
+    // Prefetch this week and adjacent weeks for the new month
+    prefetchWeekTasks(newWeekStart);
+    prefetchWeekTasks(addWeeks(newWeekStart, 1));
+    prefetchWeekTasks(subWeeks(newWeekStart, 1));
+
+    // No need to invalidate if we have the data already - just refetch
+    const formattedDate = format(newDate, "yyyy-MM-dd");
+    const existingQuery = queryClient.getQueryState([
+      "tasks",
+      formattedDate,
+      user?.id,
+    ]);
+
+    // Only invalidate if we don't have valid data
+    if (!existingQuery || existingQuery.status === "error") {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", formattedDate, user?.id],
+      });
+    }
+
+    // Always refetch to ensure we have the latest data
+    refetch();
   };
 
   // Group tasks by garden
