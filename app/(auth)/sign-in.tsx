@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
@@ -283,9 +285,14 @@ export default function Page() {
           />
         </View>
 
-        <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          You're back - your garden missed you!
-        </Text>
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-foreground text-center">
+            Welcome Back!
+          </Text>
+          <Text className="text-lg text-foreground/80 text-center mt-2">
+            Your garden missed you
+          </Text>
+        </View>
 
         {error && (
           <View className="bg-destructive/10 border border-destructive rounded-lg p-3 mb-4">
