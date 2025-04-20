@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useSignUp, useSSO } from "@clerk/clerk-expo";
 import { useRouter, Link } from "expo-router";
@@ -288,9 +290,14 @@ export default function SignUpScreen() {
           />
         </View>
 
-        <Text className="text-2xl font-bold text-foreground text-center mb-5">
-          Let's begin something meaningful together!
-        </Text>
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-foreground text-center">
+            Create an Account
+          </Text>
+          <Text className="text-lg text-foreground/80 text-center mt-2">
+            Let's begin something meaningful together
+          </Text>
+        </View>
 
         {error && (
           <View className="bg-destructive/10 border border-destructive rounded-lg p-3 mb-4">
