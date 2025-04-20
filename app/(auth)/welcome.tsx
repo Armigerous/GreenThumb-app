@@ -168,7 +168,7 @@ export default function WelcomeScreen() {
       <View className="flex-row justify-end items-center px-5 pt-2">
         <TouchableOpacity
           onPress={() => router.push("/(auth)/sign-in")}
-          className="py-2 px-4 rounded-full border border-primary"
+          className="py-2 px-4 rounded-lg border border-primary"
         >
           <Text className="text-primary text-base font-semibold">Sign In</Text>
         </TouchableOpacity>

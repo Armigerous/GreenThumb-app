@@ -4,14 +4,14 @@ module.exports = {
     slug: "theGreenThumb-app",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/logo.png",
+    icon: "./assets/images/logo-transparent.png",
     scheme: "TheGreenThumb",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
 
     // Splash screen configuration
     splash: {
-      image: "./assets/images/logo.png",
+      image: "./assets/images/logo-transparent.png",
       imageWidth: 200,
       resizeMode: "contain",
       backgroundColor: "#fff8e8",
@@ -63,13 +63,13 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo.png",
+        foregroundImage: "./assets/images/logo-transparent.png",
         backgroundColor: "#ffffff",
       },
       package: "com.thegreenthumb.app",
     },
     web: {
-      favicon: "./assets/images/logo.png",
+      favicon: "./assets/images/logo-transparent.png",
     },
 
     // Asset patterns
