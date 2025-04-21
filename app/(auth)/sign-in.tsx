@@ -1,21 +1,31 @@
+import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/icons";
+import { CompactSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
 import { useSignIn, useSSO } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useCallback, useEffect, useState } from "react";
 import {
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
-  View,
   TouchableOpacity,
-  Image,
-  SafeAreaView,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
+  useWindowDimensions,
+  StyleSheet,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import * as WebBrowser from "expo-web-browser";
-import { GoogleIcon, AppleIcon, FacebookIcon } from "@/components/icons";
-import { CompactSpinner } from "@/components/UI/LoadingSpinner";
-import { Ionicons } from "@expo/vector-icons";
-import { PageContainer } from "@/components/UI/PageContainer";
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -36,6 +46,7 @@ export default function Page() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { height: screenHeight } = useWindowDimensions();
 
   // Authentication states
   const [identifier, setIdentifier] = useState("");
@@ -43,6 +54,118 @@ export default function Page() {
   const [isPhone, setIsPhone] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
+
+  // Animation for keyboard appearance
+  const keyboardVisible = useSharedValue(0);
+  const keyboardHeight = useSharedValue(0);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      "keyboardDidShow",
+      (event) => {
+        keyboardHeight.value = event.endCoordinates.height;
+        keyboardVisible.value = withTiming(1, { duration: 300 });
+      }
+    );
+
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      keyboardVisible.value = withTiming(0, { duration: 300 });
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  // Animation styles
+  const illustrationAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        keyboardVisible.value,
+        [0, 1],
+        [1, 0.2],
+        Extrapolate.CLAMP
+      ),
+      transform: [
+        {
+          scale: interpolate(
+            keyboardVisible.value,
+            [0, 1],
+            [1, 0.5],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+      height: interpolate(
+        keyboardVisible.value,
+        [0, 1],
+        [180, 80],
+        Extrapolate.CLAMP
+      ),
+    };
+  });
+
+  // Animation for the welcome text
+  const textAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        keyboardVisible.value,
+        [0, 1],
+        [1, 0.2],
+        Extrapolate.CLAMP
+      ),
+      transform: [
+        {
+          translateY: interpolate(
+            keyboardVisible.value,
+            [0, 1],
+            [0, -10],
+            Extrapolate.CLAMP
+          ),
+        },
+        {
+          scale: interpolate(
+            keyboardVisible.value,
+            [0, 1],
+            [1, 0.9],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+    };
+  });
+
+  // Animation for the backdrop blur
+  const backdropAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        keyboardVisible.value,
+        [0, 1],
+        [0, 0.85],
+        Extrapolate.CLAMP
+      ),
+    };
+  });
+
+  const inputSectionAnimatedStyle = useAnimatedStyle(() => {
+    // Calculate a more adaptive translation based on screen size and keyboard height
+    const translationAmount = Math.min(-100, -keyboardHeight.value * 0.5);
+
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            keyboardVisible.value,
+            [0, 1],
+            [0, translationAmount],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+      zIndex: keyboardVisible.value === 1 ? 10 : 1,
+    };
+  });
 
   // Helper function to get user-friendly error messages
   const getFriendlyErrorMessage = (err: any): string => {
@@ -253,241 +376,300 @@ export default function Page() {
     setError(null);
   };
 
+  // Function to dismiss keyboard when clicking outside input areas
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
     <PageContainer scroll={false} padded={false}>
-      <View className="flex-row justify-between items-center px-5 pt-5">
-        <Link href="/(auth)/welcome" asChild>
-          <TouchableOpacity>
-            <View className="flex-row items-center">
-              <Ionicons name="chevron-back" size={20} color="#2e2c29" />
-              <Text className="text-foreground text-base ml-1">Back</Text>
-            </View>
-          </TouchableOpacity>
-        </Link>
-
-        <Link href="/(auth)/sign-up" asChild>
-          <TouchableOpacity>
-            <View className="flex-row items-center">
-              <Text className="text-primary mr-1">Sign up</Text>
-              <Ionicons name="person-add-outline" size={16} color="#5E994B" />
-            </View>
-          </TouchableOpacity>
-        </Link>
-      </View>
-
-      <View className="flex-1 p-5">
-        <View className="w-full h-64 justify-center items-center">
-          <Image
-            source={require("@/assets/images/sign-in-replace.png")}
-            className="w-1/2 h-full rounded-2xl overflow-hidden"
-            resizeMode="contain"
-            style={{ aspectRatio: 1 }}
-          />
-        </View>
-
-        <View className="mb-8">
-          <Text className="text-3xl font-bold text-foreground text-center">
-            Welcome Back!
-          </Text>
-          <Text className="text-lg text-foreground/80 text-center mt-2">
-            Your garden missed you
-          </Text>
-        </View>
-
-        {error && (
-          <View className="bg-destructive/10 border border-destructive rounded-lg p-3 mb-4">
-            <Text className="text-destructive text-center">{error}</Text>
-          </View>
-        )}
-
-        {!pendingVerification ? (
-          <>
-            <View className="w-full mb-5">
-              <View className="flex-row justify-between mb-2">
-                <TouchableOpacity
-                  onPress={() => handleIdentifierTypeChange(false)}
-                  className={`py-2 px-4 rounded-lg ${
-                    !isPhone ? "bg-primary" : "bg-transparent"
-                  }`}
-                >
-                  <Text
-                    className={
-                      !isPhone ? "text-primary-foreground" : "text-foreground"
-                    }
-                  >
-                    {isPhone ? "Use Email" : "Email"}
-                  </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <View className="flex-1">
+            <View className="flex-row justify-between items-center px-5 pt-5">
+              <Link href="/(auth)/welcome" asChild>
+                <TouchableOpacity>
+                  <View className="flex-row items-center">
+                    <Ionicons
+                      name="arrow-back-outline"
+                      size={20}
+                      color="#2e2c29"
+                    />
+                    <Text className="text-foreground text-base ml-1">Back</Text>
+                  </View>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleIdentifierTypeChange(true)}
-                  className={`py-2 px-4 rounded-lg ${
-                    isPhone ? "bg-primary" : "bg-transparent"
-                  }`}
-                >
-                  <Text
-                    className={
-                      isPhone ? "text-primary-foreground" : "text-foreground"
-                    }
-                  >
-                    {!isPhone ? "Use Phone" : "Phone"}
-                  </Text>
+              </Link>
+
+              <Link href="/(auth)/sign-up" asChild>
+                <TouchableOpacity>
+                  <View className="flex-row items-center">
+                    <Text className="text-primary mr-1">Sign up</Text>
+                    <Ionicons
+                      name="person-add-outline"
+                      size={16}
+                      color="#5E994B"
+                    />
+                  </View>
                 </TouchableOpacity>
-              </View>
-
-              <Text className="text-foreground mb-1 text-sm">
-                {isPhone ? "Phone Number" : "Email"}
-              </Text>
-              <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
-                <View className="p-3 justify-center">
-                  <Ionicons
-                    name={isPhone ? "call-outline" : "mail-outline"}
-                    size={20}
-                    color="#2e2c29"
-                  />
-                </View>
-                <TextInput
-                  className="flex-1 p-3 text-foreground"
-                  autoCapitalize="none"
-                  value={identifier}
-                  placeholder={
-                    isPhone ? "Enter your phone number" : "Enter your email"
-                  }
-                  placeholderTextColor="#2e2c29"
-                  onChangeText={(text) => setIdentifier(text)}
-                  keyboardType={isPhone ? "phone-pad" : "email-address"}
-                  editable={!isLoading}
-                />
-              </View>
-
-              <Text className="text-foreground mb-1 text-sm">Password</Text>
-              <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
-                <View className="p-3 justify-center">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color="#2e2c29"
-                  />
-                </View>
-                <TextInput
-                  className="flex-1 p-3 text-foreground"
-                  value={password}
-                  placeholder="Enter your password"
-                  placeholderTextColor="#999"
-                  secureTextEntry={true}
-                  onChangeText={(text) => setPassword(text)}
-                  editable={!isLoading}
-                />
-              </View>
-
-              <TouchableOpacity onPress={() => {}} className="mb-5">
-                <Text className="text-primary text-right text-sm font-semibold">
-                  Forgot your password?
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
-                onPress={onSignInPress}
-                disabled={isLoading || !isLoaded}
-              >
-                <Text className="text-primary-foreground font-bold text-base mr-2">
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Text>
-                {!isLoading && (
-                  <Ionicons name="log-in-outline" size={20} color="#fffefa" />
-                )}
-              </TouchableOpacity>
+              </Link>
             </View>
 
-            <View className="items-center my-4">
-              <View className="flex-row items-center w-full mb-4">
-                <View className="flex-1 h-[1px] bg-cream-300" />
-                <Text className="text-foreground text-sm mx-4">
-                  Or sign in with
-                </Text>
-                <View className="flex-1 h-[1px] bg-cream-300" />
-              </View>
-              <View className="flex-row justify-between w-full gap-4">
-                <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
-                  onPress={onSignInWithGoogle}
-                  disabled={isLoading}
-                >
-                  <GoogleIcon size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
-                  onPress={onSignInWithApple}
-                  disabled={isLoading}
-                >
-                  <AppleIcon size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
-                  onPress={onSignInWithFacebook}
-                  disabled={isLoading}
-                >
-                  <FacebookIcon size={24} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </>
-        ) : (
-          <View className="w-full mb-5">
-            <Text className="text-foreground mb-5 text-center">
-              We've sent a verification code to your phone. Please enter it
-              below.
-            </Text>
-            <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
-              <View className="p-3 justify-center">
-                <Ionicons name="keypad-outline" size={20} color="#2e2c29" />
-              </View>
-              <TextInput
-                className="flex-1 p-3 text-foreground"
-                value={verificationCode}
-                placeholder="Verification code"
-                placeholderTextColor="#999"
-                onChangeText={(code) => setVerificationCode(code)}
-                keyboardType="number-pad"
-                editable={!isLoading}
+            <View className="flex-1 p-5 relative">
+              {/* Backdrop blur effect that appears when keyboard is open */}
+              <Animated.View
+                style={[StyleSheet.absoluteFillObject, backdropAnimatedStyle]}
+                className="bg-cream-50/95 rounded-lg backdrop-blur-xl z-1"
               />
-            </View>
 
-            <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
-              onPress={onVerifyPress}
-              disabled={isLoading || !isLoaded}
-            >
-              <Text className="text-primary-foreground font-bold text-base mr-2">
-                {isLoading ? "Verifying..." : "Verify Code"}
-              </Text>
-              {!isLoading && (
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={20}
-                  color="#FFFFFF"
+              {/* Top illustration */}
+              <Animated.View
+                style={illustrationAnimatedStyle}
+                className="w-full justify-center items-center"
+              >
+                <Image
+                  source={require("@/assets/images/sign-in-replace.png")}
+                  className="w-1/2 h-full rounded-2xl overflow-hidden"
+                  resizeMode="contain"
+                  style={{ aspectRatio: 1 }}
                 />
+              </Animated.View>
+
+              {/* Welcome text section */}
+              <Animated.View className="mb-4" style={textAnimatedStyle}>
+                <Text className="text-3xl font-bold text-foreground text-center">
+                  Welcome Back!
+                </Text>
+                <Text className="text-lg text-foreground/80 text-center mt-2">
+                  Your garden missed you
+                </Text>
+              </Animated.View>
+
+              {error && (
+                <View className="bg-destructive/10 border border-destructive rounded-lg p-3 mb-4">
+                  <Text className="text-destructive text-center">{error}</Text>
+                </View>
               )}
-            </TouchableOpacity>
-          </View>
-        )}
 
-        {isLoading && (
-          <View className="mt-4 items-center">
-            <CompactSpinner size={32} color="#5E994B" />
-          </View>
-        )}
+              <Animated.View
+                style={inputSectionAnimatedStyle}
+                className="flex-1"
+              >
+                {!pendingVerification ? (
+                  <>
+                    <View className="w-full mb-5">
+                      <View className="flex-row justify-between mb-2">
+                        <TouchableOpacity
+                          onPress={() => handleIdentifierTypeChange(false)}
+                          className={`py-2 px-4 rounded-lg ${
+                            !isPhone ? "bg-primary" : "bg-transparent"
+                          }`}
+                        >
+                          <Text
+                            className={
+                              !isPhone
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }
+                          >
+                            {isPhone ? "Use Email" : "Email"}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleIdentifierTypeChange(true)}
+                          className={`py-2 px-4 rounded-lg ${
+                            isPhone ? "bg-primary" : "bg-transparent"
+                          }`}
+                        >
+                          <Text
+                            className={
+                              isPhone
+                                ? "text-primary-foreground"
+                                : "text-foreground"
+                            }
+                          >
+                            {!isPhone ? "Use Phone" : "Phone"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
 
-        <View className="flex-row justify-center mt-auto mb-8">
-          <Text className="text-foreground">Don't have an account? </Text>
-          <Link href="/(auth)/sign-up" asChild>
-            <TouchableOpacity className="flex-row items-center">
-              <Text className="text-primary mr-1">Sign up</Text>
-              <Ionicons name="person-add-outline" size={16} color="#5E994B" />
-            </TouchableOpacity>
-          </Link>
-        </View>
-      </View>
+                      <Text className="text-foreground mb-1 text-sm">
+                        {isPhone ? "Phone Number" : "Email"}
+                      </Text>
+                      <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                        <View className="p-3 justify-center">
+                          <Ionicons
+                            name={isPhone ? "call-outline" : "mail-outline"}
+                            size={20}
+                            color="#2e2c29"
+                          />
+                        </View>
+                        <TextInput
+                          className="flex-1 p-3 text-foreground"
+                          autoCapitalize="none"
+                          value={identifier}
+                          placeholder={
+                            isPhone
+                              ? "Enter your phone number"
+                              : "Enter your email"
+                          }
+                          placeholderTextColor="#2e2c29"
+                          onChangeText={(text) => setIdentifier(text)}
+                          keyboardType={isPhone ? "phone-pad" : "email-address"}
+                          editable={!isLoading}
+                        />
+                      </View>
+
+                      <Text className="text-foreground mb-1 text-sm">
+                        Password
+                      </Text>
+                      <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                        <View className="p-3 justify-center">
+                          <Ionicons
+                            name="lock-closed-outline"
+                            size={20}
+                            color="#2e2c29"
+                          />
+                        </View>
+                        <TextInput
+                          className="flex-1 p-3 text-foreground"
+                          value={password}
+                          placeholder="Enter your password"
+                          placeholderTextColor="#999"
+                          secureTextEntry={true}
+                          onChangeText={(text) => setPassword(text)}
+                          editable={!isLoading}
+                        />
+                      </View>
+
+                      <TouchableOpacity onPress={() => {}} className="mb-5">
+                        <Text className="text-primary text-right text-sm font-semibold">
+                          Forgot your password?
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
+                        onPress={onSignInPress}
+                        disabled={isLoading || !isLoaded}
+                      >
+                        <Text className="text-primary-foreground font-bold text-base mr-2">
+                          {isLoading ? "Signing in..." : "Sign In"}
+                        </Text>
+                        {!isLoading && (
+                          <Ionicons
+                            name="log-in-outline"
+                            size={20}
+                            color="#fffefa"
+                          />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+
+                    <View className="items-center my-4">
+                      <View className="flex-row items-center w-full mb-4">
+                        <View className="flex-1 h-[1px] bg-cream-300" />
+                        <Text className="text-foreground text-sm mx-4">
+                          Or sign in with
+                        </Text>
+                        <View className="flex-1 h-[1px] bg-cream-300" />
+                      </View>
+                      <View className="flex-row justify-between w-full gap-4">
+                        <TouchableOpacity
+                          className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
+                          onPress={onSignInWithGoogle}
+                          disabled={isLoading}
+                        >
+                          <GoogleIcon size={24} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
+                          onPress={onSignInWithApple}
+                          disabled={isLoading}
+                        >
+                          <AppleIcon size={24} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="bg-cream-50 p-3 rounded-lg shadow-sm border border-cream-300 flex-1 h-12 items-center justify-center"
+                          onPress={onSignInWithFacebook}
+                          disabled={isLoading}
+                        >
+                          <FacebookIcon size={24} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </>
+                ) : (
+                  <View className="w-full mb-5">
+                    <Text className="text-foreground mb-5 text-center">
+                      We've sent a verification code to your phone. Please enter
+                      it below.
+                    </Text>
+                    <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+                      <View className="p-3 justify-center">
+                        <Ionicons
+                          name="keypad-outline"
+                          size={20}
+                          color="#2e2c29"
+                        />
+                      </View>
+                      <TextInput
+                        className="flex-1 p-3 text-foreground"
+                        value={verificationCode}
+                        placeholder="Verification code"
+                        placeholderTextColor="#999"
+                        onChangeText={(code) => setVerificationCode(code)}
+                        keyboardType="number-pad"
+                        editable={!isLoading}
+                      />
+                    </View>
+
+                    <TouchableOpacity
+                      className="bg-primary py-4 rounded-lg items-center flex-row justify-center"
+                      onPress={onVerifyPress}
+                      disabled={isLoading || !isLoaded}
+                    >
+                      <Text className="text-primary-foreground font-bold text-base mr-2">
+                        {isLoading ? "Verifying..." : "Verify Code"}
+                      </Text>
+                      {!isLoading && (
+                        <Ionicons
+                          name="checkmark-circle-outline"
+                          size={20}
+                          color="#FFFFFF"
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </Animated.View>
+
+              {isLoading && (
+                <View className="mt-4 items-center">
+                  <CompactSpinner size={32} color="#5E994B" />
+                </View>
+              )}
+
+              <View className="flex-row justify-center mt-auto mb-4">
+                <Text className="text-foreground">Don't have an account? </Text>
+                <Link href="/(auth)/sign-up" asChild>
+                  <TouchableOpacity className="flex-row items-center">
+                    <Text className="text-primary mr-1">Sign up</Text>
+                    <Ionicons
+                      name="person-add-outline"
+                      size={16}
+                      color="#5E994B"
+                    />
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </PageContainer>
   );
 }

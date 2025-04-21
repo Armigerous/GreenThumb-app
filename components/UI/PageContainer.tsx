@@ -1,5 +1,12 @@
 import React, { ReactNode, useEffect } from "react";
-import { ViewStyle, ScrollView, View, SafeAreaView } from "react-native";
+import {
+  ViewStyle,
+  ScrollView,
+  View,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { BackgroundGradient } from "./BackgroundGradient";
 import AnimatedTransition from "./AnimatedTransition";
 
@@ -18,6 +25,8 @@ import AnimatedTransition from "./AnimatedTransition";
  * @param safeArea - Whether to use SafeAreaView (defaults to true)
  * @param isLoading - Whether data is loading (only used for rare full-screen loading situations)
  * @param animate - Whether to animate the content (defaults to true)
+ * @param keyboardAvoiding - Whether to use the built-in KeyboardAvoidingView (defaults to false)
+ * @param keyboardOffset - Vertical offset for the KeyboardAvoidingView
  */
 interface PageContainerProps {
   children: ReactNode;
@@ -28,6 +37,8 @@ interface PageContainerProps {
   safeArea?: boolean;
   isLoading?: boolean;
   animate?: boolean;
+  keyboardAvoiding?: boolean;
+  keyboardOffset?: number;
 }
 
 export function PageContainer({
@@ -39,6 +50,8 @@ export function PageContainer({
   safeArea = true,
   isLoading = false,
   animate = true,
+  keyboardAvoiding = false,
+  keyboardOffset = 0,
 }: PageContainerProps) {
   // Determine the inner content container based on whether scrolling is enabled
   const ContentContainer = scroll ? ScrollView : View;
@@ -68,12 +81,27 @@ export function PageContainer({
     content
   );
 
+  // Apply KeyboardAvoidingView if requested
+  const keyboardAvoidingContent = keyboardAvoiding ? (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={keyboardOffset}
+    >
+      {animatedContent}
+    </KeyboardAvoidingView>
+  ) : (
+    animatedContent
+  );
+
   return (
     <BackgroundGradient customColors={gradientColors}>
       {safeArea ? (
-        <SafeAreaView className="flex-1">{animatedContent}</SafeAreaView>
+        <SafeAreaView className="flex-1">
+          {keyboardAvoidingContent}
+        </SafeAreaView>
       ) : (
-        animatedContent
+        keyboardAvoidingContent
       )}
     </BackgroundGradient>
   );
