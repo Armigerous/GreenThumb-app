@@ -1,4 +1,4 @@
-package com.thegreenthumb.app
+package com.tugraerenk.greenthumb
 
 import android.app.Application
 import android.content.res.Configuration

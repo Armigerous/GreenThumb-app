@@ -31,7 +31,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="TheGreenThumb"/>
-        <data android:scheme="com.thegreenthumb.app"/>
+        <data android:scheme="com.tugraerenk.greenthumb"/>
         <data android:scheme="exp+thegreenthumb-app"/>
       </intent-filter>
     </activity>

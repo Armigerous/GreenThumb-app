@@ -4,6 +4,7 @@ import {
   Animated,
   FlatList,
   Image,
+  Pressable,
   SafeAreaView,
   Text,
   TouchableOpacity,
@@ -12,6 +13,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PageContainer } from "@/components/UI/PageContainer";
+import RAnimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  withSequence,
+  withDelay,
+  Easing,
+} from "react-native-reanimated";
 
 // Onboarding slides data
 const slides = [
@@ -62,6 +71,48 @@ export default function WelcomeScreen() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const autoScrollTimer = useRef<NodeJS.Timeout>();
 
+  // Animation values for buttons
+  const startButtonOpacity = useSharedValue(0);
+  const startButtonTranslateY = useSharedValue(20);
+  const startButtonScale = useSharedValue(1);
+
+  const signInOpacity = useSharedValue(0);
+  const signInTranslateY = useSharedValue(-20);
+  const signInScale = useSharedValue(1);
+
+  // Trigger animations when component mounts
+  useEffect(() => {
+    startButtonOpacity.value = withDelay(500, withTiming(1, { duration: 300 }));
+    startButtonTranslateY.value = withDelay(
+      500,
+      withTiming(0, { duration: 300 })
+    );
+
+    signInOpacity.value = withDelay(500, withTiming(1, { duration: 300 }));
+    signInTranslateY.value = withDelay(500, withTiming(0, { duration: 300 }));
+  }, []);
+
+  // Animated styles for buttons
+  const startButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: startButtonOpacity.value,
+      transform: [
+        { translateY: startButtonTranslateY.value },
+        { scale: startButtonScale.value },
+      ],
+    };
+  });
+
+  const signInAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: signInOpacity.value,
+      transform: [
+        { translateY: signInTranslateY.value },
+        { scale: signInScale.value },
+      ],
+    };
+  });
+
   const viewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems[0]) {
       setCurrentIndex(viewableItems[0].index);
@@ -87,7 +138,26 @@ export default function WelcomeScreen() {
 
   const handleGetStarted = () => {
     setIsAutoScrolling(false);
-    router.push("/(auth)/sign-up");
+    // Create a button press animation
+    startButtonScale.value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
+    setTimeout(() => {
+      router.push("/(auth)/sign-up");
+    }, 150);
+  };
+
+  const handleSignIn = () => {
+    setIsAutoScrolling(false);
+    // Create a button press animation
+    signInScale.value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
+    setTimeout(() => {
+      router.push("/(auth)/sign-in");
+    }, 150);
   };
 
   const scrollTo = (index: number) => {
@@ -98,7 +168,7 @@ export default function WelcomeScreen() {
     setIsAutoScrolling(false);
   };
 
-  const renderSlide = ({ item }: any) => {
+  const renderSlide = ({ item, index }: any) => {
     if (item.isFeatureSlide) {
       return (
         <View className="w-full items-center justify-center" style={{ width }}>
@@ -122,16 +192,14 @@ export default function WelcomeScreen() {
 
               {/* Features overlaid in a grid */}
               <View className="flex-row flex-wrap justify-center">
-                {features.map((feature, index) => (
-                  <View
-                    key={index}
-                    className="flex-row items-center bg-white rounded-lg px-4 py-2 m-2 w-[45%]"
-                  >
-                    <Ionicons name={feature.icon} size={22} color="#5E994B" />
-                    <Text className="text-sm text-foreground ml-2 font-medium">
-                      {feature.text}
-                    </Text>
-                  </View>
+                {features.map((feature, idx) => (
+                  <FeatureItem
+                    key={idx}
+                    icon={feature.icon}
+                    text={feature.text}
+                    index={idx}
+                    isActive={currentIndex === 3}
+                  />
                 ))}
               </View>
             </View>
@@ -166,12 +234,17 @@ export default function WelcomeScreen() {
   return (
     <PageContainer scroll={false} padded={false}>
       <View className="flex-row justify-end items-center px-5 pt-2">
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/sign-in")}
-          className="py-2 px-4 rounded-lg border border-primary"
-        >
-          <Text className="text-primary text-base font-semibold">Sign In</Text>
-        </TouchableOpacity>
+        <RAnimated.View style={signInAnimatedStyle}>
+          <TouchableOpacity
+            onPress={handleSignIn}
+            className="py-2 px-4 rounded-lg border border-primary"
+            activeOpacity={0.8}
+          >
+            <Text className="text-primary text-base font-semibold">
+              Sign In
+            </Text>
+          </TouchableOpacity>
+        </RAnimated.View>
       </View>
 
       <View className="flex-1">
@@ -231,16 +304,68 @@ export default function WelcomeScreen() {
 
         {/* Get Started Button */}
         <View className="items-center mb-8 px-6">
-          <TouchableOpacity
-            onPress={handleGetStarted}
-            className="w-full bg-primary py-4 rounded-xl"
-          >
-            <Text className="text-center text-primary-foreground font-bold text-lg">
-              Get Started
-            </Text>
-          </TouchableOpacity>
+          <RAnimated.View style={[startButtonAnimatedStyle, { width: "100%" }]}>
+            <TouchableOpacity
+              onPress={handleGetStarted}
+              className="w-full bg-primary py-4 rounded-xl"
+              activeOpacity={0.8}
+            >
+              <Text className="text-center text-primary-foreground font-bold text-lg">
+                Get Started
+              </Text>
+            </TouchableOpacity>
+          </RAnimated.View>
         </View>
       </View>
     </PageContainer>
   );
 }
+
+// Feature item component with staggered animation
+const FeatureItem = ({
+  icon,
+  text,
+  index,
+  isActive,
+}: {
+  icon: any;
+  text: string;
+  index: number;
+  isActive: boolean;
+}) => {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    if (isActive) {
+      opacity.value = withDelay(
+        200 + index * 100,
+        withTiming(1, { duration: 500 })
+      );
+      translateY.value = withDelay(
+        200 + index * 100,
+        withTiming(0, { duration: 500 })
+      );
+    } else {
+      opacity.value = 0;
+      translateY.value = 20;
+    }
+  }, [isActive]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
+  return (
+    <RAnimated.View
+      style={animatedStyle}
+      className="flex-row items-center bg-white rounded-lg px-4 py-2 m-2 w-[45%]"
+    >
+      <Ionicons name={icon} size={22} color="#5E994B" />
+      <Text className="text-sm text-foreground ml-2 font-medium">{text}</Text>
+    </RAnimated.View>
+  );
+};

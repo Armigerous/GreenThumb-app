@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>TheGreenThumb</string>
-          <string>com.thegreenthumb.app</string>
+          <string>com.tugraerenk.greenthumb</string>
         </array>
       </dict>
       <dict>
