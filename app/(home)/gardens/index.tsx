@@ -76,8 +76,12 @@ export default function GardensScreen() {
   const overallHealth = calculateOverallHealth(gardens);
 
   // Show loading spinner only for initial data fetch, not during navigation
-  if (isLoading && !gardens) {
-    return <LoadingSpinner message="Loading gardens..." />;
+  if (isLoading) {
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading gardens..." />
+      </PageContainer>
+    );
   }
 
   return (

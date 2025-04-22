@@ -342,7 +342,11 @@ const GardenDetails = () => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading garden details..." />;
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading garden details..." />
+      </PageContainer>
+    );
   }
 
   if (error || !gardenData) {

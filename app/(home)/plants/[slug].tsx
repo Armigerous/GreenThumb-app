@@ -140,7 +140,11 @@ export default function PlantDetailScreen() {
   const bottomPadding = 60; // Approximate height of bottom tabs
 
   if (loading) {
-    return <LoadingSpinner message="Loading plant details..." />;
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading plant details..." />
+      </PageContainer>
+    );
   }
 
   if (queryError || !plant) {

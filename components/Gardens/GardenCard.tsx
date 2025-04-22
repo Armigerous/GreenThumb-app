@@ -97,7 +97,10 @@ export default function GardenCard({
   return (
     <>
       <TouchableOpacity
-        className="bg-white rounded-xl p-2"
+        className="bg-white rounded-xl p-2 max-h-28"
+        style={{
+          height: isGardensPage ? undefined : 90,
+        }}
         onPress={() =>
           router.push({
             pathname: "/(home)/gardens/[id]",
@@ -105,7 +108,7 @@ export default function GardenCard({
           })
         }
       >
-        <View className="flex-row">
+        <View className="flex-row h-full">
           {/* Plant Image - Only shown on gardens page */}
           {isGardensPage && (
             <View className="mr-2 self-center rounded-md overflow-hidden h-24 w-24">

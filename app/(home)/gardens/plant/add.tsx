@@ -523,7 +523,11 @@ export default function AddPlantToGardenScreen() {
 
   // Render loading state
   if (loadingPlant || loadingGardens) {
-    return <LoadingSpinner message="Loading data..." />;
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading data..." />
+      </PageContainer>
+    );
   }
 
   // Render error state if plant is not found

@@ -354,7 +354,11 @@ export default function UserPlantDetailScreen() {
 
   // Loading state
   if (isLoading) {
-    return <LoadingSpinner message="Loading plant details..." />;
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading plant details..." />
+      </PageContainer>
+    );
   }
 
   // Error state
