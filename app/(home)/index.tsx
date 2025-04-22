@@ -4,167 +4,36 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
-  Animated,
-  Easing,
   LayoutAnimation,
   Platform,
   UIManager,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import { useCallback, useMemo, useState, useEffect, useRef } from "react";
-import {
-  format,
-  isAfter,
-  isBefore,
-  isTomorrow,
-  startOfDay,
-  isToday,
-  subDays,
-} from "date-fns";
+import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskWithDetails } from "@/types/garden";
-import { Task } from "@/components/Task";
 import { useFocusEffect } from "expo-router";
-import { TaskList } from "@/components/TaskList";
-import { LinearGradient } from "expo-linear-gradient";
 import { PageContainer } from "@/components/UI/PageContainer";
-import AnimatedProgressBar from "../../components/UI/AnimatedProgressBar";
-import GardenCard from "../../components/Gardens/GardenCard";
 import { TaskCompletionCelebration } from "@/components/UI/TaskCompletionCelebration";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
+import { useCurrentSeason } from "@/lib/hooks/useCurrentSeason";
+import {
+  HomeHeader,
+  TasksSection,
+  GardensSection,
+  QuickActionsSection,
+} from "@/components/Home";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
-}
-
-// Create a reusable section header component with icon
-function SectionHeader({
-  title,
-  icon,
-  onSeeAll,
-  seeAllText = "See All",
-  showSeeAll = true,
-  badge,
-}: {
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  onSeeAll?: () => void;
-  seeAllText?: string;
-  showSeeAll?: boolean;
-  badge?: { count: number; type: "warning" | "info" } | null;
-}) {
-  // Create a subtle animation when the component mounts
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 400,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  return (
-    <Animated.View
-      className="flex-row justify-between items-center mb-4"
-      style={{ opacity: fadeAnim }}
-    >
-      <View className="flex-row items-center gap-2">
-        <View className="w-8 h-8 rounded-lg bg-brand-100 items-center justify-center">
-          <Ionicons name={icon} size={18} color="#5E994B" />
-        </View>
-        <View className="flex-row items-center">
-          <Text className="text-lg font-semibold text-foreground">{title}</Text>
-
-          {/* Show badge if provided */}
-          {badge && badge.count > 0 && (
-            <View
-              className={`ml-2 py-1 px-2 rounded-lg ${
-                badge.type === "warning" ? "bg-red-100" : "bg-brand-100"
-              }`}
-            >
-              <Text
-                className={`text-xs font-medium ${
-                  badge.type === "warning" ? "text-destructive" : "text-primary"
-                }`}
-              >
-                {badge.count}
-              </Text>
-            </View>
-          )}
-        </View>
-      </View>
-      {showSeeAll && onSeeAll && (
-        <TouchableOpacity
-          onPress={onSeeAll}
-          className="flex-row items-center gap-2"
-        >
-          <Text className="text-sm text-brand-600 font-medium">
-            {seeAllText}
-          </Text>
-          <Ionicons name="arrow-forward" size={16} color="#77B860" />
-        </TouchableOpacity>
-      )}
-    </Animated.View>
-  );
-}
-
-// AnimatedSection component to replace MotiView
-function AnimatedSection({
-  children,
-  delay = 200,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) {
-  const translateY = useRef(new Animated.Value(10)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const animation = Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 500,
-        delay,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 500,
-        delay,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]);
-
-    animation.start();
-
-    return () => {
-      animation.stop();
-    };
-  }, [delay, opacity, translateY]);
-
-  return (
-    <Animated.View
-      style={{
-        opacity,
-        transform: [{ translateY }],
-      }}
-    >
-      {children}
-    </Animated.View>
-  );
 }
 
 // Add this after imports and before the component
@@ -175,9 +44,8 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Animation references
-  const headerScaleAnim = useRef(new Animated.Value(0.95)).current;
-  const headerOpacityAnim = useRef(new Animated.Value(0)).current;
+  // Get current season for the seasonal illustration
+  const currentSeason = useCurrentSeason();
 
   // State for task completion celebration
   const [showTaskCelebration, setShowTaskCelebration] = useState(false);
@@ -188,16 +56,11 @@ export default function Page() {
     useState(false);
   const celebrationTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Add a state to track if overdue tasks are still loading
+  const [overdueTasksLoading, setOverdueTasksLoading] = useState(true);
+
   // Initialize Supabase with Clerk token
   useSupabaseAuth();
-
-  // Get time of day for greeting
-  const getTimeOfDay = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
 
   // Fetch garden dashboard data
   const {
@@ -226,7 +89,11 @@ export default function Page() {
 
   // Use the same hook as our notification system for overdue tasks
   const [allOverdueTasks, setAllOverdueTasks] = useState<TaskWithDetails[]>([]);
-  const { notifications, checkNotifications } = useOverdueTasksNotifications();
+  const {
+    notifications,
+    checkNotifications,
+    loading: notificationsLoading,
+  } = useOverdueTasksNotifications();
   const hasCheckedNotificationsRef = useRef(false);
 
   // Process all overdue tasks from notifications on mount and when notifications change
@@ -260,12 +127,16 @@ export default function Page() {
     } else {
       setAllOverdueTasks([]);
     }
+
+    // Set overdue tasks as done loading when notifications change
+    setOverdueTasksLoading(false);
   }, [notifications]);
 
   // Only fetch overdue tasks on initial mount, never again on this screen
   // User will need to navigate away and back to refresh data
   useEffect(() => {
     if (user?.id && !hasCheckedNotificationsRef.current) {
+      setOverdueTasksLoading(true);
       checkNotifications();
       hasCheckedNotificationsRef.current = true;
     }
@@ -322,26 +193,6 @@ export default function Page() {
     };
   }, []);
 
-  // Trigger header animation when data is loaded
-  useEffect(() => {
-    if (!gardensLoading && !tasksLoading) {
-      Animated.parallel([
-        Animated.timing(headerScaleAnim, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(headerOpacityAnim, {
-          toValue: 1,
-          duration: 600,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [gardensLoading, tasksLoading, headerScaleAnim, headerOpacityAnim]);
-
   // Refresh tasks when the home screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -355,64 +206,6 @@ export default function Page() {
     }, [refetchTasks, queryClient, user?.id])
   );
 
-  // Get personalized message based on garden stats
-  const getPersonalizedMessage = () => {
-    if (!gardens || gardens.length === 0)
-      return "Let's start your plant journey today!";
-
-    // Overdue tasks take priority in messaging
-    if (allOverdueTasks.length > 0)
-      return `You have ${allOverdueTasks.length} overdue ${
-        allOverdueTasks.length === 1 ? "task" : "tasks"
-      } that need attention.`;
-
-    // Plants
-    if (gardenStats.plantsNeedingCare === 1)
-      return `You have ${gardenStats.plantsNeedingCare} plant that could use your attention today.`;
-    if (gardenStats.plantsNeedingCare > 1)
-      return `You have ${gardenStats.plantsNeedingCare} plants that could use your attention today.`;
-
-    // Tasks
-    if (todaysTasks && todaysTasks.length === 1)
-      return `You have ${todaysTasks.length} task planned for today.`;
-    if (todaysTasks && todaysTasks.length > 1)
-      return `You have ${todaysTasks.length} tasks planned for today.`;
-
-    return "Your garden is looking great today!";
-  };
-
-  // Format today's date in a nice way
-  const formattedDate = format(new Date(), "EEEE, MMMM d");
-
-  // Calculate garden stats from actual data
-  const gardenStats = useMemo(() => {
-    if (!gardens || gardens.length === 0)
-      return {
-        totalGardens: 0,
-        totalPlants: 0,
-        plantsNeedingCare: 0,
-        healthPercentage: 0,
-      };
-
-    let totalPlants = 0;
-    let plantsNeedingCare = 0;
-
-    gardens.forEach((garden) => {
-      totalPlants += garden.total_plants || 0;
-      plantsNeedingCare += garden.plants_needing_care || 0;
-    });
-
-    return {
-      totalGardens: gardens.length,
-      totalPlants,
-      plantsNeedingCare,
-      healthPercentage:
-        totalPlants > 0
-          ? Math.round(((totalPlants - plantsNeedingCare) / totalPlants) * 100)
-          : 0,
-    };
-  }, [gardens]);
-
   // Configure spring animation for layout changes
   const configureLayoutAnimation = useCallback(() => {
     LayoutAnimation.configureNext(
@@ -423,6 +216,18 @@ export default function Page() {
       )
     );
   }, []);
+
+  // Configure layout animation when all data is loaded
+  useEffect(() => {
+    if (!gardensLoading && !tasksLoading && !overdueTasksLoading) {
+      configureLayoutAnimation();
+    }
+  }, [
+    gardensLoading,
+    tasksLoading,
+    overdueTasksLoading,
+    configureLayoutAnimation,
+  ]);
 
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({
@@ -561,439 +366,61 @@ export default function Page() {
     tasksLoading,
   ]);
 
-  const isLoading = gardensLoading || tasksLoading;
+  const isLoading = gardensLoading || tasksLoading || overdueTasksLoading;
   const hasError = gardensError || tasksError;
 
-  if (isLoading && !gardens && !todaysTasks) {
-    return <LoadingSpinner message="Loading your garden..." />;
+  // Only show full-page loading if we have no data at all
+  if (
+    gardensLoading &&
+    !gardens &&
+    tasksLoading &&
+    !todaysTasks &&
+    overdueTasksLoading
+  ) {
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading your garden..." />
+      </PageContainer>
+    );
   }
-
-  // Determine personalized suggestions for when all tasks are done
-  const getPersonalizedSuggestion = () => {
-    if (!gardens || gardens.length === 0) {
-      return {
-        text: "Start your gardening journey by creating your first garden!",
-        action: "Create Garden",
-        route: "/(home)/gardens/new" as const,
-      };
-    }
-
-    if (gardenStats.totalPlants === 0) {
-      return {
-        text: "Add your first plant to start tracking its care",
-        action: "Add Plants",
-        route: "/(home)/plants" as const,
-      };
-    }
-
-    const suggestions = [
-      {
-        text: "Browse the plant database for new additions to your garden",
-        action: "Browse Plants",
-        route: "/(home)/plants" as const,
-      },
-      {
-        text: "Explore your garden's performance over time",
-        action: "View Gardens",
-        route: "/(home)/gardens" as const,
-      },
-      {
-        text: "Check your upcoming care schedule",
-        action: "View Calendar",
-        route: "/(home)/calendar" as const,
-      },
-    ] as const;
-
-    // Randomly select a suggestion
-    return suggestions[Math.floor(Math.random() * suggestions.length)];
-  };
-
-  // Helper function to determine task badges
-  const getTasksBadge = () => {
-    const overdueCount = allOverdueTasks.length;
-    if (overdueCount > 0) {
-      return { count: overdueCount, type: "warning" as const };
-    }
-    if (upcomingTasksCount > 0) {
-      return { count: upcomingTasksCount, type: "info" as const };
-    }
-    return null;
-  };
-
-  // Get summary for when there are no tasks today
-  const getNoTasksSummary = () => {
-    if (allOverdueTasks.length > 0) {
-      return {
-        icon: "alert-circle-outline" as const,
-        color: "#ef4444",
-        text: `You have ${allOverdueTasks.length} overdue ${
-          allOverdueTasks.length === 1 ? "task" : "tasks"
-        }`,
-        action: "View Overdue",
-        actionColor: "#ef4444",
-      };
-    }
-
-    if (upcomingTasksCount > 0) {
-      return {
-        icon: "calendar-outline" as const,
-        color: "#3b82f6",
-        text: `${upcomingTasksCount} ${
-          upcomingTasksCount === 1 ? "task" : "tasks"
-        } coming up tomorrow`,
-        action: "View Upcoming",
-        actionColor: "#3b82f6",
-      };
-    }
-
-    return null;
-  };
 
   return (
     <PageContainer scroll={false} padded={false}>
       <SignedIn>
         <ScrollView className="flex-1">
           <View className="px-5 pt-5">
-            {/* Header with Gradient */}
-            <Animated.View
-              className="mb-6 rounded-xl overflow-hidden shadow-md"
-              style={{
-                opacity: headerOpacityAnim,
-                transform: [{ scale: headerScaleAnim }],
-                shadowColor: "#333333",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
-                elevation: 5,
-              }}
-            >
-              <LinearGradient
-                colors={
-                  justCompletedAllOverdueTasks
-                    ? ["#16a34a", "#77B860"] // Green celebration gradient
-                    : allOverdueTasks.length > 0
-                    ? ["#ef4444", "#f87171"] // Red gradient for overdue tasks
-                    : ["#3F6933", "#77B860"] // Normal green gradient
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ padding: 24, borderRadius: 12 }}
-              >
-                <Text className="text-3xl font-bold text-primary-foreground mb-2">
-                  {justCompletedAllOverdueTasks
-                    ? "Congratulations!"
-                    : `${getTimeOfDay()}, ${user?.firstName}`}
-                </Text>
-                <Text className="text-lg text-primary-foreground mb-3">
-                  {justCompletedAllOverdueTasks
-                    ? "You're all caught up with your garden tasks!"
-                    : getPersonalizedMessage()}
-                </Text>
-                <View className="flex-row items-center gap-2">
-                  <Ionicons
-                    name={
-                      justCompletedAllOverdueTasks
-                        ? "checkmark-circle"
-                        : "calendar"
-                    }
-                    size={16}
-                    color="#fffefa"
-                  />
-                  <Text className="text-sm text-primary-foreground">
-                    {formattedDate}
-                  </Text>
-                </View>
-              </LinearGradient>
-            </Animated.View>
-
-            {/* TODAY'S TASKS SECTION (Now first) */}
-            <View className="mb-6">
-              <SectionHeader
-                title={
-                  allOverdueTasks.length > 0 ? "Missed Tasks" : "Today's Tasks"
-                }
-                icon={allOverdueTasks.length > 0 ? "alert-circle" : "calendar"}
-                onSeeAll={() => router.push("/(home)/calendar")}
-                badge={getTasksBadge()}
+            {/* Header Component */}
+            {overdueTasksLoading ? (
+              <View className="h-48 bg-gray-100 rounded-lg mb-4 animate-pulse" />
+            ) : (
+              <HomeHeader
+                userName={user?.firstName || null}
+                justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
+                hasOverdueTasks={allOverdueTasks.length > 0}
+                currentSeason={currentSeason}
               />
+            )}
 
-              {hasError ? (
-                <View className="bg-red-50 rounded-xl p-4 items-center">
-                  <Ionicons
-                    name="alert-circle-outline"
-                    size={24}
-                    color="#ef4444"
-                  />
-                  <Text className="text-destructive mt-2 text-center">
-                    Error loading tasks
-                  </Text>
-                </View>
-              ) : allOverdueTasks.length > 0 ? (
-                <AnimatedSection delay={200}>
-                  <View className="bg-red-50 rounded-xl p-4 mb-4">
-                    <Text className="text-destructive font-bold mb-2">
-                      You have {allOverdueTasks.length} missed{" "}
-                      {allOverdueTasks.length === 1 ? "task" : "tasks"}!
-                    </Text>
-                    <Text className="text-destructive text-sm">
-                      These tasks were due yesterday or earlier and still need
-                      to be completed.
-                    </Text>
-                  </View>
-                  <TaskList
-                    tasks={allOverdueTasks}
-                    onToggleComplete={handleCompleteTask}
-                    showGardenName={true}
-                    maxTasks={3}
-                    isOverdue={true}
-                    queryKey={[
-                      "tasks",
-                      format(today, "yyyy-MM-dd"),
-                      user?.id || "anonymous",
-                    ]}
-                  />
-                  {allOverdueTasks.length > 3 && (
-                    <TouchableOpacity
-                      className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
-                      onPress={() => router.push("/(home)/calendar")}
-                    >
-                      <Text className="text-red-600 font-medium">
-                        {allOverdueTasks.length == 4
-                          ? "+" +
-                            (allOverdueTasks.length - 3) +
-                            " more missed task"
-                          : "+" +
-                            (allOverdueTasks.length - 3) +
-                            " more missed tasks"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </AnimatedSection>
-              ) : todaysTasks && todaysTasks.length > 0 ? (
-                <AnimatedSection delay={200}>
-                  <TaskList
-                    tasks={todaysTasks}
-                    onToggleComplete={handleCompleteTask}
-                    showGardenName={true}
-                    maxTasks={3}
-                    queryKey={[
-                      "tasks",
-                      format(today, "yyyy-MM-dd"),
-                      user?.id || "anonymous",
-                    ]}
-                  />
-                  {todaysTasks.length > 3 && (
-                    <TouchableOpacity
-                      className="p-3 bg-white items-center mt-2 rounded-xl border border-brand-100 shadow-sm"
-                      onPress={() => router.push("/(home)/calendar")}
-                    >
-                      <Text className="text-brand-600 font-medium">
-                        {todaysTasks.length == 4
-                          ? "+" + (todaysTasks.length - 3) + " more task"
-                          : "+" + (todaysTasks.length - 3) + " more tasks"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </AnimatedSection>
-              ) : (
-                <AnimatedSection delay={200}>
-                  <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
-                    {getNoTasksSummary() ? (
-                      <>
-                        <Ionicons
-                          name={getNoTasksSummary()!.icon}
-                          size={32}
-                          color={getNoTasksSummary()!.color}
-                        />
-                        <Text className="text-base text-cream-700 mt-2 text-center mb-2">
-                          No tasks for today
-                        </Text>
-                        <Text className="text-sm text-cream-600 text-center mb-3">
-                          {getNoTasksSummary()!.text}
-                        </Text>
-                        <TouchableOpacity
-                          className={`px-4 py-2 bg-white rounded-lg border border-${
-                            getNoTasksSummary()!.color
-                          }`}
-                          onPress={() => router.push("/(home)/calendar")}
-                        >
-                          <Text
-                            style={{
-                              color: getNoTasksSummary()!.actionColor,
-                            }}
-                            className="font-medium"
-                          >
-                            {getNoTasksSummary()!.action}
-                          </Text>
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <>
-                        <Ionicons
-                          name="checkmark-circle-outline"
-                          size={32}
-                          color="#5E994B"
-                        />
-                        <Text className="text-base text-cream-700 mt-2 text-center mb-2">
-                          All done for today!
-                        </Text>
-
-                        {/* Added personalized call-to-action */}
-                        <Text className="text-sm text-cream-600 text-center mb-3">
-                          {getPersonalizedSuggestion().text}
-                        </Text>
-
-                        <TouchableOpacity
-                          className="px-4 py-2 bg-brand-50 rounded-lg border border-brand-200"
-                          onPress={() =>
-                            router.push(getPersonalizedSuggestion().route)
-                          }
-                        >
-                          <Text className="text-brand-600 font-medium">
-                            {getPersonalizedSuggestion().action}
-                          </Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                </AnimatedSection>
-              )}
-            </View>
-
-            {/* GARDEN STATS SECTION (Now second) */}
-            <View className="mb-6">
-              <SectionHeader
-                title="Your Gardens"
-                icon="leaf"
-                onSeeAll={() => router.push("/(home)/gardens")}
-              />
-
-              <AnimatedSection delay={300}>
-                <View className="flex-row flex-wrap gap-4">
-                  {gardens && gardens.length > 0 ? (
-                    <>
-                      {gardens.slice(0, 2).map((garden) => (
-                        <View
-                          key={garden.garden_id}
-                          className="flex-1 min-w-[45%] mb-4"
-                        >
-                          <GardenCard garden={garden} maxWidth={90} />
-                        </View>
-                      ))}
-
-                      {/* New Garden Card */}
-                      <View className="flex-1 min-w-[45%] mb-4">
-                        <TouchableOpacity
-                          className="flex-1 h-full border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm"
-                          style={{
-                            shadowColor: "#77B860",
-                            shadowOffset: { width: 0, height: 1 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 2,
-                            elevation: 1,
-                          }}
-                          onPress={() => router.push("/(home)/gardens/new")}
-                        >
-                          <View className="items-center">
-                            <View className="w-10 h-10 items-center justify-center mb-2">
-                              <Ionicons name="add" size={24} color="#5E994B" />
-                            </View>
-                            <Text className="text-primary font-medium">
-                              New Garden
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  ) : (
-                    <TouchableOpacity
-                      className="w-full border border-dashed border-cream-300 rounded-xl p-6 items-center shadow-sm"
-                      style={{
-                        shadowColor: "#77B860",
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 2,
-                        elevation: 1,
-                      }}
-                      onPress={() => router.push("/(home)/gardens/new")}
-                    >
-                      <View className="items-center">
-                        <View className="w-12 h-12 items-center justify-center mb-3">
-                          <Ionicons name="add" size={28} color="#5E994B" />
-                        </View>
-                        <Text className="text-brand-600 font-medium mb-1">
-                          Create Your First Garden
-                        </Text>
-                        <Text className="text-sm text-cream-700 text-center">
-                          Start your plant journey today
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </AnimatedSection>
-            </View>
-          </View>
-
-          {/* QUICK ACTIONS SECTION (Now last) */}
-          <View className="px-5 mb-6">
-            <SectionHeader
-              title="Quick Actions"
-              icon="flash"
-              showSeeAll={false}
+            {/* TODAY'S TASKS SECTION */}
+            <TasksSection
+              allOverdueTasks={overdueTasksLoading ? [] : allOverdueTasks}
+              todaysTasks={todaysTasks}
+              handleCompleteTask={handleCompleteTask}
+              upcomingTasksCount={upcomingTasksCount}
+              userId={user?.id}
+              justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
+              hasError={!!hasError}
+              isOverdueTasksLoading={overdueTasksLoading}
+              isTasksLoading={tasksLoading}
             />
 
-            <AnimatedSection delay={400}>
-              <View className="flex-row flex-wrap justify-between">
-                <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-                  onPress={() => router.push("/(home)/plants")}
-                >
-                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
-                    <Ionicons name="leaf" size={24} color="#5E994B" />
-                  </View>
-                  <Text className="text-sm font-medium text-foreground">
-                    Browse Plants
-                  </Text>
-                </TouchableOpacity>
+            {/* GARDEN STATS SECTION */}
+            <GardensSection gardens={gardens} isLoading={gardensLoading} />
+          </View>
 
-                <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-                  onPress={() => router.push("/(home)/gardens/new")}
-                >
-                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
-                    <Ionicons name="grid" size={24} color="#5E994B" />
-                  </View>
-                  <Text className="text-sm font-medium text-foreground">
-                    New Garden
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-                  onPress={() => router.push("/(home)/calendar")}
-                >
-                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
-                    <Ionicons name="calendar" size={24} color="#5E994B" />
-                  </View>
-                  <Text className="text-sm font-medium text-foreground">
-                    Calendar of Care
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-                  onPress={() => router.push("/(home)/gardens")}
-                >
-                  <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
-                    <Ionicons name="eye" size={24} color="#5E994B" />
-                  </View>
-                  <Text className="text-sm font-medium text-foreground">
-                    View Gardens
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </AnimatedSection>
+          {/* QUICK ACTIONS SECTION */}
+          <View className="px-5 mb-6">
+            <QuickActionsSection />
           </View>
         </ScrollView>
 

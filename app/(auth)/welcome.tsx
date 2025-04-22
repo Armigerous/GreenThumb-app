@@ -339,11 +339,11 @@ const FeatureItem = ({
   useEffect(() => {
     if (isActive) {
       opacity.value = withDelay(
-        200 + index * 100,
+        100 + index * 100,
         withTiming(1, { duration: 500 })
       );
       translateY.value = withDelay(
-        200 + index * 100,
+        100 + index * 100,
         withTiming(0, { duration: 500 })
       );
     } else {

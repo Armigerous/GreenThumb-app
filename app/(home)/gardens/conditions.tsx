@@ -14,6 +14,7 @@ import { GardenConditions, GardenEditorTabs } from "@/components/Gardens";
 import { getIdsFromNames, LOOKUP_TABLES } from "@/lib/gardenHelpers";
 import { supabase } from "@/lib/supabaseClient";
 import { useQueryClient } from "@tanstack/react-query";
+import { PageContainer } from "@/components/UI/PageContainer";
 
 /**
  * Garden Conditions Page
@@ -266,7 +267,11 @@ export default function GardenConditionsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading garden conditions..." />;
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading garden conditions..." />
+      </PageContainer>
+    );
   }
 
   if (error || !gardenData) {

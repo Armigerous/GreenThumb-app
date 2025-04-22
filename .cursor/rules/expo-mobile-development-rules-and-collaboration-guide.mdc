@@ -1,0 +1,167 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Development Rules & AI Collaboration Guide – Expo Mobile App Edition
+
+> SDK Version: 50+ (2025) – Managed Workflow  
+> Project Docs: `README.md`, `docs/architecture.md`, `docs/technical.md`, `tasks/tasks.md`
+
+---
+
+## 📜 Core Philosophy
+
+1. **Simplicity:** Favor clear, composable solutions. Avoid unnecessary logic or styling complexity.
+2. **Iterate:** Improve upon working code unless there's a clear reason to rewrite. Changes should be additive or evolutionary.
+3. **Focus:** Complete the task in scope using the architecture and patterns defined in `docs/architecture.md` and `docs/technical.md`.
+4. **Quality:** Prioritize clean, maintainable, and performant mobile code with Expo best practices.
+5. **Collaboration:** Maintain project alignment through careful adherence to documentation and update it where needed.
+
+---
+
+## 📚 Project Context & Understanding
+
+1. **Documentation First:**
+   * Before beginning a task, review:
+     * `README.md` – project overview, stack, base conventions
+     * `docs/architecture.md` – app structure, data flow, screen/component relationships
+     * `docs/technical.md` – specific patterns (e.g. navigation, styling, data fetching)
+     * `tasks/tasks.md` – currently scoped task definitions
+   * If documentation is unclear, missing, or inconsistent, **stop and ask for clarification** before continuing.
+
+2. **Architecture Adherence:**
+   * Use only file structure and data flow patterns approved in `docs/architecture.md`.
+   * Do not introduce cross-module dependencies without architecture update and review.
+   * Example folders: `screens/`, `components/`, `features/`, `lib/`, `hooks/`, `constants/`.
+
+3. **Pattern & Tech Stack Awareness:**
+   * Follow patterns in `docs/technical.md` — this includes animation conventions, gesture handling, form control, and utility layers.
+   * Use established libraries from `README.md` before proposing new ones.
+   * For Expo-specific work (e.g. camera, permissions, routing), refer to documented approaches before inventing new ones.
+
+---
+
+## ⚙️ Task Execution & Workflow
+
+1. **Task Definition:**
+   * Tasks are assigned via `tasks/tasks.md`. Confirm their status before beginning.
+   * Confirm all requirements are present, and validate dependencies or blockers with the team if needed.
+
+2. **Change Protocol:**
+   * Review affected modules using `docs/architecture.md`.
+   * Plan changes using task acceptance criteria and patterns in `docs/technical.md`.
+   * Isolate feature-specific changes. Avoid global refactoring unless explicitly requested.
+
+3. **Progress Tracking:**
+   * Update status and issues in `docs/status.md`.
+   * When a task is complete or blocked, mark it in `tasks/tasks.md` with reasoning or next steps.
+
+---
+
+## 🤖 AI Collaboration & Prompting
+
+1. **Be Clear and Contextual:**
+   * Prompt with file paths, expected behavior, and edge case examples when possible.
+
+2. **Reference Existing Docs:**
+   * Mention if the request builds on something in `docs/technical.md`, `docs/architecture.md`, or a specific section of `README.md`.
+
+3. **Use Prompt Directives:**
+   * `"Suggestion:"` for exploratory or multi-option help.
+   * `"Applying fix:"` for directly adding well-scoped logic that aligns with existing patterns.
+
+4. **Break Large Tasks Down:**
+   * For animations, onboarding, or gesture handling: break into components/screens and confirm behavior incrementally.
+
+---
+
+## ✨ Code Quality & Style
+
+1. **Strict Typing:** All files must be typed. No `any`, even temporarily.
+2. **Expo-Specific Design:**
+   * Use `KeyboardAvoidingView`, `SafeAreaView`, and `useSafeAreaInsets()` appropriately.
+   * Avoid scroll misuse. Use `FlatList` for scrollable content.
+
+3. **File Organization:**
+   * Cap screen and component files to 300 lines.
+   * Prefer smaller, purpose-driven components for testability.
+
+4. **Linting & Format:**
+   * Follow ESLint/Prettier settings in the repo.
+   * Naming should reflect purpose, not intent (e.g., no `MyComponentImproved.tsx`).
+
+---
+
+## ♻️ Refactoring
+
+1. **Intentional Only:**
+   * Refactor only when part of a defined task, or when improving adjacent code to complete it effectively.
+
+2. **Check All Callers:**
+   * After changes, run through all components, screens, or hooks relying on the updated code. Cross-reference with `docs/architecture.md`.
+
+3. **Avoid Copying:**
+   * Modify or abstract logic into utils/hooks. Do not fork files (e.g., no `Modal-v2.tsx`).
+
+---
+
+## ✅ Testing & Validation
+
+1. **Tests Must Be Tied to Task Scope:**
+   * Include unit tests for logic utilities.
+   * Do not over-test UI unless animation or gesture behavior is critical and tricky to maintain.
+
+2. **Expo Testing Frameworks:**
+   * Use `jest-expo` for unit testing.
+   * Use manual testing via Expo Go on both iOS and Android for gestures, keyboar. **Bubmitting Work:**
+   * Validate the behavior with real interaction. Dark mode, small device screens, and back navigation should not break.
+
+---
+
+## 🐛 Debugging & Troubleshooting
+
+1. **Check Logs:**
+   * Run `npx expo logs` on device or simulator for runtime warnings.
+   * Clear cache with `npx expo start --clear` if bugs appear after changes.
+
+2. **Expo Known Issues:**
+   * Search Expo Forums and GitHub before creating complex fixes. Link findings in `fixes/`.
+
+3. **Document Fixes in Place:**
+   * Place persistent issue breakdowns under `fixes/` with clear filename (`fixes/nativeDriver-animation-warning.md`).
+
+---
+
+## 🔒 Security
+
+1. **Expo Permissions:** Follow documented permission flows (camera, location, notifications) from `docs/technical.md`.
+2. **Credential Handling:**
+   * Use environment variables via `app.config.js`.
+   * Never commit secrets. Always provide `.env.example`.
+
+---
+
+## 🌳 Version Control & Environment
+
+1. **.env Discipline:**
+   * Never commit actual `.env`. Only provide `.env.example`.
+
+2. **Expo-Specific Commits:**
+   * Keep OTA support stable. When updating `app.json` (e.g. version bump), make sure CI/CD flows remain functional.
+
+3. **Branch Naming:**
+   * Use `feature/mobile-[scope]`, `bugfix/mobile-[issue]`, `refactor/mobile-[area]`.
+
+---
+
+## 📄 Documentation Maintenance
+
+1. **Always Update Docs:**
+   * Update `docs/architecture.md` for component hierarchy or data flow changes.
+   * Update `docs/technical.md` when a new reusable pattern, animation, or hook is introduced.
+   * Update `tasks/tasks.md` and `docs/status.md` for task tracking and progress.
+
+2. **Keep This File Current:**
+   * Review `.cursorrules` when Expo upgrades (e.g., SDK bump), new docs are added, or patterns evolve.
+
