@@ -48,14 +48,14 @@ export default function NewGarden() {
           className="flex-row items-center"
         >
           <Ionicons name="close" size={24} color="#2e2c29" />
-          <Text className="text-foreground text-lg font-medium ml-2">
+          <Text className="text-foreground text-lg font-paragraph font-medium ml-2">
             Cancel
           </Text>
         </TouchableOpacity>
       </View>
 
       <View className="pt-4 px-5">
-        <Text className="text-2xl text-foreground font-bold mb-6">
+        <Text className="text-2xl text-foreground font-title font-bold mb-6">
           Create New Garden
         </Text>
       </View>

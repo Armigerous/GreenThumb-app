@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { TitleText } from "@/components/UI/Text";
 
 /**
  * Header component for the Add Plant flow
@@ -39,7 +40,7 @@ export default function Header({
       <TouchableOpacity onPress={handleBackPress} className="mr-4">
         <Ionicons name="arrow-back" size={24} color="#2e2c29" />
       </TouchableOpacity>
-      <Text className="text-xl font-bold text-foreground flex-1">{title}</Text>
+      <TitleText className="text-xl text-foreground">{title}</TitleText>
     </View>
   );
 }

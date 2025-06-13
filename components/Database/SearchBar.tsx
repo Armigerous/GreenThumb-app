@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { BodyText } from "@/components/UI/Text";
 
 interface SearchBarProps {
   value: string;

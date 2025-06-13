@@ -139,7 +139,7 @@ export default function BetterSelector<T extends boolean = true>({
   return (
     <View className="mb-5">
       {!labelHidden && (
-        <Text className="text-foreground font-medium mb-1.5 text-base">
+        <Text className="text-foreground font-paragraph font-medium mb-1.5 text-base">
           {label}
         </Text>
       )}
@@ -149,11 +149,11 @@ export default function BetterSelector<T extends boolean = true>({
         className="flex-row items-center justify-between px-4 py-3.5 bg-white border border-cream-300 rounded-lg"
       >
         <Text
-          className={`${
+          className={`$${
             (multiple ? (value as number[])?.length || 0 : value)
               ? "text-gray-800"
               : "text-gray-300"
-          } text-base`}
+          } text-base font-paragraph`}
         >
           {getDisplayValue()}
         </Text>
@@ -188,16 +188,22 @@ export default function BetterSelector<T extends boolean = true>({
                     onPress={handleClear}
                     className="px-3 py-1.5"
                   >
-                    <Text className="text-brand-500 font-medium">Clear</Text>
+                    <Text className="text-brand-500 font-paragraph font-medium">
+                      Clear
+                    </Text>
                   </TouchableOpacity>
 
-                  <Text className="text-lg font-medium">{label}</Text>
+                  <Text className="text-lg font-title font-medium">
+                    {label}
+                  </Text>
 
                   <TouchableOpacity
                     onPress={handleClose}
                     className="px-3 py-1.5"
                   >
-                    <Text className="text-brand-500 font-medium">Done</Text>
+                    <Text className="text-brand-500 font-paragraph font-medium">
+                      Done
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -210,7 +216,7 @@ export default function BetterSelector<T extends boolean = true>({
                       onPress={() => handleItemToggle(item.value)}
                       className="flex-row items-center justify-between px-5 py-3.5 border-b border-gray-100"
                     >
-                      <Text className="text-gray-800 text-base">
+                      <Text className="text-gray-800 text-base font-paragraph">
                         {item.label}
                       </Text>
 

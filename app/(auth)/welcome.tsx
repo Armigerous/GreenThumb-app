@@ -6,13 +6,14 @@ import {
   Image,
   Pressable,
   SafeAreaView,
-  Text,
+  Text as RNText,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { TitleText, SubtitleText, BodyText, Text } from "@/components/UI/Text";
 import RAnimated, {
   useAnimatedStyle,
   useSharedValue,
@@ -173,12 +174,12 @@ export default function WelcomeScreen() {
       return (
         <View className="w-full items-center justify-center" style={{ width }}>
           <View className="w-full items-center px-5">
-            <Text className="text-2xl font-bold text-foreground mb-2 text-center">
+            <TitleText className="text-3xl text-foreground mb-2 text-center">
               {item.title}
-            </Text>
-            <Text className="text-base text-foreground text-center opacity-80 px-4 mb-3">
+            </TitleText>
+            <BodyText className="text-base text-foreground text-center opacity-80 px-4 mb-3">
               {item.description}
-            </Text>
+            </BodyText>
 
             {/* Feature icons with illustration background */}
             <View className="relative w-full justify-center items-center mb-4">
@@ -220,12 +221,12 @@ export default function WelcomeScreen() {
         </View>
 
         <View className="items-center px-5">
-          <Text className="text-2xl font-bold text-foreground mb-3 text-center">
+          <TitleText className="text-2xl text-foreground mb-3 text-center">
             {item.title}
-          </Text>
-          <Text className="text-base text-foreground text-center opacity-80 px-4 mb-3">
+          </TitleText>
+          <BodyText className="text-base text-foreground text-center opacity-80 px-4 mb-3">
             {item.description}
-          </Text>
+          </BodyText>
         </View>
       </View>
     );
@@ -240,7 +241,7 @@ export default function WelcomeScreen() {
             className="py-2 px-4 rounded-lg border border-primary"
             activeOpacity={0.8}
           >
-            <Text className="text-primary text-base font-semibold">
+            <Text className="font-paragraph-bold text-primary text-base">
               Sign In
             </Text>
           </TouchableOpacity>
@@ -310,7 +311,7 @@ export default function WelcomeScreen() {
               className="w-full bg-primary py-4 rounded-xl"
               activeOpacity={0.8}
             >
-              <Text className="text-center text-primary-foreground font-bold text-lg">
+              <Text className="font-paragraph-bold text-center text-primary-foreground text-lg">
                 Get Started
               </Text>
             </TouchableOpacity>
@@ -365,7 +366,9 @@ const FeatureItem = ({
       className="flex-row items-center bg-white rounded-lg px-4 py-2 m-2 w-[45%]"
     >
       <Ionicons name={icon} size={22} color="#5E994B" />
-      <Text className="text-sm text-foreground ml-2 font-medium">{text}</Text>
+      <Text className="font-paragraph-semibold text-sm text-foreground ml-2">
+        {text}
+      </Text>
     </RAnimated.View>
   );
 };

@@ -7,6 +7,7 @@ import ErrorMessage from "./ErrorMessage";
 import AnimatedProgressBar from "../../../UI/AnimatedProgressBar";
 import CachedImage from "@/components/CachedImage";
 import { useEffect, useState } from "react";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 
 /**
  * ConfirmationStep component for reviewing and confirming plant details
@@ -103,10 +104,12 @@ export default function ConfirmationStep({
   return (
     <View className="px-4 flex-1 flex">
       <View className="flex-1">
-        <Text className="text-xl font-bold mb-4">Confirm Your New Plant</Text>
-        <Text className="text-cream-600 mb-6">
+        <TitleText className="text-xl text-foreground mb-6">
+          Confirm Plant Details
+        </TitleText>
+        <BodyText className="text-cream-600 mb-6">
           Review the details of your plant before adding it to your garden:
-        </Text>
+        </BodyText>
 
         {/* Summary card */}
         <View className="bg-white rounded-xl overflow-hidden border border-cream-100 mb-6">
@@ -135,37 +138,42 @@ export default function ConfirmationStep({
 
           {/* Plant details */}
           <View className="p-4">
+            <SubtitleText className="text-lg text-foreground mb-2">
+              Plant Information
+            </SubtitleText>
+
             {/* Name section */}
             <View className="mb-4 pb-4 border-b border-cream-100">
-              <Text className="text-lg font-bold text-foreground">
+              <BodyText className="text-cream-600 text-sm">Nickname</BodyText>
+              <BodyText className="text-foreground text-base font-medium">
                 {nickname}
-              </Text>
-              <Text className="text-sm italic text-cream-500">
+              </BodyText>
+              <BodyText className="text-sm italic text-cream-500">
                 {plant.scientific_name}
-              </Text>
+              </BodyText>
             </View>
 
             {/* Status section */}
             <View className="flex-row items-center mb-4 pb-4 border-b border-cream-100">
-              <Text className="text-cream-500 text-base mr-2">Status:</Text>
+              <BodyText className="text-cream-600 text-sm">Status</BodyText>
               <View className="flex-row items-center">
                 <Ionicons
                   name={statusInfo.icon as any}
                   size={18}
                   color={statusInfo.color}
                 />
-                <Text className="text-foreground text-base font-medium ml-1">
+                <BodyText className="text-foreground text-base font-medium ml-1">
                   {status}
-                </Text>
+                </BodyText>
               </View>
             </View>
 
             {/* Garden section */}
             <View className="flex-row items-center">
-              <Text className="text-cream-500 text-base mr-2">Garden:</Text>
-              <Text className="text-foreground text-base font-medium">
-                {selectedGarden?.name}
-              </Text>
+              <BodyText className="text-cream-600 text-sm">Garden</BodyText>
+              <BodyText className="text-foreground text-base font-medium">
+                {selectedGarden.name}
+              </BodyText>
             </View>
           </View>
         </View>

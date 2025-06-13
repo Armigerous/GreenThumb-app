@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { AuthInput } from "./AuthInput";
 import { AuthButton } from "./AuthButton";
+import { BodyText } from "@/components/UI/Text";
 
 type VerificationInputProps = {
   verificationCode: string;
@@ -20,11 +21,11 @@ export function VerificationInput({
 }: VerificationInputProps) {
   return (
     <View className="w-full mb-4">
-      <Text className="text-center text-base text-gray-700 font-medium mb-4">
+      <BodyText className="text-center text-base text-gray-700 font-paragraph font-medium mb-4">
         {isPhone
           ? "We've sent a verification code to your phone"
           : "We've sent a verification code to your email"}
-      </Text>
+      </BodyText>
 
       <AuthInput
         label="Verification Code"

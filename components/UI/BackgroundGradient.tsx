@@ -37,8 +37,8 @@ export function BackgroundGradient({
   end,
   containerStyle,
 }: BackgroundGradientProps) {
-  // Default colors for the gradient (green-50 to amber-50 in tailwind)
-  const defaultColors: [string, string] = ["#ECF4E7", "#fffaef"];
+  // Default colors for the gradient (green-100 to cream-200 in tailwind)
+  const defaultColors: [string, string] = ["#D6E8CC", "#fff8e8"];
 
   // Use provided start/end points or fall back to defaults (top to bottom)
   const gradientStart = start || { x: 0, y: 0 };

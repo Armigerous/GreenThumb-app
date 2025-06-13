@@ -1,1 +1,1 @@
-The GreenThumb mobile app
+GreenThumb mobile app

@@ -13,6 +13,7 @@ import {
   EM,
   A,
 } from "@expo/html-elements";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 
 /**
  * Decodes HTML entities like &nbsp; to their actual characters.
@@ -501,34 +502,34 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
       // Check if block is a heading
       if (block.startsWith("# ")) {
         return (
-          <H1
+          <TitleText
             key={blockIndex}
             className="text-xl font-bold text-cream-800 mb-2"
           >
             {block.substring(2)}
-          </H1>
+          </TitleText>
         );
       }
 
       if (block.startsWith("## ")) {
         return (
-          <H2
+          <SubtitleText
             key={blockIndex}
             className="text-lg font-bold text-cream-800 mb-2"
           >
             {block.substring(3)}
-          </H2>
+          </SubtitleText>
         );
       }
 
       if (block.startsWith("### ")) {
         return (
-          <H3
+          <SubtitleText
             key={blockIndex}
             className="text-base font-bold text-cream-800 mb-2"
           >
             {block.substring(4)}
-          </H3>
+          </SubtitleText>
         );
       }
 
@@ -551,9 +552,9 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
 
       // Regular paragraph
       return (
-        <P key={blockIndex} className="text-cream-800 mb-3">
+        <BodyText key={blockIndex} className="text-cream-800 mb-3">
           {processInlineMarkdown(block)}
-        </P>
+        </BodyText>
       );
     });
   };

@@ -1,11 +1,12 @@
 import React from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "./SectionHeader";
-import { AnimatedSection } from "./AnimatedSection";
+import { StaggeredContent } from "@/components/UI/StaggeredContent";
 import GardenCard from "@/components/Gardens/GardenCard";
 import { GardenDashboard } from "@/types/garden";
+import { BodyText } from "@/components/UI/Text";
 
 interface GardensSectionProps {
   gardens: GardenDashboard[] | undefined;
@@ -20,13 +21,15 @@ export function GardensSection({
 
   return (
     <View className="mb-6">
-      <SectionHeader
-        title="Your Gardens"
-        icon="leaf"
-        onSeeAll={() => router.push("/(home)/gardens")}
-      />
+      <StaggeredContent index={4} baseDelay={560} staggerInterval={80}>
+        <SectionHeader
+          title="Your Gardens"
+          icon="leaf"
+          onSeeAll={() => router.push("/(home)/gardens")}
+        />
+      </StaggeredContent>
 
-      <AnimatedSection delay={300}>
+      <StaggeredContent index={5} baseDelay={640} staggerInterval={80}>
         {isLoading ? (
           <View className="flex-row flex-wrap gap-4">
             <View className="flex-1 min-w-[45%] mb-4 h-[90px] bg-gray-100 rounded-xl animate-pulse" />
@@ -62,9 +65,9 @@ export function GardensSection({
                       <View className="w-10 h-8 items-center justify-center mb-2">
                         <Ionicons name="add" size={24} color="#5E994B" />
                       </View>
-                      <Text className="text-primary font-medium">
+                      <BodyText className="text-primary font-medium">
                         New Garden
-                      </Text>
+                      </BodyText>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -85,18 +88,18 @@ export function GardensSection({
                   <View className="w-12 h-12 items-center justify-center mb-3">
                     <Ionicons name="add" size={28} color="#5E994B" />
                   </View>
-                  <Text className="text-brand-600 font-medium mb-1">
+                  <BodyText className="text-brand-600 font-medium mb-1">
                     Create Your First Garden
-                  </Text>
-                  <Text className="text-sm text-cream-700 text-center">
+                  </BodyText>
+                  <BodyText className="text-sm text-cream-700 text-center">
                     Start your plant journey today
-                  </Text>
+                  </BodyText>
                 </View>
               </TouchableOpacity>
             )}
           </View>
         )}
-      </AnimatedSection>
+      </StaggeredContent>
     </View>
   );
 }

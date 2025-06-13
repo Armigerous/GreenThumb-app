@@ -9,7 +9,6 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   RefreshControl,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -19,6 +18,8 @@ import { prefetchImages } from "@/lib/services/imagePrefetcher";
 import Pagination from "../UI/Pagination";
 import PlantCard from "./PlantCard";
 import { PlantCardData } from "@/types/plant";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
+
 // Error state component
 const ErrorState = memo(
   ({ message, onRetry }: { message?: string; onRetry: () => void }) => (
@@ -27,18 +28,18 @@ const ErrorState = memo(
         source={{ uri: "https://theofficialgreenthumb.com/sad-plant.png" }}
         className="w-40 h-40 rounded-lg mb-4"
       />
-      <Text className="text-xl font-bold text-destructive mb-2">
+      <TitleText className="text-xl font-bold text-destructive mb-2">
         Oops! Something went wrong 🌱
-      </Text>
-      <Text className="text-cream-600 text-center mb-4">
+      </TitleText>
+      <BodyText className="text-cream-600 text-center mb-4">
         {message ||
           "We couldn't load the plants. Maybe take a break and try again in a few minutes?"}
-      </Text>
+      </BodyText>
       <TouchableOpacity
         onPress={onRetry}
         className="bg-brand-600 px-4 py-2 rounded-lg"
       >
-        <Text className="text-white font-medium">Try Again</Text>
+        <BodyText className="text-white font-medium">Try Again</BodyText>
       </TouchableOpacity>
     </View>
   )
@@ -53,12 +54,12 @@ const NoResults = memo(() => (
       source={{ uri: "https://theofficialgreenthumb.com/sad-plant.png" }}
       className="w-40 h-40 rounded-lg mb-4"
     />
-    <Text className="text-xl font-bold text-cream-800 mb-2">
+    <TitleText className="text-xl font-bold text-cream-800 mb-2">
       No results found 🌱
-    </Text>
-    <Text className="text-cream-600 text-center">
+    </TitleText>
+    <BodyText className="text-cream-600 text-center">
       Try searching with different keywords.
-    </Text>
+    </BodyText>
   </View>
 ));
 
@@ -219,12 +220,12 @@ const SearchResults = memo(
         return (
           <>
             <View className="px-4 py-2">
-              <Text className="text-xl font-bold text-cream-800">
+              <TitleText className="text-xl font-bold text-cream-800">
                 {query ? `Results for "${query}"` : "All Plants"}
-              </Text>
-              <Text className="text-cream-600">
+              </TitleText>
+              <BodyText className="text-cream-600">
                 Loading plants... • Page {page} of {totalPages}
-              </Text>
+              </BodyText>
             </View>
             <View className="flex-1 relative">
               <FlatList
@@ -245,18 +246,20 @@ const SearchResults = memo(
         return (
           <View className="flex-1 justify-center items-center p-5">
             <Ionicons name="leaf" size={64} color="#d1d5db" />
-            <Text className="text-xl font-bold text-red-500 mt-4">
+            <TitleText className="text-xl font-bold text-red-500 mt-4">
               Oops! Something went wrong
-            </Text>
-            <Text className="text-sm text-cream-500 text-center mt-2">
+            </TitleText>
+            <BodyText className="text-sm text-cream-500 text-center mt-2">
               {error.message ||
                 "Failed to load plants. Please try again later."}
-            </Text>
+            </BodyText>
             <TouchableOpacity
               className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
               onPress={() => refetch()}
             >
-              <Text className="text-white font-semibold">Try Again</Text>
+              <BodyText className="text-white font-semibold">
+                Try Again
+              </BodyText>
             </TouchableOpacity>
           </View>
         );
@@ -266,22 +269,22 @@ const SearchResults = memo(
         return (
           <View className="flex-1 justify-center items-center p-5">
             <Ionicons name="search" size={64} color="#d1d5db" />
-            <Text className="text-xl font-bold text-cream-800 mt-4">
+            <TitleText className="text-xl font-bold text-cream-800 mt-4">
               No plants found
-            </Text>
-            <Text className="text-sm text-cream-500 text-center mt-2">
+            </TitleText>
+            <BodyText className="text-sm text-cream-500 text-center mt-2">
               {query
                 ? `We couldn't find any plants matching "${query}"`
                 : "No plants available at the moment"}
-            </Text>
+            </BodyText>
             {query && (
               <TouchableOpacity
                 className="mt-6 py-2.5 px-5 bg-brand-600 rounded-lg"
                 onPress={() => onPageChange(1)}
               >
-                <Text className="text-white font-semibold">
+                <BodyText className="text-white font-semibold">
                   View All Plants
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             )}
           </View>
@@ -291,12 +294,12 @@ const SearchResults = memo(
       return (
         <>
           <View className="px-4 py-2">
-            <Text className="text-xl font-bold text-cream-800">
+            <TitleText className="text-xl font-bold text-cream-800">
               {query ? `Results for "${query}"` : "All Plants"}
-            </Text>
-            <Text className="text-cream-600">
+            </TitleText>
+            <BodyText className="text-cream-600">
               {data.count} plants found • Page {page} of {totalPages}
-            </Text>
+            </BodyText>
           </View>
           <View className="flex-1 relative">
             <FlatList

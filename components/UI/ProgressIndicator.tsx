@@ -1,5 +1,6 @@
 import { View, Text, Animated, useWindowDimensions } from "react-native";
 import { useMemo, useRef, useEffect } from "react";
+import { BodyText } from "./Text";
 
 /**
  * ProgressIndicator component for multi-step flows
@@ -162,11 +163,9 @@ export default function ProgressIndicator({
                 ],
               }}
             >
-              <Text
+              <BodyText
                 className={`text-xs ${
-                  isActive
-                    ? `text-${accentColor} font-medium`
-                    : `text-cream-500`
+                  isActive ? `text-${accentColor}` : `text-${inactiveColor}`
                 }`}
                 style={{
                   textAlign: isFirst ? "left" : isLast ? "right" : "center",
@@ -175,7 +174,7 @@ export default function ProgressIndicator({
                 ellipsizeMode="tail"
               >
                 {label}
-              </Text>
+              </BodyText>
             </View>
           );
         })}

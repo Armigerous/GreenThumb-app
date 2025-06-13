@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   SafeAreaView,
   StatusBar,
-  Text,
   View,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -17,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useAtom } from "jotai";
 import { activeFiltersAtom } from "@/atoms/filters";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { TitleText, BodyText } from "@/components/UI/Text";
 
 export default function PlantDatabaseScreen() {
   const router = useRouter();
@@ -64,9 +64,9 @@ export default function PlantDatabaseScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="flex-1">
           <View className="pt-5 px-5">
-            <Text className="text-2xl text-foreground font-bold mb-4">
+            <TitleText className="text-2xl text-foreground font-bold mb-4">
               Plant Database
-            </Text>
+            </TitleText>
 
             {/* Search Bar */}
             <SearchBar
@@ -86,9 +86,9 @@ export default function PlantDatabaseScreen() {
                 onPress={handleOpenFilter}
               >
                 <Feather name="filter" color="#fffefa" size={16} />
-                <Text className="ml-2 text-sm font-medium text-primary-foreground">
+                <BodyText className="ml-2 text-sm font-medium text-primary-foreground">
                   Filter
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             </View>
           </View>

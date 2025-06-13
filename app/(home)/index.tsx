@@ -28,6 +28,7 @@ import {
   GardensSection,
   QuickActionsSection,
 } from "@/components/Home";
+import { BodyText } from "@/components/UI/Text";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -206,7 +207,7 @@ export default function Page() {
     }, [refetchTasks, queryClient, user?.id])
   );
 
-  // Configure spring animation for layout changes
+  // Configure layout animation for task completion only
   const configureLayoutAnimation = useCallback(() => {
     LayoutAnimation.configureNext(
       LayoutAnimation.create(
@@ -216,18 +217,6 @@ export default function Page() {
       )
     );
   }, []);
-
-  // Configure layout animation when all data is loaded
-  useEffect(() => {
-    if (!gardensLoading && !tasksLoading && !overdueTasksLoading) {
-      configureLayoutAnimation();
-    }
-  }, [
-    gardensLoading,
-    tasksLoading,
-    overdueTasksLoading,
-    configureLayoutAnimation,
-  ]);
 
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({
@@ -340,7 +329,7 @@ export default function Page() {
         }, 500);
       }
 
-      // Configure layout animation
+      // Configure layout animation for the task completion effect
       configureLayoutAnimation();
 
       // Execute the mutation with optimistic updates
@@ -351,20 +340,6 @@ export default function Page() {
     },
     [todaysTasks, allOverdueTasks, toggleTaskMutation, configureLayoutAnimation]
   );
-
-  // Handle changes to task lists with animation
-  useEffect(() => {
-    // Animate layout changes when tasks list changes
-    if (!gardensLoading && !tasksLoading) {
-      configureLayoutAnimation();
-    }
-  }, [
-    allOverdueTasks,
-    todaysTasks,
-    configureLayoutAnimation,
-    gardensLoading,
-    tasksLoading,
-  ]);
 
   const isLoading = gardensLoading || tasksLoading || overdueTasksLoading;
   const hasError = gardensError || tasksError;
@@ -434,9 +409,9 @@ export default function Page() {
 
       <SignedOut>
         <View className="flex-1 justify-center items-center p-5">
-          <Text className="text-base text-foreground opacity-80 text-center mb-8">
+          <BodyText className="text-base text-foreground opacity-80 text-center mb-8">
             You need to sign in to access this page
-          </Text>
+          </BodyText>
           <View className="w-full gap-4">
             <TouchableOpacity
               className="bg-primary py-4 rounded-lg items-center shadow-sm"
@@ -449,16 +424,18 @@ export default function Page() {
               }}
               onPress={() => router.replace("/(auth)/sign-in")}
             >
-              <Text className="text-primary-foreground font-bold text-base">
+              <BodyText className="text-primary-foreground font-bold text-base">
                 Sign in
-              </Text>
+              </BodyText>
             </TouchableOpacity>
 
             <TouchableOpacity
               className="bg-transparent border border-primary py-4 rounded-lg items-center"
               onPress={() => router.replace("/(auth)/sign-up")}
             >
-              <Text className="text-primary font-bold text-base">Sign up</Text>
+              <BodyText className="text-primary font-bold text-base">
+                Sign up
+              </BodyText>
             </TouchableOpacity>
           </View>
         </View>

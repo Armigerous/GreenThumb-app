@@ -5,6 +5,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { BodyText } from "@/components/UI/Text";
 
 type AuthToggleProps = {
   isPhone: boolean;
@@ -23,13 +24,13 @@ export function AuthToggle({ isPhone, onToggle }: AuthToggleProps) {
           !isPhone ? "bg-primary" : "bg-transparent"
         }`}
       >
-        <Text
-          className={`${
+        <BodyText
+          className={`$${
             !isPhone ? "text-primary-foreground" : "text-foreground"
           } ${isSmallDevice ? "text-xs" : "text-sm"}`}
         >
           {isPhone ? "Use Email" : "Email"}
-        </Text>
+        </BodyText>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => onToggle(true)}
@@ -37,13 +38,13 @@ export function AuthToggle({ isPhone, onToggle }: AuthToggleProps) {
           isPhone ? "bg-primary" : "bg-transparent"
         }`}
       >
-        <Text
-          className={`${
+        <BodyText
+          className={`$${
             isPhone ? "text-primary-foreground" : "text-foreground"
           } ${isSmallDevice ? "text-xs" : "text-sm"}`}
         >
           {!isPhone ? "Use Phone" : "Phone"}
-        </Text>
+        </BodyText>
       </TouchableOpacity>
     </View>
   );

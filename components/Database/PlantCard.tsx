@@ -1,8 +1,9 @@
 import React, { memo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { PlantCardData } from "../../types/plant";
 import { useRouter } from "expo-router";
 import CachedImage from "../CachedImage";
+import { TitleText, BodyText } from "@/components/UI/Text";
 
 interface PlantCardProps {
   plant: PlantCardData;
@@ -24,7 +25,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
       return (
         <View className="bg-white border border-cream-300 rounded-xl overflow-hidden shadow-sm h-[220px] w-[48%] mb-4">
           <View className="p-3 flex-1 justify-center items-center">
-            <Text className="text-destructive">Invalid plant data</Text>
+            <BodyText className="text-destructive">Invalid plant data</BodyText>
           </View>
         </View>
       );
@@ -80,26 +81,26 @@ const PlantCard: React.FC<PlantCardProps> = memo(
         />
         <View className="p-3 flex-1 justify-between">
           <View>
-            <Text
-              className="text-base font-bold mb-1 text-cream-800"
+            <TitleText
+              className="text-lg text-foreground line-clamp-1"
               numberOfLines={1}
             >
               {displayName}
-            </Text>
+            </TitleText>
             {subName ? (
-              <Text
-                className="text-xs italic text-cream-500 mb-2"
+              <BodyText
+                className="text-sm text-cream-600 line-clamp-1"
                 numberOfLines={1}
               >
                 {subName}
-              </Text>
+              </BodyText>
             ) : null}
           </View>
           {plant.first_tag && (
             <View className="bg-brand-100 px-2 py-1 rounded-xl self-start mt-auto">
-              <Text className="text-xs text-brand-700 font-medium">
+              <BodyText className="text-xs text-brand-700 font-medium">
                 {plant.first_tag}
-              </Text>
+              </BodyText>
             </View>
           )}
         </View>

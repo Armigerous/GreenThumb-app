@@ -2,6 +2,7 @@ import { TaskList } from "@/components/TaskList";
 import AnimatedTransition from "@/components/UI/AnimatedTransition";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { TitleText, SubtitleText, BodyText, Text } from "@/components/UI/Text";
 import { useTasksForDate, getTasksForDate } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { TaskWithDetails } from "@/types/garden";
@@ -26,7 +27,6 @@ import {
   Easing,
   Modal,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -594,16 +594,16 @@ export default function CalendarScreen() {
       {/* Header */}
       <View className="px-5 pt-5">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-bold text-foreground">
+          <TitleText className="text-2xl text-foreground">
             Calendar of Care
-          </Text>
+          </TitleText>
           <TouchableOpacity
             onPress={() => setIsMonthPickerVisible(true)}
             className="flex-row items-center bg-brand-50 px-3 py-1 rounded-lg border border-brand-100"
           >
-            <Text className="text-brand-600 font-medium mr-1">
+            <BodyText className="text-brand-600 mr-1">
               {format(selectedDay, "MMMM yyyy")}
-            </Text>
+            </BodyText>
             <Ionicons name="chevron-down" size={16} color="#059669" />
           </TouchableOpacity>
         </View>
@@ -626,7 +626,7 @@ export default function CalendarScreen() {
               color="#059669"
               className="mr-1"
             />
-            <Text className="text-brand-600 font-medium">Today</Text>
+            <BodyText className="text-brand-600">Today</BodyText>
           </TouchableOpacity>
         </Animated.View>
 
@@ -672,7 +672,7 @@ export default function CalendarScreen() {
                 onPress={() => handleDayChange(day, index)}
               >
                 <Text
-                  className={`text-xs font-medium ${
+                  className={`text-xs ${
                     isSameDay(day, selectedDay)
                       ? "text-white"
                       : isSameDay(day, new Date())
@@ -682,8 +682,8 @@ export default function CalendarScreen() {
                 >
                   {format(day, "EEE")}
                 </Text>
-                <Text
-                  className={`text-lg font-bold ${
+                <BodyText
+                  className={`text-lg ${
                     isSameDay(day, selectedDay)
                       ? "text-white"
                       : isSameDay(day, new Date())
@@ -692,7 +692,7 @@ export default function CalendarScreen() {
                   }`}
                 >
                   {format(day, "d")}
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             </Animated.View>
           ))}
@@ -701,9 +701,9 @@ export default function CalendarScreen() {
 
       {/* Tasks Section */}
       <View className="px-5 mb-4">
-        <Text className="text-lg font-semibold text-foreground">
+        <SubtitleText className="text-lg text-foreground">
           Care Tasks
-        </Text>
+        </SubtitleText>
       </View>
 
       <ScrollView className="flex-1 px-5">
@@ -716,9 +716,9 @@ export default function CalendarScreen() {
         ) : isError ? (
           <View className="bg-red-50 rounded-xl p-8 items-center justify-center">
             <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-            <Text className="text-red-500 mt-4 text-center">
+            <BodyText className="text-red-500 mt-4 text-center">
               Error loading tasks. Please try again.
-            </Text>
+            </BodyText>
           </View>
         ) : (
           <Animated.View style={{ opacity: tasksOpacity }} className="flex-1">
@@ -747,9 +747,9 @@ export default function CalendarScreen() {
         >
           <View className="flex-1 justify-center px-5">
             <View className="bg-cream-50 border border-cream-300 rounded-xl p-4">
-              <Text className="text-lg font-semibold text-foreground border-b border-cream-300 pb-4">
+              <SubtitleText className="text-lg text-foreground border-b border-cream-300 pb-4">
                 Select Month
-              </Text>
+              </SubtitleText>
               <ScrollView className="max-h-80">
                 {months.map((month, index) => (
                   <TouchableOpacity
@@ -761,15 +761,15 @@ export default function CalendarScreen() {
                     }`}
                     onPress={() => selectMonth(month.value)}
                   >
-                    <Text
+                    <BodyText
                       className={`${
                         getMonth(selectedDay) === month.value
-                          ? "text-brand-600 font-medium"
+                          ? "text-brand-600"
                           : "text-foreground"
                       }`}
                     >
                       {month.label}
-                    </Text>
+                    </BodyText>
                   </TouchableOpacity>
                 ))}
               </ScrollView>

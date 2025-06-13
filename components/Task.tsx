@@ -357,7 +357,7 @@ export function Task({
               {/* Text with animated strikethrough */}
               <View style={{ position: "relative" }}>
                 <Text
-                  className={`text-base font-medium ${
+                  className={`text-base font-paragraph font-medium ${
                     isOverdue && !localCompleted
                       ? "text-red-700"
                       : "text-foreground"
@@ -395,7 +395,7 @@ export function Task({
               }`}
             >
               <Text
-                className={`text-xs font-medium ${
+                className={`text-xs font-paragraph font-medium ${
                   isOverdue
                     ? "text-red-700"
                     : localCompleted
@@ -412,7 +412,7 @@ export function Task({
 
           {/* Garden Info - only show if requested */}
           {showGardenName && task.plant?.garden?.name && (
-            <Text className="text-sm text-cream-600 mt-1">
+            <Text className="text-sm text-cream-600 font-paragraph mt-1">
               in {task.plant.garden.name}
             </Text>
           )}

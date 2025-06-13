@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/icons";
 import Animated, { AnimatedStyleProp } from "react-native-reanimated";
+import { BodyText } from "@/components/UI/Text";
 
 type AuthSocialOptionsProps = {
   onGooglePress: () => void;
@@ -35,7 +36,7 @@ export function AuthSocialOptions({
     <>
       <View className="flex-row items-center w-full mb-4">
         <View className="flex-1 h-[1px] bg-cream-300" />
-        <Text className="text-foreground text-sm mx-4">{title}</Text>
+        <BodyText className="text-foreground text-sm mx-4">{title}</BodyText>
         <View className="flex-1 h-[1px] bg-cream-300" />
       </View>
       <View

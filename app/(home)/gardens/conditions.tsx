@@ -278,7 +278,7 @@ export default function GardenConditionsPage() {
     return (
       <SafeAreaView className="flex-1">
         <View className="pt-5 px-5">
-          <Text className="text-destructive text-lg">
+          <Text className="text-destructive text-lg font-paragraph">
             Error loading garden conditions. Please try again.
           </Text>
         </View>
@@ -296,7 +296,9 @@ export default function GardenConditionsPage() {
             className="flex-row items-center"
           >
             <Ionicons name="arrow-back" size={24} color="#2e2c29" />
-            <Text className="text-foreground text-lg ml-2">Back to Garden</Text>
+            <Text className="text-foreground text-lg font-paragraph ml-2">
+              Back to Garden
+            </Text>
           </TouchableOpacity>
 
           {!isEditing ? (
@@ -304,7 +306,9 @@ export default function GardenConditionsPage() {
               className="bg-primary px-4 py-2 rounded-lg"
               onPress={handleEditToggle}
             >
-              <Text className="text-primary-foreground font-medium">Edit</Text>
+              <Text className="text-primary-foreground font-paragraph font-medium">
+                Edit
+              </Text>
             </TouchableOpacity>
           ) : (
             <View className="flex-row">
@@ -312,14 +316,16 @@ export default function GardenConditionsPage() {
                 className="bg-cream-300 px-4 py-2 rounded-lg mr-2"
                 onPress={handleCancel}
               >
-                <Text className="text-cream-700 font-medium">Cancel</Text>
+                <Text className="text-cream-700 font-paragraph font-medium">
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="bg-primary px-4 py-2 rounded-lg"
                 onPress={handleSave}
                 disabled={isSaving}
               >
-                <Text className="text-primary-foreground font-medium">
+                <Text className="text-primary-foreground font-paragraph font-medium">
                   {isSaving ? "Saving..." : "Save"}
                 </Text>
               </TouchableOpacity>
@@ -330,10 +336,10 @@ export default function GardenConditionsPage() {
 
       {/* Title */}
       <View className="px-5 pb-4">
-        <Text className="text-2xl text-foreground font-bold mb-1">
+        <Text className="text-2xl text-foreground font-title font-bold mb-1">
           Garden Conditions
         </Text>
-        <Text className="text-cream-600">{gardenData.name}</Text>
+        <Text className="text-cream-600 font-paragraph">{gardenData.name}</Text>
       </View>
 
       {/* Content */}

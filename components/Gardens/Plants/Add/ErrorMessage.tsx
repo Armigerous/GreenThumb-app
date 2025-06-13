@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { BodyText } from "@/components/UI/Text";
 
 /**
  * ErrorMessage component for displaying error messages
@@ -34,7 +35,7 @@ export default function ErrorMessage({
 
   return (
     <View className={`mb-4 p-3 ${bgColor} rounded-lg`}>
-      <Text className={textColor}>{message}</Text>
+      <BodyText className={textColor}>{message}</BodyText>
     </View>
   );
 }

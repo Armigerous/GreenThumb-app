@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
+import { BodyText } from "@/components/UI/Text";
 
 type AuthButtonProps = {
   onPress: () => void;
@@ -30,24 +31,26 @@ export function AuthButton({
 
   return (
     <TouchableOpacity
-      className={`bg-primary ${
-        isSmallDevice ? "py-3" : "py-4"
-      } rounded-lg items-center flex-row justify-center`}
       onPress={onPress}
       disabled={isLoading || disabled}
+      className={`flex-row items-center justify-center bg-primary rounded-lg px-4 py-3 ${
+        isLoading || disabled ? "opacity-60" : ""
+      }`}
+      activeOpacity={0.8}
     >
-      <Text
-        className={`text-primary-foreground font-bold ${
-          isSmallDevice ? "text-sm" : "text-base"
-        } mr-2`}
-      >
-        {isLoading ? loadingLabel || `${label}...` : label}
-      </Text>
+      {icon && (
+        <Ionicons name={icon} size={20} color="#fffefa" className="mr-2" />
+      )}
       {isLoading ? (
-        <CompactSpinner size={isSmallDevice ? 18 : 20} color="#FFFFFF" />
-      ) : icon ? (
-        <Ionicons name={icon} size={isSmallDevice ? 18 : 20} color="#FFFFFF" />
-      ) : null}
+        <>
+          <CompactSpinner size={20} color="#fffefa" />
+          <BodyText className="text-primary-foreground ml-2">
+            {loadingLabel || label}
+          </BodyText>
+        </>
+      ) : (
+        <BodyText className="text-primary-foreground">{label}</BodyText>
+      )}
     </TouchableOpacity>
   );
 }
