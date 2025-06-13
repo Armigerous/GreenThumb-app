@@ -20,15 +20,7 @@ module.exports = {
     // Plugin configurations
     plugins: [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
-          resizeMode: "contain",
-          backgroundColor: "#ffffff",
-        },
-      ],
+      "expo-splash-screen",
       "expo-updates",
       "expo-asset",
       [
@@ -43,9 +35,9 @@ module.exports = {
     ],
 
     // Experimental features
-    experiments: {
-      typedRoutes: true,
-    },
+    // experiments: {
+    //   typedRoutes: true,
+    // },
 
     // Update configuration
     updates: {
