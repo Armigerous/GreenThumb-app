@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "./SectionHeader";
 import { StaggeredContent } from "@/components/UI/StaggeredContent";
 import { BodyText } from "@/components/UI/Text";
+import * as Sentry from "@sentry/react-native";
 
 export function QuickActionsSection() {
   const router = useRouter();

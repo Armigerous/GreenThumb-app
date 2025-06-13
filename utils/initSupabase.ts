@@ -69,11 +69,11 @@ export async function checkSupabaseStorage() {
     }
     
     // Manually check for user-uploads case-insensitively
-    console.log('All available buckets:', buckets ? buckets.map(b => b.name).join(', ') : 'none');
+    console.log('All available buckets:', buckets ? buckets.map(b => b.name || 'unnamed').join(', ') : 'none');
     
     // Check for the bucket with any capitalization
     const userUploadsBucket = buckets?.find(bucket => 
-      bucket.name.toLowerCase() === 'user-uploads'
+      bucket.name && bucket.name.toLowerCase() === 'user-uploads'
     );
     
     if (!userUploadsBucket) {

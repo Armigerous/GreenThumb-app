@@ -4,7 +4,7 @@ import { useUser } from "@clerk/clerk-expo";
 
 export interface OverdueTask {
   task_id: number;
-  task_type: string;
+  task_type: string | null;
   plant_nickname: string;
   due_date: string;
 }
