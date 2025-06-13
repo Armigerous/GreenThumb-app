@@ -7,6 +7,8 @@ import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { initSentry, setUser, addBreadcrumb } from "@/lib/sentry";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   checkSupabaseStorage,
   checkRequestingUserIdFunction,
@@ -59,7 +61,7 @@ const queryClient = new QueryClient({
 
 // This component handles authentication routing
 function InitialLayout() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, userId } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -76,6 +78,19 @@ function InitialLayout() {
       router.replace("/(auth)/welcome");
     }
   }, [isSignedIn, isLoaded, segments]);
+
+  // Set user context in Sentry when authentication state changes
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn && userId) {
+        setUser({ id: userId });
+        addBreadcrumb("User signed in", "auth");
+      } else {
+        setUser({});
+        addBreadcrumb("User signed out", "auth");
+      }
+    }
+  }, [isSignedIn, isLoaded, userId]);
 
   // Initialize Supabase storage check when user is signed in
   useEffect(() => {
@@ -133,6 +148,12 @@ function InitialLayout() {
 export default function RootLayout() {
   const [isClerkReady, setIsClerkReady] = useState(true);
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  // Initialize Sentry
+  useEffect(() => {
+    initSentry();
+    addBreadcrumb("App started", "navigation");
+  }, []);
 
   // Load fonts
   const [fontsLoaded, fontError] = useFonts({
