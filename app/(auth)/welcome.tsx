@@ -28,7 +28,7 @@ const slides = [
   {
     id: "1",
     image: require("@/assets/images/logo-transparent.png"),
-    title: "Welcome to The GreenThumb",
+    title: "Welcome to GreenThumb",
     description:
       "Your personal plant care companion that helps you grow and nurture your green friends",
   },
