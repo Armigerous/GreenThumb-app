@@ -7,7 +7,7 @@ module.exports = {
     icon: "./assets/images/logo.png",
     scheme: "greenthumb",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: false,
 
     // Splash screen configuration
     splash: {

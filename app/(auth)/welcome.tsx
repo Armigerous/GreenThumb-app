@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const slidesRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const autoScrollTimer = useRef<NodeJS.Timeout>();
+  const autoScrollTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Animation values for buttons
   const startButtonOpacity = useSharedValue(0);
