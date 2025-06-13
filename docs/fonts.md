@@ -1,6 +1,6 @@
 # Font System
 
-The Green Thumb app uses a consistent font system with two primary font families:
+GreenThumb app uses a consistent font system with two primary font families:
 
 1. **Mali** - Used for titles, headings, and emphasis
 2. **Nunito** - Used for paragraphs, labels, and most text content
