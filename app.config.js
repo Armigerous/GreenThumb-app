@@ -1,11 +1,11 @@
 module.exports = {
   expo: {
-    name: "The GreenThumb",
-    slug: "theGreenThumb-app",
+    name: "GreenThumb",
+    slug: "greenthumb-app",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/logo.png",
-    scheme: "TheGreenThumb",
+    scheme: "greenthumb",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
 
@@ -81,7 +81,7 @@ module.exports = {
         origin: false,
       },
       eas: {
-        projectId: "e0e1a7e6-9d15-4a3c-92c3-85401a72814d",
+        projectId: "5b3f0f1a-b3f6-4765-9be3-9be62ab4b53c",
       },
       // Public environment variables referenced from .env
       EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY:

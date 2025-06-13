@@ -30,9 +30,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="TheGreenThumb"/>
-        <data android:scheme="com.tugraerenk.greenthumb"/>
-        <data android:scheme="exp+thegreenthumb-app"/>
+        <data android:scheme="greenthumb"/>
+        <data android:scheme="exp+greenthumb-app"/>
       </intent-filter>
     </activity>
   </application>
