@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { TitleText, BodyText } from "./Text";
 
 type HelpIconProps = {
   title?: string;
@@ -37,16 +38,18 @@ export default function HelpIcon({
         >
           <View className="bg-white rounded-lg p-6 m-4 w-5/6 max-w-md">
             {title && (
-              <Text className="text-lg font-medium text-foreground mb-3">
+              <TitleText className="text-lg text-foreground mb-3">
                 {title}
-              </Text>
+              </TitleText>
             )}
-            <Text className="text-sm text-cream-800 mb-4">{explanation}</Text>
+            <BodyText className="text-sm text-cream-800 mb-4">
+              {explanation}
+            </BodyText>
             <Pressable
               className="bg-brand-500 py-2 px-4 rounded-lg self-end"
               onPress={() => setModalVisible(false)}
             >
-              <Text className="text-white font-medium">Got it</Text>
+              <BodyText className="text-white font-medium">Got it</BodyText>
             </Pressable>
           </View>
         </Pressable>

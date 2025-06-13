@@ -89,7 +89,9 @@ export default function GardensScreen() {
       {/* Header */}
       <AnimatedTransition delay={150} initialY={10}>
         <View className="flex-row justify-between items-center mb-6 px-4 pt-4">
-          <Text className="text-2xl font-bold text-foreground">My Gardens</Text>
+          <Text className="text-2xl font-title font-bold text-foreground">
+            My Gardens
+          </Text>
           <TouchableOpacity
             className="bg-primary rounded-lg px-4 py-2 flex-row items-center"
             onPress={() => router.push("/(home)/gardens/new")}
@@ -110,28 +112,30 @@ export default function GardensScreen() {
             <AnimatedTransition delay={250} initialY={10}>
               <View className="flex-row justify-between mb-6 px-4">
                 <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 mb-1">
+                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
                     Total Plants
                   </Text>
-                  <Text className="text-xl font-bold text-foreground">
+                  <Text className="text-xl font-title font-bold text-foreground">
                     {overallHealth.totalPlantsCount}
                   </Text>
                 </View>
 
                 <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 mb-1">Gardens</Text>
-                  <Text className="text-xl font-bold text-foreground">
+                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
+                    Gardens
+                  </Text>
+                  <Text className="text-xl font-title font-bold text-foreground">
                     {overallHealth.gardenCount}
                   </Text>
                 </View>
 
                 <View className="flex-1 bg-cream-50 rounded-lg p-3 ml-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 mb-1">
+                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
                     Health Score
                   </Text>
                   <View className="flex-row items-center">
                     <Text
-                      className={`text-xl font-bold ${
+                      className={`text-xl font-title font-bold ${
                         overallHealth.avgHealthPercentage >= 80
                           ? "text-brand-600"
                           : overallHealth.avgHealthPercentage >= 50
@@ -166,10 +170,10 @@ export default function GardensScreen() {
                     <View className="bg-brand-50 rounded-full p-4">
                       <Ionicons name="leaf" size={62} color="#5E994B" />
                     </View>
-                    <Text className="text-foreground text-center font-bold text-lg capitalize">
+                    <Text className="text-foreground text-center font-title font-bold text-lg capitalize">
                       No Gardens Yet
                     </Text>
-                    <Text className="text-foreground text-center px-8">
+                    <Text className="text-foreground text-center font-paragraph px-8">
                       Create your first garden to track and nurture your plants
                       in one place
                     </Text>
@@ -177,7 +181,7 @@ export default function GardensScreen() {
                       className="bg-primary rounded-lg px-6 py-3 flex-row items-center gap-2"
                       onPress={() => router.push("/(home)/gardens/new")}
                     >
-                      <Text className="text-primary-foreground font-medium">
+                      <Text className="text-primary-foreground font-paragraph font-medium">
                         Create Your First Garden
                       </Text>
                       <Ionicons

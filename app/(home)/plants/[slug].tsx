@@ -4,6 +4,7 @@ import { ErrorView } from "@/components/Database/Plant/ErrorView";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 import { usePlantDetails } from "@/lib/queries";
 import { PlantData, PlantImage } from "@/types/plant";
 import { TabType } from "@/types/tab";
@@ -14,7 +15,6 @@ import {
   FlatList,
   Image,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -54,7 +54,7 @@ const TabBar = ({
             size={20}
             color={activeTab === tab.id ? "#5E994B" : "#9e9a90"}
           />
-          <Text
+          <BodyText
             className={`text-xs mt-1 ${
               activeTab === tab.id
                 ? "text-brand-500 font-medium"
@@ -62,7 +62,7 @@ const TabBar = ({
             }`}
           >
             {tab.label}
-          </Text>
+          </BodyText>
         </TouchableOpacity>
       ))}
     </View>
@@ -88,7 +88,9 @@ const QuickActions = ({ plant }: { plant: PlantData }) => {
         onPress={handleAddToGarden}
       >
         <Ionicons name="add-circle-outline" size={20} color="#fffefa" />
-        <Text className="text-cream-50 font-medium ml-2">Add to Garden</Text>
+        <BodyText className="text-cream-50 font-medium ml-2">
+          Add to Garden
+        </BodyText>
       </TouchableOpacity>
     </View>
   );
@@ -173,9 +175,9 @@ export default function PlantDetailScreen() {
                 className="flex-row items-center"
               >
                 <Ionicons name="arrow-back" size={24} color="#2e2c29" />
-                <Text className="text-foreground text-lg font-medium ml-2">
+                <BodyText className="text-foreground text-lg font-medium ml-2">
                   Back
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             </View>
           </View>
@@ -199,16 +201,16 @@ export default function PlantDetailScreen() {
             </View>
             {/* Plant Information */}
             <View className="p-4 bg-white rounded-t-3xl -mt-5">
-              <Text className="text-2xl font-bold text-cream-800 mb-1">
+              <TitleText className="text-2xl font-bold text-cream-800 mb-1">
                 {commonName || plant.scientific_name}
-              </Text>
+              </TitleText>
               <View className="flex-row items-center mb-3">
-                <Text
+                <SubtitleText
                   className="text-base italic text-cream-500 flex-1"
                   numberOfLines={2}
                 >
                   {plant.scientific_name?.replace(/'/g, "'")}
-                </Text>
+                </SubtitleText>
                 {plant.sound_file && (
                   <TouchableOpacity
                     className="ml-2 bg-brand-50 rounded-xl p-2"
@@ -236,9 +238,9 @@ export default function PlantDetailScreen() {
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item }) => (
                       <View className="bg-brand-100 px-3 py-1.5 rounded-xl mr-2">
-                        <Text className="text-xs text-brand-700 font-medium">
+                        <BodyText className="text-xs text-brand-700 font-medium">
                           {item}
-                        </Text>
+                        </BodyText>
                       </View>
                     )}
                   />
@@ -248,9 +250,9 @@ export default function PlantDetailScreen() {
               {/* Display multiple images if available */}
               {plant.images && plant.images.length > 1 && (
                 <View className="my-4">
-                  <Text className="text-lg font-bold text-cream-800 mb-3">
+                  <TitleText className="text-lg font-bold text-cream-800 mb-3">
                     Images
-                  </Text>
+                  </TitleText>
                   <FlatList
                     horizontal
                     data={plant.images.slice(1)} // Skip first image as it's already shown
@@ -263,9 +265,9 @@ export default function PlantDetailScreen() {
                           resizeMode="cover"
                         />
                         {item.caption && (
-                          <Text className="text-xs text-cream-500 mt-1 w-[180px]">
+                          <BodyText className="text-xs text-cream-500 mt-1 w-[180px]">
                             {item.caption}
-                          </Text>
+                          </BodyText>
                         )}
                       </View>
                     )}
@@ -285,9 +287,9 @@ export default function PlantDetailScreen() {
                     {plant.description && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Description
-                          </Text>
+                          </TitleText>
                         </View>
                         <HtmlRenderer content={plant.description} />
                       </View>
@@ -296,48 +298,48 @@ export default function PlantDetailScreen() {
                     {/* Quick Facts */}
                     <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                       <View className="border-b border-cream-100 pb-3 mb-4">
-                        <Text className="text-lg font-bold text-foreground">
+                        <TitleText className="text-lg font-bold text-foreground">
                           Quick Facts
-                        </Text>
+                        </TitleText>
                       </View>
                       <View>
                         {(plant.height_min || plant.height_max) && (
                           <View className="flex-row justify-between mb-3">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               Height
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.height_min || "?"}-
                               {plant.height_max || "?"} inches
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                         {(plant.width_min || plant.width_max) && (
                           <View className="flex-row justify-between mb-3">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               Width
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.width_min || "?"}-{plant.width_max || "?"}{" "}
                               inches
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                         <View className="flex-row justify-between mb-3">
-                          <Text className="text-cream-500 text-base">
+                          <BodyText className="text-cream-500 text-base">
                             Growth Rate
-                          </Text>
-                          <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                          </BodyText>
+                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                             {plant.growth_rate}
-                          </Text>
+                          </BodyText>
                         </View>
                         <View className="flex-row justify-between">
-                          <Text className="text-cream-500 text-base">
+                          <BodyText className="text-cream-500 text-base">
                             Origin
-                          </Text>
-                          <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                          </BodyText>
+                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                             {plant.origin}
-                          </Text>
+                          </BodyText>
                         </View>
                       </View>
                     </View>
@@ -350,24 +352,24 @@ export default function PlantDetailScreen() {
                       plant.design_features?.length) && (
                       <View className="bg-white rounded-2xl py-5 mb-4 shadow-sm px-5">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Uses and Value
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
                           {plant.uses && (
                             <View className="mb-4 pb-4 border-b border-cream-50">
-                              <Text className="text-cream-500 text-base mb-2">
+                              <BodyText className="text-cream-500 text-base mb-2">
                                 Uses
-                              </Text>
+                              </BodyText>
                               <HtmlRenderer content={plant.uses.toString()} />
                             </View>
                           )}
                           {plant.edibility && (
                             <View className="mb-4 pb-4 border-b border-cream-50">
-                              <Text className="text-cream-500 text-base mb-2">
+                              <BodyText className="text-cream-500 text-base mb-2">
                                 Edibility
-                              </Text>
+                              </BodyText>
                               <HtmlRenderer
                                 content={plant.edibility.toString()}
                               />
@@ -375,9 +377,9 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.wildlife_value && (
                             <View className="mb-4 pb-4 border-b border-cream-50">
-                              <Text className="text-cream-500 text-base mb-2">
+                              <BodyText className="text-cream-500 text-base mb-2">
                                 Wildlife Value
-                              </Text>
+                              </BodyText>
                               <HtmlRenderer
                                 content={plant.wildlife_value.toString()}
                               />
@@ -385,9 +387,9 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.attracts && plant.attracts.length > 0 && (
                             <View>
-                              <Text className="text-cream-500 text-base mb-3">
+                              <BodyText className="text-cream-500 text-base mb-3">
                                 Attracts
-                              </Text>
+                              </BodyText>
                               <View className="flex-row flex-wrap">
                                 {plant.attracts
                                   .filter(Boolean)
@@ -396,9 +398,9 @@ export default function PlantDetailScreen() {
                                       key={index}
                                       className="bg-brand-50 px-3 py-2 rounded-xl mr-2 mb-2"
                                     >
-                                      <Text className="text-sm text-brand-700">
+                                      <BodyText className="text-sm text-brand-700">
                                         {attract}
-                                      </Text>
+                                      </BodyText>
                                     </View>
                                   ))}
                               </View>
@@ -414,16 +416,16 @@ export default function PlantDetailScreen() {
                   <View className="pb-16">
                     <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                       <View className="border-b border-cream-100 pb-3 mb-4">
-                        <Text className="text-lg font-bold text-foreground">
+                        <TitleText className="text-lg font-bold text-foreground">
                           Care Requirements
-                        </Text>
+                        </TitleText>
                       </View>
                       <View>
                         {plant.light_requirements && (
                           <View className="mb-4 pb-4 border-b border-cream-50">
-                            <Text className="text-cream-500 text-base mb-2">
+                            <BodyText className="text-cream-500 text-base mb-2">
                               Light
-                            </Text>
+                            </BodyText>
                             <HtmlRenderer
                               content={plant.light_requirements.toString()}
                             />
@@ -431,9 +433,9 @@ export default function PlantDetailScreen() {
                         )}
                         {plant.water_requirements && (
                           <View className="mb-4 pb-4 border-b border-cream-50">
-                            <Text className="text-cream-500 text-base mb-2">
+                            <BodyText className="text-cream-500 text-base mb-2">
                               Water
-                            </Text>
+                            </BodyText>
                             <HtmlRenderer
                               content={plant.water_requirements.toString()}
                             />
@@ -441,29 +443,29 @@ export default function PlantDetailScreen() {
                         )}
                         {plant.soil_ph && (
                           <View className="flex-row justify-between mb-3">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               Soil pH
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.soil_ph}
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                         {plant.soil_texture && (
                           <View className="flex-row justify-between mb-3">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               Soil Texture
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.soil_texture}
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                         {plant.maintenance && (
                           <View className="mb-4 pb-4 border-b border-cream-50">
-                            <Text className="text-cream-500 text-base mb-2">
+                            <BodyText className="text-cream-500 text-base mb-2">
                               Maintenance
-                            </Text>
+                            </BodyText>
                             <HtmlRenderer
                               content={plant.maintenance.toString()}
                             />
@@ -471,12 +473,12 @@ export default function PlantDetailScreen() {
                         )}
                         {plant.usda_hardiness_zones && (
                           <View className="flex-row justify-between">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               USDA Zones
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.usda_hardiness_zones}
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                       </View>
@@ -492,9 +494,9 @@ export default function PlantDetailScreen() {
                       plant.flower_bloom_time) && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Flower Features
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
                           {plant.flower_description && (
@@ -506,30 +508,30 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.flower_color && (
                             <View className="flex-row justify-between mb-3">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Color
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.flower_color)
                                   ? plant.flower_color
                                       .filter(Boolean)
                                       .join(", ")
                                   : plant.flower_color}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                           {plant.flower_bloom_time && (
                             <View className="flex-row justify-between">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Bloom Time
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.flower_bloom_time)
                                   ? plant.flower_bloom_time
                                       .filter(Boolean)
                                       .join(", ")
                                   : plant.flower_bloom_time}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                         </View>
@@ -542,9 +544,9 @@ export default function PlantDetailScreen() {
                       plant.leaf_shape) && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Leaf Features
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
                           {plant.leaf_description && (
@@ -554,26 +556,26 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.leaf_color && (
                             <View className="flex-row justify-between mb-3">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Color
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.leaf_color)
                                   ? plant.leaf_color.filter(Boolean).join(", ")
                                   : plant.leaf_color}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                           {plant.leaf_shape && (
                             <View className="flex-row justify-between">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Shape
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.leaf_shape)
                                   ? plant.leaf_shape.filter(Boolean).join(", ")
                                   : plant.leaf_shape}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                         </View>
@@ -586,9 +588,9 @@ export default function PlantDetailScreen() {
                       plant.fruit_type) && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Fruit Features
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
                           {plant.fruit_description && (
@@ -598,26 +600,26 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.fruit_color && (
                             <View className="flex-row justify-between mb-3">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Color
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.fruit_color)
                                   ? plant.fruit_color.filter(Boolean).join(", ")
                                   : plant.fruit_color}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                           {plant.fruit_type && (
                             <View className="flex-row justify-between">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Type
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {Array.isArray(plant.fruit_type)
                                   ? plant.fruit_type.filter(Boolean).join(", ")
                                   : plant.fruit_type}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                         </View>
@@ -630,43 +632,43 @@ export default function PlantDetailScreen() {
                   <View className="pb-16">
                     <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                       <View className="border-b border-cream-100 pb-3 mb-4">
-                        <Text className="text-lg font-bold text-foreground">
+                        <TitleText className="text-lg font-bold text-foreground">
                           Classification
-                        </Text>
+                        </TitleText>
                       </View>
                       <View>
                         <View className="flex-row justify-between mb-3">
-                          <Text className="text-cream-500 text-base">
+                          <BodyText className="text-cream-500 text-base">
                             Family
-                          </Text>
-                          <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                          </BodyText>
+                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                             {plant.family}
-                          </Text>
+                          </BodyText>
                         </View>
                         <View className="flex-row justify-between mb-3">
-                          <Text className="text-cream-500 text-base">
+                          <BodyText className="text-cream-500 text-base">
                             Genus
-                          </Text>
-                          <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                          </BodyText>
+                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                             {plant.genus}
-                          </Text>
+                          </BodyText>
                         </View>
                         <View className="flex-row justify-between mb-3">
-                          <Text className="text-cream-500 text-base">
+                          <BodyText className="text-cream-500 text-base">
                             Species
-                          </Text>
-                          <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                          </BodyText>
+                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                             {plant.species}
-                          </Text>
+                          </BodyText>
                         </View>
                         {plant.phonetic_spelling && (
                           <View className="flex-row justify-between">
-                            <Text className="text-cream-500 text-base">
+                            <BodyText className="text-cream-500 text-base">
                               Pronunciation
-                            </Text>
-                            <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                            </BodyText>
+                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                               {plant.phonetic_spelling}
-                            </Text>
+                            </BodyText>
                           </View>
                         )}
                       </View>
@@ -681,16 +683,16 @@ export default function PlantDetailScreen() {
                       plant.poison_severity) && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Toxicity Information
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
                           {plant.poison_symptoms && (
                             <View className="mb-4 pb-4 border-b border-cream-50">
-                              <Text className="text-cream-500 text-base mb-2">
+                              <BodyText className="text-cream-500 text-base mb-2">
                                 Symptoms
-                              </Text>
+                              </BodyText>
                               <HtmlRenderer
                                 content={plant.poison_symptoms.toString()}
                               />
@@ -698,9 +700,9 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.poison_toxic_principle && (
                             <View className="mb-4 pb-4 border-b border-cream-50">
-                              <Text className="text-cream-500 text-base mb-2">
+                              <BodyText className="text-cream-500 text-base mb-2">
                                 Toxic Principle
-                              </Text>
+                              </BodyText>
                               <HtmlRenderer
                                 content={plant.poison_toxic_principle.toString()}
                               />
@@ -708,23 +710,23 @@ export default function PlantDetailScreen() {
                           )}
                           {plant.poison_severity && (
                             <View className="flex-row justify-between mb-3">
-                              <Text className="text-cream-500 text-base">
+                              <BodyText className="text-cream-500 text-base">
                                 Severity
-                              </Text>
-                              <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                              </BodyText>
+                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                 {plant.poison_severity}
-                              </Text>
+                              </BodyText>
                             </View>
                           )}
                           {plant.poison_part &&
                             plant.poison_part.length > 0 && (
                               <View className="flex-row justify-between">
-                                <Text className="text-cream-500 text-base">
+                                <BodyText className="text-cream-500 text-base">
                                   Poisonous Parts
-                                </Text>
-                                <Text className="text-foreground text-base font-medium max-w-[60%] text-right">
+                                </BodyText>
+                                <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
                                   {plant.poison_part.filter(Boolean).join(", ")}
-                                </Text>
+                                </BodyText>
                               </View>
                             )}
                         </View>
@@ -734,14 +736,14 @@ export default function PlantDetailScreen() {
                     {plant.problems && plant.problems.length > 0 && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
-                          <Text className="text-lg font-bold text-foreground">
+                          <TitleText className="text-lg font-bold text-foreground">
                             Common Problems
-                          </Text>
+                          </TitleText>
                         </View>
                         <View>
-                          <Text className="text-foreground leading-relaxed">
+                          <BodyText className="text-foreground leading-relaxed">
                             {plant.problems.filter(Boolean).join(", ")}
-                          </Text>
+                          </BodyText>
                         </View>
                       </View>
                     )}
@@ -750,16 +752,16 @@ export default function PlantDetailScreen() {
                       plant.resistance_to_challenges.length > 0 && (
                         <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                           <View className="border-b border-cream-100 pb-3 mb-4">
-                            <Text className="text-lg font-bold text-foreground">
+                            <TitleText className="text-lg font-bold text-foreground">
                               Resistances
-                            </Text>
+                            </TitleText>
                           </View>
                           <View>
-                            <Text className="text-foreground leading-relaxed">
+                            <BodyText className="text-foreground leading-relaxed">
                               {plant.resistance_to_challenges
                                 .filter(Boolean)
                                 .join(", ")}
-                            </Text>
+                            </BodyText>
                           </View>
                         </View>
                       )}

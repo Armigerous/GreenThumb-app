@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { TouchableOpacity, Text, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import FilterModal from "./FilterModal";
 import { premadeFilters } from "@/types/premadeFilters";
+import { BodyText } from "@/components/UI/Text";
 
 interface FilterSelectorProps {
   filters: string[];
@@ -109,9 +110,9 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
         onPress={() => setModalVisible(true)}
       >
         <Feather name="filter" color={"#fffefa"} size={16} />
-        <Text className="ml-2 text-sm font-medium text-primary-foreground">
+        <BodyText className="ml-2 text-sm font-medium text-primary-foreground">
           {filterCount > 0 ? `Filters (${filterCount})` : "Filter"}
-        </Text>
+        </BodyText>
       </TouchableOpacity>
 
       {activeQuickFilterDetails && (
@@ -121,13 +122,13 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
             color={"#555"}
             size={16}
           />
-          <Text className="ml-2 text-sm font-medium text-gray-700">
+          <BodyText className="ml-2 text-sm font-medium text-gray-700">
             {activeQuickFilterDetails.name}
-          </Text>
+          </BodyText>
           <View className="ml-2 px-2 py-0.5 bg-brand-600/20 rounded-full">
-            <Text className="text-xs text-brand-600 font-medium">
+            <BodyText className="text-xs text-brand-600 font-medium">
               Quick Filter
-            </Text>
+            </BodyText>
           </View>
           <TouchableOpacity
             className="ml-2 p-1"

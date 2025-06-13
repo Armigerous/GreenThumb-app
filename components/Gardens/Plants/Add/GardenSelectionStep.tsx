@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import SubmitButton from "../../../UI/SubmitButton";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 
 /**
  * Advanced skeleton loading component for UI elements with pulse animation
@@ -223,16 +224,15 @@ export default function GardenSelectionStep({
   if (isLoading) {
     return (
       <View className="px-4 py-2 flex-1">
-        <Text className="text-xl font-bold mb-3">Select a Garden</Text>
-        <View className="mb-4">
-          <Text className="text-cream-600">
-            Choose which garden you want to add your{" "}
-            <Text className="text-foreground font-medium">
-              {plantName.replace(/'/g, "'")}
-            </Text>{" "}
-            to:
-          </Text>
+        <View className="flex-row items-center mb-4">
+          <TitleText className="text-xl text-foreground">
+            Choose a Garden
+          </TitleText>
         </View>
+        <BodyText className="text-cream-600 mb-6">
+          Select a garden to add{" "}
+          <BodyText className="font-medium">{plantName}</BodyText> to:
+        </BodyText>
 
         <StaggeredSkeletonLoader />
 
@@ -257,26 +257,30 @@ export default function GardenSelectionStep({
           color="#5E994B"
           style={{ marginBottom: 16 }}
         />
-        <Text className="text-xl font-bold mb-2 text-center">
+        <TitleText className="text-xl font-bold mb-2 text-center">
           No Gardens Available
-        </Text>
-        <Text className="text-cream-600 mb-8 text-center">
+        </TitleText>
+        <BodyText className="text-cream-600 mb-8 text-center">
           You need to create a garden before adding plants.
-        </Text>
-        <TouchableOpacity
-          className="bg-brand-500 rounded-xl py-3 px-6 flex-row items-center"
-          onPress={() => router.push("/(home)/gardens/new")}
-          accessibilityRole="button"
-          accessibilityLabel="Create a new garden"
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={20}
-            color="white"
-            style={{ marginRight: 6 }}
-          />
-          <Text className="text-white font-medium">Create Garden</Text>
-        </TouchableOpacity>
+        </BodyText>
+        <View className="bg-cream-100 p-6 rounded-xl mt-4">
+          <View className="items-center mb-4">
+            <Ionicons name="add-circle-outline" size={48} color="#047857" />
+            <TitleText className="text-lg text-foreground text-center mb-2">
+              Create a New Garden
+            </TitleText>
+            <BodyText className="text-cream-600 text-center mb-4">
+              Make a new garden to add your plant to!
+            </BodyText>
+          </View>
+          <SubmitButton
+            onPress={() => router.push("/(home)/gardens/new")}
+            iconName="add-circle-outline"
+            iconPosition="left"
+          >
+            Create New Garden
+          </SubmitButton>
+        </View>
       </View>
     );
   }
@@ -284,16 +288,15 @@ export default function GardenSelectionStep({
   return (
     <View className="px-4 flex-1 flex">
       <View className="flex-1">
-        <Text className="text-xl font-bold mb-3">Select a Garden</Text>
-        <View className="mb-4">
-          <Text className="text-cream-600">
-            Choose which garden you want to add your{" "}
-            <Text className="text-foreground font-medium">
-              {plantName.replace(/'/g, "'")}
-            </Text>{" "}
-            to:
-          </Text>
+        <View className="flex-row items-center mb-4">
+          <TitleText className="text-xl text-foreground">
+            Choose a Garden
+          </TitleText>
         </View>
+        <BodyText className="text-cream-600 mb-6">
+          Select a garden to add{" "}
+          <BodyText className="font-medium">{plantName}</BodyText> to:
+        </BodyText>
 
         {/* Garden search - for when users have many gardens */}
         {gardens && gardens.length > 3 && (
@@ -350,23 +353,13 @@ export default function GardenSelectionStep({
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
-                      <Text
-                        className="text-lg font-medium text-foreground"
-                        numberOfLines={1}
-                      >
+                      <SubtitleText className="text-lg text-foreground mb-1">
                         {garden.name}
-                      </Text>
-                      <View className="flex-row items-center mt-1">
-                        <Ionicons
-                          name="leaf-outline"
-                          size={14}
-                          color="#9CA3AF"
-                          style={{ marginRight: 4 }}
-                        />
-                        <Text className="text-sm text-cream-500">
-                          {garden.total_plants || 0} plants
-                        </Text>
-                      </View>
+                      </SubtitleText>
+                      <BodyText className="text-sm text-cream-600 mb-2">
+                        {garden.total_plants} plants ·{" "}
+                        {garden.health_percentage}% health
+                      </BodyText>
                     </View>
                     {selectedGarden?.garden_id === garden.garden_id && (
                       <Ionicons

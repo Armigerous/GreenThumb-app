@@ -1,0 +1,45 @@
+/**
+ * Font CSS classes
+ */
+
+@layer base {
+  .font-title {
+    font-family: "Mali_400Regular", "Mali", serif !important;
+    font-weight: 500;
+  }
+
+  .font-title-medium {
+    font-family: "Mali_500Medium", "Mali", serif !important;
+    font-weight: 600;
+  }
+
+  .font-title-semibold {
+    font-family: "Mali_600SemiBold", "Mali", serif !important;
+    font-weight: 700;
+  }
+
+  .font-title-bold {
+    font-family: "Mali_700Bold", "Mali", serif !important;
+    font-weight: 900;
+  }
+
+  .font-paragraph {
+    font-family: "Nunito_400Regular", "Nunito", sans-serif !important;
+    font-weight: 400;
+  }
+
+  .font-paragraph-medium {
+    font-family: "Nunito_500Medium", "Nunito", sans-serif !important;
+    font-weight: 500;
+  }
+
+  .font-paragraph-semibold {
+    font-family: "Nunito_600SemiBold", "Nunito", sans-serif !important;
+    font-weight: 600;
+  }
+
+  .font-paragraph-bold {
+    font-family: "Nunito_700Bold", "Nunito", sans-serif !important;
+    font-weight: 700;
+  }
+}

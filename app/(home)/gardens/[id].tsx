@@ -353,7 +353,7 @@ const GardenDetails = () => {
     return (
       <PageContainer scroll={false} padded={false}>
         <View className="pt-5 px-5">
-          <Text className="text-destructive text-lg">
+          <Text className="text-destructive text-lg font-paragraph">
             Error loading garden details. Please try again.
           </Text>
         </View>
@@ -521,12 +521,12 @@ const GardenDetails = () => {
 
             {/* Plant Info */}
             <View className="flex-1 ml-4">
-              <Text className="text-lg text-foreground font-medium">
+              <Text className="text-lg text-foreground font-paragraph font-medium">
                 {plant.nickname}
               </Text>
               <View className="flex-row items-center">
                 <Ionicons name={status.icon} size={16} color={status.color} />
-                <Text className={`text-sm ml-1 ${status.text}`}>
+                <Text className={`text-sm font-paragraph ml-1 ${status.text}`}>
                   {status.description}
                 </Text>
               </View>
@@ -550,10 +550,10 @@ const GardenDetails = () => {
           color="#77B860"
           className="mb-4"
         />
-        <Text className="text-center text-foreground text-xl font-bold mb-2">
+        <Text className="text-center text-foreground text-xl font-title font-bold mb-2">
           Your Garden Awaits
         </Text>
-        <Text className="text-center text-cream-600 mb-6 px-4">
+        <Text className="text-center text-cream-600 font-paragraph mb-6 px-4">
           Add your first plant to start your gardening journey. Track growth,
           care schedules, and watch them thrive!
         </Text>
@@ -613,10 +613,10 @@ const GardenDetails = () => {
             end={{ x: 1, y: 1 }}
             style={{ padding: 24, borderRadius: 12 }}
           >
-            <Text className="text-2xl font-bold text-primary-foreground mb-2">
+            <Text className="text-2xl font-title font-bold text-primary-foreground mb-2">
               Welcome to {gardenData?.name}
             </Text>
-            <Text className="text-lg text-primary-foreground mb-2">
+            <Text className="text-lg font-paragraph text-primary-foreground mb-2">
               {getGardenMessage()}
             </Text>
           </LinearGradient>
@@ -652,10 +652,12 @@ const GardenDetails = () => {
                   <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
                     <Ionicons name="leaf" size={24} color="#77B860" />
                   </View>
-                  <Text className="text-xl font-bold text-brand-700">
+                  <Text className="text-xl font-title font-bold text-brand-700">
                     {dashboardData.total_plants}
                   </Text>
-                  <Text className="text-cream-600 text-xs">PLANTS</Text>
+                  <Text className="text-cream-600 font-paragraph text-xs">
+                    PLANTS
+                  </Text>
                 </View>
 
                 <View className="items-center flex-1">
@@ -671,7 +673,7 @@ const GardenDetails = () => {
                     />
                   </View>
                   <Text
-                    className={`text-xl font-bold ${
+                    className={`text-xl font-title font-bold ${
                       dashboardData.plants_needing_care > 0
                         ? "text-yellow-600"
                         : "text-foreground"
@@ -679,17 +681,21 @@ const GardenDetails = () => {
                   >
                     {dashboardData.plants_needing_care}
                   </Text>
-                  <Text className="text-foreground text-xs">NEED CARE</Text>
+                  <Text className="text-foreground font-paragraph text-xs">
+                    NEED CARE
+                  </Text>
                 </View>
 
                 <View className="items-center flex-1">
                   <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
                     <Ionicons name="heart" size={24} color="#77B860" />
                   </View>
-                  <Text className="text-xl font-bold text-primary">
+                  <Text className="text-xl font-title font-bold text-primary">
                     {dashboardData.health_percentage}%
                   </Text>
-                  <Text className="text-foreground text-xs">HEALTH</Text>
+                  <Text className="text-foreground font-paragraph text-xs">
+                    HEALTH
+                  </Text>
                 </View>
               </View>
             </View>
@@ -706,7 +712,7 @@ const GardenDetails = () => {
                 <View className="my-4">
                   <AnimatedSection delay={400}>
                     <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-destructive font-medium">
+                      <Text className="text-destructive font-paragraph font-medium">
                         Needs Immediate Care
                       </Text>
                     </View>
@@ -721,7 +727,7 @@ const GardenDetails = () => {
                 <View className="my-4">
                   <AnimatedSection delay={500}>
                     <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-yellow-700 font-medium">
+                      <Text className="text-yellow-700 font-paragraph font-medium">
                         Due for Care
                       </Text>
                     </View>
@@ -738,7 +744,7 @@ const GardenDetails = () => {
                 <View className="my-4">
                   <AnimatedSection delay={600}>
                     <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-brand-700 font-medium">
+                      <Text className="text-brand-700 font-paragraph font-medium">
                         Looking Good
                       </Text>
                     </View>

@@ -11,6 +11,40 @@ import {
   checkSupabaseStorage,
   checkRequestingUserIdFunction,
 } from "@/utils/initSupabase";
+import {
+  useFonts,
+  Mali_200ExtraLight,
+  Mali_300Light,
+  Mali_400Regular,
+  Mali_500Medium,
+  Mali_600SemiBold,
+  Mali_700Bold,
+  Mali_200ExtraLight_Italic,
+  Mali_300Light_Italic,
+  Mali_400Regular_Italic,
+  Mali_500Medium_Italic,
+  Mali_600SemiBold_Italic,
+  Mali_700Bold_Italic,
+} from "@expo-google-fonts/mali";
+import {
+  Nunito_200ExtraLight,
+  Nunito_300Light,
+  Nunito_400Regular,
+  Nunito_500Medium,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+  Nunito_900Black,
+  Nunito_200ExtraLight_Italic,
+  Nunito_300Light_Italic,
+  Nunito_400Regular_Italic,
+  Nunito_500Medium_Italic,
+  Nunito_600SemiBold_Italic,
+  Nunito_700Bold_Italic,
+  Nunito_800ExtraBold_Italic,
+  Nunito_900Black_Italic,
+} from "@expo-google-fonts/nunito";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -100,6 +134,57 @@ export default function RootLayout() {
   const [isClerkReady, setIsClerkReady] = useState(true);
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+  // Load fonts
+  const [fontsLoaded, fontError] = useFonts({
+    Mali_200ExtraLight,
+    Mali_300Light,
+    Mali_400Regular,
+    Mali_500Medium,
+    Mali_600SemiBold,
+    Mali_700Bold,
+    Mali_200ExtraLight_Italic,
+    Mali_300Light_Italic,
+    Mali_400Regular_Italic,
+    Mali_500Medium_Italic,
+    Mali_600SemiBold_Italic,
+    Mali_700Bold_Italic,
+    Nunito_200ExtraLight,
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+    Nunito_900Black,
+    Nunito_200ExtraLight_Italic,
+    Nunito_300Light_Italic,
+    Nunito_400Regular_Italic,
+    Nunito_500Medium_Italic,
+    Nunito_600SemiBold_Italic,
+    Nunito_700Bold_Italic,
+    Nunito_800ExtraBold_Italic,
+    Nunito_900Black_Italic,
+  });
+
+  // Log font loading status
+  useEffect(() => {
+    if (fontsLoaded) {
+      console.log("✅ All fonts loaded successfully");
+      console.log("🔤 Mali and Nunito fonts are ready to use");
+    }
+
+    if (fontError) {
+      console.error("❌ Font loading error:", fontError);
+      console.log("📋 Attempted to load:", [
+        "Mali_400Regular",
+        "Mali_700Bold",
+        "Nunito_400Regular",
+        "Nunito_700Bold",
+        "... and other weights",
+      ]);
+    }
+  }, [fontsLoaded, fontError]);
+
   // Check if we have a publishable key
   useEffect(() => {
     if (!publishableKey) {
@@ -107,6 +192,16 @@ export default function RootLayout() {
       setIsClerkReady(false);
     }
   }, [publishableKey]);
+
+  // If fonts are not loaded or clerk is not ready, show loading screen
+  if (!fontsLoaded && !fontError) {
+    return <LoadingSpinner message="Loading fonts..." />;
+  }
+
+  // If font loading failed, log the error but continue
+  if (fontError) {
+    console.error("Error loading fonts:", fontError);
+  }
 
   // If Clerk is not ready, show a fallback UI
   if (!isClerkReady) {

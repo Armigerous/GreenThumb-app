@@ -16,6 +16,7 @@ import { Feather } from "@expo/vector-icons";
 import { allFilters } from "@/types/filterData";
 import { premadeFilters } from "@/types/premadeFilters";
 import AnimatedProgressBar from "../UI/AnimatedProgressBar";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 
 // Define a type for Feather icon names
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
@@ -171,12 +172,12 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
                     <Feather name={filter.icon} size={22} color="#555" />
                   </View>
                   <View className="ml-3 flex-1">
-                    <Text className="font-bold text-lg text-gray-800">
+                    <TitleText className="font-bold text-lg text-gray-800">
                       {filter.name}
-                    </Text>
-                    <Text className="text-xs text-gray-500 mt-0.5">
+                    </TitleText>
+                    <SubtitleText className="text-xs text-gray-500 mt-0.5">
                       Quick Filter
-                    </Text>
+                    </SubtitleText>
                   </View>
                 </View>
                 <TouchableOpacity
@@ -191,16 +192,16 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
 
             {/* Description */}
             <View className="px-4 py-3 bg-cream-400/10">
-              <Text className="text-sm text-gray-600 leading-5">
+              <BodyText className="text-sm text-gray-600 leading-5">
                 {filter.description}
-              </Text>
+              </BodyText>
             </View>
 
             {/* Filter Groups */}
             <ScrollView className="px-4 py-3" style={{ maxHeight: 300 }}>
-              <Text className="text-xs font-bold mb-3 text-brand-600">
+              <TitleText className="text-xs font-bold mb-3 text-brand-600">
                 Includes these filters:
-              </Text>
+              </TitleText>
 
               {Object.keys(groupedFilters).map((sectionId) => {
                 const section = groupedFilters[sectionId];
@@ -208,9 +209,9 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
                   <View key={sectionId} className="mb-4 last:mb-0">
                     <View className="flex-row items-center mb-2">
                       <Feather name={section.icon} size={16} color="#555" />
-                      <Text className="text-sm font-semibold ml-2 text-gray-700">
+                      <BodyText className="text-sm font-semibold ml-2 text-gray-700">
                         {section.name}
-                      </Text>
+                      </BodyText>
                     </View>
                     <View className="bg-cream-400/20 p-3 rounded-lg ml-2">
                       {section.filters.map((filter, idx) => (
@@ -219,12 +220,12 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
                           className="flex-row items-center mb-2 last:mb-0"
                         >
                           <View className="w-2 h-2 rounded-full bg-gray-400 mr-2" />
-                          <Text className="text-xs flex-1 text-gray-700">
-                            <Text className="font-medium">
+                          <BodyText className="text-xs flex-1 text-gray-700">
+                            <BodyText className="font-medium">
                               {filter.categoryName}:
-                            </Text>{" "}
+                            </BodyText>{" "}
                             {filter.value}
-                          </Text>
+                          </BodyText>
                         </View>
                       ))}
                     </View>
@@ -239,9 +240,9 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
                 className="flex-1 py-3 bg-cream-400/40 rounded-lg items-center"
                 onPress={onClose}
               >
-                <Text className="font-medium text-sm text-gray-700">
+                <BodyText className="font-medium text-sm text-gray-700">
                   Cancel
-                </Text>
+                </BodyText>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 py-3 bg-brand-600 rounded-lg items-center"
@@ -250,7 +251,9 @@ const QuickFilterTooltip: React.FC<QuickFilterTooltipProps> = ({
                   onApply(filter.id);
                 }}
               >
-                <Text className="text-white font-semibold text-sm">Apply</Text>
+                <BodyText className="text-white font-semibold text-sm">
+                  Apply
+                </BodyText>
               </TouchableOpacity>
             </View>
           </View>
@@ -434,9 +437,9 @@ export default function FilterModal({
           <TouchableOpacity onPress={onClose}>
             <Feather name="x" size={24} color="#000" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold">Filter Plants</Text>
+          <TitleText className="text-xl font-bold">Filter Plants</TitleText>
           <TouchableOpacity onPress={handleApplyFilters}>
-            <Text className="text-brand-600 font-semibold">Apply</Text>
+            <BodyText className="text-brand-600 font-semibold">Apply</BodyText>
           </TouchableOpacity>
         </View>
 
@@ -462,7 +465,9 @@ export default function FilterModal({
         {/* Premade Filters */}
         <View className="p-4 border-b border-cream-300">
           <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-lg font-semibold">Quick Filters</Text>
+            <TitleText className="text-lg font-semibold">
+              Quick Filters
+            </TitleText>
             {activeFilterDetails && (
               <TouchableOpacity
                 onPress={() =>
@@ -470,9 +475,9 @@ export default function FilterModal({
                 }
                 className="flex-row items-center"
               >
-                <Text className="text-primary mr-1">
+                <BodyText className="text-primary mr-1">
                   {showQuickFilterDetails ? "Hide details" : "Show details"}
-                </Text>
+                </BodyText>
                 <Feather
                   name={showQuickFilterDetails ? "chevron-up" : "chevron-down"}
                   size={16}
@@ -494,26 +499,26 @@ export default function FilterModal({
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center justify-between">
-                    <Text className="font-bold text-base text-gray-800">
+                    <TitleText className="font-bold text-base text-gray-800">
                       {activeFilterDetails.name}
-                    </Text>
+                    </TitleText>
                     <TouchableOpacity
                       onPress={clearAllFilters}
                       className="bg-cream-400/60 px-2 py-1 rounded-md"
                     >
-                      <Text className="text-xs font-medium">Clear</Text>
+                      <BodyText className="text-xs font-medium">Clear</BodyText>
                     </TouchableOpacity>
                   </View>
-                  <Text className="text-sm text-gray-600 mt-1 leading-5">
+                  <BodyText className="text-sm text-gray-600 mt-1 leading-5">
                     {activeFilterDetails.description}
-                  </Text>
+                  </BodyText>
                 </View>
               </View>
 
               <View className="bg-white p-3 rounded-md mb-2">
-                <Text className="text-xs font-medium mb-2 text-gray-700">
+                <BodyText className="text-xs font-medium mb-2 text-gray-700">
                   Filter Progress
-                </Text>
+                </BodyText>
                 <View className="flex-row items-center mb-1">
                   <View className="flex-1">
                     <AnimatedProgressBar
@@ -527,16 +532,16 @@ export default function FilterModal({
                       duration={500}
                     />
                   </View>
-                  <Text className="text-xs ml-2 font-medium">
+                  <BodyText className="text-xs ml-2 font-medium">
                     {activeFilterDetails.appliedCount}/
                     {activeFilterDetails.totalCount}
-                  </Text>
+                  </BodyText>
                 </View>
-                <Text className="text-xs text-gray-500 mt-1">
+                <BodyText className="text-xs text-gray-500 mt-1">
                   {activeFilterDetails.isFullyApplied
                     ? "All filters in this quick filter are applied"
                     : "Some filters in this quick filter are not applied"}
-                </Text>
+                </BodyText>
               </View>
 
               <TouchableOpacity
@@ -547,9 +552,9 @@ export default function FilterModal({
                 }}
               >
                 <Feather name="info" size={14} color="#555" />
-                <Text className="text-sm ml-1 text-gray-700 font-medium">
+                <BodyText className="text-sm ml-1 text-gray-700 font-medium">
                   View Filter Details
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             </View>
           )}
@@ -593,13 +598,13 @@ export default function FilterModal({
                       size={24}
                       color={isActive ? "#fff" : "#555"}
                     />
-                    <Text
+                    <BodyText
                       className={`text-sm text-center mt-1 ${
                         isActive ? "text-white font-medium" : ""
                       }`}
                     >
                       {filter.name}
-                    </Text>
+                    </BodyText>
                     {isPartiallyApplied && (
                       <View className="absolute top-1 right-1 w-3 h-3 bg-accent-400 rounded-full" />
                     )}
@@ -624,13 +629,13 @@ export default function FilterModal({
                       size={14}
                       color={isActive ? "#fff" : "#555"}
                     />
-                    <Text
+                    <BodyText
                       className={`text-xs ml-1 ${
                         isActive ? "text-white" : "text-gray-700"
                       }`}
                     >
                       Info
-                    </Text>
+                    </BodyText>
                   </TouchableOpacity>
 
                   {tooltipFilter === filter.id && (
@@ -659,9 +664,9 @@ export default function FilterModal({
               >
                 <View className="flex-row items-center">
                   <Feather name={section.icon} size={20} color="#555" />
-                  <Text className="text-lg font-medium ml-2">
+                  <BodyText className="text-lg font-medium ml-2">
                     {section.name}
-                  </Text>
+                  </BodyText>
                 </View>
                 <Feather
                   name={
@@ -690,15 +695,15 @@ export default function FilterModal({
                             size={18}
                             color="#666"
                           />
-                          <Text className="text-base font-medium ml-2">
+                          <BodyText className="text-base font-medium ml-2">
                             {category.name}
                             {category.isAdvanced && showAdvancedFilters && (
-                              <Text className="text-xs text-brand-600 ml-1">
+                              <BodyText className="text-xs text-brand-600 ml-1">
                                 {" "}
                                 (Advanced)
-                              </Text>
+                              </BodyText>
                             )}
-                          </Text>
+                          </BodyText>
                         </View>
                         <Feather
                           name={
@@ -741,7 +746,9 @@ export default function FilterModal({
                                     />
                                   )}
                                 </View>
-                                <Text className="text-base ml-2">{option}</Text>
+                                <BodyText className="text-base ml-2">
+                                  {option}
+                                </BodyText>
                               </TouchableOpacity>
                             );
                           })}
@@ -762,12 +769,12 @@ export default function FilterModal({
             .length > 0 && (
             <View className="mb-3 bg-cream-400/20 p-3 rounded-lg">
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="font-semibold">Selected Filters</Text>
+                <BodyText className="font-semibold">Selected Filters</BodyText>
                 <TouchableOpacity
                   onPress={clearAllFilters}
                   className="bg-cream-400/40 px-2 py-1 rounded"
                 >
-                  <Text className="text-xs">Clear All</Text>
+                  <BodyText className="text-xs">Clear All</BodyText>
                 </TouchableOpacity>
               </View>
               <ScrollView style={{ maxHeight: 100 }}>
@@ -791,10 +798,12 @@ export default function FilterModal({
                     return (
                       <View key={index} className="flex-row items-center mb-1">
                         <Feather name={categoryIcon} size={12} color="#555" />
-                        <Text className="text-xs ml-1">
-                          <Text className="font-medium">{categoryName}:</Text>{" "}
+                        <BodyText className="text-xs ml-1">
+                          <BodyText className="font-medium">
+                            {categoryName}:
+                          </BodyText>{" "}
                           {value}
-                        </Text>
+                        </BodyText>
                         <TouchableOpacity
                           className="ml-auto p-1"
                           onPress={() => toggleOption(key, false)}
@@ -810,7 +819,9 @@ export default function FilterModal({
               {activeQuickFilter && (
                 <View className="mt-2 pt-2 border-t border-cream-300/50">
                   <View className="flex-row items-center">
-                    <Text className="text-xs text-gray-600">Quick Filter:</Text>
+                    <BodyText className="text-xs text-gray-600">
+                      Quick Filter:
+                    </BodyText>
                     <View className="flex-row items-center ml-1 bg-brand-600/10 px-2 py-0.5 rounded-full">
                       {premadeFilters.find(
                         (f) => f.id === activeQuickFilter
@@ -825,10 +836,10 @@ export default function FilterModal({
                           color="#555"
                         />
                       )}
-                      <Text className="text-xs ml-1 font-medium">
+                      <BodyText className="text-xs ml-1 font-medium">
                         {premadeFilters.find((f) => f.id === activeQuickFilter)
                           ?.name || ""}
-                      </Text>
+                      </BodyText>
                     </View>
                   </View>
                 </View>
@@ -841,22 +852,26 @@ export default function FilterModal({
               className="flex-1 mr-2 py-3 bg-destructive rounded-lg items-center"
               onPress={clearAllFilters}
             >
-              <Text className="text-white font-semibold">Clear All</Text>
+              <BodyText className="text-white font-semibold">
+                Clear All
+              </BodyText>
             </TouchableOpacity>
             <TouchableOpacity
               className="flex-1 ml-2 py-3 bg-cream-400/40 rounded-lg items-center"
               onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
             >
-              <Text className="font-semibold">
+              <BodyText className="font-semibold">
                 {showAdvancedFilters ? "Hide Advanced" : "Show Advanced"}
-              </Text>
+              </BodyText>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
             className="py-3 bg-brand-600 rounded-lg items-center"
             onPress={handleApplyFilters}
           >
-            <Text className="text-white font-semibold">Apply Filters</Text>
+            <BodyText className="text-white font-semibold">
+              Apply Filters
+            </BodyText>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

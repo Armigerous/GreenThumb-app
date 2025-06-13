@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View, useWindowDimensions } from "react-native";
+import { BodyText } from "@/components/UI/Text";
 
 type AuthErrorProps = {
   error: string | null;
@@ -17,13 +18,13 @@ export function AuthError({ error }: AuthErrorProps) {
         isSmallDevice ? "p-2 mb-3" : "p-3 mb-4"
       }`}
     >
-      <Text
+      <BodyText
         className={`text-destructive text-center ${
           isSmallDevice ? "text-xs" : "text-sm"
         }`}
       >
         {error}
-      </Text>
+      </BodyText>
     </View>
   );
 }

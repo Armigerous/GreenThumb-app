@@ -158,10 +158,10 @@ export function AuthGreeting({
 
         {/* Text section at bottom */}
         <View className="w-full">
-          <Text className="text-2xl md:text-3xl font-bold text-foreground text-center">
+          <Text className="text-2xl md:text-3xl font-title font-bold text-foreground text-center">
             {title}
           </Text>
-          <Text className="text-base md:text-lg text-foreground/80 text-center mt-1">
+          <Text className="text-base md:text-lg font-paragraph text-foreground/80 text-center mt-1">
             {subtitle}
           </Text>
         </View>
@@ -197,7 +197,7 @@ export function AuthGreeting({
         {/* Title with dynamic size animation */}
         <Animated.Text
           style={[titleTextStyle]}
-          className="text-foreground font-bold text-center"
+          className="text-foreground font-title font-bold text-center"
         >
           {title}
         </Animated.Text>
@@ -205,7 +205,7 @@ export function AuthGreeting({
         {/* Subtitle with dynamic size animation */}
         <Animated.Text
           style={[subtitleTextStyle]}
-          className="text-foreground/80 text-center mt-1"
+          className="text-foreground/80 font-paragraph text-center mt-1"
         >
           {subtitle}
         </Animated.Text>

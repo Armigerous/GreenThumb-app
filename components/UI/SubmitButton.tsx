@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, View } from "react-native";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
 import { Ionicons } from "@expo/vector-icons";
+import { BodyText } from "./Text";
 
 /**
  * SubmitButton component for form submissions with loading state
@@ -136,9 +137,7 @@ export default function SubmitButton({
         {isLoading ? (
           <View className="flex-row items-center space-x-2">
             <CompactSpinner size={18} color={spinnerColor} />
-            <Text className={`font-medium ${textClass} ml-2`}>
-              {loadingLabel}
-            </Text>
+            <BodyText className={`${textClass} ml-2`}>{loadingLabel}</BodyText>
           </View>
         ) : (
           <View className="flex-row items-center justify-center">
@@ -153,9 +152,9 @@ export default function SubmitButton({
 
             {!iconOnly &&
               (typeof children === "string" ? (
-                <Text className={`font-medium ${textClass} text-center`}>
+                <BodyText className={`${textClass} text-center`}>
                   {children}
-                </Text>
+                </BodyText>
               ) : (
                 children
               ))}

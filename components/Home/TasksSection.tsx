@@ -1,12 +1,13 @@
 import React from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { TaskWithDetails } from "@/types/garden";
 import { SectionHeader } from "./SectionHeader";
-import { AnimatedSection } from "./AnimatedSection";
+import { StaggeredContent } from "@/components/UI/StaggeredContent";
 import { TaskList } from "@/components/TaskList";
+import { SubtitleText, BodyText } from "@/components/UI/Text";
 
 interface TasksSectionProps {
   allOverdueTasks: TaskWithDetails[];
@@ -104,45 +105,51 @@ export function TasksSection({
 
   return (
     <View className="mb-6">
-      <SectionHeader
-        title={
-          isLoading
-            ? "Tasks"
-            : allOverdueTasks.length > 0
-            ? "Missed Tasks"
-            : "Today's Tasks"
-        }
-        icon={
-          isLoading
-            ? "hourglass-outline"
-            : allOverdueTasks.length > 0
-            ? "alert-circle"
-            : "calendar"
-        }
-        onSeeAll={() => router.push("/(home)/calendar")}
-        badge={!isLoading ? getTasksBadge() : null}
-      />
+      <StaggeredContent index={2} baseDelay={400} staggerInterval={80}>
+        <SectionHeader
+          title={
+            isLoading
+              ? "Tasks"
+              : allOverdueTasks.length > 0
+              ? "Missed Tasks"
+              : "Today's Tasks"
+          }
+          icon={
+            isLoading
+              ? "hourglass-outline"
+              : allOverdueTasks.length > 0
+              ? "alert-circle"
+              : "calendar"
+          }
+          onSeeAll={() => router.push("/(home)/calendar")}
+          badge={!isLoading ? getTasksBadge() : null}
+        />
+      </StaggeredContent>
 
       {isLoading ? (
-        <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+          <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+        </StaggeredContent>
       ) : hasError ? (
-        <View className="bg-red-50 rounded-xl p-4 items-center">
-          <Ionicons name="alert-circle-outline" size={24} color="#ef4444" />
-          <Text className="text-destructive mt-2 text-center">
-            Error loading tasks
-          </Text>
-        </View>
+        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+          <View className="bg-red-50 rounded-xl p-4 items-center">
+            <Ionicons name="alert-circle-outline" size={24} color="#ef4444" />
+            <BodyText className="text-destructive mt-2 text-center">
+              Error loading tasks
+            </BodyText>
+          </View>
+        </StaggeredContent>
       ) : allOverdueTasks.length > 0 ? (
-        <AnimatedSection delay={200}>
+        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
           <View className="bg-red-50 rounded-xl p-4 mb-4">
-            <Text className="text-destructive font-bold mb-2">
+            <SubtitleText className="text-destructive font-bold mb-2">
               You have {allOverdueTasks.length} missed{" "}
               {allOverdueTasks.length === 1 ? "task" : "tasks"}!
-            </Text>
-            <Text className="text-destructive text-sm">
+            </SubtitleText>
+            <BodyText className="text-destructive text-sm">
               These tasks were due yesterday or earlier and still need to be
               completed.
-            </Text>
+            </BodyText>
           </View>
           <TaskList
             tasks={allOverdueTasks}
@@ -161,16 +168,16 @@ export function TasksSection({
               className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
               onPress={() => router.push("/(home)/calendar")}
             >
-              <Text className="text-red-600 font-medium">
+              <BodyText className="text-red-600 font-medium">
                 {allOverdueTasks.length == 4
                   ? "+" + (allOverdueTasks.length - 3) + " more missed task"
                   : "+" + (allOverdueTasks.length - 3) + " more missed tasks"}
-              </Text>
+              </BodyText>
             </TouchableOpacity>
           )}
-        </AnimatedSection>
+        </StaggeredContent>
       ) : todaysTasks && todaysTasks.length > 0 ? (
-        <AnimatedSection delay={200}>
+        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
           <TaskList
             tasks={todaysTasks}
             onToggleComplete={handleCompleteTask}
@@ -187,16 +194,16 @@ export function TasksSection({
               className="p-3 bg-white items-center mt-2 rounded-xl border border-brand-100 shadow-sm"
               onPress={() => router.push("/(home)/calendar")}
             >
-              <Text className="text-brand-600 font-medium">
+              <BodyText className="text-brand-600 font-medium">
                 {todaysTasks.length == 4
                   ? "+" + (todaysTasks.length - 3) + " more task"
                   : "+" + (todaysTasks.length - 3) + " more tasks"}
-              </Text>
+              </BodyText>
             </TouchableOpacity>
           )}
-        </AnimatedSection>
+        </StaggeredContent>
       ) : (
-        <AnimatedSection delay={200}>
+        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
           <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
             {getNoTasksSummary() ? (
               <>
@@ -205,12 +212,12 @@ export function TasksSection({
                   size={32}
                   color={getNoTasksSummary()!.color}
                 />
-                <Text className="text-base text-cream-700 mt-2 text-center mb-2">
+                <BodyText className="text-base text-cream-700 mt-2 text-center mb-2">
                   No tasks for today
-                </Text>
-                <Text className="text-sm text-cream-600 text-center mb-3">
+                </BodyText>
+                <BodyText className="text-sm text-cream-600 text-center mb-3">
                   {getNoTasksSummary()!.text}
-                </Text>
+                </BodyText>
                 <TouchableOpacity
                   className="px-4 py-2 bg-white rounded-lg border border-red-300"
                   style={{
@@ -218,14 +225,14 @@ export function TasksSection({
                   }}
                   onPress={() => router.push("/(home)/calendar")}
                 >
-                  <Text
+                  <BodyText
                     style={{
                       color: getNoTasksSummary()!.actionColor,
                     }}
                     className="font-medium"
                   >
                     {getNoTasksSummary()!.action}
-                  </Text>
+                  </BodyText>
                 </TouchableOpacity>
               </>
             ) : (
@@ -235,27 +242,27 @@ export function TasksSection({
                   size={32}
                   color="#5E994B"
                 />
-                <Text className="text-base text-cream-700 mt-2 text-center mb-2">
+                <BodyText className="text-base text-cream-700 mt-2 text-center mb-2">
                   All done for today!
-                </Text>
+                </BodyText>
 
                 {/* Personalized call-to-action */}
-                <Text className="text-sm text-cream-600 text-center mb-3">
+                <BodyText className="text-sm text-cream-600 text-center mb-3">
                   {getPersonalizedSuggestion().text}
-                </Text>
+                </BodyText>
 
                 <TouchableOpacity
                   className="px-4 py-2 bg-brand-50 rounded-lg border border-brand-200"
                   onPress={() => router.push(getPersonalizedSuggestion().route)}
                 >
-                  <Text className="text-brand-600 font-medium">
+                  <BodyText className="text-brand-600 font-medium">
                     {getPersonalizedSuggestion().action}
-                  </Text>
+                  </BodyText>
                 </TouchableOpacity>
               </>
             )}
           </View>
-        </AnimatedSection>
+        </StaggeredContent>
       )}
     </View>
   );

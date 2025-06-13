@@ -11,6 +11,7 @@ import { AuthToggle } from "./AuthToggle";
 import { AuthButton } from "./AuthButton";
 import Animated, { AnimatedStyleProp } from "react-native-reanimated";
 import { CompactSpinner } from "@/components/UI/LoadingSpinner";
+import { BodyText } from "@/components/UI/Text";
 
 type AuthInputSectionProps = {
   isPhone: boolean;
@@ -71,9 +72,9 @@ export function AuthInputSection({
         labelRightComponent={
           showForgotPassword ? (
             <TouchableOpacity onPress={onForgotPasswordPress}>
-              <Text className="text-primary text-sm font-semibold">
+              <BodyText className="text-primary text-sm font-semibold">
                 Forgot your password?
-              </Text>
+              </BodyText>
             </TouchableOpacity>
           ) : null
         }

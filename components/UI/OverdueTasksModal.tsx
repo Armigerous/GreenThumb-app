@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { TitleText, SubtitleText, BodyText } from "./Text";
 
 // Define the notification data structure
 interface OverdueTask {
@@ -139,11 +140,11 @@ export default function OverdueTasksModal({
               <View className="w-10 h-10 bg-red-100 rounded-lg items-center justify-center mr-3">
                 <Ionicons name="alert-circle" size={24} color="#ef4444" />
               </View>
-              <Text className="text-xl font-bold text-foreground">
+              <TitleText className="text-xl text-foreground">
                 {gardenId
                   ? filteredNotifications[0]?.garden_name || "Garden"
                   : "Garden Health Alert"}
-              </Text>
+              </TitleText>
             </View>
 
             <TouchableOpacity onPress={onClose}>
@@ -153,35 +154,35 @@ export default function OverdueTasksModal({
 
           {/* Summary information */}
           <View className="mb-4 bg-red-50 p-3 rounded-lg">
-            <Text className="text-red-800 font-medium">
+            <BodyText className="text-red-800 font-medium">
               {totalOverdueTasks} overdue{" "}
               {totalOverdueTasks === 1 ? "task" : "tasks"} across{" "}
               {filteredNotifications.length}{" "}
               {filteredNotifications.length === 1 ? "garden" : "gardens"}
-            </Text>
+            </BodyText>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {filteredNotifications.map((notification) => (
               <View key={notification.garden_id} className="pb-4">
-                <Text className="text-lg font-semibold text-foreground mb-2">
+                <SubtitleText className="text-foreground text-lg mb-2">
                   {notification.garden_name}
-                </Text>
+                </SubtitleText>
 
                 <View className="flex-row items-center mb-2 bg-red-50 p-3 rounded-lg">
                   <Ionicons name="trending-down" size={20} color="#ef4444" />
-                  <Text className="text-red-600 font-medium ml-2">
+                  <BodyText className="text-red-600 font-medium ml-2">
                     {notification.health_impact}% health impact
-                  </Text>
+                  </BodyText>
                 </View>
 
-                <Text className="text-sm text-cream-700 mb-2">
+                <BodyText className="text-sm text-cream-700 font-paragraph mb-2">
                   {notification.overdue_tasks_count}{" "}
                   {notification.overdue_tasks_count === 1
                     ? "task has"
                     : "tasks have"}{" "}
                   become overdue:
-                </Text>
+                </BodyText>
 
                 {notification.tasks && notification.tasks.length > 0 ? (
                   notification.tasks.map((task) => (
@@ -197,37 +198,37 @@ export default function OverdueTasksModal({
                         />
                       </View>
                       <View className="flex-1">
-                        <Text className="text-sm font-medium">
+                        <BodyText className="text-foreground font-medium">
                           {task.task_type} {task.plant_nickname}
-                        </Text>
-                        <Text className="text-xs text-cream-600">
+                        </BodyText>
+                        <BodyText className="text-sm text-cream-600">
                           Due: {formatDate(task.due_date)}
-                        </Text>
+                        </BodyText>
                       </View>
                     </View>
                   ))
                 ) : (
-                  <Text className="text-sm text-cream-600 italic">
+                  <BodyText className="text-sm text-cream-600 font-paragraph italic">
                     No task details available
-                  </Text>
+                  </BodyText>
                 )}
 
                 <TouchableOpacity
                   className="bg-primary rounded-lg p-3 mt-2"
                   onPress={() => handleViewGarden(notification.garden_id)}
                 >
-                  <Text className="text-white text-center font-medium">
-                    View Garden
-                  </Text>
+                  <BodyText className="text-white text-center font-medium">
+                    {gardenId ? "View Tasks" : "View Gardens"}
+                  </BodyText>
                 </TouchableOpacity>
               </View>
             ))}
           </ScrollView>
 
           <TouchableOpacity onPress={onClose}>
-            <Text className="text-cream-700 text-center font-medium">
+            <BodyText className="text-cream-700 text-center font-medium">
               Close
-            </Text>
+            </BodyText>
           </TouchableOpacity>
         </View>
       </View>

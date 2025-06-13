@@ -7,6 +7,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { TitleText, BodyText } from "@/components/UI/Text";
 
 type AuthHeaderProps = {
   backPath: any; // Using any for path to bypass type checking
@@ -38,13 +39,13 @@ export function AuthHeader({
               size={isSmallDevice ? 18 : 20}
               color="#2e2c29"
             />
-            <Text
+            <TitleText
               className={`text-foreground ${
                 isSmallDevice ? "text-sm" : "text-base"
               } ml-1`}
             >
               Back
-            </Text>
+            </TitleText>
           </View>
         </TouchableOpacity>
       </Link>
@@ -52,13 +53,13 @@ export function AuthHeader({
       <Link href={alternateAuthPath} asChild>
         <TouchableOpacity>
           <View className="flex-row items-center">
-            <Text
+            <BodyText
               className={`text-primary mr-1 ${
                 isSmallDevice ? "text-xs" : "text-sm"
               }`}
             >
               {alternateAuthText}
-            </Text>
+            </BodyText>
             <Ionicons
               name={alternateAuthIcon}
               size={isSmallDevice ? 14 : 16}

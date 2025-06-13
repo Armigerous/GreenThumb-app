@@ -1,9 +1,10 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import type { Garden, GardenDashboard } from "@/types/garden";
 import AnimatedProgressBar from "../UI/AnimatedProgressBar";
+import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
 
 type GardenDetailHeaderProps = {
   garden: Garden;
@@ -46,9 +47,9 @@ export default function GardenDetailHeader({
         </View>
       </View>
 
-      <Text className="text-2xl text-foreground font-bold mb-4">
+      <TitleText className="text-2xl text-foreground mb-4">
         {garden.name}
-      </Text>
+      </TitleText>
 
       {dashboardData ? (
         <View className="space-y-4">
@@ -56,35 +57,37 @@ export default function GardenDetailHeader({
             <View className="flex-row items-center">
               <View className="flex-row bg-brand-50 rounded-lg items-center px-3 py-1.5">
                 <Ionicons name="leaf" size={16} color="#77B860" />
-                <Text className="text-brand-600 text-sm font-medium ml-1">
+                <BodyText className="text-brand-600 text-sm font-medium ml-1">
                   {dashboardData.total_plants}{" "}
                   {dashboardData.total_plants === 1 ? "Plant" : "Plants"}
-                </Text>
+                </BodyText>
               </View>
             </View>
 
             {dashboardData.plants_needing_care > 0 ? (
               <TouchableOpacity className="bg-yellow-100 rounded-lg px-3 py-1.5">
-                <Text className="text-sm text-yellow-700 font-medium">
+                <BodyText className="text-sm text-yellow-700 font-medium">
                   {dashboardData.plants_needing_care} need
                   {dashboardData.plants_needing_care === 1 ? "s" : ""} care
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             ) : (
               <View className="bg-brand-100 rounded-lg px-3 py-1.5">
-                <Text className="text-brand-700 text-sm font-medium">
+                <BodyText className="text-brand-700 text-sm font-medium">
                   All plants healthy
-                </Text>
+                </BodyText>
               </View>
             )}
           </View>
 
           <View className="bg-cream-50 p-3 rounded-lg">
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-cream-700 font-medium">Garden Health</Text>
-              <Text className="text-cream-600 text-sm">
+              <SubtitleText className="text-cream-700">
+                Garden Health
+              </SubtitleText>
+              <BodyText className="text-cream-600 text-sm">
                 {dashboardData.health_percentage}% Healthy
-              </Text>
+              </BodyText>
             </View>
             <AnimatedProgressBar
               percentage={dashboardData.health_percentage}
@@ -96,9 +99,9 @@ export default function GardenDetailHeader({
         </View>
       ) : (
         <View className="bg-cream-50 p-4 rounded-lg">
-          <Text className="text-center text-cream-600 mb-3">
+          <BodyText className="text-center text-cream-600 mb-3">
             Get started by adding your first plant
-          </Text>
+          </BodyText>
           <TouchableOpacity
             onPress={onAddPlant}
             className="bg-brand-500 rounded-full items-center py-2"

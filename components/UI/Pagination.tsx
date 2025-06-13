@@ -1,6 +1,7 @@
 import React, { memo } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { BodyText } from "./Text";
 
 interface PaginationProps {
   currentPage: number;
@@ -89,12 +90,14 @@ const Pagination = memo(
             accessibilityLabel="Previous page"
           >
             <Ionicons name="chevron-back" size={18} color="#047857" />
-            <Text className="text-brand-700 ml-1 font-medium">Previous</Text>
+            <BodyText className="text-brand-700 ml-1 font-medium">
+              Previous
+            </BodyText>
           </TouchableOpacity>
 
-          <Text className="text-cream-600">
+          <BodyText className="text-cream-600">
             Page {currentPage} of {totalPages}
-          </Text>
+          </BodyText>
 
           <TouchableOpacity
             onPress={() => !isLastPage && onPageChange(currentPage + 1)}
@@ -104,7 +107,9 @@ const Pagination = memo(
             }`}
             accessibilityLabel="Next page"
           >
-            <Text className="text-brand-700 mr-1 font-medium">Next</Text>
+            <BodyText className="text-brand-700 mr-1 font-medium">
+              Next
+            </BodyText>
             <Ionicons name="chevron-forward" size={18} color="#047857" />
           </TouchableOpacity>
         </View>
@@ -126,7 +131,9 @@ const Pagination = memo(
             accessibilityLabel="Previous page"
           >
             <Ionicons name="chevron-back" size={20} color="#047857" />
-            <Text className="text-brand-700 ml-1 font-medium">Prev</Text>
+            <BodyText className="text-brand-700 ml-1 font-medium">
+              Prev
+            </BodyText>
           </TouchableOpacity>
 
           {/* Page numbers */}
@@ -142,7 +149,7 @@ const Pagination = memo(
                   // Render ellipsis
                   return (
                     <View key={`ellipsis-${index}`} className="px-2 py-1">
-                      <Text className="text-cream-500">...</Text>
+                      <BodyText className="text-cream-500">...</BodyText>
                     </View>
                   );
                 }
@@ -160,13 +167,15 @@ const Pagination = memo(
                     }`}
                     accessibilityLabel={`Page ${page}`}
                   >
-                    <Text
+                    <BodyText
                       className={`${
-                        isActive ? "text-white font-medium" : "text-brand-700"
+                        isActive
+                          ? "text-foreground font-medium"
+                          : "text-cream-600"
                       }`}
                     >
                       {page}
-                    </Text>
+                    </BodyText>
                   </TouchableOpacity>
                 );
               })}
@@ -182,7 +191,9 @@ const Pagination = memo(
             }`}
             accessibilityLabel="Next page"
           >
-            <Text className="text-brand-700 mr-1 font-medium">Next</Text>
+            <BodyText className="text-brand-700 mr-1 font-medium">
+              Next
+            </BodyText>
             <Ionicons name="chevron-forward" size={20} color="#047857" />
           </TouchableOpacity>
         </View>

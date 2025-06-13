@@ -5,6 +5,10 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        title: ["Mali_400Regular", "Mali_700Bold", "serif"],
+        paragraph: ["Nunito_400Regular", "Nunito_600SemiBold", "sans-serif"],
+      },
       colors: {
         // Brand colors - Green palette
         // Use brand-600 as the primary color for buttons, links and accents

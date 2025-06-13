@@ -1,12 +1,13 @@
 import { GardenDashboard } from "@/types/garden";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 import CachedImage from "../CachedImage";
 import { Ionicons } from "@expo/vector-icons";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
 import OverdueTasksModal from "../UI/OverdueTasksModal";
+import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
 
 /**
  * GardenCard displays summary information about a garden
@@ -135,9 +136,9 @@ export default function GardenCard({
             <View>
               <View className="flex-row justify-between items-start">
                 <View className="flex-row items-center flex-1 mr-2">
-                  <Text className="text-lg font-semibold text-foreground flex-1">
+                  <TitleText className="text-lg text-foreground flex-1">
                     {garden.name}
-                  </Text>
+                  </TitleText>
                   {/* Overdue Task Indicator Dot */}
                   {hasOverdueTasks && (
                     <TouchableOpacity
@@ -160,20 +161,20 @@ export default function GardenCard({
                   {/* Plants Needing Care Badge */}
                   {garden.plants_needing_care > 0 && (
                     <View className="bg-accent-200 rounded-full px-2.5 py-1">
-                      <Text className="text-xs text-accent-800 font-medium">
+                      <BodyText className="text-xs text-accent-800 font-medium">
                         {garden.plants_needing_care} needs care
-                      </Text>
+                      </BodyText>
                     </View>
                   )}
                 </View>
               </View>
 
               {/* Plant Count */}
-              <Text className="text-sm text-cream-700 mb-2">
+              <BodyText className="text-sm text-cream-700 mb-2">
                 {garden.total_plants === 1
                   ? "1 Plant"
                   : `${garden.total_plants} Plants`}
-              </Text>
+              </BodyText>
             </View>
 
             {/* Health Progress Bar and Percentage Side by Side */}
@@ -188,9 +189,9 @@ export default function GardenCard({
                   duration={600}
                 />
               </View>
-              <Text className="text-sm text-cream-700 ml-2">
+              <BodyText className="text-sm text-cream-700 ml-2">
                 {garden.health_percentage}%
-              </Text>
+              </BodyText>
             </View>
           </View>
 

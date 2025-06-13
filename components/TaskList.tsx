@@ -661,7 +661,7 @@ export function TaskList({
             aspectRatio: 3 / 2,
           }}
         />
-        <Text className="text-lg text-foreground font-medium text-center leading-tight">
+        <Text className="text-lg text-foreground font-paragraph font-medium text-center leading-tight">
           {emptyStateMessage}
         </Text>
       </Animated.View>
@@ -687,7 +687,7 @@ export function TaskList({
         {Object.entries(groupedTasks).map(
           ([gardenName, gardenTasks], groupIndex) => (
             <View key={gardenName} className="mb-4 bg-white rounded-xl">
-              <Text className="text-sm font-medium text-cream-700 p-4">
+              <Text className="text-sm font-paragraph font-medium text-cream-700 p-4">
                 {gardenName}
               </Text>
               {gardenTasks.slice(0, maxTasks).map((task, index) => (
@@ -710,7 +710,7 @@ export function TaskList({
                 </View>
               ))}
               {gardenTasks.length > (maxTasks || gardenTasks.length) && (
-                <Text className="text-sm text-cream-600 p-4">
+                <Text className="text-sm text-cream-600 font-paragraph p-4">
                   {gardenTasks.length == 4
                     ? "+" + (gardenTasks.length - 3) + " more task"
                     : "+" + (gardenTasks.length - 3) + " more tasks"}
@@ -741,10 +741,10 @@ export function TaskList({
                 <View className="w-16 h-16 rounded-full bg-brand-100 items-center justify-center mb-3 shadow-sm">
                   <Ionicons name="trophy" size={32} color="#16a34a" />
                 </View>
-                <Text className="text-lg font-bold text-brand-700 text-center mb-1">
+                <Text className="text-lg font-title font-bold text-brand-700 text-center mb-1">
                   All done!
                 </Text>
-                <Text className="text-sm text-brand-600 text-center">
+                <Text className="text-sm text-brand-600 font-paragraph text-center">
                   You've completed all your tasks
                 </Text>
               </View>
@@ -755,10 +755,10 @@ export function TaskList({
                   <Ionicons name="checkmark-circle" size={24} color="#16a34a" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-bold text-brand-700 mb-0.5">
+                  <Text className="text-base font-title font-bold text-brand-700 mb-0.5">
                     Almost there!
                   </Text>
-                  <Text className="text-xs text-brand-600">
+                  <Text className="text-xs text-brand-600 font-paragraph">
                     Just one more task to go
                   </Text>
                 </View>
@@ -769,10 +769,10 @@ export function TaskList({
                 <View className="w-14 h-14 rounded-full bg-brand-100 items-center justify-center mb-2 shadow-sm">
                   <Ionicons name="checkmark-circle" size={28} color="#16a34a" />
                 </View>
-                <Text className="text-base font-bold text-brand-700 text-center mb-0.5">
+                <Text className="text-base font-title font-bold text-brand-700 text-center mb-0.5">
                   Nice work!
                 </Text>
-                <Text className="text-xs text-brand-600 text-center">
+                <Text className="text-xs text-brand-600 font-paragraph text-center">
                   You're making great progress
                 </Text>
               </View>
@@ -850,7 +850,7 @@ export function TaskList({
       {renderRemovingTasks()}
 
       {tasks.length > (maxTasks || tasks.length) && (
-        <Text className="text-sm text-cream-600 p-4">
+        <Text className="text-sm text-cream-600 font-paragraph p-4">
           {tasks.length == 4
             ? "+" + (tasks.length - 3) + " more task"
             : "+" + (tasks.length - 3) + " more tasks"}
@@ -878,10 +878,10 @@ export function TaskList({
               <View className="w-16 h-16 rounded-full bg-brand-100 items-center justify-center mb-3 shadow-sm">
                 <Ionicons name="trophy" size={32} color="#16a34a" />
               </View>
-              <Text className="text-lg font-bold text-brand-700 text-center mb-1">
+              <Text className="text-lg font-title font-bold text-brand-700 text-center mb-1">
                 All done!
               </Text>
-              <Text className="text-sm text-brand-600 text-center">
+              <Text className="text-sm text-brand-600 font-paragraph text-center">
                 You've completed all your tasks
               </Text>
             </View>
@@ -892,10 +892,10 @@ export function TaskList({
                 <Ionicons name="checkmark-circle" size={24} color="#16a34a" />
               </View>
               <View className="flex-1">
-                <Text className="text-base font-bold text-brand-700 mb-0.5">
+                <Text className="text-base font-title font-bold text-brand-700 mb-0.5">
                   Almost there!
                 </Text>
-                <Text className="text-xs text-brand-600">
+                <Text className="text-xs text-brand-600 font-paragraph">
                   Just one more task to go
                 </Text>
               </View>
@@ -906,10 +906,10 @@ export function TaskList({
               <View className="w-14 h-14 rounded-full bg-brand-100 items-center justify-center mb-2 shadow-sm">
                 <Ionicons name="checkmark-circle" size={28} color="#16a34a" />
               </View>
-              <Text className="text-base font-bold text-brand-700 text-center mb-0.5">
+              <Text className="text-base font-title font-bold text-brand-700 text-center mb-0.5">
                 Nice work!
               </Text>
-              <Text className="text-xs text-brand-600 text-center">
+              <Text className="text-xs text-brand-600 font-paragraph text-center">
                 You're making great progress
               </Text>
             </View>

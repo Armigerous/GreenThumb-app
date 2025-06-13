@@ -1,18 +1,21 @@
 import React from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "./SectionHeader";
-import { AnimatedSection } from "./AnimatedSection";
+import { StaggeredContent } from "@/components/UI/StaggeredContent";
+import { BodyText } from "@/components/UI/Text";
 
 export function QuickActionsSection() {
   const router = useRouter();
 
   return (
     <View className="mb-6">
-      <SectionHeader title="Quick Actions" icon="flash" showSeeAll={false} />
+      <StaggeredContent index={6} baseDelay={720} staggerInterval={80}>
+        <SectionHeader title="Quick Actions" icon="flash" showSeeAll={false} />
+      </StaggeredContent>
 
-      <AnimatedSection delay={400}>
+      <StaggeredContent index={7} baseDelay={800} staggerInterval={80}>
         <View className="flex-row flex-wrap justify-between">
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
@@ -21,9 +24,9 @@ export function QuickActionsSection() {
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="leaf" size={24} color="#5E994B" />
             </View>
-            <Text className="text-sm font-medium text-foreground">
+            <BodyText className="text-sm font-medium text-foreground">
               Browse Plants
-            </Text>
+            </BodyText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -33,9 +36,9 @@ export function QuickActionsSection() {
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="grid" size={24} color="#5E994B" />
             </View>
-            <Text className="text-sm font-medium text-foreground">
+            <BodyText className="text-sm font-medium text-foreground">
               New Garden
-            </Text>
+            </BodyText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -45,9 +48,9 @@ export function QuickActionsSection() {
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="calendar" size={24} color="#5E994B" />
             </View>
-            <Text className="text-sm font-medium text-foreground">
+            <BodyText className="text-sm font-medium text-foreground">
               Calendar of Care
-            </Text>
+            </BodyText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -57,12 +60,12 @@ export function QuickActionsSection() {
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="eye" size={24} color="#5E994B" />
             </View>
-            <Text className="text-sm font-medium text-foreground">
+            <BodyText className="text-sm font-medium text-foreground">
               View Gardens
-            </Text>
+            </BodyText>
           </TouchableOpacity>
         </View>
-      </AnimatedSection>
+      </StaggeredContent>
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { BodyText } from "@/components/UI/Text";
 
 interface NameToggleProps {
   useCommonNames: boolean;
@@ -13,9 +14,9 @@ const NameToggle: React.FC<NameToggleProps> = ({
 }) => {
   return (
     <View className="flex-row items-center">
-      <Text className="text-sm text-cream-600 mr-2">
+      <BodyText className="text-sm text-cream-600 mr-2">
         {useCommonNames ? "Common" : "Scientific"}
-      </Text>
+      </BodyText>
       <TouchableOpacity
         className={`w-12 h-6 rounded-full p-0.5 ${
           useCommonNames ? "bg-brand-100" : "bg-cream-400/40"

@@ -55,7 +55,7 @@ export function AuthInput({
   return (
     <>
       <View className="flex-row justify-between items-center mb-1">
-        <Text className="text-foreground text-sm">{label}</Text>
+        <Text className="text-foreground text-sm font-paragraph">{label}</Text>
         {labelRightComponent}
       </View>
       <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
