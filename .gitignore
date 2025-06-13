@@ -44,3 +44,5 @@ app-example
 
 # Cursor MCP configuration
 .cursor/mcp.json
+
+.env.local

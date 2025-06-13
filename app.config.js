@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "GreenThumb",
     slug: "greenthumb-app",
-    version: "1.0.0",
+    version: "1.0.1",
     orientation: "portrait",
     icon: "./assets/images/logo.png",
     scheme: "greenthumb",
@@ -19,6 +19,14 @@ module.exports = {
 
     // Plugin configurations
     plugins: [
+      [
+        "@sentry/react-native/expo",
+        {
+          url: "https://sentry.io/",
+          project: process.env.SENTRY_PROJECT,
+          organization: process.env.SENTRY_ORG,
+        },
+      ],
       "expo-router",
       "expo-splash-screen",
       "expo-updates",
@@ -46,7 +54,7 @@ module.exports = {
       url: "https://u.expo.dev/e0e1a7e6-9d15-4a3c-92c3-85401a72814d",
     },
 
-    runtimeVersion: "1.0.0",
+    runtimeVersion: "1.0.1",
 
     // Platform specific configurations
     ios: {
@@ -82,6 +90,8 @@ module.exports = {
       EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       EXPO_PUBLIC_OPENWEATHER_API_KEY:
         process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY,
+      // Sentry configuration
+      SENTRY_DSN: process.env.SENTRY_DSN,
     },
 
     // Owner information

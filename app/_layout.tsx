@@ -7,12 +7,13 @@ import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { initSentry, setUser, addBreadcrumb } from "@/lib/sentry";
+import * as Sentry from "@sentry/react-native";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   checkSupabaseStorage,
   checkRequestingUserIdFunction,
 } from "@/utils/initSupabase";
+import Constants from "expo-constants";
 import {
   useFonts,
   Mali_200ExtraLight,
@@ -83,11 +84,19 @@ function InitialLayout() {
   useEffect(() => {
     if (isLoaded) {
       if (isSignedIn && userId) {
-        setUser({ id: userId });
-        addBreadcrumb("User signed in", "auth");
+        Sentry.setUser({ id: userId });
+        Sentry.addBreadcrumb({
+          message: "User signed in",
+          category: "auth",
+          level: "info",
+        });
       } else {
-        setUser({});
-        addBreadcrumb("User signed out", "auth");
+        Sentry.setUser({});
+        Sentry.addBreadcrumb({
+          message: "User signed out",
+          category: "auth",
+          level: "info",
+        });
       }
     }
   }, [isSignedIn, isLoaded, userId]);
@@ -113,6 +122,10 @@ function InitialLayout() {
               })
               .catch((error) => {
                 console.error("Failed to check RLS function:", error);
+                Sentry.captureException(error, {
+                  tags: { component: "RLS_function_check" },
+                  extra: { userId: userId },
+                });
               });
           }
         }, 2000);
@@ -133,11 +146,19 @@ function InitialLayout() {
               })
               .catch((error) => {
                 console.error("Failed to check Supabase storage:", error);
+                Sentry.captureException(error, {
+                  tags: { component: "supabase_storage_check" },
+                  extra: { userId: userId },
+                });
               });
           }
         }, 4000); // Increase delay to ensure RLS function check completes first
       } catch (error) {
         console.error("Error setting up storage services:", error);
+        Sentry.captureException(error as Error, {
+          tags: { component: "storage_services_setup" },
+          extra: { userId: userId },
+        });
       }
     }
   }, [isSignedIn]);
@@ -145,14 +166,52 @@ function InitialLayout() {
   return <Slot />;
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const [isClerkReady, setIsClerkReady] = useState(true);
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   // Initialize Sentry
   useEffect(() => {
-    initSentry();
-    addBreadcrumb("App started", "navigation");
+    const sentryDsn = Constants.expoConfig?.extra?.SENTRY_DSN;
+
+    if (!sentryDsn) {
+      console.warn("⚠️ SENTRY_DSN not found in app config");
+      return;
+    }
+
+    console.log(
+      "🔧 Initializing Sentry with DSN:",
+      sentryDsn.substring(0, 20) + "..."
+    );
+
+    Sentry.init({
+      dsn: sentryDsn,
+      debug: __DEV__,
+      environment: __DEV__ ? "development" : "production",
+      tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+      _experiments: {
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
+      },
+      integrations: [
+        Sentry.mobileReplayIntegration({
+          maskAllText: true,
+          maskAllImages: true,
+          maskAllVectors: true,
+        }),
+        Sentry.feedbackIntegration({
+          // Additional configuration goes here
+        }),
+      ],
+    });
+
+    Sentry.addBreadcrumb({
+      message: "App started",
+      category: "navigation",
+      level: "info",
+    });
+
+    console.log("✅ Sentry initialized successfully");
   }, []);
 
   // Load fonts
@@ -265,3 +324,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

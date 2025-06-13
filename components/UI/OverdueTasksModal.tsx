@@ -14,7 +14,7 @@ import { TitleText, SubtitleText, BodyText } from "./Text";
 // Define the notification data structure
 interface OverdueTask {
   task_id: number;
-  task_type: string;
+  task_type: string | null;
   plant_nickname: string;
   due_date: string;
 }
@@ -98,8 +98,10 @@ export default function OverdueTasksModal({
 
   // Get task icon based on task type
   const getTaskIcon = (
-    taskType: string
+    taskType: string | null
   ): "water" | "leaf" | "cut" | "basket" | "checkmark-circle" => {
+    if (!taskType) return "checkmark-circle";
+
     switch (taskType.toLowerCase()) {
       case "water":
         return "water";
