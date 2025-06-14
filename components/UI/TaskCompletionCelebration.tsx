@@ -152,14 +152,14 @@ export function TaskCompletionCelebration({
   const [showConfetti, setShowConfetti] = useState(false);
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-  // Generate confetti particles
+  // Generate confetti particles - using brand colors only
   const confettiColors = [
-    "#77B860",
-    "#5E994B",
-    "#3F6933",
-    "#F9E9C3",
-    "#F8D58C",
-    "#16a34a",
+    "#5E994B", // brand-600 (primary)
+    "#77B860", // brand-500
+    "#8EC57B", // brand-400
+    "#A5D196", // brand-300
+    "#ffd900", // accent-200 (yellow)
+    "#ffe264", // accent-100
   ];
   const confettiCount = 50;
   const confettiParticles = Array.from({ length: confettiCount }).map(
@@ -246,9 +246,10 @@ export function TaskCompletionCelebration({
       case "overdueComplete":
         return {
           icon: "trophy" as CelebrationIcon,
-          iconColor: "#16a34a",
-          title: "Caught up!",
-          message: "You've completed all your overdue tasks",
+          iconColor: "#5E994B", // brand-600
+          title: "🌱 Caught up!",
+          message:
+            "Your plants are so grateful! You've completed all your overdue care tasks.",
           actionText: "View Calendar",
           actionRoute: "/(home)/calendar" as AppRoute,
           showConfetti: true,
@@ -256,9 +257,9 @@ export function TaskCompletionCelebration({
       case "all":
         return {
           icon: "trophy" as CelebrationIcon,
-          iconColor: "#16a34a",
-          title: "All done!",
-          message: "You've completed all your tasks",
+          iconColor: "#5E994B", // brand-600
+          title: "🌿 All done!",
+          message: "Your garden is thriving thanks to your dedicated care!",
           actionText: "View More",
           actionRoute: actionRoute || ("/(home)/calendar" as AppRoute),
           showConfetti: true,
@@ -267,9 +268,9 @@ export function TaskCompletionCelebration({
       default:
         return {
           icon: "checkmark-circle" as CelebrationIcon,
-          iconColor: "#16a34a",
-          title: "Nice work!",
-          message: "You're making great progress",
+          iconColor: "#5E994B", // brand-600
+          title: "🌱 Nice work!",
+          message: "Your plants appreciate the love and attention!",
           actionText: "Continue",
           actionRoute: actionRoute,
           showConfetti: false,
@@ -322,11 +323,11 @@ export function TaskCompletionCelebration({
           />
         </View>
 
-        <Text className="text-2xl font-bold text-brand-700 text-center mb-2">
+        <Text className="text-2xl font-title font-bold text-brand-700 text-center mb-2">
           {content.title}
         </Text>
 
-        <Text className="text-base text-brand-600 text-center mb-6">
+        <Text className="text-base font-paragraph text-brand-600 text-center mb-6">
           {content.message}
         </Text>
 
@@ -335,7 +336,7 @@ export function TaskCompletionCelebration({
             className="bg-brand-100 py-3 px-8 rounded-lg border border-brand-200 shadow-sm"
             onPress={handleActionPress}
           >
-            <Text className="text-brand-600 font-medium">
+            <Text className="text-brand-600 font-paragraph font-medium">
               {content.actionText}
             </Text>
           </TouchableOpacity>

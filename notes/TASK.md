@@ -120,6 +120,124 @@
 
 ---
 
+## 🔥 DISCOVERED DURING WORK - Critical Issues to Address
+
+### 🐛 User Interface & Experience Issues
+
+**UI-SCROLL-001**: Database view not scrollable  
+**Status:** 🔴 **CRITICAL** - Core functionality broken  
+**Owner:** Development Team  
+**Due:** January 16, 2025  
+**Description:** The plant database page opens but users cannot scroll down to see more plants  
+**Root Cause:** PageContainer with `scroll={false}` and SearchResults component not properly handling scrollable content  
+**Acceptance Criteria:**
+
+- [ ] Users can scroll through plant database results
+- [ ] Pagination works correctly with scrolling
+- [ ] Smooth scrolling performance on both iOS and Android
+
+**UI-FILTER-002**: Database filters cause errors when clicked  
+**Status:** 🔴 **CRITICAL** - Core functionality broken  
+**Owner:** Development Team  
+**Due:** January 16, 2025  
+**Description:** Clicking on filter button in database view throws errors and prevents filter application  
+**Root Cause:** FilterModal component has routing or state management issues  
+**Acceptance Criteria:**
+
+- [ ] Filter button opens modal without errors
+- [ ] Users can select and apply filters successfully
+- [ ] Filter state persists correctly across navigation
+
+**UI-TEXT-003**: Sign in/up pages have black text on green background  
+**Status:** 🟡 **HIGH** - Accessibility and UX issue  
+**Owner:** Development Team  
+**Due:** January 17, 2025  
+**Description:** Phone and email input fields have poor contrast with black text on green background  
+**Root Cause:** AuthInput component using `text-foreground` class which resolves to dark text  
+**Acceptance Criteria:**
+
+- [ ] Input text is light colored and readable on green background
+- [ ] Placeholder text has appropriate contrast
+- [ ] Icon colors are adjusted for visibility
+
+**UI-TEXT-004**: Database buttons have black text on green background  
+**Status:** 🟡 **HIGH** - Accessibility and UX issue  
+**Owner:** Development Team  
+**Due:** January 17, 2025  
+**Description:** Filter and other database buttons have poor contrast  
+**Root Cause:** Button components using dark text classes on primary background  
+**Acceptance Criteria:**
+
+- [ ] Button text is light colored and readable
+- [ ] Consistent button styling across database views
+- [ ] Proper contrast ratios for accessibility
+
+**UI-PROFILE-005**: Profile page needs complete redesign  
+**Status:** 🟡 **HIGH** - User experience improvement  
+**Owner:** Development Team  
+**Due:** January 19, 2025  
+**Description:** Current profile page is basic and doesn't match app design standards  
+**Requirements:**
+
+- [ ] Modern, cohesive design matching app theme
+- [ ] Better organization of user information and settings
+- [ ] Improved navigation and user actions
+- [ ] Integration with user statistics and achievements
+
+**UI-TOGGLE-006**: Scientific/common name button colors need adjustment  
+**Status:** 🟡 **HIGH** - Visual consistency  
+**Owner:** Development Team  
+**Due:** January 17, 2025  
+**Description:** Name toggle buttons don't follow consistent color scheme  
+**Root Cause:** NameToggle component using inconsistent color classes  
+**Acceptance Criteria:**
+
+- [ ] Toggle buttons use consistent brand colors
+- [ ] Clear visual indication of active/inactive states
+- [ ] Proper contrast for accessibility
+
+### 🌤️ Feature Enhancement Issues
+
+**FEAT-WEATHER-007**: Weather API integration needs prominence  
+**Status:** 🟡 **HIGH** - Feature enhancement  
+**Owner:** Development Team  
+**Due:** January 20, 2025  
+**Description:** Weather integration should be more prominent and dynamic task adjustment needs implementation  
+**Requirements:**
+
+- [ ] Weather information prominently displayed on dashboard
+- [ ] Tasks automatically adjust based on weather conditions
+- [ ] Weather-based notifications and recommendations
+- [ ] Visual weather indicators throughout the app
+
+**FEAT-CALENDAR-008**: Calendar needs upcoming/overdue task panel  
+**Status:** 🟡 **HIGH** - User experience improvement  
+**Owner:** Development Team  
+**Due:** January 19, 2025  
+**Description:** Users should see upcoming and overdue tasks without navigating to specific days  
+**Requirements:**
+
+- [ ] Bottom panel or sidebar showing upcoming tasks
+- [ ] Overdue tasks prominently highlighted
+- [ ] Quick task completion from overview panel
+- [ ] Smooth animations for panel interactions
+
+### ⚡ Performance & Technical Issues
+
+**PERF-CACHE-009**: Database caching needs improvement  
+**Status:** 🟡 **HIGH** - Performance optimization  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**Description:** Plant database should implement better caching for improved performance  
+**Requirements:**
+
+- [ ] Implement proper image caching for plant photos
+- [ ] Cache search results and filter combinations
+- [ ] Optimize database queries and pagination
+- [ ] Reduce loading times for frequently accessed data
+
+---
+
 ## 🚧 IMPORTANT - Week of Jan 21-26 (Launch week)
 
 ### 🚀 Final Preparations
