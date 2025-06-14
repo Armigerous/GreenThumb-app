@@ -1,1111 +1,1551 @@
 # 🔧 GreenThumb Technical Implementation Guide
 
-> **Last Updated:** January 2025  
-> **App Version:** 1.0.0  
-> **Target Launch:** January 27, 2025
+> **Version:** 2.0 (Updated January 2025)  
+> **Last Updated:** January 14, 2025  
+> **Expo SDK:** 53  
+> **React Native:** 0.74+  
+> **TypeScript:** 5.0+
+
+---
 
 ## 📋 Table of Contents
 
-- [Development Setup](#development-setup)
-- [Code Standards](#code-standards)
-- [UI/UX Patterns](#uiux-patterns)
-- [Animation Guidelines](#animation-guidelines)
-- [Data Management](#data-management)
-- [Authentication Implementation](#authentication-implementation)
-- [Performance Patterns](#performance-patterns)
-- [Error Handling](#error-handling)
-- [Testing Approach](#testing-approach)
-- [Build & Deployment](#build--deployment)
+1. [Development Environment](#development-environment)
+2. [Authentication Implementation](#authentication-implementation)
+3. [Database Integration](#database-integration)
+4. [Subscription System](#subscription-system)
+5. [UI Components & Styling](#ui-components--styling)
+6. [Navigation & Routing](#navigation--routing)
+7. [State Management](#state-management)
+8. [Performance Optimization](#performance-optimization)
+9. [Testing Strategy](#testing-strategy)
+10. [Deployment & CI/CD](#deployment--cicd)
 
-## 🚀 Development Setup
+---
 
-### Environment Requirements
+## 🛠️ Development Environment
+
+### Prerequisites
 
 ```bash
-# Required versions
-Node.js >= 18.0.0
+# Required tools
+node >= 18.0.0
 npm >= 9.0.0
-Expo CLI >= 6.0.0
+expo-cli >= 6.0.0
+eas-cli >= 5.0.0
 
-# Install global dependencies
-npm install -g @expo/cli eas-cli
-
-# Platform-specific tools
-iOS: Xcode 15+ (Mac only)
-Android: Android Studio + SDK
+# Development tools
+git
+vscode (recommended)
+android-studio (for Android development)
+xcode (for iOS development, macOS only)
 ```
 
 ### Project Setup
 
 ```bash
-# Clone and install
-git clone <repository-url>
-cd GreenThumb-app
+# Clone repository
+git clone https://github.com/your-org/greenthumb-app.git
+cd greenthumb-app
+
+# Install dependencies
 npm install
 
-# Environment configuration
+# Set up environment variables
 cp .env.example .env
-# Configure API keys (see README.md)
+# Edit .env with your actual values
 
-# Start development
-npm start
+# Start development server
+npx expo start
+
+# Run on specific platform
+npx expo start --ios
+npx expo start --android
 ```
 
-### VS Code Configuration
-
-**Recommended Extensions:**
-
-```json
-{
-  "recommendations": [
-    "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next",
-    "esbenp.prettier-vscode",
-    "ms-vscode.vscode-eslint",
-    "expo.vscode-expo-tools"
-  ]
-}
-```
-
-**Settings (.vscode/settings.json):**
-
-```json
-{
-  "typescript.preferences.useAliasesForRenames": false,
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "tailwindCSS.experimental.classRegex": [
-    ["className\\s*=\\s*[\"']([^\"']*)[\"']", "\"([^\"]*)\""]
-  ]
-}
-```
-
-## 📝 Code Standards
-
-### TypeScript Guidelines
-
-1. **Strict Type Safety**
-
-   ```typescript
-   // ✅ Good - Explicit typing
-   interface PlantTaskProps {
-     task: TaskWithDetails;
-     onComplete: (taskId: number) => void;
-     loading?: boolean;
-   }
-
-   // ❌ Avoid - Any types
-   function updatePlant(data: any) {}
-   ```
-
-2. **Type Organization**
-
-   ```typescript
-   // types/garden.ts - Domain-specific types
-   export interface Garden {
-     id: number;
-     name: string;
-     user_id: string;
-     // ... other fields
-   }
-
-   // types/api.ts - API-specific types
-   export interface CreateGardenRequest {
-     name: string;
-     preferences: GardenPreferences;
-   }
-   ```
-
-3. **Generic Patterns**
-
-   ```typescript
-   // Reusable generic patterns
-   export interface ApiResponse<T> {
-     data: T;
-     error?: string;
-     loading: boolean;
-   }
-
-   export function useApiQuery<T>(queryFn: () => Promise<T>): ApiResponse<T> {
-     // Implementation
-   }
-   ```
-
-### Naming Conventions
-
-```typescript
-// Files: PascalCase for components, camelCase for utilities
-components / TaskList.tsx;
-utils / dateHelpers.ts;
-hooks / useGardenData.ts;
-
-// Components: PascalCase
-export function TaskCompletionModal() {}
-
-// Variables & Functions: camelCase
-const handleTaskComplete = () => {};
-const isTaskOverdue = true;
-
-// Constants: SCREAMING_SNAKE_CASE
-const MAX_GARDENS_PER_USER = 10;
-const API_ENDPOINTS = {
-  GARDENS: "/gardens",
-  PLANTS: "/plants",
-};
-
-// Types & Interfaces: PascalCase
-interface GardenFormData {}
-type TaskStatus = "pending" | "completed" | "overdue";
-```
-
-### File Organization
-
-```
-components/
-├── UI/                    # Base design system components
-│   ├── Button.tsx         # Generic button component
-│   ├── Input.tsx          # Form input component
-│   └── index.ts           # Barrel exports
-├── Gardens/               # Garden-specific components
-│   ├── GardenCard.tsx     # Garden display card
-│   ├── GardenForm.tsx     # Garden creation/edit form
-│   └── index.ts           # Feature exports
-└── Home/                  # Home screen components
-    ├── HomeHeader.tsx     # Dashboard header
-    ├── TasksSection.tsx   # Tasks overview
-    └── index.ts           # Section exports
-```
-
-## 🎨 UI/UX Patterns
-
-### Design System Implementation
-
-**Color System:**
-
-```typescript
-// constants/colors.ts
-export const colors = {
-  primary: {
-    50: "#f0f9f0",
-    500: "#77B860",
-    600: "#5c8f47",
-    // ... full scale
-  },
-  semantic: {
-    error: "#ef4444",
-    warning: "#f59e0b",
-    success: "#10b981",
-    info: "#3b82f6",
-  },
-};
-```
-
-**Component Patterns:**
-
-```typescript
-// Base component with variants
-interface ButtonProps {
-  variant?: "primary" | "secondary" | "ghost";
-  size?: "sm" | "md" | "lg";
-  loading?: boolean;
-  children: React.ReactNode;
-}
-
-export function Button({
-  variant = "primary",
-  size = "md",
-  loading = false,
-  children,
-  ...props
-}: ButtonProps) {
-  const baseClasses = "rounded-lg font-medium transition-colors";
-  const variantClasses = {
-    primary: "bg-primary text-primary-foreground",
-    secondary: "bg-secondary text-secondary-foreground",
-    ghost: "bg-transparent text-foreground hover:bg-accent",
-  };
-
-  return (
-    <TouchableOpacity
-      className={cn(baseClasses, variantClasses[variant])}
-      disabled={loading}
-      {...props}
-    >
-      {loading ? <LoadingSpinner /> : children}
-    </TouchableOpacity>
-  );
-}
-```
-
-### Layout Patterns
-
-**Page Container:**
-
-```typescript
-// Standard page wrapper with consistent spacing
-export function PageContainer({
-  children,
-  scroll = true,
-  padded = true,
-  animate = true,
-}: PageContainerProps) {
-  return (
-    <SafeAreaView className="flex-1 bg-background">
-      {scroll ? (
-        <ScrollView
-          className={cn(padded && "px-5")}
-          showsVerticalScrollIndicator={false}
-        >
-          {children}
-        </ScrollView>
-      ) : (
-        <View className={cn("flex-1", padded && "px-5")}>{children}</View>
-      )}
-    </SafeAreaView>
-  );
-}
-```
-
-**Card Patterns:**
-
-```typescript
-// Consistent card styling across the app
-export function Card({ children, className, ...props }: CardProps) {
-  return (
-    <View
-      className={cn(
-        "bg-card rounded-lg p-4 border border-border shadow-sm",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </View>
-  );
-}
-```
-
-### Form Patterns
-
-**Form State Management:**
-
-```typescript
-// Using Zod for validation with TypeScript inference
-const gardenSchema = z.object({
-  name: z.string().min(1, "Garden name is required"),
-  location: z.string().optional(),
-  preferences: z.object({
-    sunlight: z.array(z.string()),
-    soilType: z.array(z.string()),
-  }),
-});
-
-type GardenFormData = z.infer<typeof gardenSchema>;
-
-export function GardenForm() {
-  const [formData, setFormData] = useState<GardenFormData>({
-    name: "",
-    location: "",
-    preferences: { sunlight: [], soilType: [] },
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const handleSubmit = () => {
-    const result = gardenSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors(fieldErrors);
-      return;
-    }
-
-    // Submit valid data
-    createGarden(result.data);
-  };
-}
-```
-
-## 🎬 Animation Guidelines
-
-### Moti Animation Patterns
-
-**Page Transitions:**
-
-```typescript
-import { MotiView } from "moti";
-
-// Standard page entrance animation
-export function AnimatedPage({ children }: { children: React.ReactNode }) {
-  return (
-    <MotiView
-      from={{ opacity: 0, translateY: 20 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      exit={{ opacity: 0, translateY: -20 }}
-      transition={{ type: "timing", duration: 300 }}
-    >
-      {children}
-    </MotiView>
-  );
-}
-```
-
-**Task Completion Animation:**
-
-```typescript
-// Celebratory animation for task completion
-export function TaskCompletionCelebration({ visible }: { visible: boolean }) {
-  return (
-    <MotiView
-      animate={{
-        opacity: visible ? 1 : 0,
-        scale: visible ? 1 : 0.8,
-      }}
-      transition={{
-        type: "spring",
-        damping: 15,
-        stiffness: 150,
-      }}
-    >
-      {/* Celebration content */}
-    </MotiView>
-  );
-}
-```
-
-### React Native Reanimated Patterns
-
-**Layout Animations:**
-
-```typescript
-import { LayoutAnimation, Platform, UIManager } from "react-native";
-
-// Enable layout animations on Android
-if (Platform.OS === "android") {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
-// Configure smooth layout transitions
-const configureLayoutAnimation = () => {
-  LayoutAnimation.configureNext(
-    LayoutAnimation.create(
-      300,
-      LayoutAnimation.Types.easeInEaseOut,
-      LayoutAnimation.Properties.opacity
-    )
-  );
-};
-```
-
-**Gesture Handling:**
-
-```typescript
-import { PanGestureHandler } from "react-native-gesture-handler";
-import Animated, {
-  useSharedValue,
-  useAnimatedGestureHandler,
-} from "react-native-reanimated";
-
-export function SwipeableCard({ onSwipe }: { onSwipe: () => void }) {
-  const translateX = useSharedValue(0);
-
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context) => {
-      context.startX = translateX.value;
-    },
-    onActive: (event, context) => {
-      translateX.value = context.startX + event.translationX;
-    },
-    onEnd: (event) => {
-      if (Math.abs(event.translationX) > 100) {
-        runOnJS(onSwipe)();
-      }
-      translateX.value = withSpring(0);
-    },
-  });
-
-  return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[animatedStyle]}>
-        {/* Card content */}
-      </Animated.View>
-    </PanGestureHandler>
-  );
-}
-```
-
-### Performance Guidelines
-
-**Animation Best Practices:**
-
-```typescript
-// ✅ Good - Use native driver when possible
-const fadeAnim = useRef(new Animated.Value(0)).current;
-
-Animated.timing(fadeAnim, {
-  toValue: 1,
-  duration: 300,
-  useNativeDriver: true, // Only for transform and opacity
-}).start();
-
-// ❌ Avoid - Layout properties with native driver
-Animated.timing(fadeAnim, {
-  toValue: 100,
-  duration: 300,
-  useNativeDriver: true, // Don't use with width, height, etc.
-}).start();
-```
-
-## 📊 Data Management
-
-### TanStack Query Implementation
-
-**Query Patterns:**
-
-```typescript
-// lib/queries.ts
-export function useGardenDashboard(userId?: string) {
-  return useQuery({
-    queryKey: ["gardenDashboard", userId],
-    queryFn: () => supabaseApi.getGardenDashboard(userId!),
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      // Custom retry logic
-      return failureCount < 3 && error.status !== 404;
-    },
-  });
-}
-```
-
-**Mutation Patterns:**
-
-```typescript
-export function useCompleteTask() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ taskId, completed }: CompleteTaskInput) => {
-      const { error } = await supabase
-        .from("plant_tasks")
-        .update({ completed })
-        .eq("id", taskId);
-
-      if (error) throw error;
-      return { taskId, completed };
-    },
-
-    // Optimistic updates
-    onMutate: async ({ taskId, completed }) => {
-      await queryClient.cancelQueries(["tasks"]);
-
-      const previousTasks = queryClient.getQueryData(["tasks"]);
-
-      queryClient.setQueryData(["tasks"], (old: TaskWithDetails[]) =>
-        old?.map((task) => (task.id === taskId ? { ...task, completed } : task))
-      );
-
-      return { previousTasks };
-    },
-
-    onError: (err, variables, context) => {
-      if (context?.previousTasks) {
-        queryClient.setQueryData(["tasks"], context.previousTasks);
-      }
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries(["tasks"]);
-      queryClient.invalidateQueries(["gardenDashboard"]);
-    },
-  });
-}
-```
-
-### Supabase Integration
-
-**Database Operations:**
-
-```typescript
-// lib/supabaseApi.ts
-export const gardenApi = {
-  async create(gardenData: CreateGardenInput): Promise<Garden> {
-    const { data, error } = await supabase
-      .from("user_gardens")
-      .insert(gardenData)
-      .select()
-      .single();
-
-    if (error) throw new Error(error.message);
-    return data;
-  },
-
-  async list(userId: string): Promise<Garden[]> {
-    const { data, error } = await supabase
-      .from("user_gardens_dashboard")
-      .select("*")
-      .eq("user_id", userId)
-      .order("updated_at", { ascending: false });
-
-    if (error) throw new Error(error.message);
-    return data || [];
-  },
-
-  async update(id: number, updates: UpdateGardenInput): Promise<Garden> {
-    const { data, error } = await supabase
-      .from("user_gardens")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) throw new Error(error.message);
-    return data;
-  },
-};
-```
-
-**Real-time Subscriptions:**
-
-```typescript
-export function useTaskSubscription(userId?: string) {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const subscription = supabase
-      .channel("task_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "plant_tasks",
-          filter: `user_plant_id=eq.${userId}`,
-        },
-        () => {
-          // Invalidate relevant queries when tasks change
-          queryClient.invalidateQueries(["tasks"]);
-          queryClient.invalidateQueries(["gardenDashboard"]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [userId, queryClient]);
-}
-```
-
-### Image Management
-
-**Cached Image Component:**
-
-```typescript
-// components/CachedImage.tsx
-export function CachedImage({
-  source,
-  placeholder,
-  className,
-  ...props
-}: CachedImageProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  return (
-    <View className={cn("relative overflow-hidden", className)}>
-      <Image
-        source={{ uri: source }}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
-        onError={() => setError(true)}
-        cachePolicy="memory-disk"
-        className="w-full h-full"
-        {...props}
-      />
-
-      {loading && (
-        <View className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <LoadingSpinner size="sm" />
-        </View>
-      )}
-
-      {error && placeholder && (
-        <View className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <Image source={placeholder} className="w-full h-full opacity-50" />
-        </View>
-      )}
-    </View>
-  );
-}
-```
-
-## 🔐 Authentication Implementation
-
-### Clerk Integration
-
-**Custom Auth Hook:**
-
-```typescript
-// lib/hooks/useSupabaseAuth.ts
-export function useSupabaseAuth() {
-  const { getToken, userId } = useAuth();
-
-  useEffect(() => {
-    const syncSupabaseAuth = async () => {
-      if (!userId) {
-        // Clear Supabase session
-        await supabase.auth.signOut();
-        return;
-      }
-
-      try {
-        const token = await getToken({ template: "supabase" });
-        if (token) {
-          // Set Supabase session with Clerk token
-          await supabase.auth.setSession({
-            access_token: token,
-            refresh_token: "",
-          });
-        }
-      } catch (error) {
-        console.error("Error syncing auth:", error);
-      }
-    };
-
-    syncSupabaseAuth();
-  }, [userId, getToken]);
-}
-```
-
-**Protected Route Pattern:**
-
-```typescript
-// app/_layout.tsx
-export default function RootLayout() {
-  return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-      <QueryClient>
-        <AuthSync /> {/* Initialize auth sync */}
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(home)" options={{ headerShown: false }} />
-        </Stack>
-      </QueryClient>
-    </ClerkProvider>
-  );
-}
-
-function AuthSync() {
-  useSupabaseAuth(); // Sync Clerk with Supabase
-  return null;
-}
-```
-
-### Security Patterns
-
-**Row Level Security (RLS):**
-
-```sql
--- Supabase RLS policies
-CREATE POLICY "Users can only see their own gardens" ON user_gardens
-  FOR ALL USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can only see their own plants" ON user_plants
-  FOR ALL USING (
-    garden_id IN (
-      SELECT id FROM user_gardens WHERE user_id = auth.uid()
-    )
-  );
-```
-
-**API Key Management:**
-
-```typescript
-// app.config.js - Environment variable handling
-export default {
-  expo: {
-    extra: {
-      CLERK_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
-      SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
-      SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
-    },
-  },
-};
-
-// Access in app
-import Constants from "expo-constants";
-const { CLERK_PUBLISHABLE_KEY } = Constants.expoConfig.extra;
-```
-
-## ⚡ Performance Patterns
-
-### Memory Management
-
-**Image Optimization:**
-
-```typescript
-// Optimized image loading with proper cleanup
-export function OptimizedImage({ source, ...props }: ImageProps) {
-  const [imageSource, setImageSource] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadImage = async () => {
-      try {
-        // Pre-process image if needed
-        const optimizedSource = await processImage(source);
-        if (!cancelled) {
-          setImageSource(optimizedSource);
-        }
-      } catch (error) {
-        console.error("Image loading error:", error);
-      }
-    };
-
-    loadImage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [source]);
-
-  if (!imageSource) return <ImagePlaceholder />;
-
-  return <Image source={{ uri: imageSource }} {...props} />;
-}
-```
-
-**List Optimization:**
-
-```typescript
-// Efficient list rendering with FlashList
-import { FlashList } from "@shopify/flash-list";
-
-export function TaskList({ tasks }: { tasks: TaskWithDetails[] }) {
-  const renderTask = useCallback(
-    ({ item }: { item: TaskWithDetails }) => (
-      <TaskItem key={item.id} task={item} />
-    ),
-    []
-  );
-
-  const getItemType = useCallback((item: TaskWithDetails) => {
-    return item.task_type; // Different types for different layouts
-  }, []);
-
-  return (
-    <FlashList
-      data={tasks}
-      renderItem={renderTask}
-      getItemType={getItemType}
-      estimatedItemSize={80}
-      keyExtractor={(item) => item.id.toString()}
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={10}
-      windowSize={10}
-    />
-  );
-}
-```
-
-### Bundle Optimization
-
-**Lazy Loading:**
-
-```typescript
-// Lazy load heavy screens
-const GardenDetails = lazy(() => import("../screens/GardenDetails"));
-const PlantDatabase = lazy(() => import("../screens/PlantDatabase"));
-
-// Use with Suspense
-function App() {
-  return (
-    <Suspense fallback={<LoadingScreen />}>
-      <Router />
-    </Suspense>
-  );
-}
-```
-
-**Asset Optimization:**
-
-```typescript
-// Optimize static assets
-import { Asset } from "expo-asset";
-
-// Pre-load critical images
-const preloadAssets = async () => {
-  const imageAssets = [
-    require("../assets/images/logo.png"),
-    require("../assets/images/welcome-bg.jpg"),
-  ];
-
-  await Asset.loadAsync(imageAssets);
-};
-```
-
-## 🚨 Error Handling
-
-### Error Boundary Pattern
-
-```typescript
-// components/ErrorBoundary.tsx
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log to crash reporting service
-    console.error("Error Boundary caught an error:", error, errorInfo);
-
-    // Optional: Send to error tracking service
-    // Sentry.captureException(error, { extra: errorInfo });
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View className="flex-1 justify-center items-center p-5">
-          <Text className="text-lg font-semibold mb-4">
-            Something went wrong
-          </Text>
-          <Text className="text-gray-600 text-center mb-6">
-            We're sorry, but something unexpected happened. Please try
-            restarting the app.
-          </Text>
-          <Button
-            onPress={() => this.setState({ hasError: false, error: null })}
-            title="Try Again"
-          />
-        </View>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-```
-
-### API Error Handling
-
-```typescript
-// Centralized error handling for API calls
-export class ApiError extends Error {
-  constructor(message: string, public status: number, public code?: string) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
-
-export async function handleApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
-  try {
-    return await apiCall();
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    // Handle Supabase errors
-    if (error.message) {
-      throw new ApiError(error.message, error.status || 500, error.code);
-    }
-
-    // Generic error
-    throw new ApiError("An unexpected error occurred", 500);
-  }
-}
-
-// Usage in queries
-export function useGardens(userId?: string) {
-  return useQuery({
-    queryKey: ["gardens", userId],
-    queryFn: () => handleApiCall(() => gardenApi.list(userId!)),
-    enabled: !!userId,
-    retry: (failureCount, error) => {
-      // Don't retry on 4xx errors
-      if (
-        error instanceof ApiError &&
-        error.status >= 400 &&
-        error.status < 500
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-  });
-}
-```
-
-## 🧪 Testing Approach
-
-### Unit Testing Patterns
-
-```typescript
-// __tests__/components/TaskItem.test.tsx
-import { render, fireEvent } from "@testing-library/react-native";
-import { TaskItem } from "../../components/TaskItem";
-
-const mockTask = {
-  id: 1,
-  task_type: "Water" as const,
-  due_date: "2025-01-15",
-  completed: false,
-  plant: {
-    nickname: "Basil",
-    garden: { name: "Kitchen Garden" },
-  },
-};
-
-describe("TaskItem", () => {
-  it("renders task information correctly", () => {
-    const { getByText } = render(
-      <TaskItem task={mockTask} onComplete={jest.fn()} />
-    );
-
-    expect(getByText("Water Basil")).toBeTruthy();
-    expect(getByText("Kitchen Garden")).toBeTruthy();
-  });
-
-  it("calls onComplete when pressed", () => {
-    const onComplete = jest.fn();
-    const { getByTestId } = render(
-      <TaskItem task={mockTask} onComplete={onComplete} />
-    );
-
-    fireEvent.press(getByTestId("complete-button"));
-    expect(onComplete).toHaveBeenCalledWith(1);
-  });
-});
-```
-
-### Hook Testing
-
-```typescript
-// __tests__/hooks/useGardens.test.tsx
-import { renderHook, waitFor } from "@testing-library/react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useGardens } from "../../lib/queries";
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
-  return ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
-describe("useGardens", () => {
-  it("fetches gardens successfully", async () => {
-    const { result } = renderHook(() => useGardens("user-123"), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toBeDefined();
-  });
-});
-```
-
-## 🚀 Build & Deployment
-
-### EAS Build Configuration
-
-**Development Build:**
+### Environment Variables
 
 ```bash
-# Create development build
-eas build --profile development --platform ios
+# .env file structure
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# Install on device
-eas build:run --profile development --platform ios
-```
+# Stripe Configuration (NEW - January 2025)
+EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-**Production Build:**
-
-```bash
-# Build for app stores
-eas build --profile production --platform all
-
-# Submit to stores
-eas submit --platform ios --path ./build.ipa
-eas submit --platform android --path ./build.aab
-```
-
-### Environment-Specific Configurations
-
-```typescript
-// lib/config.ts
-const isDev = __DEV__;
-const isPreview = process.env.EAS_BUILD_PROFILE === "preview";
-const isProduction = process.env.EAS_BUILD_PROFILE === "production";
-
-export const config = {
-  apiUrl: isDev
-    ? "http://localhost:3000"
-    : isPreview
-    ? "https://staging-api.example.com"
-    : "https://api.example.com",
-
-  enableLogging: isDev || isPreview,
-  enableAnalytics: isProduction,
-
-  supabase: {
-    url: process.env.EXPO_PUBLIC_SUPABASE_URL!,
-    anonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
-  },
-};
-```
-
-### Over-the-Air Updates
-
-```typescript
-// lib/updates.ts
-import * as Updates from "expo-updates";
-
-export async function checkForUpdates() {
-  if (__DEV__) return; // Skip in development
-
-  try {
-    const update = await Updates.checkForUpdateAsync();
-
-    if (update.isAvailable) {
-      await Updates.fetchUpdateAsync();
-      await Updates.reloadAsync();
-    }
-  } catch (error) {
-    console.error("Error checking for updates:", error);
-  }
-}
-
-// In App.tsx
-useEffect(() => {
-  checkForUpdates();
-}, []);
+# Optional services
+SENTRY_DSN=your_sentry_dsn
+ANALYTICS_API_KEY=your_analytics_key
 ```
 
 ---
 
-**📅 Last Updated:** January 2025  
-**🎯 Launch Target:** January 27, 2025  
-**📱 Ready for:** iOS App Store & Google Play Store
+## 🔐 Authentication Implementation
+
+### Supabase Auth Setup
+
+```typescript
+// lib/supabase.ts
+import { createClient } from "@supabase/supabase-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+
+### Auth Context Implementation
+
+```typescript
+// contexts/AuthContext.tsx
+import { createContext, useContext, useEffect, useState } from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) throw error;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+```
+
+---
+
+## 🗄️ Database Integration
+
+### Supabase Client Queries
+
+```typescript
+// lib/queries/plants.ts
+import { supabase } from "@/lib/supabase";
+import { Plant, CreatePlantData } from "@/types/plants";
+
+export const plantQueries = {
+  // Get all plants for a garden
+  getPlantsByGarden: async (gardenId: string): Promise<Plant[]> => {
+    const { data, error } = await supabase
+      .from("plants")
+      .select(
+        `
+        *,
+        plant_care_logs (
+          id,
+          care_type,
+          notes,
+          created_at
+        )
+      `
+      )
+      .eq("garden_id", gardenId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Create new plant
+  createPlant: async (plantData: CreatePlantData): Promise<Plant> => {
+    const { data, error } = await supabase
+      .from("plants")
+      .insert(plantData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Update plant
+  updatePlant: async (id: string, updates: Partial<Plant>): Promise<Plant> => {
+    const { data, error } = await supabase
+      .from("plants")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Delete plant
+  deletePlant: async (id: string): Promise<void> => {
+    const { error } = await supabase.from("plants").delete().eq("id", id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### React Query Integration
+
+```typescript
+// lib/queries/useQueries.ts
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { plantQueries } from "./plants";
+
+export const usePlants = (gardenId: string) => {
+  return useQuery({
+    queryKey: ["plants", gardenId],
+    queryFn: () => plantQueries.getPlantsByGarden(gardenId),
+    enabled: !!gardenId,
+  });
+};
+
+export const useCreatePlant = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: plantQueries.createPlant,
+    onSuccess: (newPlant) => {
+      // Invalidate and refetch plants query
+      queryClient.invalidateQueries({
+        queryKey: ["plants", newPlant.garden_id],
+      });
+
+      // Optimistically update the cache
+      queryClient.setQueryData(
+        ["plants", newPlant.garden_id],
+        (old: Plant[] = []) => {
+          return [newPlant, ...old];
+        }
+      );
+    },
+  });
+};
+```
+
+---
+
+## 💳 Subscription System
+
+### Stripe Integration Setup
+
+```typescript
+// lib/stripe.ts
+import Stripe from "stripe";
+
+// Server-side Stripe instance (for API routes)
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+});
+
+// Client-side configuration
+export const stripeConfig = {
+  publishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  merchantIdentifier: "merchant.com.greenthumb.app",
+  urlScheme: "greenthumb",
+};
+
+// Price formatting utilities
+export const formatPrice = (cents: number, currency = "USD"): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(cents / 100);
+};
+
+// Calculate savings for annual plans
+export const calculateSavings = (annualPrice: number, monthlyPrice: number) => {
+  const monthlyTotal = monthlyPrice * 12;
+  const savings = monthlyTotal - annualPrice;
+  const percentage = Math.round((savings / monthlyTotal) * 100);
+  return { savings, percentage };
+};
+
+// Plan recommendation logic
+export const getPlanBadge = (plan: SubscriptionPlan): string | null => {
+  if (plan.billing_period === "annual") return "Most Popular";
+  if (plan.billing_period === "6_month") return "Best Value";
+  return null;
+};
+
+// Date formatting for subscriptions
+export const formatDate = (date: string | Date): string => {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(date));
+};
+```
+
+### Payment Processing Implementation
+
+```typescript
+// api/create-payment-intent.ts
+import { stripe } from "@/lib/stripe";
+import { supabase } from "@/lib/supabase";
+
+export default async function handler(req: Request) {
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  try {
+    const { planId, userId } = await req.json();
+
+    // Validate input
+    if (!planId || !userId) {
+      return new Response("Missing required fields", { status: 400 });
+    }
+
+    // Get plan details from database
+    const { data: plan, error: planError } = await supabase
+      .from("subscription_plans")
+      .select("*")
+      .eq("id", planId)
+      .single();
+
+    if (planError || !plan) {
+      return new Response("Plan not found", { status: 404 });
+    }
+
+    // Get or create Stripe customer
+    let customer;
+    const { data: existingSubscription } = await supabase
+      .from("user_subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", userId)
+      .single();
+
+    if (existingSubscription?.stripe_customer_id) {
+      customer = await stripe.customers.retrieve(
+        existingSubscription.stripe_customer_id
+      );
+    } else {
+      // Get user email for customer creation
+      const { data: user } = await supabase.auth.admin.getUserById(userId);
+
+      customer = await stripe.customers.create({
+        email: user.user?.email,
+        metadata: { userId },
+      });
+    }
+
+    // Create payment intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: plan.price_cents,
+      currency: "usd",
+      customer: customer.id,
+      metadata: {
+        planId,
+        userId,
+        planName: plan.name,
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    // Create ephemeral key for mobile
+    const ephemeralKey = await stripe.ephemeralKeys.create(
+      { customer: customer.id },
+      { apiVersion: "2023-10-16" }
+    );
+
+    return Response.json({
+      clientSecret: paymentIntent.client_secret,
+      ephemeralKey: ephemeralKey.secret,
+      customerId: customer.id,
+      publishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    });
+  } catch (error) {
+    console.error("Payment intent creation failed:", error);
+    return new Response("Internal server error", { status: 500 });
+  }
+}
+```
+
+### Subscription React Query Hooks
+
+```typescript
+// lib/subscriptionQueries.ts
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  SubscriptionPlan,
+  UserSubscription,
+  CreateSubscriptionData,
+  PricingDisplay,
+} from "@/types/subscription";
+
+// Fetch all available subscription plans
+export const useSubscriptionPlans = () => {
+  return useQuery({
+    queryKey: ["subscription-plans"],
+    queryFn: async (): Promise<SubscriptionPlan[]> => {
+      const { data, error } = await supabase
+        .from("subscription_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+};
+
+// Get pricing display with calculated savings and badges
+export const usePricingDisplay = () => {
+  const { data: plans, ...rest } = useSubscriptionPlans();
+
+  const pricingDisplay: PricingDisplay[] =
+    plans?.map((plan) => {
+      const monthlyPlan = plans.find((p) => p.billing_period === "monthly");
+      const savings = monthlyPlan
+        ? calculateSavings(plan.price_cents, monthlyPlan.price_cents)
+        : null;
+
+      return {
+        ...plan,
+        badge: getPlanBadge(plan),
+        savings: savings?.savings || 0,
+        savingsPercentage: savings?.percentage || 0,
+        monthlyEquivalent: Math.round(
+          plan.price_cents /
+            (plan.billing_period === "annual"
+              ? 12
+              : plan.billing_period === "6_month"
+              ? 6
+              : 1)
+        ),
+      };
+    }) || [];
+
+  return {
+    data: pricingDisplay,
+    ...rest,
+  };
+};
+
+// Get current user's subscription
+export const useUserSubscription = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["user-subscription", user?.id],
+    queryFn: async (): Promise<UserSubscription | null> => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("user_subscriptions")
+        .select(
+          `
+          *,
+          subscription_plans (*)
+        `
+        )
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+};
+
+// Create new subscription
+export const useCreateSubscription = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (subscriptionData: CreateSubscriptionData) => {
+      const { data, error } = await supabase
+        .from("user_subscriptions")
+        .insert({
+          ...subscriptionData,
+          user_id: user?.id,
+        })
+        .select(
+          `
+          *,
+          subscription_plans (*)
+        `
+        )
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
+    },
+  });
+};
+
+// Cancel subscription
+export const useCancelSubscription = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const { data, error } = await supabase
+        .from("user_subscriptions")
+        .update({
+          cancel_at_period_end: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", subscriptionId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
+    },
+  });
+};
+
+// Create payment intent
+export const useCreatePaymentIntent = () => {
+  return useMutation({
+    mutationFn: async ({ planId }: { planId: string }) => {
+      const response = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ planId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create payment intent");
+      }
+
+      return response.json();
+    },
+  });
+};
+```
+
+### Stripe Payment Sheet Implementation
+
+```typescript
+// components/subscription/PaymentSheet.tsx
+import React, { useState } from "react";
+import { Alert } from "react-native";
+import { useStripe } from "@stripe/stripe-react-native";
+import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import {
+  useCreatePaymentIntent,
+  useCreateSubscription,
+} from "@/lib/subscriptionQueries";
+import { SubscriptionPlan } from "@/types/subscription";
+
+interface PaymentSheetProps {
+  plan: SubscriptionPlan;
+  onSuccess: () => void;
+  onError: (error: string) => void;
+}
+
+export const PaymentSheet = ({
+  plan,
+  onSuccess,
+  onError,
+}: PaymentSheetProps) => {
+  const [loading, setLoading] = useState(false);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const createPaymentIntent = useCreatePaymentIntent();
+  const createSubscription = useCreateSubscription();
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+
+      // Create payment intent
+      const paymentIntentData = await createPaymentIntent.mutateAsync({
+        planId: plan.id,
+      });
+
+      // Initialize payment sheet
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: "GreenThumb",
+        customerId: paymentIntentData.customerId,
+        customerEphemeralKeySecret: paymentIntentData.ephemeralKey,
+        paymentIntentClientSecret: paymentIntentData.clientSecret,
+        allowsDelayedPaymentMethods: true,
+        defaultBillingDetails: {
+          name: "GreenThumb User",
+        },
+        returnURL: "greenthumb://payment-success",
+      });
+
+      if (initError) {
+        throw new Error(initError.message);
+      }
+
+      // Present payment sheet
+      const { error: paymentError } = await presentPaymentSheet();
+
+      if (paymentError) {
+        if (paymentError.code === "Canceled") {
+          // User canceled payment
+          return;
+        }
+        throw new Error(paymentError.message);
+      }
+
+      // Payment successful - create subscription record
+      await createSubscription.mutateAsync({
+        plan_id: plan.id,
+        stripe_customer_id: paymentIntentData.customerId,
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(
+          Date.now() +
+            (plan.billing_period === "annual"
+              ? 365
+              : plan.billing_period === "6_month"
+              ? 183
+              : 30) *
+              24 *
+              60 *
+              60 *
+              1000
+        ).toISOString(),
+      });
+
+      onSuccess();
+    } catch (error) {
+      console.error("Payment failed:", error);
+      onError(error instanceof Error ? error.message : "Payment failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button onPress={handlePayment} disabled={loading} className="w-full">
+      {loading ? (
+        <LoadingSpinner size="small" color="white" />
+      ) : (
+        `Complete Purchase - ${formatPrice(plan.price_cents)}`
+      )}
+    </Button>
+  );
+};
+```
+
+### Subscription Status Management
+
+```typescript
+// components/subscription/SubscriptionStatus.tsx
+import React from "react";
+import { View, Text } from "react-native";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import {
+  useUserSubscription,
+  useCancelSubscription,
+} from "@/lib/subscriptionQueries";
+import { formatDate, formatPrice } from "@/lib/stripe";
+
+export const SubscriptionStatus = () => {
+  const { data: subscription, isLoading } = useUserSubscription();
+  const cancelSubscription = useCancelSubscription();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!subscription) {
+    return (
+      <Card>
+        <CardContent className="text-center py-8">
+          <Text className="text-muted-foreground mb-4">
+            No active subscription
+          </Text>
+          <Button onPress={() => router.push("/pricing")}>View Plans</Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const handleCancel = async () => {
+    try {
+      await cancelSubscription.mutateAsync(subscription.id);
+      Alert.alert(
+        "Subscription Canceled",
+        "Your subscription will remain active until the end of your current billing period."
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to cancel subscription. Please try again.");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex-row items-center justify-between">
+          <Text>{subscription.subscription_plans.name}</Text>
+          <Badge
+            variant={subscription.status === "active" ? "default" : "secondary"}
+          >
+            {subscription.status}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <View className="flex-row justify-between">
+          <Text className="text-muted-foreground">Price</Text>
+          <Text className="font-semibold">
+            {formatPrice(subscription.subscription_plans.price_cents)}/{subscription.subscription_plans.billing_period}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between">
+          <Text className="text-muted-foreground">Next billing date</Text>
+          <Text>{formatDate(subscription.current_period_end)}</Text>
+        </View>
+
+        {subscription.cancel_at_period_end && (
+          <View className="bg-yellow-50 p-3 rounded-lg">
+            <Text className="text-yellow-800 text-sm">
+              Your subscription will end on{" "}
+              {formatDate(subscription.current_period_end)}
+            </Text>
+          </View>
+        )}
+
+        {!subscription.cancel_at_period_end && (
+          <Button
+            variant="outline"
+            onPress={handleCancel}
+            disabled={cancelSubscription.isPending}
+          >
+            Cancel Subscription
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+```
+
+---
+
+## 🎨 UI Components & Styling
+
+### NativeWind Configuration
+
+```javascript
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: "#f0fdf4",
+          100: "#dcfce7",
+          500: "#22c55e",
+          600: "#16a34a",
+          700: "#15803d",
+          900: "#14532d",
+        },
+        secondary: {
+          100: "#f1f5f9",
+          500: "#64748b",
+          900: "#0f172a",
+        },
+      },
+      fontFamily: {
+        inter: ["Inter", "sans-serif"],
+        "inter-medium": ["Inter-Medium", "sans-serif"],
+        "inter-semibold": ["Inter-SemiBold", "sans-serif"],
+        "inter-bold": ["Inter-Bold", "sans-serif"],
+      },
+    },
+  },
+  plugins: [],
+};
+```
+
+### Component Library Structure
+
+```typescript
+// components/ui/Button.tsx
+import React from "react";
+import { Pressable, Text, PressableProps } from "react-native";
+import { cn } from "@/lib/utils";
+
+interface ButtonProps extends PressableProps {
+  variant?: "default" | "outline" | "ghost" | "destructive";
+  size?: "sm" | "md" | "lg";
+  children: React.ReactNode;
+}
+
+export const Button = ({
+  variant = "default",
+  size = "md",
+  className,
+  children,
+  ...props
+}: ButtonProps) => {
+  return (
+    <Pressable
+      className={cn(
+        // Base styles
+        "rounded-lg items-center justify-center",
+
+        // Size variants
+        size === "sm" && "px-3 py-2",
+        size === "md" && "px-4 py-3",
+        size === "lg" && "px-6 py-4",
+
+        // Color variants
+        variant === "default" && "bg-primary-600",
+        variant === "outline" && "border border-primary-600",
+        variant === "ghost" && "bg-transparent",
+        variant === "destructive" && "bg-red-600",
+
+        // Disabled state
+        props.disabled && "opacity-50",
+
+        className
+      )}
+      {...props}
+    >
+      <Text
+        className={cn(
+          "font-inter-medium",
+          size === "sm" && "text-sm",
+          size === "md" && "text-base",
+          size === "lg" && "text-lg",
+          variant === "default" && "text-white",
+          variant === "outline" && "text-primary-600",
+          variant === "ghost" && "text-primary-600",
+          variant === "destructive" && "text-white"
+        )}
+      >
+        {children}
+      </Text>
+    </Pressable>
+  );
+};
+```
+
+### Animation Patterns
+
+```typescript
+// lib/animations.ts
+import { Animated, Easing } from "react-native";
+
+export const createFadeAnimation = (
+  value: Animated.Value,
+  toValue: number,
+  duration = 300
+) => {
+  return Animated.timing(value, {
+    toValue,
+    duration,
+    easing: Easing.out(Easing.quad),
+    useNativeDriver: true,
+  });
+};
+
+export const createSlideAnimation = (
+  value: Animated.Value,
+  toValue: number,
+  duration = 300
+) => {
+  return Animated.timing(value, {
+    toValue,
+    duration,
+    easing: Easing.out(Easing.back(1.1)),
+    useNativeDriver: true,
+  });
+};
+
+// Usage in components
+const AnimatedCard = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      createFadeAnimation(fadeAnim, 1),
+      createSlideAnimation(slideAnim, 0),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ translateY: slideAnim }],
+      }}
+    >
+      {/* Card content */}
+    </Animated.View>
+  );
+};
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### Subscription System Testing
+
+```typescript
+// __tests__/subscription/paymentFlow.test.ts
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { PaymentSheet } from "@/components/subscription/PaymentSheet";
+import { mockStripe } from "@/__mocks__/stripe";
+
+describe("Payment Flow", () => {
+  const mockPlan = {
+    id: "plan-1",
+    name: "Annual Premium",
+    price_cents: 7999,
+    billing_period: "annual",
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should initialize payment sheet correctly", async () => {
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+
+    const { getByText } = render(
+      <PaymentSheet plan={mockPlan} onSuccess={onSuccess} onError={onError} />
+    );
+
+    const payButton = getByText("Complete Purchase - $79.99");
+    fireEvent.press(payButton);
+
+    await waitFor(() => {
+      expect(mockStripe.initPaymentSheet).toHaveBeenCalledWith({
+        merchantDisplayName: "GreenThumb",
+        customerId: expect.any(String),
+        customerEphemeralKeySecret: expect.any(String),
+        paymentIntentClientSecret: expect.any(String),
+        allowsDelayedPaymentMethods: true,
+        defaultBillingDetails: {
+          name: "GreenThumb User",
+        },
+        returnURL: "greenthumb://payment-success",
+      });
+    });
+  });
+
+  it("should handle payment success", async () => {
+    mockStripe.presentPaymentSheet.mockResolvedValue({ error: null });
+
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+
+    const { getByText } = render(
+      <PaymentSheet plan={mockPlan} onSuccess={onSuccess} onError={onError} />
+    );
+
+    const payButton = getByText("Complete Purchase - $79.99");
+    fireEvent.press(payButton);
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should handle payment cancellation", async () => {
+    mockStripe.presentPaymentSheet.mockResolvedValue({
+      error: { code: "Canceled", message: "User canceled" },
+    });
+
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+
+    const { getByText } = render(
+      <PaymentSheet plan={mockPlan} onSuccess={onSuccess} onError={onError} />
+    );
+
+    const payButton = getByText("Complete Purchase - $79.99");
+    fireEvent.press(payButton);
+
+    await waitFor(() => {
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should handle payment errors", async () => {
+    mockStripe.presentPaymentSheet.mockResolvedValue({
+      error: { code: "Failed", message: "Payment failed" },
+    });
+
+    const onSuccess = jest.fn();
+    const onError = jest.fn();
+
+    const { getByText } = render(
+      <PaymentSheet plan={mockPlan} onSuccess={onSuccess} onError={onError} />
+    );
+
+    const payButton = getByText("Complete Purchase - $79.99");
+    fireEvent.press(payButton);
+
+    await waitFor(() => {
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith("Payment failed");
+    });
+  });
+});
+```
+
+### Database Query Testing
+
+```typescript
+// __tests__/queries/subscription.test.ts
+import { renderHook, waitFor } from "@testing-library/react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  useSubscriptionPlans,
+  useUserSubscription,
+} from "@/lib/subscriptionQueries";
+import { mockSupabase } from "@/__mocks__/supabase";
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
+describe("Subscription Queries", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("useSubscriptionPlans", () => {
+    it("should fetch subscription plans", async () => {
+      const mockPlans = [
+        {
+          id: "plan-1",
+          name: "Annual Premium",
+          price_cents: 7999,
+          billing_period: "annual",
+          is_active: true,
+        },
+        {
+          id: "plan-2",
+          name: "Monthly Premium",
+          price_cents: 999,
+          billing_period: "monthly",
+          is_active: true,
+        },
+      ];
+
+      mockSupabase.from.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockResolvedValue({
+              data: mockPlans,
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const { result } = renderHook(() => useSubscriptionPlans(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(result.current.data).toEqual(mockPlans);
+    });
+
+    it("should handle fetch errors", async () => {
+      mockSupabase.from.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockResolvedValue({
+              data: null,
+              error: { message: "Database error" },
+            }),
+          }),
+        }),
+      });
+
+      const { result } = renderHook(() => useSubscriptionPlans(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(result.current.error).toBeTruthy();
+    });
+  });
+});
+```
+
+### E2E Testing with Detox
+
+```typescript
+// e2e/subscription.e2e.ts
+import { device, element, by, expect } from "detox";
+
+describe("Subscription Flow", () => {
+  beforeAll(async () => {
+    await device.launchApp();
+  });
+
+  beforeEach(async () => {
+    await device.reloadReactNative();
+  });
+
+  it("should complete subscription purchase flow", async () => {
+    // Navigate to pricing page
+    await element(by.text("Upgrade to Premium")).tap();
+
+    // Select annual plan
+    await element(by.text("Annual Premium")).tap();
+    await element(by.text("Choose Plan")).tap();
+
+    // Verify checkout screen
+    await expect(element(by.text("Complete Your Purchase"))).toBeVisible();
+    await expect(element(by.text("Annual Premium"))).toBeVisible();
+    await expect(element(by.text("$79.99"))).toBeVisible();
+
+    // Complete payment (using test card)
+    await element(by.text("Complete Purchase")).tap();
+
+    // Verify success screen
+    await expect(element(by.text("Welcome to Premium!"))).toBeVisible();
+    await expect(
+      element(by.text("Your subscription is now active"))
+    ).toBeVisible();
+
+    // Navigate to subscription management
+    await element(by.text("Manage Subscription")).tap();
+
+    // Verify subscription details
+    await expect(element(by.text("Annual Premium"))).toBeVisible();
+    await expect(element(by.text("active"))).toBeVisible();
+  });
+
+  it("should handle payment cancellation", async () => {
+    await element(by.text("Upgrade to Premium")).tap();
+    await element(by.text("Monthly Premium")).tap();
+    await element(by.text("Choose Plan")).tap();
+
+    // Start payment process
+    await element(by.text("Complete Purchase")).tap();
+
+    // Cancel payment in Stripe sheet
+    await element(by.text("Cancel")).tap();
+
+    // Should return to checkout screen
+    await expect(element(by.text("Complete Your Purchase"))).toBeVisible();
+  });
+});
+```
+
+---
+
+## 🚀 Deployment & CI/CD
+
+### EAS Build Configuration
+
+```json
+// eas.json
+{
+  "cli": {
+    "version": ">= 5.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_..."
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_..."
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_..."
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+```
+
+### GitHub Actions Workflow
+
+```yaml
+# .github/workflows/build-and-deploy.yml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+  build-ios:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build iOS
+        run: eas build --platform ios --non-interactive
+        env:
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+
+  build-android:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Android
+        run: eas build --platform android --non-interactive
+        env:
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+```
+
+### Environment Management
+
+```bash
+# Production environment setup
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Production Stripe keys
+EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Analytics and monitoring
+SENTRY_DSN=your_sentry_dsn
+ANALYTICS_API_KEY=your_analytics_key
+
+# App configuration
+APP_VERSION=1.0.0
+BUILD_NUMBER=1
+```
+
+---
+
+## 📊 Performance Monitoring
+
+### Subscription Analytics
+
+```typescript
+// lib/analytics.ts
+import { supabase } from "@/lib/supabase";
+
+export const trackSubscriptionEvent = async (
+  event: "subscription_started" | "subscription_canceled" | "payment_failed",
+  data: {
+    planId?: string;
+    amount?: number;
+    currency?: string;
+    userId?: string;
+  }
+) => {
+  try {
+    await supabase.from("analytics_events").insert({
+      event_type: event,
+      event_data: data,
+      created_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Analytics tracking failed:", error);
+  }
+};
+
+// Usage in components
+const handleSubscriptionSuccess = async (subscription: UserSubscription) => {
+  await trackSubscriptionEvent("subscription_started", {
+    planId: subscription.plan_id,
+    amount: subscription.subscription_plans.price_cents,
+    currency: "usd",
+    userId: subscription.user_id,
+  });
+};
+```
+
+### Error Monitoring
+
+```typescript
+// lib/errorTracking.ts
+import * as Sentry from "@sentry/react-native";
+
+export const initErrorTracking = () => {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: __DEV__ ? "development" : "production",
+  });
+};
+
+export const capturePaymentError = (error: Error, context: any) => {
+  Sentry.withScope((scope) => {
+    scope.setTag("error_type", "payment");
+    scope.setContext("payment_context", context);
+    Sentry.captureException(error);
+  });
+};
+```
+
+---
+
+## 🔧 Development Tools
+
+### Debugging Subscription Issues
+
+```typescript
+// lib/debug.ts
+export const debugSubscription = {
+  logPaymentIntent: (paymentIntent: any) => {
+    if (__DEV__) {
+      console.log("Payment Intent:", {
+        id: paymentIntent.id,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        status: paymentIntent.status,
+        metadata: paymentIntent.metadata,
+      });
+    }
+  },
+
+  logSubscriptionState: (subscription: UserSubscription | null) => {
+    if (__DEV__) {
+      console.log("Subscription State:", {
+        id: subscription?.id,
+        status: subscription?.status,
+        planName: subscription?.subscription_plans?.name,
+        currentPeriodEnd: subscription?.current_period_end,
+        cancelAtPeriodEnd: subscription?.cancel_at_period_end,
+      });
+    }
+  },
+
+  logStripeError: (error: any) => {
+    if (__DEV__) {
+      console.error("Stripe Error:", {
+        code: error.code,
+        message: error.message,
+        type: error.type,
+        decline_code: error.decline_code,
+      });
+    }
+  },
+};
+```
+
+### Testing Utilities
+
+```typescript
+// __tests__/utils/testUtils.tsx
+import React from "react";
+import { render } from "@testing-library/react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { StripeProvider } from "@stripe/stripe-react-native";
+
+export const createTestWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <StripeProvider publishableKey="pk_test_mock">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>{children}</AuthProvider>
+      </QueryClientProvider>
+    </StripeProvider>
+  );
+};
+
+export const renderWithProviders = (ui: React.ReactElement) => {
+  return render(ui, { wrapper: createTestWrapper() });
+};
+```
+
+---
+
+**📝 Technical Guide Version:** 2.0  
+**🗓️ Last Updated:** January 14, 2025  
+**👥 Maintained by:** GreenThumb Development Team
