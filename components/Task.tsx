@@ -36,6 +36,8 @@ export function Task({
   // Simplified state management - single source of truth
   const [isCompleted, setIsCompleted] = useState(task.completed);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasAnimatedForCurrentToggle, setHasAnimatedForCurrentToggle] =
+    useState(false);
   const queryClient = useQueryClient();
 
   // Animation values - simpler, more reliable
@@ -116,7 +118,11 @@ export function Task({
 
       // Immediate visual feedback
       setIsCompleted(completed);
-      animateCompletion(completed);
+
+      // Only animate if we haven't already animated for this toggle
+      if (!hasAnimatedForCurrentToggle) {
+        animateCompletion(completed);
+      }
 
       // Optimistic updates if queryKey provided
       if (queryKey) {
@@ -168,6 +174,8 @@ export function Task({
     },
     onSettled: () => {
       setIsProcessing(false);
+      // Reset animation flag for next toggle
+      setHasAnimatedForCurrentToggle(false);
     },
   });
 
@@ -207,7 +215,22 @@ export function Task({
     if (isProcessing || isRemoving) return;
 
     const newCompletedState = !isCompleted;
-    toggleTaskMutation.mutate(newCompletedState);
+
+    // If parent provides onToggleComplete, use that instead of direct mutation
+    if (onToggleComplete) {
+      // Set flag to prevent duplicate animation in mutation
+      setHasAnimatedForCurrentToggle(true);
+
+      // Immediate visual feedback
+      setIsCompleted(newCompletedState);
+      animateCompletion(newCompletedState);
+
+      // Let parent handle the actual mutation
+      onToggleComplete(task.id, newCompletedState);
+    } else {
+      // Fallback to direct mutation if no parent handler
+      toggleTaskMutation.mutate(newCompletedState);
+    }
   };
 
   // Helper functions for display

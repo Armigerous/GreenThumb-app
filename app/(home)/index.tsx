@@ -207,15 +207,28 @@ export default function Page() {
     }, [refetchTasks, queryClient, user?.id])
   );
 
-  // Configure layout animation for task completion only
+  // Configure layout animation for task completion with smooth size transitions
   const configureLayoutAnimation = useCallback(() => {
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(
-        300,
-        LayoutAnimation.Types.easeInEaseOut,
-        LayoutAnimation.Properties.opacity
-      )
-    );
+    LayoutAnimation.configureNext({
+      duration: 400,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+        duration: 300,
+      },
+      update: {
+        type: LayoutAnimation.Types.spring,
+        springDamping: 0.85,
+        initialVelocity: 0.1,
+        property: LayoutAnimation.Properties.scaleXY,
+        duration: 400,
+      },
+      delete: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+        duration: 250,
+      },
+    });
   }, []);
 
   // Toggle task completion mutation with optimistic updates
@@ -304,10 +317,23 @@ export default function Page() {
 
       if (!taskToUpdate) return;
 
+      // Configure layout animation before state changes
+      configureLayoutAnimation();
+
+      // Store the current count before updating
+      const currentOverdueCount = allOverdueTasks.length;
+
+      // Immediately update the overdue tasks state for real-time UI updates
+      if (isOverdueTask) {
+        setAllOverdueTasks((prevTasks) =>
+          prevTasks.filter((task) => task.id !== taskId)
+        );
+      }
+
       // Check if this is the last overdue task being completed
       if (
         isOverdueTask &&
-        allOverdueTasks.length === 1 &&
+        currentOverdueCount === 1 &&
         !taskToUpdate.completed
       ) {
         // Clear any existing timer
@@ -329,11 +355,8 @@ export default function Page() {
               setJustCompletedAllOverdueTasks(false);
             }, 1000);
           }, CELEBRATION_DURATION);
-        }, 800); // Increased delay to let the task removal animation finish
+        }, 600); // Reduced delay for better timing
       }
-
-      // Configure layout animation for smooth transitions
-      configureLayoutAnimation();
 
       // Execute the mutation with optimistic updates
       toggleTaskMutation.mutate({

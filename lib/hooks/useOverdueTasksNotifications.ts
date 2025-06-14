@@ -27,7 +27,7 @@ export function useOverdueTasksNotifications() {
   const hasCheckedRef = useRef(false);
 
   // Function to fetch garden health impact
-  const fetchGardenHealthImpact = async () => {
+  const fetchGardenHealthImpact = async (showModal: boolean) => {
     try {
       if (!user) return false;
       
@@ -56,7 +56,9 @@ export function useOverdueTasksNotifications() {
         }));
         
         setNotifications(processedData);
-        setShowModal(true);
+        if (showModal) {
+          setShowModal(true);
+        }
         return true;
       }
       
@@ -86,7 +88,7 @@ export function useOverdueTasksNotifications() {
         hasCheckedRef.current = true;
         
         // Fetch garden health impact data
-        await fetchGardenHealthImpact();
+        await fetchGardenHealthImpact(true);
       } catch (err) {
         console.error('Unexpected error checking for overdue tasks:', err);
       } finally {
@@ -133,7 +135,11 @@ export function useOverdueTasksNotifications() {
     getGardenOverdueTasksCount,
     checkNotifications: () => {
       hasCheckedRef.current = false; // Reset the check flag
-      fetchGardenHealthImpact(); // Fetch garden health impact
+      return fetchGardenHealthImpact(false); // Don't show modal when manually refreshing
+    },
+    // Add a method to refresh data without showing modal
+    refreshOverdueData: () => {
+      return fetchGardenHealthImpact(false);
     }
   };
 } 

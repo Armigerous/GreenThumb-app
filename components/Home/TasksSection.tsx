@@ -125,7 +125,15 @@ export function TasksSection({
               ? "checkmark-circle"
               : "calendar"
           }
-          onSeeAll={() => router.push("/(home)/calendar")}
+          onSeeAll={
+            // Only show "See All" if there are tasks to see or if not in completed state
+            !justCompletedAllOverdueTasks &&
+            (allOverdueTasks.length > 0 ||
+              (todaysTasks && todaysTasks.length > 0) ||
+              upcomingTasksCount > 0)
+              ? () => router.push("/(home)/calendar")
+              : undefined
+          }
           badge={!isLoading ? getTasksBadge() : null}
         />
       </StaggeredContent>
@@ -156,14 +164,18 @@ export function TasksSection({
               You&apos;ve caught up on all your overdue tasks. Your plants are
               going to love the attention!
             </BodyText>
-            <TouchableOpacity
-              className="px-4 py-2 bg-brand-600 rounded-lg"
-              onPress={() => router.push("/(home)/calendar")}
-            >
-              <BodyText className="text-white font-paragraph font-medium">
-                View Your Progress
-              </BodyText>
-            </TouchableOpacity>
+            {/* Only show View Your Progress button if there are any tasks to view */}
+            {(upcomingTasksCount > 0 ||
+              (todaysTasks && todaysTasks.length > 0)) && (
+              <TouchableOpacity
+                className="px-4 py-2 bg-brand-600 rounded-lg"
+                onPress={() => router.push("/(home)/calendar")}
+              >
+                <BodyText className="text-white font-paragraph font-medium">
+                  View Your Progress
+                </BodyText>
+              </TouchableOpacity>
+            )}
           </View>
         </StaggeredContent>
       ) : allOverdueTasks.length > 0 ? (
