@@ -46,7 +46,7 @@ interface TaskListProps {
 }
 
 export function TaskList({
-  tasks: initialTasks,
+  tasks,
   onToggleComplete,
   showGardenName = false,
   groupByGarden = false,
@@ -55,17 +55,16 @@ export function TaskList({
   queryKey,
   isOverdue = false,
 }: TaskListProps) {
-  // Simplified state management
-  const [displayTasks, setDisplayTasks] =
-    useState<TaskWithDetails[]>(initialTasks);
-  const [removingTaskIds, setRemovingTaskIds] = useState<number[]>([]);
+  // Simplified state management - only track removing tasks for UI feedback
+  const [removingTaskIds, setRemovingTaskIds] = useState<Set<number>>(
+    new Set()
+  );
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [celebrationType, setCelebrationType] = useState<"single" | "all">(
     "single"
   );
 
   // Animation references
-  const listHeight = useRef(new Animated.Value(0)).current;
   const emptyStateOpacity = useRef(new Animated.Value(0)).current;
   const emptyStateScale = useRef(new Animated.Value(0.95)).current;
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
@@ -74,6 +73,7 @@ export function TaskList({
   // Refs for managing state
   const celebrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialized = useRef(false);
+  const pendingRemovals = useRef<Set<number>>(new Set());
 
   const queryClient = useQueryClient();
 
@@ -84,33 +84,15 @@ export function TaskList({
     ]
   ).current;
 
-  // Initialize display tasks
+  // Initialize empty state if needed
   useEffect(() => {
-    setDisplayTasks(initialTasks);
-
     if (!isInitialized.current) {
       isInitialized.current = true;
-      if (initialTasks.length === 0) {
+      if (tasks.length === 0) {
         showEmptyState();
       }
     }
-  }, [initialTasks]);
-
-  // Handle task updates from external sources
-  useEffect(() => {
-    // Update display tasks when props change, but preserve removal animations
-    const updatedTasks = initialTasks.filter(
-      (task) => !removingTaskIds.includes(task.id)
-    );
-    if (
-      JSON.stringify(updatedTasks) !==
-      JSON.stringify(
-        displayTasks.filter((task) => !removingTaskIds.includes(task.id))
-      )
-    ) {
-      setDisplayTasks(updatedTasks);
-    }
-  }, [initialTasks, removingTaskIds]);
+  }, [tasks.length]);
 
   // Show empty state animation
   const showEmptyState = useCallback(() => {
@@ -145,7 +127,7 @@ export function TaskList({
     ]).start();
   }, [emptyStateOpacity, emptyStateScale]);
 
-  // Show celebration animation
+  // Show celebration animation with proper sizing
   const showCelebration = useCallback(
     (type: "single" | "all") => {
       setCelebrationType(type);
@@ -204,70 +186,75 @@ export function TaskList({
     });
   }, [celebrationOpacity, celebrationScale]);
 
-  // Handle task completion with coordinated animations
+  // Handle task completion with proper state management
   const handleTaskComplete = useCallback(
     (taskId: number, completed: boolean) => {
       if (!completed) return; // Only handle completion, not unchecking
 
-      // Add to removing array
-      setRemovingTaskIds((prev) => [...prev, taskId]);
+      // Prevent duplicate processing
+      if (pendingRemovals.current.has(taskId)) {
+        return;
+      }
 
-      // Count remaining tasks (excluding the one being removed)
-      const remainingTasks = displayTasks.filter(
+      // Add to pending removals to prevent race conditions
+      pendingRemovals.current.add(taskId);
+
+      // Add to removing array for UI feedback
+      setRemovingTaskIds((prev) => new Set([...prev, taskId]));
+
+      // Count remaining tasks (excluding the one being removed and any pending removals)
+      const remainingTasks = tasks.filter(
         (task: TaskWithDetails) =>
-          task.id !== taskId && !removingTaskIds.includes(task.id)
+          task.id !== taskId &&
+          !removingTaskIds.has(task.id) &&
+          !pendingRemovals.current.has(task.id)
       );
 
       // Show appropriate celebration
       if (remainingTasks.length === 0) {
-        // This was the last task
-        setTimeout(() => showCelebration("all"), 600);
+        // This was the last task - delay celebration to let parent state update
+        setTimeout(() => showCelebration("all"), 400);
       } else {
         // Regular task completion
-        setTimeout(() => showCelebration("single"), 300);
+        setTimeout(() => showCelebration("single"), 200);
       }
 
-      // Notify parent
+      // Notify parent immediately
       onToggleComplete?.(taskId, completed);
 
-      // Configure smooth layout animation for list resize
+      // Configure smooth layout animation for container resize
       LayoutAnimation.configureNext({
         duration: 400,
-        update: {
-          type: LayoutAnimation.Types.easeInEaseOut,
-          property: LayoutAnimation.Properties.scaleXY,
-        },
-        delete: {
-          duration: 400,
+        create: {
           type: LayoutAnimation.Types.easeInEaseOut,
           property: LayoutAnimation.Properties.opacity,
+          duration: 300,
+        },
+        update: {
+          type: LayoutAnimation.Types.spring,
+          springDamping: 0.85,
+          initialVelocity: 0.1,
+          property: LayoutAnimation.Properties.scaleXY,
+          duration: 400,
+        },
+        delete: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+          property: LayoutAnimation.Properties.opacity,
+          duration: 250,
         },
       });
+
+      // Clean up removing state after animation
+      setTimeout(() => {
+        setRemovingTaskIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(taskId);
+          return newSet;
+        });
+        pendingRemovals.current.delete(taskId);
+      }, 400);
     },
-    [displayTasks, removingTaskIds, onToggleComplete, showCelebration]
-  );
-
-  // Handle removal animation completion
-  const handleRemovalComplete = useCallback(
-    (taskId: number) => {
-      setRemovingTaskIds((prev: number[]) =>
-        prev.filter((id) => id !== taskId)
-      );
-
-      // Update display tasks
-      setDisplayTasks((prev) => prev.filter((task) => task.id !== taskId));
-
-      // Check if we should show empty state
-      const remainingTasks = displayTasks.filter(
-        (task: TaskWithDetails) =>
-          task.id !== taskId && !removingTaskIds.includes(task.id)
-      );
-
-      if (remainingTasks.length === 0) {
-        setTimeout(() => showEmptyState(), 200);
-      }
-    },
-    [displayTasks, removingTaskIds, showEmptyState]
+    [tasks, removingTaskIds, onToggleComplete, showCelebration]
   );
 
   // Cleanup on unmount
@@ -279,8 +266,11 @@ export function TaskList({
     };
   }, []);
 
-  // Show empty state if no tasks
-  if (displayTasks.length === 0 && removingTaskIds.length === 0) {
+  // Filter out tasks that are being removed for display
+  const visibleTasks = tasks.filter((task) => !removingTaskIds.has(task.id));
+
+  // Show empty state if no visible tasks
+  if (visibleTasks.length === 0) {
     return (
       <Animated.View
         className="bg-background p-6 items-center rounded-xl"
@@ -304,7 +294,7 @@ export function TaskList({
 
   // Render grouped tasks
   if (groupByGarden) {
-    const groupedTasks = displayTasks.reduce<Record<string, TaskWithDetails[]>>(
+    const groupedTasks = visibleTasks.reduce<Record<string, TaskWithDetails[]>>(
       (acc, task) => {
         const gardenName = task.plant?.garden?.name || "Unknown Garden";
         if (!acc[gardenName]) {
@@ -331,8 +321,8 @@ export function TaskList({
                   showGardenName={false}
                   queryKey={queryKey}
                   isOverdue={isOverdue}
-                  isRemoving={removingTaskIds.includes(task.id)}
-                  onRemovalComplete={handleRemovalComplete}
+                  isRemoving={removingTaskIds.has(task.id)}
+                  onRemovalComplete={() => {}} // No longer needed
                 />
                 {index < gardenTasks.length - 1 && (
                   <View className="h-[1px] bg-cream-200 mx-4" />
@@ -353,7 +343,7 @@ export function TaskList({
   }
 
   // Render regular task list
-  const tasksToShow = displayTasks.slice(0, maxTasks);
+  const tasksToShow = visibleTasks.slice(0, maxTasks);
 
   return (
     <View className={`${className} bg-white rounded-xl relative`}>
@@ -365,8 +355,8 @@ export function TaskList({
             showGardenName={showGardenName}
             queryKey={queryKey}
             isOverdue={isOverdue}
-            isRemoving={removingTaskIds.includes(task.id)}
-            onRemovalComplete={handleRemovalComplete}
+            isRemoving={removingTaskIds.has(task.id)}
+            onRemovalComplete={() => {}} // No longer needed
           />
           {index < tasksToShow.length - 1 && (
             <View className="h-[1px] bg-cream-200 mx-4" />
@@ -374,10 +364,10 @@ export function TaskList({
         </React.Fragment>
       ))}
 
-      {displayTasks.length > (maxTasks || displayTasks.length) && (
+      {visibleTasks.length > (maxTasks || visibleTasks.length) && (
         <Text className="text-sm text-cream-600 font-paragraph p-4">
-          +{displayTasks.length - (maxTasks || 0)} more{" "}
-          {displayTasks.length - (maxTasks || 0) === 1 ? "task" : "tasks"}
+          +{visibleTasks.length - (maxTasks || 0)} more{" "}
+          {visibleTasks.length - (maxTasks || 0) === 1 ? "task" : "tasks"}
         </Text>
       )}
 
@@ -385,9 +375,15 @@ export function TaskList({
     </View>
   );
 
-  // Render celebration overlay
+  // Render celebration overlay with adaptive sizing for different container sizes
   function renderCelebration() {
     if (!celebrationVisible) return null;
+
+    // Calculate adaptive sizing based on remaining tasks (smaller celebration for smaller containers)
+    const remainingTaskCount = tasks.filter(
+      (task) => !removingTaskIds.has(task.id)
+    ).length;
+    const isSmallContainer = remainingTaskCount <= 1;
 
     return (
       <Animated.View
@@ -396,29 +392,64 @@ export function TaskList({
           opacity: celebrationOpacity,
           transform: [{ scale: celebrationScale }],
           backgroundColor: "rgba(255, 255, 255, 0.95)",
+          minHeight: isSmallContainer ? 80 : 100, // Even smaller for single task containers
         }}
       >
         {celebrationType === "all" ? (
-          <View className="items-center px-4 py-6 max-w-[280px]">
-            <View className="w-16 h-16 rounded-full bg-brand-100 items-center justify-center mb-4 shadow-sm">
-              <Ionicons name="trophy" size={36} color="#5E994B" />
+          <View
+            className={`items-center ${
+              isSmallContainer ? "px-2 py-2" : "px-3 py-4"
+            } max-w-[240px]`}
+          >
+            <View
+              className={`${
+                isSmallContainer ? "w-8 h-8" : "w-10 h-10"
+              } rounded-full bg-brand-100 items-center justify-center ${
+                isSmallContainer ? "mb-1" : "mb-2"
+              } shadow-sm`}
+            >
+              <Ionicons
+                name="trophy"
+                size={isSmallContainer ? 16 : 20}
+                color="#5E994B"
+              />
             </View>
-            <Text className="text-xl font-title font-bold text-brand-700 text-center mb-2">
+            <Text
+              className={`${
+                isSmallContainer ? "text-sm" : "text-base"
+              } font-title font-bold text-brand-700 text-center mb-1`}
+            >
               Amazing work!
             </Text>
-            <Text className="text-sm font-paragraph text-brand-600 text-center">
-              You've completed all your {isOverdue ? "overdue " : ""}tasks
+            <Text className="text-xs font-paragraph text-brand-600 text-center">
+              You&apos;ve completed all your {isOverdue ? "overdue " : ""}tasks
             </Text>
           </View>
         ) : (
-          <View className="items-center px-4 py-4 max-w-[280px]">
-            <View className="w-14 h-14 rounded-full bg-brand-100 items-center justify-center mb-3 shadow-sm">
-              <Ionicons name="checkmark-circle" size={32} color="#5E994B" />
+          <View
+            className={`items-center ${
+              isSmallContainer ? "px-2 py-2" : "px-3 py-3"
+            } max-w-[200px]`}
+          >
+            <View
+              className={`${
+                isSmallContainer ? "w-6 h-6" : "w-8 h-8"
+              } rounded-full bg-brand-100 items-center justify-center mb-1 shadow-sm`}
+            >
+              <Ionicons
+                name="checkmark-circle"
+                size={isSmallContainer ? 12 : 16}
+                color="#5E994B"
+              />
             </View>
-            <Text className="text-lg font-title font-bold text-brand-700 text-center mb-1">
+            <Text
+              className={`${
+                isSmallContainer ? "text-xs" : "text-sm"
+              } font-title font-bold text-brand-700 text-center mb-1`}
+            >
               Well done!
             </Text>
-            <Text className="text-sm font-paragraph text-brand-600 text-center">
+            <Text className="text-xs font-paragraph text-brand-600 text-center">
               Keep up the great work
             </Text>
           </View>

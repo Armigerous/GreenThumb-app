@@ -299,14 +299,14 @@ export default function CalendarScreen() {
   });
 
   // Function to handle marking a task as complete
-  const handleToggleComplete = async (id: number) => {
+  const handleToggleComplete = async (id: number, completed: boolean) => {
     const taskToUpdate = tasks?.find((task) => task.id === id);
     if (!taskToUpdate) return;
 
     // Execute the mutation with optimistic updates
     toggleTaskMutation.mutate({
       id,
-      completed: !taskToUpdate.completed,
+      completed,
     });
   };
 
