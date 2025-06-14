@@ -292,7 +292,10 @@ export default function Page() {
 
   // Function to handle marking a task as complete
   const handleCompleteTask = useCallback(
-    (taskId: number) => {
+    (taskId: number, completed: boolean) => {
+      // Only handle task completion, not unchecking
+      if (!completed) return;
+
       // Check if this is an overdue task
       const isOverdueTask = allOverdueTasks.some((task) => task.id === taskId);
       const taskToUpdate = isOverdueTask
@@ -312,7 +315,7 @@ export default function Page() {
           clearTimeout(celebrationTimer.current);
         }
 
-        // Schedule the celebration to show after the API call succeeds
+        // Schedule the celebration to show after the task animation completes
         setTimeout(() => {
           setShowTaskCelebration(true);
           setJustCompletedAllOverdueTasks(true);
@@ -326,16 +329,16 @@ export default function Page() {
               setJustCompletedAllOverdueTasks(false);
             }, 1000);
           }, CELEBRATION_DURATION);
-        }, 500);
+        }, 800); // Increased delay to let the task removal animation finish
       }
 
-      // Configure layout animation for the task completion effect
+      // Configure layout animation for smooth transitions
       configureLayoutAnimation();
 
       // Execute the mutation with optimistic updates
       toggleTaskMutation.mutate({
         id: taskId,
-        completed: !taskToUpdate.completed,
+        completed: true, // Always true since we only handle completion
       });
     },
     [todaysTasks, allOverdueTasks, toggleTaskMutation, configureLayoutAnimation]
