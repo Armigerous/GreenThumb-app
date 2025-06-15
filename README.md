@@ -188,9 +188,35 @@ eas submit                 # Submit to app stores
 
 ## 📅 App Store Launch Plan - January 27, 2025
 
+### 🚨 URGENT: User Interview Findings (January 14, 2025)
+
+**Critical bugs identified** that must be fixed before launch:
+
+- 🔴 **Database not scrollable** - Core functionality broken
+- 🔴 **Database filters non-functional** - Filter buttons cause errors
+- 🔴 **Garden completion status mismatch** - Data integrity issue
+
+**Documentation:**
+
+- **Quick Reference:** `notes/USER_INTERVIEW_SUMMARY.md`
+- **Full Analysis:** `docs/user_feedback.md`
+- **Task Tracking:** `notes/TASK.md` → "USER INTERVIEW FINDINGS" section
+
 ### 🔥 Critical Pre-Launch Tasks
 
-#### High Priority (Complete by Jan 20)
+#### High Priority (Complete by Jan 16-17)
+
+- [ ] **Fix database scrolling** - Users must be able to scroll through plant database
+- [ ] **Fix database filters** - Filter functionality must work without errors
+- [ ] **Fix garden completion status** - Ensure data consistency between creation and edit flows
+
+#### High Priority (Complete by Jan 18-19)
+
+- [ ] **Fix typography inconsistency** - Quick actions must match brand guidelines
+- [ ] **Fix layout bugs** - Long text should not break UI or hide buttons
+- [ ] **Fix selection logic** - Prevent invalid option combinations in garden setup
+
+#### Medium Priority (Complete by Jan 20)
 
 - [ ] **Fix animation bugs** - Resolve useNativeDriver warnings in task completion
 - [ ] **App Store assets** - Screenshots, app icon, store descriptions

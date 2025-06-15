@@ -107,9 +107,7 @@ const Pagination = memo(
             }`}
             accessibilityLabel="Next page"
           >
-            <BodyText className="text-brand-700 mr-1 font-medium">
-              Next
-            </BodyText>
+            <BodyText className="text-primary mr-1 font-medium">Next</BodyText>
             <Ionicons name="chevron-forward" size={18} color="#047857" />
           </TouchableOpacity>
         </View>
@@ -131,9 +129,7 @@ const Pagination = memo(
             accessibilityLabel="Previous page"
           >
             <Ionicons name="chevron-back" size={20} color="#047857" />
-            <BodyText className="text-brand-700 ml-1 font-medium">
-              Prev
-            </BodyText>
+            <BodyText className="text-primary ml-1 font-medium">Prev</BodyText>
           </TouchableOpacity>
 
           {/* Page numbers */}
@@ -162,15 +158,15 @@ const Pagination = memo(
                     onPress={() => onPageChange(page)}
                     className={`mx-1 px-3 py-1.5 rounded-lg ${
                       isActive
-                        ? "bg-brand-600"
-                        : "bg-brand-50 border border-brand-100"
+                        ? "bg-primary"
+                        : "bg-cream-50 border border-primary"
                     }`}
                     accessibilityLabel={`Page ${page}`}
                   >
                     <BodyText
                       className={`${
                         isActive
-                          ? "text-foreground font-medium"
+                          ? "text-primary-foreground font-medium"
                           : "text-cream-600"
                       }`}
                     >
@@ -191,10 +187,8 @@ const Pagination = memo(
             }`}
             accessibilityLabel="Next page"
           >
-            <BodyText className="text-brand-700 mr-1 font-medium">
-              Next
-            </BodyText>
-            <Ionicons name="chevron-forward" size={20} color="#047857" />
+            <BodyText className="text-primary mr-1 font-medium">Next</BodyText>
+            <Ionicons name="chevron-forward" size={20} color="#fffefa" />
           </TouchableOpacity>
         </View>
       </View>

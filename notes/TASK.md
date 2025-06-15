@@ -449,6 +449,200 @@
 
 ## 🔥 DISCOVERED DURING WORK - Critical Issues to Address
 
+### 🎯 USER INTERVIEW FINDINGS (January 14, 2025)
+
+**Source:** User interview feedback session  
+**Participants:** Beta testers and target users  
+**Priority:** Critical bugs and UX improvements for launch
+
+#### 🔴 CRITICAL BUGS - Must Fix Before Launch
+
+**INTERVIEW-CRIT-001**: Database page not scrollable  
+**Status:** 🔴 **CRITICAL** - Core functionality broken  
+**Owner:** Development Team  
+**Due:** January 16, 2025  
+**User Impact:** "I can't scroll through the plant database to see more plants"  
+**Description:** Users cannot scroll through plant database results, severely limiting plant discovery  
+**Acceptance Criteria:**
+
+- [ ] Database page allows full scrolling functionality
+- [ ] All plants are accessible through scrolling
+- [ ] Smooth scrolling performance on all devices
+
+**INTERVIEW-CRIT-002**: Database filters non-functional  
+**Status:** 🔴 **CRITICAL** - Core functionality broken  
+**Owner:** Development Team  
+**Due:** January 16, 2025  
+**User Impact:** "The filter buttons don't work and the filter page doesn't load"  
+**Description:** Filter functionality completely broken, preventing users from finding specific plants  
+**Acceptance Criteria:**
+
+- [ ] Filter buttons open modal without errors
+- [ ] All filter options function correctly
+- [ ] Filter page loads and displays properly
+
+**INTERVIEW-CRIT-003**: Garden setup completion mismatch  
+**Status:** 🔴 **CRITICAL** - Data integrity issue  
+**Owner:** Development Team  
+**Due:** January 17, 2025  
+**User Impact:** "My garden shows incomplete even after I set it up completely"  
+**Description:** Garden setup shows incomplete (not 100%) when editing conditions after creation  
+**Root Cause:** Mismatch between garden creation flow and edit flow data structures  
+**Acceptance Criteria:**
+
+- [ ] Garden completion status accurately reflects setup state
+- [ ] Edit flow maintains completion percentage
+- [ ] Data consistency between creation and edit flows
+
+#### 🟡 HIGH PRIORITY UX ISSUES - Fix Before Launch
+
+**INTERVIEW-HIGH-004**: Typography inconsistency in quick actions  
+**Status:** 🟡 **HIGH** - Brand consistency issue  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "The font in quick actions doesn't match the rest of the app"  
+**Description:** Quick actions font doesn't match brand guidelines (should use Mali/Nunito system)  
+**Reference:** See `docs/fonts.md` and `notes/BRAND_IDENTITY.md`  
+**Acceptance Criteria:**
+
+- [ ] Quick actions use correct brand fonts
+- [ ] Typography consistency across all UI elements
+- [ ] Font weights and sizes match design system
+
+**INTERVIEW-HIGH-005**: Garden setup UI bottom stack transparency  
+**Status:** 🟡 **HIGH** - Visual bug  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "The bottom part looks transparent during garden setup"  
+**Description:** Bottom stack doesn't extend fully to screen bottom during garden condition selection  
+**Acceptance Criteria:**
+
+- [ ] Bottom stack extends to screen edge
+- [ ] No transparency issues in garden setup flow
+- [ ] Consistent background across all setup screens
+
+**INTERVIEW-HIGH-006**: Selection logic allows invalid combinations  
+**Status:** 🟡 **HIGH** - Logic error  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "I can select 'none' plus other options which doesn't make sense"  
+**Description:** Users can select "none" plus other options simultaneously in garden setup  
+**Acceptance Criteria:**
+
+- [ ] "None" option is mutually exclusive with other selections
+- [ ] Clear visual feedback for invalid selections
+- [ ] Proper validation before allowing progression
+
+**INTERVIEW-HIGH-007**: Single selection questions allow multiple choices  
+**Status:** 🟡 **HIGH** - Logic error  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "I should only be able to pick one space size and one region since I'm setting up one garden"  
+**Description:** Available space and NC region questions should only allow single selection  
+**Acceptance Criteria:**
+
+- [ ] Available space allows only one selection
+- [ ] NC region allows only one selection
+- [ ] UI clearly indicates single vs multiple selection questions
+
+**INTERVIEW-HIGH-008**: Long garden names break layout  
+**Status:** 🟡 **HIGH** - Layout bug  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "When I add plants with long names, the Next button disappears off screen"  
+**Description:** Long garden names push "Next" button off screen during plant addition flow  
+**Acceptance Criteria:**
+
+- [ ] Garden names truncate appropriately
+- [ ] Next button always remains accessible
+- [ ] Responsive layout handles long text gracefully
+
+**INTERVIEW-HIGH-009**: Garden card name truncation missing  
+**Status:** 🟡 **HIGH** - Text display issue  
+**Owner:** Development Team  
+**Due:** January 18, 2025  
+**User Impact:** "Garden names get cut off in weird ways on the cards"  
+**Description:** Garden card names need proper truncation (1 line for small cards, 2 lines for large cards)  
+**Acceptance Criteria:**
+
+- [ ] Small garden cards: 1 line with ellipsis
+- [ ] Large garden cards: 2 lines with ellipsis
+- [ ] Consistent truncation behavior across card types
+
+**INTERVIEW-HIGH-010**: Inconsistent scrolling in garden setup  
+**Status:** 🟡 **HIGH** - UX consistency  
+**Owner:** Development Team  
+**Due:** January 19, 2025  
+**User Impact:** "Some screens scroll smoothly, others feel jerky or don't scroll at all"  
+**Description:** Garden setup has inconsistent scrolling behavior across different screens  
+**Acceptance Criteria:**
+
+- [ ] Consistent scrolling behavior across all setup screens
+- [ ] Smooth scroll performance on all devices
+- [ ] Proper scroll indicators where needed
+
+#### 🟢 ENHANCEMENT SUGGESTIONS - Post-Launch Consideration
+
+**INTERVIEW-ENHANCE-011**: Improve selection organization  
+**Status:** 🟢 **ENHANCEMENT** - UX improvement  
+**Owner:** Product Team  
+**Due:** Post-launch (February 2025)  
+**User Suggestion:** "Options should be organized better - alphabetical or logical like coastal→piedmont→mountains"  
+**Description:** Selection options need better organization for improved usability  
+**Implementation Ideas:**
+
+- [ ] Alphabetical sorting for plant lists
+- [ ] Logical geographic ordering (coastal→piedmont→mountains)
+- [ ] Category grouping for better navigation
+
+**INTERVIEW-ENHANCE-012**: Soil pyramid visualization  
+**Status:** 🟢 **ENHANCEMENT** - UI improvement  
+**Owner:** Design Team  
+**Due:** Post-launch (February 2025)  
+**User Suggestion:** "Use a soil pyramid visualization for soil type selection"  
+**Description:** Replace current soil type selection with visual pyramid interface  
+**Implementation Ideas:**
+
+- [ ] Interactive soil pyramid component
+- [ ] Visual representation of soil composition
+- [ ] Educational tooltips for soil types
+
+**INTERVIEW-ENHANCE-013**: Icon improvement in info modals  
+**Status:** 🟢 **ENHANCEMENT** - Visual improvement  
+**Owner:** Design Team  
+**Due:** Post-launch (February 2025)  
+**User Suggestion:** "Replace question marks with exclamation points in info modal circles"  
+**Description:** Info modal icons should use exclamation points instead of question marks  
+**Implementation Ideas:**
+
+- [ ] Update icon library usage
+- [ ] Consistent info icon treatment
+- [ ] Better visual hierarchy in modals
+
+**INTERVIEW-ENHANCE-014**: Smart plant recommendations  
+**Status:** 🟢 **ENHANCEMENT** - Feature addition  
+**Owner:** Product Team  
+**Due:** Post-launch (March 2025)  
+**User Suggestion:** "Suggest plants based on my garden conditions"  
+**Description:** Implement intelligent plant recommendations based on created garden inputs  
+**Implementation Ideas:**
+
+- [ ] Algorithm for matching plants to garden conditions
+- [ ] Recommendation engine integration
+- [ ] Personalized plant suggestions
+
+**INTERVIEW-ENHANCE-015**: Database content cleanup  
+**Status:** 🟢 **ENHANCEMENT** - Content curation  
+**Owner:** Content Team  
+**Due:** Post-launch (February 2025)  
+**User Suggestion:** "Remove weeds from plantable options since users wouldn't intentionally plant weeds"  
+**Description:** Clean up plant database to remove inappropriate plant types  
+**Implementation Ideas:**
+
+- [ ] Audit plant database for inappropriate entries
+- [ ] Create plant category filters
+- [ ] Separate beneficial vs problematic plants
+
 ### 🐛 User Interface & Experience Issues
 
 **UI-SCROLL-001**: Database view not scrollable  
