@@ -30,33 +30,33 @@
 ### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    GreenThumb Mobile App                    │
-├─────────────────────────────────────────────────────────────┤
-│  React Native + Expo SDK 53 + TypeScript + NativeWind     │
-├─────────────────────────────────────────────────────────────┤
-│                     Application Layer                      │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │   Screens   │ │ Components  │ │   Hooks     │          │
-│  │             │ │             │ │             │          │
-│  │ • Home      │ │ • UI Kit    │ │ • Queries   │          │
-│  │ • Garden    │ │ • Forms     │ │ • Auth      │          │
-│  │ • Plants    │ │ • Cards     │ │ • Storage   │          │
-│  │ • Tasks     │ │ • Modals    │ │ • Payments  │          │
-│  │ • Profile   │ │ • Lists     │ │             │          │
-│  │ • Pricing   │ │             │ │             │          │
-│  └─────────────┘ └─────────────┘ └─────────────┘          │
-├─────────────────────────────────────────────────────────────┤
-│                      Service Layer                         │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │  Supabase   │ │   Stripe    │ │   Storage   │          │
-│  │             │ │             │ │             │          │
-│  │ • Auth      │ │ • Payments  │ │ • Images    │          │
-│  │ • Database  │ │ • Billing   │ │ • Cache     │          │
-│  │ • RLS       │ │ • Webhooks  │ │ • Offline   │          │
-│  │ • Real-time │ │ • Customers │ │             │          │
-│  └─────────────┘ └─────────────┘ └─────────────┘          │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                    GreenThumb Mobile App                           │
+├────────────────────────────────────────────────────────────────────┤
+│  React Native + Expo SDK 53 + TypeScript + NativeWind              │
+├────────────────────────────────────────────────────────────────────┤
+│                     Application Layer                              │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
+│  │   Screens   │ │ Components  │ │   Hooks     │                   │
+│  │             │ │             │ │             │                   │
+│  │ • Home      │ │ • UI Kit    │ │ • Queries   │                   │
+│  │ • Garden    │ │ • Forms     │ │ • Auth      │                   │
+│  │ • Plants    │ │ • Cards     │ │ • Storage   │                   │
+│  │ • Tasks     │ │ • Modals    │ │ • Payments  │                   │
+│  │ • Profile   │ │ • Lists     │ │             │                   │
+│  │ • Pricing   │ │             │ │             │                   │
+│  └─────────────┘ └─────────────┘ └─────────────┘                   │
+├────────────────────────────────────────────────────────────────────┤
+│                      Service Layer                                 │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
+│  │  Supabase   │ │   Stripe    │ │   Storage   │ │   Clerk     │   │
+│  │             │ │             │ │             │ │ • Auth      │   │
+│  │             │ │ • Payments  │ │ • Images    │ │             │   │
+│  │ • Database  │ │ • Billing   │ │ • Cache     │ │             │   │
+│  │ • RLS       │ │ • Webhooks  │ │ • Offline   │ │             │   │
+│  │ • Real-time │ │ • Customers │ │             │ │             │   │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘   │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Core Principles
@@ -76,7 +76,7 @@
 
 ```sql
 -- User Management
-users (Supabase Auth)
+users (Clerk Auth)
 user_profiles
 user_preferences
 
@@ -120,8 +120,8 @@ CREATE TABLE subscription_plans (
 -- User Subscriptions: Active user subscriptions
 CREATE TABLE user_subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  plan_id UUID REFERENCES subscription_plans(id),
+  user_id TEXT NOT NULL,                 -- Clerk user ID (TEXT, not UUID)
+  plan_id TEXT REFERENCES subscription_plans(id),
   stripe_subscription_id TEXT UNIQUE,    -- Stripe subscription ID
   stripe_customer_id TEXT NOT NULL,      -- Stripe customer ID
   status TEXT NOT NULL,                  -- "active", "canceled", "past_due"
@@ -149,49 +149,55 @@ CREATE TABLE subscription_addons (
 -- User Add-on Purchases
 CREATE TABLE user_subscription_addons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  addon_id UUID REFERENCES subscription_addons(id),
-  subscription_id UUID REFERENCES user_subscriptions(id),
-  stripe_line_item_id TEXT,              -- Stripe line item ID
-  status TEXT NOT NULL DEFAULT 'active', -- "active", "canceled"
-  purchased_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ,                -- For time-limited add-ons
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  user_subscription_id UUID REFERENCES user_subscriptions(id) ON DELETE CASCADE,
+  addon_id TEXT REFERENCES subscription_addons(id),
+  stripe_subscription_item_id TEXT,      -- Stripe subscription item ID
+  quantity INTEGER DEFAULT 1,            -- Quantity purchased
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Payment History: Transaction records
 CREATE TABLE payment_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  subscription_id UUID REFERENCES user_subscriptions(id),
-  stripe_payment_intent_id TEXT UNIQUE,  -- Stripe payment intent ID
+  user_id TEXT NOT NULL,                 -- Clerk user ID (TEXT, not UUID)
+  user_subscription_id UUID REFERENCES user_subscriptions(id),
+  stripe_payment_intent_id TEXT,         -- Stripe payment intent ID
+  stripe_invoice_id TEXT,                -- Stripe invoice ID
   amount_cents INTEGER NOT NULL,         -- Amount charged
   currency TEXT DEFAULT 'usd',           -- Currency code
   status TEXT NOT NULL,                  -- "succeeded", "failed", "pending"
   description TEXT,                      -- Payment description
-  payment_method_type TEXT,              -- "card", "apple_pay", "google_pay"
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
 ### Row Level Security (RLS)
 
+**IMPORTANT:** This project uses Clerk for authentication. All RLS policies must use `requesting_user_id()` function, NOT `auth.uid()`.
+
 ```sql
 -- Users can only access their own subscription data
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own subscriptions" ON user_subscriptions
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (requesting_user_id() = user_id);
 
 -- Users can only access their own payment history
 ALTER TABLE payment_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own payments" ON payment_history
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (requesting_user_id() = user_id);
 
 -- Subscription plans are publicly readable
 ALTER TABLE subscription_plans ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Plans are publicly readable" ON subscription_plans
   FOR SELECT USING (is_active = true);
 ```
+
+#### Clerk Integration Notes
+
+- **User IDs:** Clerk user IDs are TEXT strings (e.g., `user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5`), not UUIDs
+- **RLS Function:** The `requesting_user_id()` function extracts the Clerk user ID from JWT claims
+- **Schema:** All `user_id` columns must be `TEXT NOT NULL`, never `UUID`
 
 ### Database Relationships
 

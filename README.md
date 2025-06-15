@@ -186,6 +186,20 @@ eas build --platform all   # Build for iOS and Android
 eas submit                 # Submit to app stores
 ```
 
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+- **Clerk + Supabase Integration:** See [`docs/troubleshooting-clerk-supabase.md`](docs/troubleshooting-clerk-supabase.md) for UUID validation errors
+- **Database Connection:** Ensure environment variables are correctly configured
+- **Build Issues:** Clear cache with `npx expo start --clear`
+
+### Development Guidelines
+
+- **Authentication:** Always use `requesting_user_id()` in RLS policies, never `auth.uid()`
+- **User IDs:** Clerk user IDs are TEXT strings, not UUIDs
+- **Database Schema:** All `user_id` columns must be `TEXT NOT NULL`
+
 ## 📅 App Store Launch Plan - January 27, 2025
 
 ### 🚨 URGENT: User Interview Findings (January 14, 2025)

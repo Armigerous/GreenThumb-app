@@ -58,7 +58,7 @@ export function AuthInput({
         <Text className="text-foreground text-sm font-paragraph">{label}</Text>
         {labelRightComponent}
       </View>
-      <View className="flex-row items-center bg-cream-50 border-2 border-foreground rounded-lg mb-4 overflow-hidden">
+      <View className="flex-row items-center bg-cream-50 border border-foreground rounded-lg mb-4 overflow-hidden">
         <View className={`${isSmallDevice ? "p-2" : "p-3"} justify-center`}>
           <Ionicons
             name={icon}
