@@ -104,7 +104,52 @@ ANALYTICS_API_KEY=your_analytics_key
 
 ## 🔐 Authentication Implementation
 
-### Supabase Auth Setup
+**IMPORTANT:** This project uses **Clerk** for authentication, not Supabase Auth. The examples below are for reference only.
+
+### Clerk + Supabase Integration
+
+This project uses Clerk for authentication with Supabase as the database backend. Key integration points:
+
+#### User ID Handling
+
+- **Clerk User IDs:** TEXT strings like `user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5`
+- **Database Schema:** All `user_id` columns must be `TEXT NOT NULL`, never `UUID`
+- **RLS Policies:** Always use `requesting_user_id()` function, never `auth.uid()`
+
+#### Critical Function: `requesting_user_id()`
+
+```sql
+-- This function extracts Clerk user ID from JWT claims
+CREATE OR REPLACE FUNCTION requesting_user_id()
+RETURNS TEXT AS $$
+  SELECT NULLIF(
+    current_setting('request.jwt.claims', true)::json->>'sub',
+    ''
+  )::text;
+$$ LANGUAGE sql STABLE;
+```
+
+#### RLS Policy Pattern
+
+```sql
+-- ✅ CORRECT - Use requesting_user_id() for Clerk integration
+CREATE POLICY "Users can view their own data" ON table_name FOR
+SELECT USING (requesting_user_id() = user_id);
+
+-- ❌ WRONG - Never use auth.uid() with Clerk
+CREATE POLICY "Users can view their own data" ON table_name FOR
+SELECT USING (auth.uid()::text = user_id);
+```
+
+#### Common Error Prevention
+
+If you see errors like `"invalid input syntax for type uuid: \"user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5\""`, it means:
+
+1. A table has `user_id UUID` instead of `user_id TEXT`
+2. An RLS policy is using `auth.uid()` instead of `requesting_user_id()`
+3. The `requesting_user_id()` function is missing from the database
+
+### Legacy Supabase Auth Setup (For Reference Only)
 
 ```typescript
 // lib/supabase.ts

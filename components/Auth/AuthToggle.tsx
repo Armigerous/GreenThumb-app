@@ -25,7 +25,7 @@ export function AuthToggle({ isPhone, onToggle }: AuthToggleProps) {
         }`}
       >
         <BodyText
-          className={`$${
+          className={`${
             !isPhone ? "text-primary-foreground" : "text-foreground"
           } ${isSmallDevice ? "text-xs" : "text-sm"}`}
         >
@@ -39,7 +39,7 @@ export function AuthToggle({ isPhone, onToggle }: AuthToggleProps) {
         }`}
       >
         <BodyText
-          className={`$${
+          className={`${
             isPhone ? "text-primary-foreground" : "text-foreground"
           } ${isSmallDevice ? "text-xs" : "text-sm"}`}
         >

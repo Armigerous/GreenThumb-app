@@ -149,7 +149,7 @@ export default function BetterSelector<T extends boolean = true>({
         className="flex-row items-center justify-between px-4 py-3.5 bg-white border border-cream-300 rounded-lg"
       >
         <Text
-          className={`$${
+          className={`${
             (multiple ? (value as number[])?.length || 0 : value)
               ? "text-gray-800"
               : "text-gray-300"

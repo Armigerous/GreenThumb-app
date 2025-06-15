@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   Text,
@@ -10,8 +10,8 @@ import {
 import { TitleText, BodyText } from "@/components/UI/Text";
 
 type AuthHeaderProps = {
-  backPath: any; // Using any for path to bypass type checking
-  alternateAuthPath: any; // Using any for path to bypass type checking
+  backPath: string;
+  alternateAuthPath: string;
   alternateAuthText: string;
   alternateAuthIcon: "log-in-outline" | "person-add-outline";
 };
@@ -24,6 +24,15 @@ export function AuthHeader({
 }: AuthHeaderProps) {
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 380;
+  const router = useRouter();
+
+  const handleBackPress = () => {
+    router.push(backPath);
+  };
+
+  const handleAlternateAuthPress = () => {
+    router.push(alternateAuthPath);
+  };
 
   return (
     <View
@@ -31,43 +40,39 @@ export function AuthHeader({
         isSmallDevice ? "px-3" : "px-5"
       }`}
     >
-      <Link href={backPath} asChild>
-        <TouchableOpacity>
-          <View className="flex-row items-center">
-            <Ionicons
-              name="arrow-back-outline"
-              size={isSmallDevice ? 18 : 20}
-              color="#2e2c29"
-            />
-            <TitleText
-              className={`text-foreground ${
-                isSmallDevice ? "text-sm" : "text-base"
-              } ml-1`}
-            >
-              Back
-            </TitleText>
-          </View>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity onPress={handleBackPress}>
+        <View className="flex-row items-center">
+          <Ionicons
+            name="arrow-back-outline"
+            size={isSmallDevice ? 18 : 20}
+            color="#2e2c29"
+          />
+          <BodyText
+            className={`text-foreground ${
+              isSmallDevice ? "text-sm" : "text-base"
+            } ml-1`}
+          >
+            Back
+          </BodyText>
+        </View>
+      </TouchableOpacity>
 
-      <Link href={alternateAuthPath} asChild>
-        <TouchableOpacity>
-          <View className="flex-row items-center">
-            <BodyText
-              className={`text-primary mr-1 ${
-                isSmallDevice ? "text-xs" : "text-sm"
-              }`}
-            >
-              {alternateAuthText}
-            </BodyText>
-            <Ionicons
-              name={alternateAuthIcon}
-              size={isSmallDevice ? 14 : 16}
-              color="#5E994B"
-            />
-          </View>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity onPress={handleAlternateAuthPress}>
+        <View className="flex-row items-center">
+          <BodyText
+            className={`text-primary mr-1 ${
+              isSmallDevice ? "text-xs" : "text-sm"
+            }`}
+          >
+            {alternateAuthText}
+          </BodyText>
+          <Ionicons
+            name={alternateAuthIcon}
+            size={isSmallDevice ? 14 : 16}
+            color="#5E994B"
+          />
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }

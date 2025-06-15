@@ -142,6 +142,43 @@ alwaysApply: true
 
 ---
 
+## 🔐 Clerk + Supabase Integration Rules
+
+**CRITICAL:** This project uses Clerk for authentication with Supabase as the database. Follow these rules strictly:
+
+1. **User ID Handling:**
+   * Clerk user IDs are TEXT strings (e.g., `user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5`), NOT UUIDs
+   * All `user_id` columns in database tables MUST be `TEXT NOT NULL`, never `UUID`
+   * Never use `auth.uid()` in RLS policies - it returns Supabase UUIDs, not Clerk IDs
+
+2. **RLS Policies - ALWAYS use `requesting_user_id()`:**
+   ```sql
+   -- ✅ CORRECT - Use requesting_user_id() for Clerk integration
+   CREATE POLICY "Users can view their own data" ON table_name FOR
+   SELECT USING (requesting_user_id() = user_id);
+   
+   -- ❌ WRONG - Never use auth.uid() with Clerk
+   CREATE POLICY "Users can view their own data" ON table_name FOR
+   SELECT USING (auth.uid()::text = user_id);
+   ```
+
+3. **Database Schema Requirements:**
+   * All user-owned tables must have `user_id TEXT NOT NULL` 
+   * The `requesting_user_id()` function must exist in the database
+   * RLS policies must use `requesting_user_id() = user_id` pattern
+
+4. **Migration Standards:**
+   * When creating new tables with user ownership, always use `requesting_user_id()` in RLS policies
+   * Test RLS policies with actual Clerk user IDs before deployment
+   * Document any new user-owned tables in `docs/architecture.md`
+
+5. **Error Prevention:**
+   * If you see "invalid input syntax for type uuid" errors, check RLS policies immediately
+   * Always verify user ID format matches Clerk's string format, not UUID format
+   * When in doubt, reference existing working tables like `user_subscriptions` or `user_usage`
+
+---
+
 ## 🌳 Version Control & Environment
 
 1. **.env Discipline:**
