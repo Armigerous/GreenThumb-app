@@ -94,6 +94,13 @@ module.exports = {
         process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       // Sentry configuration
       SENTRY_DSN: process.env.SENTRY_DSN,
+      SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+      SENTRY_ORG: process.env.SENTRY_ORG,
+      // Server-side only variables (not exposed to client)
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     },
 
     // Owner information
