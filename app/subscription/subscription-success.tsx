@@ -24,7 +24,7 @@ export default function SubscriptionSuccessScreen() {
 
   const handleViewSubscription = () => {
     // Navigate to subscription management
-    router.push("/(home)/subscription");
+    router.push("/subscription/subscription");
   };
 
   return (
