@@ -7,14 +7,21 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useUser } from "@clerk/clerk-expo";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import NewGardenForm from "@/components/Gardens/NewGardenForm";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { useSubscriptionGate } from "@/components/subscription/SubscriptionGate";
 
 export default function NewGarden() {
   const router = useRouter();
+  const { user } = useUser();
+
   // Use the hook to ensure we have a valid Supabase token
   useSupabaseAuth();
+
+  // Subscription gate for garden creation
+  const { checkAndProceed, PaywallComponent } = useSubscriptionGate("gardens");
 
   const handleSuccess = () => {
     // Navigate back to the gardens index
@@ -42,6 +49,8 @@ export default function NewGarden() {
 
   return (
     <PageContainer scroll={false} padded={false}>
+      <PaywallComponent />
+
       <View className="flex-row justify-between items-center pt-5 px-5">
         <TouchableOpacity
           onPress={handleCancel}

@@ -770,7 +770,9 @@ export const SubscriptionStatus = () => {
           <Text className="text-muted-foreground mb-4">
             No active subscription
           </Text>
-          <Button onPress={() => router.push("/pricing")}>View Plans</Button>
+          <Button onPress={() => router.push("/subscription/pricing")}>
+            View Plans
+          </Button>
         </CardContent>
       </Card>
     );

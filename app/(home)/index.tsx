@@ -29,6 +29,10 @@ import {
   QuickActionsSection,
 } from "@/components/Home";
 import { BodyText } from "@/components/UI/Text";
+import { useUsageSummary } from "@/lib/usageLimits";
+import { PaywallBanner } from "@/components/subscription/PaywallPrompt";
+import { SmartSubscriptionPrompt } from "@/components/subscription/SmartSubscriptionPrompt";
+import { WelcomeSubscriptionBanner } from "@/components/subscription/WelcomeSubscriptionBanner";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -45,6 +49,9 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  // Usage tracking for subscription limits
+  const usageSummary = useUsageSummary(user?.id);
+
   // Get current season for the seasonal illustration
   const currentSeason = useCurrentSeason();
 
@@ -59,6 +66,9 @@ export default function Page() {
 
   // Add a state to track if overdue tasks are still loading
   const [overdueTasksLoading, setOverdueTasksLoading] = useState(true);
+
+  // State for welcome banner (shows for new users only)
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
   // Initialize Supabase with Clerk token
   useSupabaseAuth();
@@ -142,6 +152,32 @@ export default function Page() {
       hasCheckedNotificationsRef.current = true;
     }
   }, [user?.id, checkNotifications]);
+
+  // Check if user is new and should see welcome banner
+  useEffect(() => {
+    const checkNewUser = async () => {
+      if (!user?.id) return;
+
+      // Only show if user is not premium and has minimal gardens/usage
+      if (!usageSummary.isPremium && usageSummary.gardens.current <= 1) {
+        // Check if user signed up in the last 7 days
+        const signupDate = user.createdAt;
+        if (signupDate) {
+          const signupTime =
+            typeof signupDate === "number"
+              ? signupDate
+              : new Date(signupDate).getTime();
+          const daysSinceSignup =
+            (Date.now() - signupTime) / (1000 * 60 * 60 * 24);
+          if (daysSinceSignup <= 7) {
+            setShowWelcomeBanner(true);
+          }
+        }
+      }
+    };
+
+    checkNewUser();
+  }, [user, usageSummary.isPremium, usageSummary.gardens.current]);
 
   // Count of upcoming tasks for badges
   const upcomingTasksCount = useMemo(() => {
@@ -389,6 +425,42 @@ export default function Page() {
     <PageContainer scroll={false} padded={false}>
       <SignedIn>
         <ScrollView className="flex-1">
+          {/* Smart subscription prompts (context-aware, non-intrusive) */}
+          <SmartSubscriptionPrompt />
+
+          {/* Welcome banner for new users (first week only) */}
+          {showWelcomeBanner && (
+            <WelcomeSubscriptionBanner
+              onDismiss={() => setShowWelcomeBanner(false)}
+              showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
+            />
+          )}
+
+          {/* Usage limit banners for free users */}
+          {!usageSummary.isPremium && (
+            <>
+              {/* Show garden limit banner if close to limit */}
+              {usageSummary.gardens.percentage >= 50 && (
+                <PaywallBanner
+                  feature="gardens"
+                  currentUsage={usageSummary.gardens.current}
+                  limit={usageSummary.gardens.limit}
+                  onUpgrade={() => router.push("/subscription/pricing")}
+                />
+              )}
+
+              {/* Show task limit banner if close to limit */}
+              {usageSummary.tasks.percentage >= 80 && (
+                <PaywallBanner
+                  feature="tasks_per_month"
+                  currentUsage={usageSummary.tasks.current}
+                  limit={usageSummary.tasks.limit}
+                  onUpgrade={() => router.push("/subscription/pricing")}
+                />
+              )}
+            </>
+          )}
+
           <View className="px-5 pt-5">
             {/* Header Component */}
             {overdueTasksLoading ? (

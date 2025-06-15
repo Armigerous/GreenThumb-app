@@ -44,7 +44,7 @@ export default function PricingScreen() {
   // If user already has premium, redirect to subscription management
   React.useEffect(() => {
     if (subscriptionSummary?.is_premium) {
-      router.replace("/(home)/subscription");
+      router.replace("/subscription/subscription");
     }
   }, [subscriptionSummary?.is_premium, router]);
 
@@ -64,7 +64,7 @@ export default function PricingScreen() {
     setIsProcessing(true);
     try {
       // Navigate to checkout screen with selected plan
-      router.push(`/(home)/checkout?plan=${selectedPlanId}`);
+      router.push(`/subscription/checkout?plan=${selectedPlanId}`);
     } catch (error) {
       console.error("Error navigating to checkout:", error);
       Alert.alert("Error", "Failed to proceed to checkout. Please try again.");

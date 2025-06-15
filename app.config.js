@@ -7,7 +7,7 @@ module.exports = {
     icon: "./assets/images/logo.png",
     scheme: "greenthumb",
     userInterfaceStyle: "automatic",
-    newArchEnabled: false,
+    newArchEnabled: true,
 
     // Splash screen configuration
     splash: {
@@ -90,6 +90,8 @@ module.exports = {
       EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       EXPO_PUBLIC_OPENWEATHER_API_KEY:
         process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY,
+      EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+        process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       // Sentry configuration
       SENTRY_DSN: process.env.SENTRY_DSN,
     },
