@@ -8,6 +8,25 @@
 
 ---
 
+## 🚨 Important: User Feedback Integration
+
+**Critical Issues Identified:** User interviews (January 14, 2025) revealed several critical bugs and UX issues that must be addressed before launch. See detailed analysis in:
+
+- **Task Tracking:** `notes/TASK.md` → "USER INTERVIEW FINDINGS" section
+- **Detailed Analysis:** `docs/user_feedback.md` → Complete interview analysis and recommendations
+
+**Priority Issues for Development Team:**
+
+1. 🔴 **Database scrolling non-functional** - Core feature broken
+2. 🔴 **Database filters not working** - Filter modal errors
+3. 🔴 **Garden completion status mismatch** - Data integrity issue
+4. 🟡 **Typography inconsistency** - Brand guidelines violation
+5. 🟡 **Layout bugs with long text** - UI responsiveness issues
+
+**Action Required:** Review user feedback documentation before implementing any new features or making architectural changes.
+
+---
+
 ## 📋 Table of Contents
 
 1. [Development Environment](#development-environment)
@@ -786,7 +805,8 @@ export const SubscriptionStatus = () => {
         <View className="flex-row justify-between">
           <Text className="text-muted-foreground">Price</Text>
           <Text className="font-semibold">
-            {formatPrice(subscription.subscription_plans.price_cents)}/{subscription.subscription_plans.billing_period}
+            {formatPrice(subscription.subscription_plans.price_cents)}/
+            {subscription.subscription_plans.billing_period}
           </Text>
         </View>
 
