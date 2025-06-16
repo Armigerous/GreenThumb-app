@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,6 +11,7 @@ import { useUser } from "@clerk/clerk-expo";
 // Custom tab bar component
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View
@@ -27,49 +28,49 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const isFocused = state.index === index;
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
+          // Safety check: ensure navigation is available
+          if (!navigation || !router) {
+            console.warn("Navigation not available yet");
+            return;
+          }
 
-          if (!isFocused && !event.defaultPrevented) {
-            // Special case for gardens tab - always navigate to index
-            if (route.name === "gardens") {
-              // Reset the gardens stack to just the index screen
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: route.name,
-                    params: { screen: "index" },
-                  },
-                ],
-              });
-            } else {
-              navigation.navigate(route.name);
-            }
-          } else if (isFocused && route.name === "gardens") {
-            // Get the current route information to check if we're already on index
-            const currentRoute = state.routes[state.index];
-            const childState = currentRoute.state as any;
+          try {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-            // Only reset if we're not already on gardens/index
-            if (
-              childState &&
-              (childState.index !== 0 || childState.routes[0].name !== "index")
-            ) {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: route.name,
-                    params: { screen: "index" },
-                  },
-                ],
-              });
+            if (!isFocused && !event.defaultPrevented) {
+              // Use Expo Router for safer navigation
+              if (route.name === "gardens") {
+                router.replace("/(home)/gardens");
+              } else {
+                // Map route names to proper paths
+                const routeMap: Record<string, string> = {
+                  index: "/(home)",
+                  calendar: "/(home)/calendar",
+                  plants: "/(home)/plants",
+                  profile: "/(home)/profile",
+                };
+                
+                const targetRoute = routeMap[route.name] || `/(home)/${route.name}`;
+                router.replace(targetRoute);
+              }
+            } else if (isFocused && route.name === "gardens") {
+              // For gardens tab, use Expo Router to reset to index
+              router.replace("/(home)/gardens");
             }
-            // Otherwise, do nothing if already on gardens/index to prevent flickering
+          } catch (error) {
+            console.warn("Navigation error:", error);
+            // Fallback: try to use standard navigation if available
+            if (navigation && !isFocused) {
+              try {
+                navigation.navigate(route.name);
+              } catch (fallbackError) {
+                console.warn("Fallback navigation also failed:", fallbackError);
+              }
+            }
           }
         };
 
