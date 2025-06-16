@@ -1,17 +1,51 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter, usePathname } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
 import OverdueTasksModal from "@/components/UI/OverdueTasksModal";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
 import { useUser } from "@clerk/clerk-expo";
 
-// Custom tab bar component
-function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+// Simple tab configuration
+const tabs = [
+  {
+    name: "gardens",
+    title: "Gardens",
+    icon: "leaf",
+    href: "/(home)/gardens",
+  },
+  {
+    name: "calendar", 
+    title: "Calendar",
+    icon: "calendar",
+    href: "/(home)/calendar",
+  },
+  {
+    name: "index",
+    title: "Home", 
+    icon: "home",
+    href: "/(home)",
+  },
+  {
+    name: "plants",
+    title: "Plants",
+    icon: "book", 
+    href: "/(home)/plants",
+  },
+  {
+    name: "profile",
+    title: "Profile",
+    icon: "person",
+    href: "/(home)/profile",
+  },
+];
+
+// Custom tab bar component using only Expo Router
+function CustomTabBar() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <View
@@ -22,64 +56,29 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         height: 70 + (insets.bottom > 0 ? insets.bottom : 0) + 15,
       }}
     >
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label = options.title || route.name;
-        const isFocused = state.index === index;
+      {tabs.map((tab) => {
+        // Determine if this tab is focused based on current pathname
+        const isFocused = 
+          pathname === tab.href || 
+          (tab.name === "index" && pathname === "/(home)") ||
+          pathname.startsWith(`/(home)/${tab.name}`);
 
         const onPress = () => {
-          // Safety check: ensure navigation is available
-          if (!navigation || !router) {
-            console.warn("Navigation not available yet");
-            return;
-          }
-
           try {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              // Use Expo Router for safer navigation
-              if (route.name === "gardens") {
-                router.replace("/(home)/gardens");
-              } else {
-                // Map route names to proper paths
-                const routeMap: Record<string, string> = {
-                  index: "/(home)",
-                  calendar: "/(home)/calendar",
-                  plants: "/(home)/plants",
-                  profile: "/(home)/profile",
-                };
-                
-                const targetRoute = routeMap[route.name] || `/(home)/${route.name}`;
-                router.replace(targetRoute);
-              }
-            } else if (isFocused && route.name === "gardens") {
-              // For gardens tab, use Expo Router to reset to index
-              router.replace("/(home)/gardens");
+            if (!isFocused) {
+              router.push(tab.href);
+            } else if (tab.name === "gardens") {
+              // For gardens tab, refresh to index if already focused
+              router.push("/(home)/gardens");
             }
           } catch (error) {
             console.warn("Navigation error:", error);
-            // Fallback: try to use standard navigation if available
-            if (navigation && !isFocused) {
-              try {
-                navigation.navigate(route.name);
-              } catch (fallbackError) {
-                console.warn("Fallback navigation also failed:", fallbackError);
-              }
-            }
           }
         };
 
-        // Get the icon component from options
-        const IconComponent = options.tabBarIcon;
-
         return (
           <Pressable
-            key={route.key}
+            key={tab.name}
             onPress={onPress}
             className="flex-1 items-center justify-center"
           >
@@ -95,17 +94,16 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                   : "transparent",
               }}
             >
-              {IconComponent &&
-                IconComponent({
-                  focused: isFocused,
-                  color: isFocused ? "#5E994B" : "#6b7280",
-                  size: 24,
-                })}
+              <Ionicons 
+                name={tab.icon as any}
+                size={24}
+                color={isFocused ? "#5E994B" : "#6b7280"}
+              />
             </View>
 
             {isFocused && (
               <Text className="text-xs font-medium text-primary mt-1">
-                {label}
+                {tab.title}
               </Text>
             )}
           </Pressable>
@@ -159,7 +157,7 @@ export default function HomeLayout() {
       )}
 
       <Tabs
-        tabBar={(props) => <CustomTabBar {...props} />}
+        tabBar={() => <CustomTabBar />}
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
