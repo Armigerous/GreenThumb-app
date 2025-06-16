@@ -1,16 +1,33 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
 import OverdueTasksModal from "@/components/UI/OverdueTasksModal";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
 import { useUser } from "@clerk/clerk-expo";
 
-// Custom tab bar component
-function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+// Define tab bar props interface for Expo Router
+interface CustomTabBarProps {
+  state: {
+    index: number;
+    routes: Array<{
+      key: string;
+      name: string;
+    }>;
+  };
+  descriptors: Record<string, {
+    options: {
+      title?: string;
+      tabBarIcon?: (props: { focused: boolean; color: string; size: number }) => React.ReactNode;
+    };
+  }>;
+}
+
+// Custom tab bar component for Expo Router
+function CustomTabBar({ state, descriptors }: CustomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View
@@ -27,49 +44,23 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const isFocused = state.index === index;
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
+          if (!isFocused) {
+            // Map route names to their paths
+            const routeMap: Record<string, string> = {
+              'index': '/(home)/',
+              'gardens': '/(home)/gardens',
+              'calendar': '/(home)/calendar',
+              'plants': '/(home)/plants',
+              'profile': '/(home)/profile',
+            };
 
-          if (!isFocused && !event.defaultPrevented) {
-            // Special case for gardens tab - always navigate to index
-            if (route.name === "gardens") {
-              // Reset the gardens stack to just the index screen
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: route.name,
-                    params: { screen: "index" },
-                  },
-                ],
-              });
-            } else {
-              navigation.navigate(route.name);
+            const targetPath = routeMap[route.name];
+            if (targetPath) {
+              router.push(targetPath);
             }
           } else if (isFocused && route.name === "gardens") {
-            // Get the current route information to check if we're already on index
-            const currentRoute = state.routes[state.index];
-            const childState = currentRoute.state as any;
-
-            // Only reset if we're not already on gardens/index
-            if (
-              childState &&
-              (childState.index !== 0 || childState.routes[0].name !== "index")
-            ) {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: route.name,
-                    params: { screen: "index" },
-                  },
-                ],
-              });
-            }
-            // Otherwise, do nothing if already on gardens/index to prevent flickering
+            // If already on gardens, navigate to gardens index
+            router.push('/(home)/gardens/');
           }
         };
 

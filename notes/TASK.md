@@ -34,6 +34,13 @@
 
 **Recent Improvements (January 14, 2025):**
 
+- ✅ **CRITICAL-NAV-FIX**: Fixed NavigationContainer error causing app crashes
+  - Resolved React Navigation + Expo Router conflict in CustomTabBar component
+  - Added SafeAreaProvider wrapper for proper navigation context
+  - Removed conflicting @react-navigation dependencies
+  - App now launches successfully without navigation errors
+  - **Impact:** App is now functional - this was blocking all usage
+
 - ✅ **AUTH-CONSOLIDATION**: Unified phone collection screens for OAuth and manual auth flows
   - Replaced separate `OAuthCompletionScreen` and inline phone step with unified `PhoneCollectionScreen`
   - Single component handles both OAuth completion and manual signup phone collection

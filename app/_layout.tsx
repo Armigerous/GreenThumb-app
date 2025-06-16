@@ -7,6 +7,7 @@ import "./globals.css";
 import { Platform, Text, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Sentry from "@sentry/react-native";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
@@ -286,42 +287,46 @@ function RootLayout() {
   // If Clerk is not ready, show a fallback UI
   if (!isClerkReady) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20 }}>
-          Authentication configuration is missing.
-        </Text>
-        <Text style={{ fontSize: 14, textAlign: "center", color: "#666" }}>
-          Please add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file.
-        </Text>
-      </View>
+      <SafeAreaProvider>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20 }}>
+            Authentication configuration is missing.
+          </Text>
+          <Text style={{ fontSize: 14, textAlign: "center", color: "#666" }}>
+            Please add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file.
+          </Text>
+        </View>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
-        <ClerkLoaded>
-          <QueryClientProvider client={queryClient}>
-            <SWRConfig
-              value={{
-                provider: () => new Map(),
-                revalidateOnFocus: false,
-                revalidateOnReconnect: true,
-              }}
-            >
-              <InitialLayout />
-            </SWRConfig>
-          </QueryClientProvider>
-        </ClerkLoaded>
-      </ClerkProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
+          <ClerkLoaded>
+            <QueryClientProvider client={queryClient}>
+              <SWRConfig
+                value={{
+                  provider: () => new Map(),
+                  revalidateOnFocus: false,
+                  revalidateOnReconnect: true,
+                }}
+              >
+                <InitialLayout />
+              </SWRConfig>
+            </QueryClientProvider>
+          </ClerkLoaded>
+        </ClerkProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
