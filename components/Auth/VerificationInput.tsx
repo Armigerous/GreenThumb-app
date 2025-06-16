@@ -10,6 +10,7 @@ type VerificationInputProps = {
   onVerify: () => void;
   isLoading: boolean;
   isPhone: boolean;
+  error?: string | null;
 };
 
 export function VerificationInput({
@@ -18,6 +19,7 @@ export function VerificationInput({
   onVerify,
   isLoading,
   isPhone,
+  error = null,
 }: VerificationInputProps) {
   return (
     <View className="w-full mb-4">
@@ -28,19 +30,22 @@ export function VerificationInput({
       </BodyText>
 
       <AuthInput
-        label="Verification Code"
         value={verificationCode}
         onChangeText={setVerificationCode}
         placeholder="Enter verification code"
         icon="shield-checkmark-outline"
         keyboardType="number-pad"
         disabled={isLoading}
+        validationType="verification"
+        error={error}
+        showValidation={true}
+        maxLength={8}
       />
 
       <View className="mt-4">
         <AuthButton
           onPress={onVerify}
-          isLoading={isLoading}
+          loading={isLoading}
           label="Verify"
           loadingLabel="Verifying..."
           icon="checkmark-circle-outline"

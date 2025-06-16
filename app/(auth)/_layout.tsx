@@ -45,15 +45,15 @@ export default function AuthRoutesLayout() {
         }}
       />
       <Stack.Screen
-        name="sign-in"
+        name="auth"
         options={{
           animation: "slide_from_right",
         }}
       />
       <Stack.Screen
-        name="sign-up"
+        name="oauth-native-callback"
         options={{
-          animation: "slide_from_right",
+          headerShown: false,
         }}
       />
     </Stack>

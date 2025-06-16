@@ -34,7 +34,7 @@ export function AuthSocialOptions({
 
   const content = (
     <>
-      <View className="flex-row items-center w-full mb-4">
+      <View className="flex-row items-center w-full my-4">
         <View className="flex-1 h-[1px] bg-cream-300" />
         <BodyText className="text-foreground text-sm mx-4">{title}</BodyText>
         <View className="flex-1 h-[1px] bg-cream-300" />

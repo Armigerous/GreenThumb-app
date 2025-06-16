@@ -17,7 +17,7 @@ export default function AestheticsSection({
     <View className="space-y-5 px-4">
       {/* Flower Characteristics */}
       <CollapsibleSection title="Flower Characteristics" icon="flower-outline">
-        <View className="mt-2 space-y-1">
+        <View className="mt-2">
           <BetterSelector
             label="Flower Colors"
             placeholder="Select flower colors"
@@ -29,34 +29,38 @@ export default function AestheticsSection({
           />
 
           {LOOKUP_TABLES.flower_bloom_time && (
-            <BetterSelector
-              label="Flower Bloom Time"
-              placeholder="Select bloom times"
-              items={LOOKUP_TABLES.flower_bloom_time}
-              value={formValues.flower_bloom_time_ids}
-              onChange={(value: number[]) =>
-                updateFormValues("flower_bloom_time_ids", value)
-              }
-            />
+            <View className="mt-4">
+              <BetterSelector
+                label="Flower Bloom Time"
+                placeholder="Select bloom times"
+                items={LOOKUP_TABLES.flower_bloom_time}
+                value={formValues.flower_bloom_time_ids}
+                onChange={(value: number[]) =>
+                  updateFormValues("flower_bloom_time_ids", value)
+                }
+              />
+            </View>
           )}
 
           {LOOKUP_TABLES.flower_value_to_gardener && (
-            <BetterSelector
-              label="Flower Value"
-              placeholder="Select flower values"
-              items={LOOKUP_TABLES.flower_value_to_gardener}
-              value={formValues.flower_value_to_gardener_ids}
-              onChange={(value: number[]) =>
-                updateFormValues("flower_value_to_gardener_ids", value)
-              }
-            />
+            <View className="mt-4">
+              <BetterSelector
+                label="Flower Value"
+                placeholder="Select flower values"
+                items={LOOKUP_TABLES.flower_value_to_gardener}
+                value={formValues.flower_value_to_gardener_ids}
+                onChange={(value: number[]) =>
+                  updateFormValues("flower_value_to_gardener_ids", value)
+                }
+              />
+            </View>
           )}
         </View>
       </CollapsibleSection>
 
       {/* Leaf Characteristics */}
       <CollapsibleSection title="Leaf Characteristics" icon="leaf-outline">
-        <View className="mt-2 space-y-1">
+        <View className="mt-2">
           <BetterSelector
             label="Leaf Colors"
             placeholder="Select leaf colors"
@@ -68,27 +72,31 @@ export default function AestheticsSection({
           />
 
           {LOOKUP_TABLES.leaf_feel && (
-            <BetterSelector
-              label="Leaf Feel"
-              placeholder="Select leaf textures"
-              items={LOOKUP_TABLES.leaf_feel}
-              value={formValues.leaf_feel_ids}
-              onChange={(value: number[]) =>
-                updateFormValues("leaf_feel_ids", value)
-              }
-            />
+            <View className="mt-4">
+              <BetterSelector
+                label="Leaf Feel"
+                placeholder="Select leaf textures"
+                items={LOOKUP_TABLES.leaf_feel}
+                value={formValues.leaf_feel_ids}
+                onChange={(value: number[]) =>
+                  updateFormValues("leaf_feel_ids", value)
+                }
+              />
+            </View>
           )}
 
           {LOOKUP_TABLES.leaf_value && (
-            <BetterSelector
-              label="Leaf Value"
-              placeholder="Select leaf values"
-              items={LOOKUP_TABLES.leaf_value}
-              value={formValues.leaf_value_ids}
-              onChange={(value: number[]) =>
-                updateFormValues("leaf_value_ids", value)
-              }
-            />
+            <View className="mt-4">
+              <BetterSelector
+                label="Leaf Value"
+                placeholder="Select leaf values"
+                items={LOOKUP_TABLES.leaf_value}
+                value={formValues.leaf_value_ids}
+                onChange={(value: number[]) =>
+                  updateFormValues("leaf_value_ids", value)
+                }
+              />
+            </View>
           )}
         </View>
       </CollapsibleSection>

@@ -421,9 +421,9 @@ export const formatConditionValues = (values: string[] | undefined): string => {
  * @returns Color code for completeness indicator
  */
 export const getCompletionColor = (percent: number): string => {
-  if (percent < 30) return "#ef4444"; // red-500
-  if (percent < 70) return "#f59e0b"; // amber-500
-  return "#77B860"; // brand-500
+  if (percent < 30) return "#E50000"; // Brand destructive color
+  if (percent < 70) return "#ffd900"; // Brand accent-200 (yellow)
+  return "#77B860"; // brand-500 (green)
 };
 
 /**

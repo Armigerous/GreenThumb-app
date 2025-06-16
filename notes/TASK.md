@@ -32,6 +32,14 @@
 - Complete beta testing and bug fixes
 - Finalize legal documents and privacy policies
 
+**Recent Improvements (January 14, 2025):**
+
+- ✅ **AUTH-CONSOLIDATION**: Unified phone collection screens for OAuth and manual auth flows
+  - Replaced separate `OAuthCompletionScreen` and inline phone step with unified `PhoneCollectionScreen`
+  - Single component handles both OAuth completion and manual signup phone collection
+  - Consistent UI/UX across all authentication paths
+  - Reduced code duplication and maintenance overhead
+
 ---
 
 ## 💳 SUBSCRIPTION SYSTEM - COMPLETED (January 2025)

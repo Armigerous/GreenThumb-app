@@ -6,7 +6,7 @@ alwaysApply: true
 # Cursor Development Rules & AI Collaboration Guide – Expo Mobile App Edition
 
 > SDK Version: 50+ (2025) – Managed Workflow  
-> Project Docs: `README.md`, `docs/architecture.md`, `docs/technical.md`, `tasks/tasks.md`
+> Project Docs: `README.md`, `docs/architecture.md`, `docs/technical.md`, `notes/TASK.md`, `notes/PLANNING.md`
 
 ---
 
@@ -27,7 +27,8 @@ alwaysApply: true
      * `README.md` – project overview, stack, base conventions
      * `docs/architecture.md` – app structure, data flow, screen/component relationships
      * `docs/technical.md` – specific patterns (e.g. navigation, styling, data fetching)
-     * `tasks/tasks.md` – currently scoped task definitions
+     * `notes/TASK.md` – currently scoped task definitions and status
+     * `notes/PLANNING.md` – project goals, timeline, and business strategy
    * If documentation is unclear, missing, or inconsistent, **stop and ask for clarification** before continuing.
 
 2. **Architecture Adherence:**
@@ -45,7 +46,7 @@ alwaysApply: true
 ## ⚙️ Task Execution & Workflow
 
 1. **Task Definition:**
-   * Tasks are assigned via `tasks/tasks.md`. Confirm their status before beginning.
+   * Tasks are assigned via `notes/TASK.md`. Confirm their status before beginning.
    * Confirm all requirements are present, and validate dependencies or blockers with the team if needed.
 
 2. **Change Protocol:**
@@ -54,8 +55,8 @@ alwaysApply: true
    * Isolate feature-specific changes. Avoid global refactoring unless explicitly requested.
 
 3. **Progress Tracking:**
-   * Update status and issues in `docs/status.md`.
-   * When a task is complete or blocked, mark it in `tasks/tasks.md` with reasoning or next steps.
+   * Update status and issues in `notes/TASK.md` (status is tracked within the task file).
+   * When a task is complete or blocked, mark it in `notes/TASK.md` with reasoning or next steps.
 
 ---
 
@@ -197,7 +198,8 @@ alwaysApply: true
 1. **Always Update Docs:**
    * Update `docs/architecture.md` for component hierarchy or data flow changes.
    * Update `docs/technical.md` when a new reusable pattern, animation, or hook is introduced.
-   * Update `tasks/tasks.md` and `docs/status.md` for task tracking and progress.
+   * Update `notes/TASK.md` for task tracking and progress.
+   * Update `notes/PLANNING.md` when project goals, timeline, or business strategy changes.
 
 2. **Keep This File Current:**
    * Review `.cursorrules` when Expo upgrades (e.g., SDK bump), new docs are added, or patterns evolve.

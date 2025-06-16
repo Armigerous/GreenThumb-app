@@ -21,16 +21,16 @@ export default function ErrorMessage({
 }: ErrorMessageProps) {
   if (!message) return null;
 
-  // Define background and text colors based on severity
-  let bgColor = "bg-red-100";
-  let textColor = "text-red-700";
+  // Define background and text colors based on severity using brand colors
+  let bgColor = "bg-red-50"; // Keep red for errors for accessibility
+  let textColor = "text-destructive"; // Use brand destructive color
 
   if (severity === "warning") {
-    bgColor = "bg-amber-100";
-    textColor = "text-amber-700";
+    bgColor = "bg-accent-50"; // Brand yellow background
+    textColor = "text-accent-800"; // Brand yellow text with good contrast
   } else if (severity === "info") {
-    bgColor = "bg-blue-100";
-    textColor = "text-blue-700";
+    bgColor = "bg-brand-50"; // Brand green background for info
+    textColor = "text-brand-700"; // Brand green text with good contrast
   }
 
   return (
