@@ -77,10 +77,6 @@ export default function WelcomeScreen() {
   const startButtonTranslateY = useSharedValue(20);
   const startButtonScale = useSharedValue(1);
 
-  const signInOpacity = useSharedValue(0);
-  const signInTranslateY = useSharedValue(-20);
-  const signInScale = useSharedValue(1);
-
   // Trigger animations when component mounts
   useEffect(() => {
     startButtonOpacity.value = withDelay(500, withTiming(1, { duration: 300 }));
@@ -88,9 +84,6 @@ export default function WelcomeScreen() {
       500,
       withTiming(0, { duration: 300 })
     );
-
-    signInOpacity.value = withDelay(500, withTiming(1, { duration: 300 }));
-    signInTranslateY.value = withDelay(500, withTiming(0, { duration: 300 }));
   }, []);
 
   // Animated styles for buttons
@@ -100,16 +93,6 @@ export default function WelcomeScreen() {
       transform: [
         { translateY: startButtonTranslateY.value },
         { scale: startButtonScale.value },
-      ],
-    };
-  });
-
-  const signInAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: signInOpacity.value,
-      transform: [
-        { translateY: signInTranslateY.value },
-        { scale: signInScale.value },
       ],
     };
   });
@@ -145,19 +128,7 @@ export default function WelcomeScreen() {
       withTiming(1, { duration: 100 })
     );
     setTimeout(() => {
-      router.push("/(auth)/sign-up");
-    }, 150);
-  };
-
-  const handleSignIn = () => {
-    setIsAutoScrolling(false);
-    // Create a button press animation
-    signInScale.value = withSequence(
-      withTiming(0.95, { duration: 100 }),
-      withTiming(1, { duration: 100 })
-    );
-    setTimeout(() => {
-      router.push("/(auth)/sign-in");
+      router.push("/(auth)/auth"); // Use new unified auth flow
     }, 150);
   };
 
@@ -174,10 +145,10 @@ export default function WelcomeScreen() {
       return (
         <View className="w-full items-center justify-center" style={{ width }}>
           <View className="w-full items-center px-5">
-            <TitleText className="text-3xl text-foreground mb-2 text-center">
+            <TitleText className="text-5xl text-foreground mb-2 text-center">
               {item.title}
             </TitleText>
-            <BodyText className="text-base text-foreground text-center opacity-80 px-4 mb-3">
+            <BodyText className="text-xl text-foreground text-center opacity-80 px-4 mb-3">
               {item.description}
             </BodyText>
 
@@ -221,10 +192,10 @@ export default function WelcomeScreen() {
         </View>
 
         <View className="items-center px-5">
-          <TitleText className="text-2xl text-foreground mb-3 text-center">
+          <TitleText className="text-5xl text-foreground mb-3 text-center">
             {item.title}
           </TitleText>
-          <BodyText className="text-base text-foreground text-center opacity-80 px-4 mb-3">
+          <BodyText className="text-xl text-foreground text-center opacity-80 px-4 mb-3">
             {item.description}
           </BodyText>
         </View>
@@ -234,20 +205,6 @@ export default function WelcomeScreen() {
 
   return (
     <PageContainer scroll={false} padded={false}>
-      <View className="flex-row justify-end items-center px-5 pt-2">
-        <RAnimated.View style={signInAnimatedStyle}>
-          <TouchableOpacity
-            onPress={handleSignIn}
-            className="py-2 px-4 rounded-lg border border-primary"
-            activeOpacity={0.8}
-          >
-            <Text className="font-paragraph-bold text-primary text-base">
-              Sign In
-            </Text>
-          </TouchableOpacity>
-        </RAnimated.View>
-      </View>
-
       <View className="flex-1">
         {/* Slides */}
         <FlatList
@@ -270,7 +227,7 @@ export default function WelcomeScreen() {
         />
 
         {/* Progress Dots */}
-        <View className="flex-row justify-center space-x-2 mb-3">
+        <View className="flex-row justify-center space-x-3 mb-3">
           {slides.map((_, index) => {
             const inputRange = [
               (index - 1) * width,
@@ -286,14 +243,14 @@ export default function WelcomeScreen() {
 
             const dotWidth = scrollX.interpolate({
               inputRange,
-              outputRange: [10, 20, 10],
+              outputRange: [16, 32, 16],
               extrapolate: "clamp",
             });
 
             return (
               <Animated.View
                 key={index}
-                className="h-2.5 rounded-full bg-primary"
+                className="h-4 rounded-full bg-primary"
                 style={{
                   width: dotWidth,
                   opacity: dotOpacity,
@@ -308,12 +265,12 @@ export default function WelcomeScreen() {
           <RAnimated.View style={[startButtonAnimatedStyle, { width: "100%" }]}>
             <TouchableOpacity
               onPress={handleGetStarted}
-              className="w-full bg-primary py-4 rounded-xl"
+              className="w-full bg-primary py-6 rounded-xl"
               activeOpacity={0.8}
             >
-              <Text className="font-paragraph-bold text-center text-primary-foreground text-lg">
+              <TitleText className="text-center text-primary-foreground text-3xl font-extrabold">
                 Get Started
-              </Text>
+              </TitleText>
             </TouchableOpacity>
           </RAnimated.View>
         </View>
@@ -366,7 +323,7 @@ const FeatureItem = ({
       className="flex-row items-center bg-white rounded-lg px-4 py-2 m-2 w-[45%]"
     >
       <Ionicons name={icon} size={22} color="#5E994B" />
-      <Text className="font-paragraph-semibold text-sm text-foreground ml-2">
+      <Text className="font-paragraph-semibold text-base text-foreground ml-2">
         {text}
       </Text>
     </RAnimated.View>

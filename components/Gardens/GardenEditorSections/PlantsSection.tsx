@@ -65,7 +65,7 @@ export default function PlantsSection({
 
       {/* Wildlife */}
       <CollapsibleSection title="Wildlife & Challenges" icon="paw-outline">
-        <View className="mt-2 space-y-1">
+        <View className="mt-2">
           <BetterSelector
             label="Attracts Wildlife"
             placeholder="Select wildlife attractions"
@@ -76,25 +76,29 @@ export default function PlantsSection({
             }
           />
 
-          <BetterSelector
-            label="Resistance Challenges"
-            placeholder="Select resistance challenges"
-            items={LOOKUP_TABLES.resistance_to_challenges}
-            value={formValues.resistance_to_challenges_ids}
-            onChange={(value: number[]) =>
-              updateFormValues("resistance_to_challenges_ids", value)
-            }
-          />
+          <View className="mt-4">
+            <BetterSelector
+              label="Resistance Challenges"
+              placeholder="Select resistance challenges"
+              items={LOOKUP_TABLES.resistance_to_challenges}
+              value={formValues.resistance_to_challenges_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("resistance_to_challenges_ids", value)
+              }
+            />
+          </View>
 
-          <BetterSelector
-            label="Problems to Exclude"
-            placeholder="Select problems to exclude"
-            items={LOOKUP_TABLES.problems}
-            value={formValues.problems_ids}
-            onChange={(value: number[]) =>
-              updateFormValues("problems_ids", value)
-            }
-          />
+          <View className="mt-4">
+            <BetterSelector
+              label="Problems to Exclude"
+              placeholder="Select problems to exclude"
+              items={LOOKUP_TABLES.problems}
+              value={formValues.problems_ids}
+              onChange={(value: number[]) =>
+                updateFormValues("problems_ids", value)
+              }
+            />
+          </View>
         </View>
       </CollapsibleSection>
     </View>

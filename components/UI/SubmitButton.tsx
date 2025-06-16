@@ -88,13 +88,15 @@ export default function SubmitButton({
   } else if (color === "destructive") {
     if (type === "outline") {
       buttonClass = isButtonDisabled
-        ? "bg-transparent border border-red-300 opacity-70"
-        : "bg-transparent border border-red-500";
-      textClass = isButtonDisabled ? "text-red-300" : "text-red-500";
-      spinnerColor = "#EF4444"; // Red
+        ? "bg-transparent border border-destructive/30 opacity-70"
+        : "bg-transparent border border-destructive";
+      textClass = isButtonDisabled ? "text-destructive/30" : "text-destructive";
+      spinnerColor = "#E50000"; // Brand destructive color
     } else {
-      buttonClass = isButtonDisabled ? "bg-red-300 opacity-70" : "bg-red-500";
-      textClass = "text-white";
+      buttonClass = isButtonDisabled
+        ? "bg-destructive/30 opacity-70"
+        : "bg-destructive";
+      textClass = "text-destructive-foreground";
       spinnerColor = "white";
     }
   }
@@ -104,7 +106,7 @@ export default function SubmitButton({
     if (isButtonDisabled) {
       if (type === "outline") {
         if (color === "primary") return "#64A583"; // Lighter primary
-        if (color === "destructive") return "#F87171"; // Lighter red
+        if (color === "destructive") return "#E50000"; // Brand destructive with opacity
         return "#9CA3AF"; // Light gray
       }
       return "#ffffff";
@@ -112,7 +114,7 @@ export default function SubmitButton({
 
     if (type === "outline") {
       if (color === "primary") return "#047857"; // Primary color
-      if (color === "destructive") return "#EF4444"; // Red
+      if (color === "destructive") return "#E50000"; // Brand destructive color
       return "#4B5563"; // Dark gray
     }
 
