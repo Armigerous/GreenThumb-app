@@ -67,16 +67,51 @@ function InitialLayout() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("📱 Root Layout: Component mounted - App initialization");
+    console.log(
+      "🔍 Root Layout: Initial auth state - isLoaded:",
+      isLoaded,
+      "isSignedIn:",
+      isSignedIn
+    );
+    console.log("📍 Root Layout: Current segments:", segments);
+  }, []);
+
+  useEffect(() => {
+    console.log(
+      "🔍 Root Layout: Auth state changed - isLoaded:",
+      isLoaded,
+      "isSignedIn:",
+      isSignedIn
+    );
+    console.log("📍 Root Layout: Current segments:", segments);
+
     if (!isLoaded) return;
 
     const inAuthGroup = segments[0] === "(auth)";
 
     if (isSignedIn && inAuthGroup) {
       // Redirect to home if user is signed in and trying to access auth screens
+      console.log(
+        "🚀 Root Layout: User signed in but in auth group - redirecting to home"
+      );
+      console.log(
+        "📍 Navigation triggered from: Root Layout -> Home (Signed in user in auth)"
+      );
       router.replace("/");
     } else if (!isSignedIn && !inAuthGroup && segments[0] !== undefined) {
       // Redirect to welcome screen if user is not signed in and trying to access protected screens
+      console.log(
+        "🔙 Root Layout: User not signed in but in protected area - redirecting to welcome"
+      );
+      console.log(
+        "📍 Navigation triggered from: Root Layout -> Welcome (Unauthenticated user in protected area)"
+      );
       router.replace("/(auth)/welcome");
+    } else {
+      console.log(
+        "📋 Root Layout: Navigation state is correct - no redirect needed"
+      );
     }
   }, [isSignedIn, isLoaded, segments]);
 

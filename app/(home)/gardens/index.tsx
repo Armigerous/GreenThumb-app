@@ -4,12 +4,12 @@ import { useGardenDashboard } from "@/lib/queries";
 import { GardenDashboard } from "@/types/garden";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedTransition from "@/components/UI/AnimatedTransition";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { useFocusEffect } from "expo-router";
+
 import { useCallback } from "react";
 
 export default function GardensScreen() {

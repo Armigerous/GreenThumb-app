@@ -15,6 +15,16 @@ import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageContainer } from "@/components/UI/PageContainer";
 
+// Import our modular components
+import {
+  Header,
+  ProgressIndicator,
+  GardenSelectionStep,
+  PlantDetailsStep,
+  ConfirmationStep,
+  ErrorMessage,
+} from "@/components/Gardens/Plants/Add";
+
 /**
  * Generate a UUID that is compatible with React Native
  * This is a simple implementation that should be sufficient for our needs
@@ -26,16 +36,6 @@ function generateUUID(): string {
     return v.toString(16);
   });
 }
-
-// Import our modular components
-import {
-  Header,
-  ProgressIndicator,
-  GardenSelectionStep,
-  PlantDetailsStep,
-  ConfirmationStep,
-  ErrorMessage,
-} from "@/components/Gardens/Plants/Add";
 
 /**
  * AddPlantToGardenScreen handles the flow for adding a plant to the user's garden

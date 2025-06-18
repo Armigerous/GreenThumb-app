@@ -79,6 +79,9 @@ export default function WelcomeScreen() {
 
   // Trigger animations when component mounts
   useEffect(() => {
+    console.log(
+      "📱 Welcome Screen: Component mounted - User arrived at welcome page"
+    );
     startButtonOpacity.value = withDelay(500, withTiming(1, { duration: 300 }));
     startButtonTranslateY.value = withDelay(
       500,
@@ -128,7 +131,12 @@ export default function WelcomeScreen() {
       withTiming(1, { duration: 100 })
     );
     setTimeout(() => {
-      router.push("/(auth)/auth"); // Use new unified auth flow
+      const targetPage = "/(auth)/auth";
+      console.log("🚀 Welcome Screen: Navigating user to:", targetPage);
+      console.log(
+        "📍 Navigation triggered from: Welcome Screen -> Get Started button"
+      );
+      router.push(targetPage); // Use new unified auth flow
     }, 150);
   };
 

@@ -75,6 +75,13 @@ export default function UnifiedAuthScreen() {
   } = useSignUp();
   const { startSSOFlow } = useSSO();
 
+  // Log component mount
+  React.useEffect(() => {
+    console.log(
+      "📱 Auth Screen: Component mounted - User arrived at unified auth screen"
+    );
+  }, []);
+
   const { width, height } = useWindowDimensions();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -374,9 +381,19 @@ export default function UnifiedAuthScreen() {
 
   const handleBackPress = () => {
     if (currentStep === "auth") {
+      console.log(
+        "🔙 Auth Screen: Back button pressed - returning to welcome screen"
+      );
+      console.log(
+        "📍 Navigation triggered from: Auth Screen -> Welcome Screen (Back)"
+      );
       router.push("/(auth)/welcome");
     } else {
       // Go back to auth step
+      console.log(
+        `🔙 Auth Screen: Back button pressed - returning to auth step from ${currentStep}`
+      );
+      console.log(`📍 Step transition: ${currentStep} -> auth (Back)`);
       animateToStep("auth");
       setError(null);
     }
@@ -522,16 +539,32 @@ export default function UnifiedAuthScreen() {
 
       if (createdSessionId && setActive) {
         // Existing user - complete sign in
+        console.log("🚀 Auth Screen: OAuth existing user - navigating to home");
+        console.log(
+          "📍 Navigation triggered from: OAuth Social Auth -> Existing User"
+        );
         await setActive({ session: createdSessionId });
         router.replace("/(home)");
       } else if (signUp?.emailAddress) {
         // New user - need phone number
+        console.log(
+          "🔄 Auth Screen: OAuth new user - moving to phone collection step"
+        );
+        console.log(
+          "📍 Step transition: OAuth Social Auth -> Phone Collection"
+        );
         setOauthEmail(signUp.emailAddress);
         setOauthFirstName(signUp.firstName || "");
         setAuthMode("oauth_completion");
         animateToStep("phone");
       } else if (signIn && setActiveSignIn) {
         // OAuth sign-in - complete directly
+        console.log(
+          "🚀 Auth Screen: OAuth sign-in complete - navigating to home"
+        );
+        console.log(
+          "📍 Navigation triggered from: OAuth Social Auth -> Direct Sign-in"
+        );
         await setActiveSignIn({ session: signIn.createdSessionId! });
         router.replace("/(home)");
       } else {
@@ -603,11 +636,23 @@ export default function UnifiedAuthScreen() {
 
           if (signInAttempt?.status === "complete") {
             // Existing user with complete sign in - go directly to home
+            console.log(
+              "🚀 Auth Screen: Manual sign-in complete - navigating to home"
+            );
+            console.log(
+              "📍 Navigation triggered from: Manual Auth -> Existing User Sign-in"
+            );
             await setActiveSignIn({ session: signInAttempt.createdSessionId });
             router.replace("/(home)");
             return;
           } else if (signInAttempt?.status === "needs_second_factor") {
             // Needs verification
+            console.log(
+              "🔄 Auth Screen: Manual sign-in needs verification - moving to verification step"
+            );
+            console.log(
+              "📍 Step transition: Manual Auth -> Verification (2FA)"
+            );
             setAuthMode("signin");
             animateToStep("verification");
             return;
@@ -626,11 +671,23 @@ export default function UnifiedAuthScreen() {
 
             if (signUpAttempt?.status === "missing_requirements") {
               // New user - proceed to phone step
+              console.log(
+                "🔄 Auth Screen: Manual sign-up needs requirements - moving to phone step"
+              );
+              console.log(
+                "📍 Step transition: Manual Auth -> Phone Collection (New User)"
+              );
               setAuthMode("signup");
               animateToStep("phone");
               return;
             } else if (signUpAttempt?.status === "complete") {
               // Account created successfully - go to phone step
+              console.log(
+                "🔄 Auth Screen: Manual sign-up complete - moving to phone step"
+              );
+              console.log(
+                "📍 Step transition: Manual Auth -> Phone Collection (Account Created)"
+              );
               setAuthMode("signup");
               animateToStep("phone");
               return;
@@ -668,6 +725,12 @@ export default function UnifiedAuthScreen() {
 
         if (signUpAttempt?.status === "complete" && setActiveSignUp) {
           // Account is complete, no verification needed
+          console.log(
+            "🚀 Auth Screen: Phone collection complete - navigating to home"
+          );
+          console.log(
+            "📍 Navigation triggered from: Phone Collection -> Account Complete"
+          );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
           router.replace("/(home)");
         } else if (
@@ -675,12 +738,22 @@ export default function UnifiedAuthScreen() {
           signUpAttempt?.unverifiedFields?.includes("phone_number")
         ) {
           // Phone verification is required
+          console.log(
+            "🔄 Auth Screen: Phone verification required - moving to verification step"
+          );
+          console.log("📍 Step transition: Phone Collection -> Verification");
           await signUp?.preparePhoneNumberVerification({
             strategy: "phone_code",
           });
           animateToStep("verification");
         } else {
           // Unexpected status, try to proceed to verification anyway
+          console.log(
+            "🔄 Auth Screen: Unexpected phone status - proceeding to verification"
+          );
+          console.log(
+            "📍 Step transition: Phone Collection -> Verification (Fallback)"
+          );
           await signUp?.preparePhoneNumberVerification({
             strategy: "phone_code",
           });
@@ -720,6 +793,12 @@ export default function UnifiedAuthScreen() {
         });
 
         if (signInAttempt?.status === "complete" && setActiveSignIn) {
+          console.log(
+            "🚀 Auth Screen: Verification complete (sign-in) - navigating to home"
+          );
+          console.log(
+            "📍 Navigation triggered from: Verification -> Sign-in Complete"
+          );
           await setActiveSignIn({ session: signInAttempt.createdSessionId });
           router.replace("/(home)");
         }
@@ -730,6 +809,12 @@ export default function UnifiedAuthScreen() {
         });
 
         if (signUpAttempt?.status === "complete" && setActiveSignUp) {
+          console.log(
+            "🚀 Auth Screen: Verification complete (sign-up) - navigating to home"
+          );
+          console.log(
+            "📍 Navigation triggered from: Verification -> Sign-up Complete"
+          );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
           router.replace("/(home)");
         }

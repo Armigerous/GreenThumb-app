@@ -6,7 +6,35 @@ import { useEffect } from "react";
 export default function AuthRoutesLayout() {
   const { isSignedIn, isLoaded } = useAuth();
 
+  useEffect(() => {
+    console.log(
+      "📱 Auth Layout: Component mounted - Auth routes layout initialized"
+    );
+    console.log(
+      "🔍 Auth Layout: isLoaded:",
+      isLoaded,
+      "isSignedIn:",
+      isSignedIn
+    );
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn) {
+        console.log("🚀 Auth Layout: User is signed in - redirecting to home");
+        console.log(
+          "📍 Navigation triggered from: Auth Layout -> Home (Already Signed In)"
+        );
+      } else {
+        console.log(
+          "📋 Auth Layout: User not signed in - staying in auth flow"
+        );
+      }
+    }
+  }, [isLoaded, isSignedIn]);
+
   if (!isLoaded) {
+    console.log("⏳ Auth Layout: Auth state loading...");
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#5E994B" />
