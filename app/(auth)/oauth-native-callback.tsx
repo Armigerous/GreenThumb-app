@@ -10,6 +10,9 @@ export default function OAuthCallback() {
 
   useEffect(() => {
     console.log(
+      "📱 OAuth Callback: Component mounted - User arrived at OAuth callback"
+    );
+    console.log(
       "🔄 OAuth Callback - isLoaded:",
       isLoaded,
       "isSignedIn:",
@@ -20,10 +23,16 @@ export default function OAuthCallback() {
 
     if (isLoaded) {
       if (isSignedIn) {
-        console.log("✅ OAuth Success - Redirecting to home");
+        console.log("🚀 OAuth Callback: Success - navigating to home");
+        console.log(
+          "📍 Navigation triggered from: OAuth Callback -> Home (Success)"
+        );
         router.replace("/");
       } else {
-        console.log("❌ OAuth Failed - Redirecting to auth");
+        console.log("🔙 OAuth Callback: Failed - returning to auth screen");
+        console.log(
+          "📍 Navigation triggered from: OAuth Callback -> Auth Screen (Failed)"
+        );
         router.replace("/(auth)/auth");
       }
     }

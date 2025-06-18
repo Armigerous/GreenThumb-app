@@ -20,7 +20,7 @@ export type LookupItem = {
 type BetterSelectorProps<T extends boolean = true> = {
   label: string;
   placeholder: string;
-  items: Array<LookupItem>;
+  items: LookupItem[];
   value: T extends true ? number[] : number | null;
   onChange: (value: T extends true ? number[] : number | null) => void;
   multiple?: T;

@@ -55,8 +55,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <View style={styles.content}>
             <Text style={styles.title}>Oops! Something went wrong</Text>
             <Text style={styles.message}>
-              We've encountered an unexpected error. The issue has been reported
-              and we're working on a fix.
+              We&apos;ve encountered an unexpected error. The issue has been
+              reported and we&apos;re working on a fix.
             </Text>
 
             {__DEV__ && this.state.error && (

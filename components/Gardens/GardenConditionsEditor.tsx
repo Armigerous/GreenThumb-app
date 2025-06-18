@@ -128,7 +128,7 @@ function SelectionModal<T extends boolean = true>({
   visible: boolean;
   onClose: () => void;
   title: string;
-  items: Array<{ label: string; value: number }>;
+  items: { label: string; value: number }[];
   selectedValues: T extends true ? number[] : number | null;
   onSelectionChange: (
     values: T extends true ? number[] : number | null
@@ -230,7 +230,7 @@ function BetterSelector<T extends boolean = true>({
 }: {
   label: string;
   placeholder: string;
-  items: Array<{ label: string; value: number }>;
+  items: { label: string; value: number }[];
   value: T extends true ? number[] : number | null;
   onChange: (value: T extends true ? number[] : number | null) => void;
   multiple?: T;

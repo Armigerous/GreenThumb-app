@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
 import {
   Text,
   View,
@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskWithDetails } from "@/types/garden";
-import { useFocusEffect } from "expo-router";
+
 import { PageContainer } from "@/components/UI/PageContainer";
 import { TaskCompletionCelebration } from "@/components/UI/TaskCompletionCelebration";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";

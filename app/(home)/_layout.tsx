@@ -119,6 +119,18 @@ export default function HomeLayout() {
   const [isInitialRender, setIsInitialRender] = useState(true);
   const { user } = useUser();
 
+  // Log when user successfully reaches home layout
+  useEffect(() => {
+    console.log(
+      "📱 Home Layout: Component mounted - User successfully reached home screen"
+    );
+    console.log("👤 Home Layout: User ID:", user?.id);
+    console.log(
+      "📧 Home Layout: User email:",
+      user?.emailAddresses?.[0]?.emailAddress
+    );
+  }, []);
+
   // Get overdue task notifications
   const { notifications, showModal, setShowModal, checkNotifications } =
     useOverdueTasksNotifications();

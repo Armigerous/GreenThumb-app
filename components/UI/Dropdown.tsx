@@ -18,7 +18,7 @@ type DropdownItem = {
 
 type DropdownProps = {
   items: DropdownItem[];
-  value: Array<number | string> | number | string | null;
+  value: (number | string)[] | number | string | null;
   onChange: (value: any) => void;
   placeholder?: string;
   multiple?: boolean;
