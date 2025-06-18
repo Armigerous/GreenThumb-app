@@ -91,12 +91,8 @@ function InitialLayout() {
     const inAuthGroup = segments[0] === "(auth)";
 
     if (isSignedIn && inAuthGroup) {
-      // Redirect to home if user is signed in and trying to access auth screens
       console.log(
         "🚀 Root Layout: User signed in but in auth group - redirecting to home"
-      );
-      console.log(
-        "📍 Navigation triggered from: Root Layout -> Home (Signed in user in auth)"
       );
       router.replace("/");
     } else if (!isSignedIn && !inAuthGroup && segments[0] !== undefined) {
