@@ -8,27 +8,26 @@
  * - Front-loaded value proposition
  */
 
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { useUser } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { PageContainer } from "@/components/UI/PageContainer";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
+import { formatPrice } from "@/lib/stripe";
 import {
   usePricingDisplay,
   useSubscriptionSummary,
 } from "@/lib/subscriptionQueries";
-import { formatPrice } from "@/lib/stripe";
 import { PricingDisplay } from "@/types/subscription";
+import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function PricingScreen() {
   const router = useRouter();
@@ -44,7 +43,7 @@ export default function PricingScreen() {
   // If user already has premium, redirect to subscription management
   React.useEffect(() => {
     if (subscriptionSummary?.is_premium) {
-      router.replace("/subscription/subscription");
+      router.replace("/subscription");
     }
   }, [subscriptionSummary?.is_premium, router]);
 
@@ -64,7 +63,7 @@ export default function PricingScreen() {
     setIsProcessing(true);
     try {
       // Navigate to checkout screen with selected plan
-      router.push(`/subscription/checkout?plan=${selectedPlanId}`);
+      router.push(`/checkout?plan=${selectedPlanId}`);
     } catch (error) {
       console.error("Error navigating to checkout:", error);
       Alert.alert("Error", "Failed to proceed to checkout. Please try again.");

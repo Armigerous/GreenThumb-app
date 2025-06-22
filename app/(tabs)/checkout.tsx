@@ -184,9 +184,7 @@ function CheckoutContent() {
       const { subscription } = await response.json();
 
       // Navigate to success screen
-      router.replace(
-        `/subscription/subscription-success?subscription=${subscription.id}`
-      );
+      router.replace(`/subscription-success?subscription=${subscription.id}`);
     } catch (error) {
       console.error("Subscription creation error:", error);
       Alert.alert(

@@ -49,7 +49,7 @@ export default function SubscriptionScreen() {
   // If user doesn't have premium, redirect to pricing
   React.useEffect(() => {
     if (subscriptionSummary && !subscriptionSummary.is_premium) {
-      router.replace("/subscription/pricing");
+      router.replace("/pricing");
     }
   }, [subscriptionSummary?.is_premium, router]);
 
@@ -121,7 +121,7 @@ export default function SubscriptionScreen() {
   };
 
   const handleUpgradeSubscription = () => {
-    router.push("/subscription/pricing");
+    router.push("/pricing");
   };
 
   const handlePurchaseAddon = (addonId: string) => {
@@ -145,7 +145,7 @@ export default function SubscriptionScreen() {
             No active subscription found
           </Text>
           <TouchableOpacity
-            onPress={() => router.push("/subscription/pricing")}
+            onPress={() => router.push("/pricing")}
             className="bg-green-600 rounded-xl py-3 px-6"
           >
             <Text className="text-white font-semibold">View Plans</Text>

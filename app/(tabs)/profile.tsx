@@ -309,8 +309,8 @@ export default function ProfileScreen() {
                     How do I add a new plant?
                   </Text>
                   <Text className="text-xs text-foreground opacity-70 mt-1">
-                    Tap the "+" button on the home screen to add a new plant to
-                    your garden.
+                    Tap the &quot;+&quot; button on the home screen to add a new
+                    plant to your garden.
                   </Text>
                 </View>
 

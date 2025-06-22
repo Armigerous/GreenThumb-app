@@ -544,7 +544,7 @@ export default function UnifiedAuthScreen() {
           "📍 Navigation triggered from: OAuth Social Auth -> Existing User"
         );
         await setActive({ session: createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(tabs)");
       } else if (signUp?.emailAddress) {
         // New user - need phone number
         console.log(
@@ -566,7 +566,7 @@ export default function UnifiedAuthScreen() {
           "📍 Navigation triggered from: OAuth Social Auth -> Direct Sign-in"
         );
         await setActiveSignIn({ session: signIn.createdSessionId! });
-        router.replace("/(home)");
+        router.replace("/(tabs)");
       } else {
         // OAuth was cancelled or failed - reset state and stay on auth screen
         console.log("OAuth cancelled or failed - no session or signup created");
@@ -643,7 +643,7 @@ export default function UnifiedAuthScreen() {
               "📍 Navigation triggered from: Manual Auth -> Existing User Sign-in"
             );
             await setActiveSignIn({ session: signInAttempt.createdSessionId });
-            router.replace("/(home)");
+            router.replace("/(tabs)");
             return;
           } else if (signInAttempt?.status === "needs_second_factor") {
             // Needs verification
@@ -732,7 +732,7 @@ export default function UnifiedAuthScreen() {
             "📍 Navigation triggered from: Phone Collection -> Account Complete"
           );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
-          router.replace("/(home)");
+          router.replace("/(tabs)");
         } else if (
           signUpAttempt?.status === "missing_requirements" ||
           signUpAttempt?.unverifiedFields?.includes("phone_number")
@@ -800,7 +800,7 @@ export default function UnifiedAuthScreen() {
             "📍 Navigation triggered from: Verification -> Sign-in Complete"
           );
           await setActiveSignIn({ session: signInAttempt.createdSessionId });
-          router.replace("/(home)");
+          router.replace("/(tabs)");
         }
       } else {
         // For signup (both manual and oauth_completion), verify the phone number
@@ -816,7 +816,7 @@ export default function UnifiedAuthScreen() {
             "📍 Navigation triggered from: Verification -> Sign-up Complete"
           );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
-          router.replace("/(home)");
+          router.replace("/(tabs)");
         }
       }
     } catch (err: any) {
@@ -897,7 +897,7 @@ export default function UnifiedAuthScreen() {
                 onApplePress={handleAppleAuth}
                 onFacebookPress={handleFacebookAuth}
                 isLoading={isLoading}
-                title="Or sign in with"
+                title="Or continue with"
               />
             </Animated.View>
           </Animated.View>
@@ -906,7 +906,6 @@ export default function UnifiedAuthScreen() {
       case "phone":
         return (
           <PhoneCollectionScreen
-            firstName={oauthFirstName}
             emailAddress={authMode === "oauth_completion" ? oauthEmail : email}
             phoneNumber={phoneNumber}
             setPhoneNumber={setPhoneNumber}
@@ -914,46 +913,22 @@ export default function UnifiedAuthScreen() {
             isLoading={isLoading}
             error={error}
             animatedStyle={stepAnimatedStyle}
-            mode={
-              authMode === "oauth_completion"
-                ? "oauth_completion"
-                : "manual_signup"
-            }
           />
         );
 
       case "verification":
         return (
-          <Animated.View style={stepAnimatedStyle} className="w-full px-4">
-            <View className="mb-6">
-              <BodyText className="text-lg font-paragraph-semibold text-foreground mb-2">
-                Enter verification code
-              </BodyText>
-              <BodyText className="text-cream-600 mb-4">
-                We sent a code to {phoneNumber}
-              </BodyText>
-            </View>
-
-            <VerificationInput
-              verificationCode={verificationCode}
-              setVerificationCode={setVerificationCode}
-              onVerify={handleVerificationSubmit}
-              isLoading={isLoading}
-              isPhone={true}
-              error={error}
-            />
-
-            <View className="mt-6">
-              <AuthButton
-                label="Verify & Continue"
-                onPress={handleVerificationSubmit}
-                loading={isLoading}
-                disabled={!verificationCode || isLoading}
-                icon="checkmark-circle-outline"
-                loadingLabel="Verifying..."
-              />
-            </View>
-          </Animated.View>
+          <VerificationInput
+            verificationCode={verificationCode}
+            setVerificationCode={setVerificationCode}
+            onVerify={handleVerificationSubmit}
+            isLoading={isLoading}
+            isPhone={true}
+            phoneNumber={phoneNumber}
+            emailAddress={authMode === "oauth_completion" ? oauthEmail : email}
+            error={error}
+            animatedStyle={stepAnimatedStyle}
+          />
         );
 
       default:

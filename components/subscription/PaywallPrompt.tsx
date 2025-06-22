@@ -5,19 +5,16 @@
  * or try to access premium features.
  */
 
-import React from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  Dimensions,
   Modal,
   ScrollView,
-  Dimensions,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -51,7 +48,7 @@ export function PaywallPrompt({
 
   const handleUpgrade = () => {
     onClose();
-    router.push("/subscription/pricing");
+    router.push("/pricing");
   };
 
   const getTitle = () => {

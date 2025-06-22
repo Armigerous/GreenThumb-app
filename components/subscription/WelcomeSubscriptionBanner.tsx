@@ -52,7 +52,7 @@ export function WelcomeSubscriptionBanner({
     );
 
     setTimeout(() => {
-      router.push("/subscription/pricing");
+      router.push("/pricing");
     }, 150);
   };
 
@@ -146,7 +146,7 @@ export function FeatureDiscoveryCard({
     );
 
     setTimeout(() => {
-      router.push("/subscription/pricing");
+      router.push("/pricing");
     }, 150);
   };
 
