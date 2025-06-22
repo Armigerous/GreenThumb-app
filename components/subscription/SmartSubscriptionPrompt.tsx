@@ -132,7 +132,7 @@ export function SmartSubscriptionPrompt({
     await subscriptionTriggers.markTriggerShown(trigger.moment);
 
     setTimeout(() => {
-      router.push("/subscription/pricing");
+      router.push("/pricing");
       onUpgrade?.();
     }, 150);
   };
@@ -145,7 +145,7 @@ export function SmartSubscriptionPrompt({
       "subscription_prompt_learn_more"
     );
 
-    router.push("/subscription/pricing");
+    router.push("/pricing");
   };
 
   if (!isVisible || !trigger || subscriptionTriggers.isPremium) {

@@ -43,7 +43,7 @@ export default function AuthRoutesLayout() {
   }
 
   if (isSignedIn) {
-    return <Redirect href={"/(home)"} />;
+    return <Redirect href={"/"} />;
   }
 
   return (

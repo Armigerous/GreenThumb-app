@@ -1,28 +1,27 @@
+import CachedImage from "@/components/CachedImage";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
+import SubmitButton from "@/components/UI/SubmitButton";
+import { SwipeableRow } from "@/components/UI/SwipeableRow";
 import { useGardenDetails, useGardenTasksSummary } from "@/lib/queries";
+import { deleteImageFromStorage } from "@/lib/services/imageUpload";
 import { supabase } from "@/lib/supabaseClient";
 import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
   Alert,
+  Animated,
   Dimensions,
-  Image,
+  Easing,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  Animated,
-  Easing,
 } from "react-native";
-import { SwipeableRow } from "@/components/UI/SwipeableRow";
-import { useQueryClient } from "@tanstack/react-query";
-import { PageContainer } from "@/components/UI/PageContainer";
-import CachedImage from "@/components/CachedImage";
-import { deleteImageFromStorage } from "@/lib/services/imageUpload";
-import SubmitButton from "@/components/UI/SubmitButton";
-import { LinearGradient } from "expo-linear-gradient";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;

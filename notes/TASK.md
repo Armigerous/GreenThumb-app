@@ -1024,4 +1024,49 @@
 **🌍 INITIAL MARKETS: UNITED STATES, CANADA**  
 **💳 MONETIZATION: SUBSCRIPTION-BASED WITH GUARANTEE SYSTEM**
 
+---
+
+## 🚨 DISCOVERED DURING WORK
+
+### 🔴 CRITICAL: Navigation Context Error in Home Layout (January 14, 2025)
+
+**BUG-NAV-001**: "Couldn't find a navigation context" error preventing app from loading  
+**Status:** 🔴 **CRITICAL** - App completely broken  
+**Discovered:** January 14, 2025  
+**File:** `app/(home)/_layout.tsx`  
+**Severity:** App crashes immediately after authentication
+
+**Root Cause Analysis - CONFIRMED:**
+Through systematic commenting out of components, we identified that the navigation context error is caused by **expo-router's `<Tabs>` component itself** or its interaction with the app's navigation structure.
+
+**What We Tested (All NOT the cause):**
+
+- ❌ Custom tab bar component (`CustomTabBar`)
+- ❌ Overdue tasks notification system (`useOverdueTasksNotifications`, `OverdueTasksModal`)
+- ❌ Clerk authentication hooks (`useUser`)
+- ❌ State management and timing logic (`isInitialRender`, useEffect)
+- ❌ Icon imports and usage (`Ionicons`, `tabBarIcon` properties)
+- ❌ Individual tab screens (gardens, calendar, plants, profile)
+- ❌ React Native imports and basic components
+
+**What IS the cause:**
+
+- ✅ **The `<Tabs>` component from expo-router** - When completely removed and replaced with basic React Native components, the error disappears
+
+**Impact:**
+
+- App is completely unusable after authentication
+- Users cannot access any home screens
+- Blocks all testing and launch preparation
+
+**Next Steps Required:**
+
+1. Investigate expo-router `<Tabs>` component configuration
+2. Check if there's a navigation context provider missing in parent layouts
+3. Review expo-router setup in `app/_layout.tsx`
+4. Consider alternative navigation solutions if expo-router issue persists
+5. Test with different expo-router versions if necessary
+
+**Priority:** 🔥 **IMMEDIATE** - Must be fixed before any other work can continue
+
 _Last Updated: January 14, 2025 by Development Team_

@@ -1,6 +1,6 @@
 import { tokenCache } from "@/cache";
 import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Slot } from "expo-router";
 import { useEffect, useState } from "react";
 import { SWRConfig } from "swr";
 import "./globals.css";
@@ -60,56 +60,19 @@ const queryClient = new QueryClient({
   },
 });
 
-// This component handles authentication routing
-function InitialLayout() {
+// This component handles the app initialization and providers
+function RootNavigator() {
   const { isSignedIn, isLoaded, userId } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
 
   useEffect(() => {
-    console.log("📱 Root Layout: Component mounted - App initialization");
+    console.log("📱 Root Navigator: Component mounted - App initialization");
     console.log(
-      "🔍 Root Layout: Initial auth state - isLoaded:",
+      "🔍 Root Navigator: Auth state - isLoaded:",
       isLoaded,
       "isSignedIn:",
       isSignedIn
     );
-    console.log("📍 Root Layout: Current segments:", segments);
   }, []);
-
-  useEffect(() => {
-    console.log(
-      "🔍 Root Layout: Auth state changed - isLoaded:",
-      isLoaded,
-      "isSignedIn:",
-      isSignedIn
-    );
-    console.log("📍 Root Layout: Current segments:", segments);
-
-    if (!isLoaded) return;
-
-    const inAuthGroup = segments[0] === "(auth)";
-
-    if (isSignedIn && inAuthGroup) {
-      console.log(
-        "🚀 Root Layout: User signed in but in auth group - redirecting to home"
-      );
-      router.replace("/");
-    } else if (!isSignedIn && !inAuthGroup && segments[0] !== undefined) {
-      // Redirect to welcome screen if user is not signed in and trying to access protected screens
-      console.log(
-        "🔙 Root Layout: User not signed in but in protected area - redirecting to welcome"
-      );
-      console.log(
-        "📍 Navigation triggered from: Root Layout -> Welcome (Unauthenticated user in protected area)"
-      );
-      router.replace("/(auth)/welcome");
-    } else {
-      console.log(
-        "📋 Root Layout: Navigation state is correct - no redirect needed"
-      );
-    }
-  }, [isSignedIn, isLoaded, segments]);
 
   // Set user context in Sentry when authentication state changes
   useEffect(() => {
@@ -194,6 +157,7 @@ function InitialLayout() {
     }
   }, [isSignedIn]);
 
+  // Use Slot to allow nested routing to handle navigation
   return <Slot />;
 }
 
@@ -347,7 +311,7 @@ function RootLayout() {
                 revalidateOnReconnect: true,
               }}
             >
-              <InitialLayout />
+              <RootNavigator />
             </SWRConfig>
           </QueryClientProvider>
         </ClerkLoaded>

@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { useRouter , useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import {
   Text,
   View,
@@ -33,6 +33,7 @@ import { useUsageSummary } from "@/lib/usageLimits";
 import { PaywallBanner } from "@/components/subscription/PaywallPrompt";
 import { SmartSubscriptionPrompt } from "@/components/subscription/SmartSubscriptionPrompt";
 import { WelcomeSubscriptionBanner } from "@/components/subscription/WelcomeSubscriptionBanner";
+import { NavigationGuard } from "@/components/UI/NavigationGuard";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -426,14 +427,18 @@ export default function Page() {
       <SignedIn>
         <ScrollView className="flex-1">
           {/* Smart subscription prompts (context-aware, non-intrusive) */}
-          <SmartSubscriptionPrompt />
+          <NavigationGuard>
+            <SmartSubscriptionPrompt />
+          </NavigationGuard>
 
           {/* Welcome banner for new users (first week only) */}
           {showWelcomeBanner && (
-            <WelcomeSubscriptionBanner
-              onDismiss={() => setShowWelcomeBanner(false)}
-              showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
-            />
+            <NavigationGuard>
+              <WelcomeSubscriptionBanner
+                onDismiss={() => setShowWelcomeBanner(false)}
+                showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
+              />
+            </NavigationGuard>
           )}
 
           {/* Usage limit banners for free users */}
@@ -441,22 +446,26 @@ export default function Page() {
             <>
               {/* Show garden limit banner if close to limit */}
               {usageSummary.gardens.percentage >= 50 && (
-                <PaywallBanner
-                  feature="gardens"
-                  currentUsage={usageSummary.gardens.current}
-                  limit={usageSummary.gardens.limit}
-                  onUpgrade={() => router.push("/subscription/pricing")}
-                />
+                <NavigationGuard>
+                  <PaywallBanner
+                    feature="gardens"
+                    currentUsage={usageSummary.gardens.current}
+                    limit={usageSummary.gardens.limit}
+                    onUpgrade={() => router.push("/pricing")}
+                  />
+                </NavigationGuard>
               )}
 
               {/* Show task limit banner if close to limit */}
               {usageSummary.tasks.percentage >= 80 && (
-                <PaywallBanner
-                  feature="tasks_per_month"
-                  currentUsage={usageSummary.tasks.current}
-                  limit={usageSummary.tasks.limit}
-                  onUpgrade={() => router.push("/subscription/pricing")}
-                />
+                <NavigationGuard>
+                  <PaywallBanner
+                    feature="tasks_per_month"
+                    currentUsage={usageSummary.tasks.current}
+                    limit={usageSummary.tasks.limit}
+                    onUpgrade={() => router.push("/pricing")}
+                  />
+                </NavigationGuard>
               )}
             </>
           )}

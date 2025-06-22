@@ -31,6 +31,7 @@ module.exports = {
       "expo-splash-screen",
       "expo-updates",
       "expo-asset",
+      "expo-web-browser",
       [
         "expo-image-picker",
         {

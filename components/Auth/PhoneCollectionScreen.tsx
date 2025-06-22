@@ -8,7 +8,6 @@ import Animated, { AnimatedStyleProp } from "react-native-reanimated";
 
 type PhoneCollectionScreenProps = {
   // Data
-  firstName?: string;
   emailAddress?: string;
   phoneNumber: string;
   setPhoneNumber: (value: string) => void;
@@ -23,13 +22,9 @@ type PhoneCollectionScreenProps = {
 
   // Styling
   animatedStyle?: AnimatedStyleProp<ViewStyle>;
-
-  // Context - determines the UI variant
-  mode: "oauth_completion" | "manual_signup";
 };
 
 export function PhoneCollectionScreen({
-  firstName,
   emailAddress,
   phoneNumber,
   setPhoneNumber,
@@ -38,39 +33,23 @@ export function PhoneCollectionScreen({
   isLoading,
   error,
   animatedStyle,
-  mode,
 }: PhoneCollectionScreenProps) {
-  const isOAuth = mode === "oauth_completion";
-
   const content = (
     <View className="flex-1 px-4">
       {/* Header */}
       <View className="mb-6">
-        {isOAuth ? (
-          // OAuth completion header - more welcoming
-          <View className="items-center mb-6">
-            <View className="w-16 h-16 bg-brand-100 rounded-full items-center justify-center mb-4">
-              <Ionicons name="checkmark-circle" size={32} color="#5E994B" />
-            </View>
-            <TitleText className="text-2xl text-center mb-2 text-foreground">
-              Welcome{firstName ? ` ${firstName}` : ""} to GreenThumb! 🌱
-            </TitleText>
-            <BodyText className="text-cream-600 text-center leading-6">
-              Your account is connected. Let&apos;s add your phone number for
-              account security and plant care reminders.
-            </BodyText>
+        <View className="items-center mb-6">
+          <View className="w-16 h-16 bg-brand-100 rounded-full items-center justify-center mb-4">
+            <Ionicons name="call-outline" size={32} color="#5E994B" />
           </View>
-        ) : (
-          // Manual signup header - simpler
-          <View>
-            <BodyText className="text-lg font-paragraph-semibold text-foreground mb-2">
-              Add your phone number
-            </BodyText>
-            <BodyText className="text-cream-600 mb-4">
-              We&apos;ll send you care reminders
-            </BodyText>
-          </View>
-        )}
+          <TitleText className="text-2xl text-center mb-2 text-foreground">
+            Add Your Phone Number
+          </TitleText>
+          <BodyText className="text-cream-600 text-center leading-6">
+            We&apos;ll send you plant care reminders and account security
+            updates.
+          </BodyText>
+        </View>
       </View>
 
       {/* Account info display */}
@@ -84,7 +63,7 @@ export function PhoneCollectionScreen({
         <View className="flex-row items-center">
           <Ionicons name="checkmark-circle" size={16} color="#5E994B" />
           <BodyText className="text-brand-700 font-paragraph-medium ml-2">
-            {isOAuth ? "Account connected" : "Password set"}
+            Account created successfully
           </BodyText>
         </View>
       </View>
@@ -108,33 +87,31 @@ export function PhoneCollectionScreen({
         />
       </View>
 
-      {/* Privacy note for OAuth users */}
-      {isOAuth && (
-        <View className="bg-cream-100 rounded-xl p-4 mb-6 border border-cream-200">
-          <View className="flex-row items-start">
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color="#5E994B"
-              className="mt-1"
-            />
-            <View className="flex-1 ml-3">
-              <BodyText className="text-foreground font-paragraph-semibold mb-1">
-                Your Privacy is Protected
-              </BodyText>
-              <BodyText className="text-cream-600 text-sm leading-5">
-                We&apos;ll never share your phone number. You can update
-                notification preferences anytime.
-              </BodyText>
-            </View>
+      {/* Privacy note */}
+      <View className="bg-cream-100 rounded-xl p-4 mb-6 border border-cream-200">
+        <View className="flex-row items-start">
+          <Ionicons
+            name="lock-closed-outline"
+            size={20}
+            color="#5E994B"
+            className="mt-1"
+          />
+          <View className="flex-1 ml-3">
+            <BodyText className="text-foreground font-paragraph-semibold mb-1">
+              Your Privacy is Protected
+            </BodyText>
+            <BodyText className="text-cream-600 text-sm leading-5">
+              We&apos;ll never share your phone number. You can update
+              notification preferences anytime.
+            </BodyText>
           </View>
         </View>
-      )}
+      </View>
 
       {/* Action buttons */}
       <View className="mt-6">
         <AuthButton
-          label={isOAuth ? "Complete My Garden Setup" : "Complete Setup"}
+          label="Complete Setup"
           onPress={onComplete}
           loading={isLoading}
           disabled={phoneNumber.replace(/\D/g, "").length === 0 || isLoading}

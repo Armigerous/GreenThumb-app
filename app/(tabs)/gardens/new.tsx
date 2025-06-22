@@ -25,7 +25,7 @@ export default function NewGarden() {
 
   const handleSuccess = () => {
     // Navigate back to the gardens index
-    router.replace("/(home)/gardens");
+    router.replace("/(tabs)/gardens");
   };
 
   const handleCancel = () => {

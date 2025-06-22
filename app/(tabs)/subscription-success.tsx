@@ -19,12 +19,12 @@ export default function SubscriptionSuccessScreen() {
 
   const handleGetStarted = () => {
     // Navigate to main app
-    router.replace("/(home)");
+    router.replace("/(tabs)");
   };
 
   const handleViewSubscription = () => {
     // Navigate to subscription management
-    router.push("/subscription/subscription");
+    router.push("/subscription");
   };
 
   return (
