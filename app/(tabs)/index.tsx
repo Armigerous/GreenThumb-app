@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   Text,
   View,
@@ -231,18 +231,16 @@ export default function Page() {
     };
   }, []);
 
-  // Refresh tasks when the home screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) {
-        // Invalidate task queries to ensure fresh data
-        queryClient.invalidateQueries({
-          queryKey: ["tasks"],
-        });
-        refetchTasks();
-      }
-    }, [refetchTasks, queryClient, user?.id])
-  );
+  // Refresh tasks when the component mounts or user changes
+  useEffect(() => {
+    if (user?.id) {
+      // Invalidate task queries to ensure fresh data
+      queryClient.invalidateQueries({
+        queryKey: ["tasks"],
+      });
+      refetchTasks();
+    }
+  }, [refetchTasks, queryClient, user?.id]);
 
   // Configure layout animation for task completion with smooth size transitions
   const configureLayoutAnimation = useCallback(() => {

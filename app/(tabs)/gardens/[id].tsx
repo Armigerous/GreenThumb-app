@@ -10,7 +10,7 @@ import type { UserPlant } from "@/types/garden";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
   Alert,
@@ -89,11 +89,9 @@ const GardenDetails = () => {
   );
 
   // Refetch garden data whenever the screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch])
-  );
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Trigger header animation when data is loaded
   useEffect(() => {
