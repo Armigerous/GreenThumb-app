@@ -20,7 +20,7 @@ import {
   startOfWeek,
   subWeeks,
 } from "date-fns";
-import { useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -215,18 +215,16 @@ export default function CalendarScreen() {
     }
   }, [isFirstLoad, weekSlideAnim, tasks, tasksOpacity]);
 
-  // Refetch tasks when the screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) {
-        // Invalidate task queries to ensure fresh data
-        queryClient.invalidateQueries({
-          queryKey: ["tasks"],
-        });
-        refetch();
-      }
-    }, [refetch, queryClient, user?.id])
-  );
+  // Refetch tasks when user changes
+  useEffect(() => {
+    if (user?.id) {
+      // Invalidate task queries to ensure fresh data
+      queryClient.invalidateQueries({
+        queryKey: ["tasks"],
+      });
+      refetch();
+    }
+  }, [refetch, queryClient, user?.id]);
 
   // Toggle task completion mutation with optimistic updates
   const toggleTaskMutation = useMutation({

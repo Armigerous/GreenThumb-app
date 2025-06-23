@@ -35,10 +35,41 @@
 **Recent Improvements (January 14, 2025):**
 
 - ✅ **AUTH-CONSOLIDATION**: Unified phone collection screens for OAuth and manual auth flows
+
   - Replaced separate `OAuthCompletionScreen` and inline phone step with unified `PhoneCollectionScreen`
   - Single component handles both OAuth completion and manual signup phone collection
   - Consistent UI/UX across all authentication paths
   - Reduced code duplication and maintenance overhead
+
+- ✅ **AUTH-ROUTING**: Implemented automatic redirection for unauthenticated users
+
+  - Modified `app/_layout.tsx` to redirect unauthenticated users to `/(auth)/welcome`
+  - Added proper loading states while authentication status is being determined
+  - Ensures users cannot access protected routes without authentication
+  - Maintains [navigation has been streamlined to use pure Expo Router][memory:4216459845467723475]] patterns
+
+- ✅ **INFINITE-LOOP-FIX**: Resolved critical navigation and Sentry initialization loop
+
+  - **Issue:** App was stuck in infinite loop with repeated Sentry initialization and navigation redirects
+  - **Root Cause:** Sentry.wrap() causing component reinitialization + race conditions in auth state
+  - **Solution:**
+    - Moved Sentry initialization to module level to prevent reinitialization
+    - Removed `Sentry.wrap()` from root layout export
+    - Added navigation delay states to prevent redirect race conditions
+    - Fixed auth layout to redirect to `/(tabs)` instead of `/` to prevent circular redirects
+    - Added proper cleanup and state management for navigation timing
+  - **Result:** App now loads cleanly without loops, proper navigation flow restored
+
+- ✅ **NAVIGATION-LOOP-FIX-V2**: Fixed recurring infinite loop in navigation (January 14, 2025)
+  - **Issue:** App returned to infinite loop state with repeated component mounting and auth redirects
+  - **Root Cause:** Circular redirects between root layout and auth layout, both trying to handle routing
+  - **Solution:**
+    - Created dedicated `app/index.tsx` to handle initial routing decisions
+    - Removed redirect logic from root layout, letting Expo Router handle file-based routing
+    - Updated auth layout to only redirect when navigationReady is true
+    - Increased navigation delay to 200ms to prevent race conditions
+    - Added proper dependency arrays to useEffect hooks
+  - **Result:** Clean navigation flow with single source of truth for initial routing
 
 ---
 

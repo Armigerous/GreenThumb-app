@@ -8,6 +8,7 @@ import { SectionHeader } from "./SectionHeader";
 import { StaggeredContent } from "@/components/UI/StaggeredContent";
 import { TaskList } from "@/components/TaskList";
 import { SubtitleText, BodyText } from "@/components/UI/Text";
+import { NavigationGuard } from "@/components/UI/NavigationGuard";
 
 interface TasksSectionProps {
   allOverdueTasks: TaskWithDetails[];
@@ -104,203 +105,208 @@ export function TasksSection({
   };
 
   return (
-    <View className="mb-6">
-      <StaggeredContent index={2} baseDelay={400} staggerInterval={80}>
-        <SectionHeader
-          title={
-            isLoading
-              ? "Tasks"
-              : allOverdueTasks.length > 0
-              ? "Missed Tasks"
-              : justCompletedAllOverdueTasks
-              ? "Tasks Complete!"
-              : "Today's Tasks"
-          }
-          icon={
-            isLoading
-              ? "hourglass-outline"
-              : allOverdueTasks.length > 0
-              ? "alert-circle"
-              : justCompletedAllOverdueTasks
-              ? "checkmark-circle"
-              : "calendar"
-          }
-          onSeeAll={
-            // Only show "See All" if there are tasks to see or if not in completed state
-            !justCompletedAllOverdueTasks &&
-            (allOverdueTasks.length > 0 ||
-              (todaysTasks && todaysTasks.length > 0) ||
-              upcomingTasksCount > 0)
-              ? () => router.push("/(home)/calendar")
-              : undefined
-          }
-          badge={!isLoading ? getTasksBadge() : null}
-        />
-      </StaggeredContent>
+    <NavigationGuard fallback={<View className="mb-6" />}>
+      <View className="mb-6">
+        <StaggeredContent index={2} baseDelay={400} staggerInterval={80}>
+          <SectionHeader
+            title={
+              isLoading
+                ? "Tasks"
+                : allOverdueTasks.length > 0
+                ? "Missed Tasks"
+                : justCompletedAllOverdueTasks
+                ? "Tasks Complete!"
+                : "Today's Tasks"
+            }
+            icon={
+              isLoading
+                ? "hourglass-outline"
+                : allOverdueTasks.length > 0
+                ? "alert-circle"
+                : justCompletedAllOverdueTasks
+                ? "checkmark-circle"
+                : "calendar"
+            }
+            onSeeAll={
+              // Only show "See All" if there are tasks to see or if not in completed state
+              !justCompletedAllOverdueTasks &&
+              (allOverdueTasks.length > 0 ||
+                (todaysTasks && todaysTasks.length > 0) ||
+                upcomingTasksCount > 0)
+                ? () => router.push("/(home)/calendar")
+                : undefined
+            }
+            badge={!isLoading ? getTasksBadge() : null}
+          />
+        </StaggeredContent>
 
-      {isLoading ? (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
-        </StaggeredContent>
-      ) : hasError ? (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <View className="bg-red-50 rounded-xl p-4 items-center">
-            <Ionicons name="alert-circle-outline" size={24} color="#ef4444" />
-            <BodyText className="text-destructive font-paragraph mt-2 text-center">
-              Error loading tasks
-            </BodyText>
-          </View>
-        </StaggeredContent>
-      ) : justCompletedAllOverdueTasks ? (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <View className="bg-brand-50 rounded-xl p-6 items-center border border-brand-200">
-            <View className="w-16 h-16 rounded-full bg-brand-100 items-center justify-center mb-4">
-              <Ionicons name="trophy" size={32} color="#5E994B" />
+        {isLoading ? (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+          </StaggeredContent>
+        ) : hasError ? (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <View className="bg-red-50 rounded-xl p-4 items-center">
+              <Ionicons name="alert-circle-outline" size={24} color="#ef4444" />
+              <BodyText className="text-destructive font-paragraph mt-2 text-center">
+                Error loading tasks
+              </BodyText>
             </View>
-            <SubtitleText className="text-brand-700 font-title font-bold mb-2 text-center">
-              🌱 Amazing work!
-            </SubtitleText>
-            <BodyText className="text-brand-600 font-paragraph text-sm text-center mb-4">
-              You&apos;ve caught up on all your overdue tasks. Your plants are
-              going to love the attention!
-            </BodyText>
-            {/* Only show View Your Progress button if there are any tasks to view */}
-            {(upcomingTasksCount > 0 ||
-              (todaysTasks && todaysTasks.length > 0)) && (
+          </StaggeredContent>
+        ) : justCompletedAllOverdueTasks ? (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <View className="bg-brand-50 rounded-xl p-6 items-center border border-brand-200">
+              <View className="w-16 h-16 rounded-full bg-brand-100 items-center justify-center mb-4">
+                <Ionicons name="trophy" size={32} color="#5E994B" />
+              </View>
+              <SubtitleText className="text-brand-700 font-title font-bold mb-2 text-center">
+                🌱 Amazing work!
+              </SubtitleText>
+              <BodyText className="text-brand-600 font-paragraph text-sm text-center mb-4">
+                You&apos;ve caught up on all your overdue tasks. Your plants are
+                going to love the attention!
+              </BodyText>
+              {/* Only show View Your Progress button if there are any tasks to view */}
+              {(upcomingTasksCount > 0 ||
+                (todaysTasks && todaysTasks.length > 0)) && (
+                <TouchableOpacity
+                  className="px-4 py-2 bg-brand-600 rounded-lg"
+                  onPress={() => router.push("/(home)/calendar")}
+                >
+                  <BodyText className="text-white font-paragraph font-medium">
+                    View Your Progress
+                  </BodyText>
+                </TouchableOpacity>
+              )}
+            </View>
+          </StaggeredContent>
+        ) : allOverdueTasks.length > 0 ? (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <View className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200">
+              <SubtitleText className="text-destructive font-title font-bold mb-2">
+                You have {allOverdueTasks.length} missed{" "}
+                {allOverdueTasks.length === 1 ? "task" : "tasks"}!
+              </SubtitleText>
+              <BodyText className="text-destructive font-paragraph text-sm mb-3">
+                These tasks were due yesterday or earlier. Don&apos;t worry -
+                your plants are resilient! Let&apos;s get them the care they
+                need.
+              </BodyText>
+            </View>
+            <TaskList
+              tasks={allOverdueTasks}
+              onToggleComplete={handleCompleteTask}
+              showGardenName={true}
+              maxTasks={3}
+              isOverdue={true}
+              queryKey={[
+                "tasks",
+                format(today, "yyyy-MM-dd"),
+                userId || "anonymous",
+              ]}
+            />
+            {allOverdueTasks.length > 3 && (
               <TouchableOpacity
-                className="px-4 py-2 bg-brand-600 rounded-lg"
+                className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
                 onPress={() => router.push("/(home)/calendar")}
               >
-                <BodyText className="text-white font-paragraph font-medium">
-                  View Your Progress
+                <BodyText className="text-red-600 font-paragraph font-medium">
+                  +{allOverdueTasks.length - 3} more missed{" "}
+                  {allOverdueTasks.length - 3 === 1 ? "task" : "tasks"}
                 </BodyText>
               </TouchableOpacity>
             )}
-          </View>
-        </StaggeredContent>
-      ) : allOverdueTasks.length > 0 ? (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <View className="bg-red-50 rounded-xl p-4 mb-4 border border-red-200">
-            <SubtitleText className="text-destructive font-title font-bold mb-2">
-              You have {allOverdueTasks.length} missed{" "}
-              {allOverdueTasks.length === 1 ? "task" : "tasks"}!
-            </SubtitleText>
-            <BodyText className="text-destructive font-paragraph text-sm mb-3">
-              These tasks were due yesterday or earlier. Don&apos;t worry - your
-              plants are resilient! Let&apos;s get them the care they need.
-            </BodyText>
-          </View>
-          <TaskList
-            tasks={allOverdueTasks}
-            onToggleComplete={handleCompleteTask}
-            showGardenName={true}
-            maxTasks={3}
-            isOverdue={true}
-            queryKey={[
-              "tasks",
-              format(today, "yyyy-MM-dd"),
-              userId || "anonymous",
-            ]}
-          />
-          {allOverdueTasks.length > 3 && (
-            <TouchableOpacity
-              className="p-3 bg-white items-center mt-2 rounded-xl border border-red-200 shadow-sm"
-              onPress={() => router.push("/(home)/calendar")}
-            >
-              <BodyText className="text-red-600 font-paragraph font-medium">
-                +{allOverdueTasks.length - 3} more missed{" "}
-                {allOverdueTasks.length - 3 === 1 ? "task" : "tasks"}
-              </BodyText>
-            </TouchableOpacity>
-          )}
-        </StaggeredContent>
-      ) : todaysTasks && todaysTasks.length > 0 ? (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <TaskList
-            tasks={todaysTasks}
-            onToggleComplete={handleCompleteTask}
-            showGardenName={true}
-            maxTasks={3}
-            queryKey={[
-              "tasks",
-              format(today, "yyyy-MM-dd"),
-              userId || "anonymous",
-            ]}
-          />
-          {todaysTasks.length > 3 && (
-            <TouchableOpacity
-              className="p-3 bg-white items-center mt-2 rounded-xl border border-brand-100 shadow-sm"
-              onPress={() => router.push("/(home)/calendar")}
-            >
-              <BodyText className="text-brand-600 font-paragraph font-medium">
-                +{todaysTasks.length - 3} more{" "}
-                {todaysTasks.length - 3 === 1 ? "task" : "tasks"}
-              </BodyText>
-            </TouchableOpacity>
-          )}
-        </StaggeredContent>
-      ) : (
-        <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
-          <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
-            {getNoTasksSummary() ? (
-              <>
-                <Ionicons
-                  name={getNoTasksSummary()!.icon}
-                  size={32}
-                  color={getNoTasksSummary()!.color}
-                />
-                <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
-                  No tasks for today
+          </StaggeredContent>
+        ) : todaysTasks && todaysTasks.length > 0 ? (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <TaskList
+              tasks={todaysTasks}
+              onToggleComplete={handleCompleteTask}
+              showGardenName={true}
+              maxTasks={3}
+              queryKey={[
+                "tasks",
+                format(today, "yyyy-MM-dd"),
+                userId || "anonymous",
+              ]}
+            />
+            {todaysTasks.length > 3 && (
+              <TouchableOpacity
+                className="p-3 bg-white items-center mt-2 rounded-xl border border-brand-100 shadow-sm"
+                onPress={() => router.push("/(home)/calendar")}
+              >
+                <BodyText className="text-brand-600 font-paragraph font-medium">
+                  +{todaysTasks.length - 3} more{" "}
+                  {todaysTasks.length - 3 === 1 ? "task" : "tasks"}
                 </BodyText>
-                <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
-                  {getNoTasksSummary()!.text}
-                </BodyText>
-                <TouchableOpacity
-                  className="px-4 py-2 bg-white rounded-lg border border-red-300"
-                  style={{
-                    borderColor: getNoTasksSummary()!.color,
-                  }}
-                  onPress={() => router.push("/(home)/calendar")}
-                >
-                  <BodyText
-                    style={{
-                      color: getNoTasksSummary()!.actionColor,
-                    }}
-                    className="font-paragraph font-medium"
-                  >
-                    {getNoTasksSummary()!.action}
-                  </BodyText>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <>
-                <Ionicons
-                  name="checkmark-circle-outline"
-                  size={32}
-                  color="#5E994B"
-                />
-                <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
-                  All done for today!
-                </BodyText>
-
-                {/* Personalized call-to-action */}
-                <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
-                  {getPersonalizedSuggestion().text}
-                </BodyText>
-
-                <TouchableOpacity
-                  className="px-4 py-2 bg-brand-50 rounded-lg border border-brand-200"
-                  onPress={() => router.push(getPersonalizedSuggestion().route)}
-                >
-                  <BodyText className="text-brand-600 font-paragraph font-medium">
-                    {getPersonalizedSuggestion().action}
-                  </BodyText>
-                </TouchableOpacity>
-              </>
+              </TouchableOpacity>
             )}
-          </View>
-        </StaggeredContent>
-      )}
-    </View>
+          </StaggeredContent>
+        ) : (
+          <StaggeredContent index={3} baseDelay={480} staggerInterval={80}>
+            <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
+              {getNoTasksSummary() ? (
+                <>
+                  <Ionicons
+                    name={getNoTasksSummary()!.icon}
+                    size={32}
+                    color={getNoTasksSummary()!.color}
+                  />
+                  <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
+                    No tasks for today
+                  </BodyText>
+                  <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
+                    {getNoTasksSummary()!.text}
+                  </BodyText>
+                  <TouchableOpacity
+                    className="px-4 py-2 bg-white rounded-lg border border-red-300"
+                    style={{
+                      borderColor: getNoTasksSummary()!.color,
+                    }}
+                    onPress={() => router.push("/(home)/calendar")}
+                  >
+                    <BodyText
+                      style={{
+                        color: getNoTasksSummary()!.actionColor,
+                      }}
+                      className="font-paragraph font-medium"
+                    >
+                      {getNoTasksSummary()!.action}
+                    </BodyText>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={32}
+                    color="#5E994B"
+                  />
+                  <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
+                    All done for today!
+                  </BodyText>
+
+                  {/* Personalized call-to-action */}
+                  <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
+                    {getPersonalizedSuggestion().text}
+                  </BodyText>
+
+                  <TouchableOpacity
+                    className="px-4 py-2 bg-brand-50 rounded-lg border border-brand-200"
+                    onPress={() =>
+                      router.push(getPersonalizedSuggestion().route)
+                    }
+                  >
+                    <BodyText className="text-brand-600 font-paragraph font-medium">
+                      {getPersonalizedSuggestion().action}
+                    </BodyText>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </StaggeredContent>
+        )}
+      </View>
+    </NavigationGuard>
   );
 }

@@ -15,7 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { differenceInDays, format, isValid, parseISO } from "date-fns";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, useEffect } from "react";
 import {
   Alert,
@@ -67,10 +67,10 @@ export default function UserPlantDetailScreen() {
   // State for task tab navigation
   const [activeTaskTab, setActiveTaskTab] = useState<TaskTimePeriod>("today");
 
-  // Refetch data when screen comes into focus
-  useFocusEffect(() => {
+  // Refetch data on component mount
+  useEffect(() => {
     refetch();
-  });
+  }, [refetch]);
 
   // Handle back navigation
   const handleBack = () => {

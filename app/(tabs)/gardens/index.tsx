@@ -4,13 +4,13 @@ import { useGardenDashboard } from "@/lib/queries";
 import { GardenDashboard } from "@/types/garden";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter , useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { PageContainer } from "@/components/UI/PageContainer";
 import AnimatedTransition from "@/components/UI/AnimatedTransition";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 export default function GardensScreen() {
   const { user } = useUser();
@@ -23,14 +23,12 @@ export default function GardensScreen() {
     refetch,
   } = useGardenDashboard(user?.id);
 
-  // Silently refresh data when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      if (!isLoading) {
-        refetch();
-      }
-    }, [refetch, isLoading])
-  );
+  // Silently refresh data when component mounts or loading state changes
+  useEffect(() => {
+    if (!isLoading) {
+      refetch();
+    }
+  }, [refetch, isLoading]);
 
   // Log error details if present
   if (error) {

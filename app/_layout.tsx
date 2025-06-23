@@ -1,6 +1,6 @@
 import { tokenCache } from "@/cache";
 import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
-import { Slot } from "expo-router";
+import { Slot, Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { SWRConfig } from "swr";
 import "./globals.css";
@@ -49,6 +49,49 @@ import {
 } from "@expo-google-fonts/nunito";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
+// Initialize Sentry once at module level to prevent reinitialization
+const sentryDsn = Constants.expoConfig?.extra?.SENTRY_DSN;
+let sentryInitialized = false;
+
+if (sentryDsn && !sentryInitialized) {
+  console.log(
+    "🔧 Initializing Sentry with DSN:",
+    sentryDsn.substring(0, 20) + "..."
+  );
+
+  Sentry.init({
+    dsn: sentryDsn,
+    debug: __DEV__,
+    environment: __DEV__ ? "development" : "production",
+    tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+    _experiments: {
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    },
+    integrations: [
+      Sentry.mobileReplayIntegration({
+        maskAllText: true,
+        maskAllImages: true,
+        maskAllVectors: true,
+      }),
+      Sentry.feedbackIntegration({
+        // Additional configuration goes here
+      }),
+    ],
+  });
+
+  Sentry.addBreadcrumb({
+    message: "App started",
+    category: "navigation",
+    level: "info",
+  });
+
+  sentryInitialized = true;
+  console.log("✅ Sentry initialized successfully");
+} else if (!sentryDsn) {
+  console.warn("⚠️ SENTRY_DSN not found in app config");
+}
+
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +106,7 @@ const queryClient = new QueryClient({
 // This component handles the app initialization and providers
 function RootNavigator() {
   const { isSignedIn, isLoaded, userId } = useAuth();
+  const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
     console.log("📱 Root Navigator: Component mounted - App initialization");
@@ -72,11 +116,11 @@ function RootNavigator() {
       "isSignedIn:",
       isSignedIn
     );
-  }, []);
+  }, [isLoaded, isSignedIn]);
 
   // Set user context in Sentry when authentication state changes
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && sentryInitialized) {
       if (isSignedIn && userId) {
         Sentry.setUser({ id: userId });
         Sentry.addBreadcrumb({
@@ -116,10 +160,12 @@ function RootNavigator() {
               })
               .catch((error) => {
                 console.error("Failed to check RLS function:", error);
-                Sentry.captureException(error, {
-                  tags: { component: "RLS_function_check" },
-                  extra: { userId: userId },
-                });
+                if (sentryInitialized) {
+                  Sentry.captureException(error, {
+                    tags: { component: "RLS_function_check" },
+                    extra: { userId: userId },
+                  });
+                }
               });
           }
         }, 2000);
@@ -140,74 +186,54 @@ function RootNavigator() {
               })
               .catch((error) => {
                 console.error("Failed to check Supabase storage:", error);
-                Sentry.captureException(error, {
-                  tags: { component: "supabase_storage_check" },
-                  extra: { userId: userId },
-                });
+                if (sentryInitialized) {
+                  Sentry.captureException(error, {
+                    tags: { component: "supabase_storage_check" },
+                    extra: { userId: userId },
+                  });
+                }
               });
           }
         }, 4000); // Increase delay to ensure RLS function check completes first
       } catch (error) {
         console.error("Error setting up storage services:", error);
-        Sentry.captureException(error as Error, {
-          tags: { component: "storage_services_setup" },
-          extra: { userId: userId },
-        });
+        if (sentryInitialized) {
+          Sentry.captureException(error as Error, {
+            tags: { component: "storage_services_setup" },
+            extra: { userId: userId },
+          });
+        }
       }
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, userId]);
 
-  // Use Slot to allow nested routing to handle navigation
+  // Add a small delay to prevent immediate redirects that cause loops
+  useEffect(() => {
+    if (isLoaded) {
+      const timer = setTimeout(() => {
+        setNavigationReady(true);
+      }, 200); // Increased delay to prevent race conditions
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
+
+  // Show loading spinner while auth state is being determined
+  if (!isLoaded || !navigationReady) {
+    console.log("⏳ Root Navigator: Auth state loading...");
+    return <LoadingSpinner message="Loading..." />;
+  }
+
+  // Let Expo Router handle the routing based on file structure
+  // The (auth) and (tabs) groups will handle their own auth checks
+  console.log(
+    "✅ Root Navigator: Navigation ready - allowing router to handle routing"
+  );
   return <Slot />;
 }
 
 function RootLayout() {
   const [isClerkReady, setIsClerkReady] = useState(true);
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  // Initialize Sentry
-  useEffect(() => {
-    const sentryDsn = Constants.expoConfig?.extra?.SENTRY_DSN;
-
-    if (!sentryDsn) {
-      console.warn("⚠️ SENTRY_DSN not found in app config");
-      return;
-    }
-
-    console.log(
-      "🔧 Initializing Sentry with DSN:",
-      sentryDsn.substring(0, 20) + "..."
-    );
-
-    Sentry.init({
-      dsn: sentryDsn,
-      debug: __DEV__,
-      environment: __DEV__ ? "development" : "production",
-      tracesSampleRate: __DEV__ ? 1.0 : 0.2,
-      _experiments: {
-        replaysSessionSampleRate: 0.1,
-        replaysOnErrorSampleRate: 1.0,
-      },
-      integrations: [
-        Sentry.mobileReplayIntegration({
-          maskAllText: true,
-          maskAllImages: true,
-          maskAllVectors: true,
-        }),
-        Sentry.feedbackIntegration({
-          // Additional configuration goes here
-        }),
-      ],
-    });
-
-    Sentry.addBreadcrumb({
-      message: "App started",
-      category: "navigation",
-      level: "info",
-    });
-
-    console.log("✅ Sentry initialized successfully");
-  }, []);
 
   // Load fonts
   const [fontsLoaded, fontError] = useFonts({
@@ -320,4 +346,5 @@ function RootLayout() {
   );
 }
 
-export default Sentry.wrap(RootLayout);
+// Export without Sentry.wrap to prevent reinitialization loop
+export default RootLayout;

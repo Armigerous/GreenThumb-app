@@ -1,10 +1,11 @@
 import { Redirect, Stack } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { ActivityIndicator, View } from "react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function AuthRoutesLayout() {
   const { isSignedIn, isLoaded } = useAuth();
+  const [navigationReady, setNavigationReady] = useState(false);
 
   useEffect(() => {
     console.log(
@@ -16,14 +17,13 @@ export default function AuthRoutesLayout() {
       "isSignedIn:",
       isSignedIn
     );
-  }, []);
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
     if (isLoaded) {
       if (isSignedIn) {
-        console.log("🚀 Auth Layout: User is signed in - redirecting to home");
         console.log(
-          "📍 Navigation triggered from: Auth Layout -> Home (Already Signed In)"
+          "🚀 Auth Layout: User is signed in - will redirect to home"
         );
       } else {
         console.log(
@@ -32,6 +32,16 @@ export default function AuthRoutesLayout() {
       }
     }
   }, [isLoaded, isSignedIn]);
+
+  // Add a small delay to prevent immediate redirects that cause loops
+  useEffect(() => {
+    if (isLoaded) {
+      const timer = setTimeout(() => {
+        setNavigationReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
     console.log("⏳ Auth Layout: Auth state loading...");
@@ -42,8 +52,9 @@ export default function AuthRoutesLayout() {
     );
   }
 
-  if (isSignedIn) {
-    return <Redirect href={"/"} />;
+  if (isSignedIn && navigationReady) {
+    console.log("📍 Auth Layout: Redirecting signed-in user to home");
+    return <Redirect href={"/(tabs)"} />;
   }
 
   return (
