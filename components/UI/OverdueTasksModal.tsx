@@ -73,7 +73,7 @@ export default function OverdueTasksModal({
   const handleViewGarden = (gardenId: number) => {
     onClose();
     router.push({
-      pathname: "/(home)/gardens/[id]",
+      pathname: "/(tabs)/gardens/[id]",
       params: { id: gardenId },
     });
   };

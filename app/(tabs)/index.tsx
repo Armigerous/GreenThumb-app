@@ -33,7 +33,6 @@ import { useUsageSummary } from "@/lib/usageLimits";
 import { PaywallBanner } from "@/components/subscription/PaywallPrompt";
 import { SmartSubscriptionPrompt } from "@/components/subscription/SmartSubscriptionPrompt";
 import { WelcomeSubscriptionBanner } from "@/components/subscription/WelcomeSubscriptionBanner";
-import { NavigationGuard } from "@/components/UI/NavigationGuard";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -49,6 +48,17 @@ export default function Page() {
   const { user } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  // Add navigation readiness state
+  const [navigationReady, setNavigationReady] = useState(false);
+
+  // Initialize navigation readiness with a small delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNavigationReady(true);
+    }, 500); // Increased delay to ensure navigation context is fully ready
+    return () => clearTimeout(timer);
+  }, []);
 
   // Usage tracking for subscription limits
   const usageSummary = useUsageSummary(user?.id);
@@ -425,18 +435,14 @@ export default function Page() {
       <SignedIn>
         <ScrollView className="flex-1">
           {/* Smart subscription prompts (context-aware, non-intrusive) */}
-          <NavigationGuard>
-            <SmartSubscriptionPrompt />
-          </NavigationGuard>
+          <SmartSubscriptionPrompt />
 
           {/* Welcome banner for new users (first week only) */}
           {showWelcomeBanner && (
-            <NavigationGuard>
-              <WelcomeSubscriptionBanner
-                onDismiss={() => setShowWelcomeBanner(false)}
-                showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
-              />
-            </NavigationGuard>
+            <WelcomeSubscriptionBanner
+              onDismiss={() => setShowWelcomeBanner(false)}
+              showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
+            />
           )}
 
           {/* Usage limit banners for free users */}
@@ -444,26 +450,22 @@ export default function Page() {
             <>
               {/* Show garden limit banner if close to limit */}
               {usageSummary.gardens.percentage >= 50 && (
-                <NavigationGuard>
-                  <PaywallBanner
-                    feature="gardens"
-                    currentUsage={usageSummary.gardens.current}
-                    limit={usageSummary.gardens.limit}
-                    onUpgrade={() => router.push("/pricing")}
-                  />
-                </NavigationGuard>
+                <PaywallBanner
+                  feature="gardens"
+                  currentUsage={usageSummary.gardens.current}
+                  limit={usageSummary.gardens.limit}
+                  onUpgrade={() => router.push("/pricing")}
+                />
               )}
 
               {/* Show task limit banner if close to limit */}
               {usageSummary.tasks.percentage >= 80 && (
-                <NavigationGuard>
-                  <PaywallBanner
-                    feature="tasks_per_month"
-                    currentUsage={usageSummary.tasks.current}
-                    limit={usageSummary.tasks.limit}
-                    onUpgrade={() => router.push("/pricing")}
-                  />
-                </NavigationGuard>
+                <PaywallBanner
+                  feature="tasks_per_month"
+                  currentUsage={usageSummary.tasks.current}
+                  limit={usageSummary.tasks.limit}
+                  onUpgrade={() => router.push("/pricing")}
+                />
               )}
             </>
           )}
@@ -482,25 +484,43 @@ export default function Page() {
             )}
 
             {/* TODAY'S TASKS SECTION */}
-            <TasksSection
-              allOverdueTasks={overdueTasksLoading ? [] : allOverdueTasks}
-              todaysTasks={todaysTasks}
-              handleCompleteTask={handleCompleteTask}
-              upcomingTasksCount={upcomingTasksCount}
-              userId={user?.id}
-              justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
-              hasError={!!hasError}
-              isOverdueTasksLoading={overdueTasksLoading}
-              isTasksLoading={tasksLoading}
-            />
+            {navigationReady ? (
+              <TasksSection
+                allOverdueTasks={overdueTasksLoading ? [] : allOverdueTasks}
+                todaysTasks={todaysTasks}
+                handleCompleteTask={handleCompleteTask}
+                upcomingTasksCount={upcomingTasksCount}
+                userId={user?.id}
+                justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
+                hasError={!!hasError}
+                isOverdueTasksLoading={overdueTasksLoading}
+                isTasksLoading={tasksLoading}
+              />
+            ) : (
+              <View className="mb-6">
+                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+              </View>
+            )}
 
             {/* GARDEN STATS SECTION */}
-            <GardensSection gardens={gardens} isLoading={gardensLoading} />
+            {navigationReady ? (
+              <GardensSection gardens={gardens} isLoading={gardensLoading} />
+            ) : (
+              <View className="mb-6">
+                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+              </View>
+            )}
           </View>
 
           {/* QUICK ACTIONS SECTION */}
           <View className="px-5 mb-6">
-            <QuickActionsSection />
+            {navigationReady ? (
+              <QuickActionsSection />
+            ) : (
+              <View className="mb-6">
+                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+              </View>
+            )}
           </View>
         </ScrollView>
 

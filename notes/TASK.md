@@ -121,7 +121,7 @@
 **SUBS-UI-004**: Pricing screen implementation  
 **Status:** ✅ **COMPLETE**  
 **Completed:** January 2025  
-**File:** `app/(home)/pricing.tsx`  
+**File:** `app/(tabs)/pricing.tsx`  
 **Features:**
 
 - [x] Guarantee-based selling strategy implementation
@@ -134,7 +134,7 @@
 **SUBS-UI-005**: Checkout screen implementation  
 **Status:** ✅ **COMPLETE**  
 **Completed:** January 2025  
-**File:** `app/(home)/checkout.tsx`  
+**File:** `app/(tabs)/checkout.tsx`  
 **Features:**
 
 - [x] Stripe payment processing with StripeProvider
@@ -146,7 +146,7 @@
 **SUBS-UI-006**: Subscription success screen  
 **Status:** ✅ **COMPLETE**  
 **Completed:** January 2025  
-**File:** `app/(home)/subscription-success.tsx`  
+**File:** `app/(tabs)/subscription-success.tsx`  
 **Features:**
 
 - [x] Success celebration UI
@@ -157,7 +157,7 @@
 **SUBS-UI-007**: Subscription management screen  
 **Status:** ✅ **COMPLETE**  
 **Completed:** January 2025  
-**File:** `app/(home)/subscription.tsx`  
+**File:** `app/(tabs)/subscription.tsx`  
 **Features:**
 
 - [x] Current subscription details view
@@ -303,10 +303,10 @@
 - `types/subscription.ts` - TypeScript interfaces for subscription entities
 - `lib/stripe.ts` - Stripe configuration and utility functions
 - `lib/subscriptionQueries.ts` - React Query hooks for subscription data
-- `app/(home)/pricing.tsx` - Pricing page with guarantee-based selling
-- `app/(home)/checkout.tsx` - Stripe payment processing screen
-- `app/(home)/subscription-success.tsx` - Post-purchase success screen
-- `app/(home)/subscription.tsx` - Subscription management screen
+- `app/(tabs)/pricing.tsx` - Pricing page with guarantee-based selling
+- `app/(tabs)/checkout.tsx` - Stripe payment processing screen
+- `app/(tabs)/subscription-success.tsx` - Post-purchase success screen
+- `app/(tabs)/subscription.tsx` - Subscription management screen
 - `api/create-payment-intent.ts` - Backend API for payment processing
 - `supabase/migrations/20250103000000_create_subscriptions.sql` - Database schema
 
@@ -1064,7 +1064,7 @@
 **BUG-NAV-001**: "Couldn't find a navigation context" error preventing app from loading  
 **Status:** 🔴 **CRITICAL** - App completely broken  
 **Discovered:** January 14, 2025  
-**File:** `app/(home)/_layout.tsx`  
+**File:** `app/(tabs)/_layout.tsx`  
 **Severity:** App crashes immediately after authentication
 
 **Root Cause Analysis - CONFIRMED:**

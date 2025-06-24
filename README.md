@@ -92,7 +92,7 @@ app/
 │   ├── welcome.tsx         # Welcome/onboarding
 │   ├── sign-in.tsx         # Sign in with animations
 │   └── sign-up.tsx         # Registration flow
-└── (home)/                 # Main app screens
+└── (tabs)/                 # Main app screens
     ├── index.tsx           # Home dashboard
     ├── calendar.tsx        # Task calendar
     ├── profile.tsx         # User profile

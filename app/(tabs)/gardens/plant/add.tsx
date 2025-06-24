@@ -457,7 +457,7 @@ export default function AddPlantToGardenScreen() {
                 // Use setTimeout to ensure the alert is dismissed before navigation
                 setTimeout(() => {
                   router.push(
-                    `/(home)/gardens/${selectedGarden.garden_id.toString()}`
+                    `/(tabs)/gardens/${selectedGarden.garden_id.toString()}`
                   );
                 }, 100);
               },
@@ -517,7 +517,7 @@ export default function AddPlantToGardenScreen() {
     if (step > 1) {
       handlePreviousStep();
     } else {
-      router.push(`/(home)/gardens`);
+      router.push(`/(tabs)/gardens`);
     }
   };
 
@@ -536,7 +536,7 @@ export default function AddPlantToGardenScreen() {
       <PageContainer padded={false}>
         <Header
           title="Plant Not Found"
-          onBackPress={() => router.push("/(home)/gardens")}
+          onBackPress={() => router.push("/(tabs)/gardens")}
         />
         <View className="flex-1 px-4 py-2">
           <ScrollView>

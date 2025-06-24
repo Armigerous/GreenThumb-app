@@ -8,7 +8,7 @@ The subscription system has been strategically integrated **without disrupting**
 
 ### 1. **Post-Signup Welcome (Non-Disruptive)**
 
-- **Location**: Home screen (`app/(home)/index.tsx`)
+- **Location**: Home screen (`app/(tabs)/index.tsx`)
 - **Trigger**: New users (< 7 days old) with minimal usage
 - **Behavior**: Gentle welcome banner that introduces premium features
 - **User Control**: Easily dismissible, never blocks functionality

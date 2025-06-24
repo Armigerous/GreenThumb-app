@@ -25,7 +25,7 @@ export function GardensSection({
         <SectionHeader
           title="Your Gardens"
           icon="leaf"
-          onSeeAll={() => router.push("/(home)/gardens")}
+          onSeeAll={() => router.push("/(tabs)/gardens")}
         />
       </StaggeredContent>
 
@@ -59,7 +59,7 @@ export function GardensSection({
                       shadowRadius: 2,
                       elevation: 1,
                     }}
-                    onPress={() => router.push("/(home)/gardens/new")}
+                    onPress={() => router.push("/(tabs)/gardens/new")}
                   >
                     <View className="items-center">
                       <View className="w-10 h-8 items-center justify-center mb-2">
@@ -82,7 +82,7 @@ export function GardensSection({
                   shadowRadius: 2,
                   elevation: 1,
                 }}
-                onPress={() => router.push("/(home)/gardens/new")}
+                onPress={() => router.push("/(tabs)/gardens/new")}
               >
                 <View className="items-center">
                   <View className="w-12 h-12 items-center justify-center mb-3">

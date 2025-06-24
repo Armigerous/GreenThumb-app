@@ -31,7 +31,7 @@ export default function Header({
     if (onBackPress) {
       onBackPress();
     } else {
-      router.push("/(home)/gardens");
+      router.push("/(tabs)/gardens");
     }
   };
 

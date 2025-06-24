@@ -126,7 +126,7 @@ export default function SubscriptionScreen() {
 
   const handlePurchaseAddon = (addonId: string) => {
     // Navigate to addon purchase flow
-    router.push(`/(home)/addon-checkout?addon=${addonId}`);
+    router.push(`/(tabs)/addon-checkout?addon=${addonId}`);
   };
 
   if (isLoadingSummary) {

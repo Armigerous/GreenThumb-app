@@ -229,7 +229,7 @@ app/
 │   ├── sign-in.tsx           # Sign in screen
 │   ├── sign-up.tsx           # Sign up screen
 │   └── forgot-password.tsx   # Password reset
-├── (home)/                   # Main app screens
+├── (tabs)/                   # Main app screens
 │   ├── index.tsx             # Dashboard/Home
 │   ├── gardens/              # Garden management
 │   │   ├── index.tsx         # Garden list
@@ -525,7 +525,7 @@ export const useCreateSubscription = () => {
 ### Screen Component Pattern
 
 ```typescript
-// app/(home)/pricing.tsx
+// app/(tabs)/pricing.tsx
 export default function PricingScreen() {
   const { data: plans, isLoading } = usePricingDisplay();
   const navigation = useRouter();

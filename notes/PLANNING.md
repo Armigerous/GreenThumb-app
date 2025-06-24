@@ -335,10 +335,10 @@
 - `types/subscription.ts` - TypeScript interfaces for subscription entities
 - `lib/stripe.ts` - Stripe configuration and utility functions
 - `lib/subscriptionQueries.ts` - React Query hooks for subscription data
-- `app/(home)/pricing.tsx` - Pricing page with guarantee-based selling
-- `app/(home)/checkout.tsx` - Stripe payment processing screen
-- `app/(home)/subscription-success.tsx` - Post-purchase success screen
-- `app/(home)/subscription.tsx` - Subscription management screen
+- `app/(tabs)/pricing.tsx` - Pricing page with guarantee-based selling
+- `app/(tabs)/checkout.tsx` - Stripe payment processing screen
+- `app/(tabs)/subscription-success.tsx` - Post-purchase success screen
+- `app/(tabs)/subscription.tsx` - Subscription management screen
 - `api/create-payment-intent.ts` - Backend API for payment processing
 - `supabase/migrations/20250103000000_create_subscriptions.sql` - Database schema
 
