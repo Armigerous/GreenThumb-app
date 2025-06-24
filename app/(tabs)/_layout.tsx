@@ -17,18 +17,20 @@ export default function TabsLayout() {
     <>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#22c55e",
-          tabBarInactiveTintColor: "#9ca3af",
+          // Brand colors according to BRAND_IDENTITY.md
+          tabBarActiveTintColor: "#5E994B", // brand-600 - Primary brand color
+          tabBarInactiveTintColor: "#636059", // cream-600 - Medium-dark text with good contrast
           tabBarStyle: {
-            backgroundColor: "#ffffff",
+            backgroundColor: "#fffefa", // cream-50 - Background color
             borderTopWidth: 1,
-            borderTopColor: "#e5e7eb",
+            borderTopColor: "#ded8ca", // cream-300 - Border color
             paddingBottom: insets.bottom,
             height: 60 + insets.bottom,
           },
           tabBarLabelStyle: {
             fontSize: 12,
-            fontWeight: "500",
+            fontWeight: "600", // Nunito SemiBold for UI elements
+            fontFamily: "Nunito_600SemiBold", // Brand typography - Nunito for UI
           },
           headerShown: false,
         }}

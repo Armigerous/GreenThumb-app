@@ -30,12 +30,12 @@
 ## 📋 Table of Contents
 
 1. [Development Environment](#development-environment)
-2. [Navigation Context Error Troubleshooting](#navigation-context-error-troubleshooting)
-3. [Authentication Implementation](#authentication-implementation)
-4. [Database Integration](#database-integration)
-5. [Subscription System](#subscription-system)
-6. [UI Components & Styling](#ui-components--styling)
-7. [Navigation & Routing](#navigation--routing)
+2. [Authentication Implementation](#authentication-implementation)
+3. [Database Integration](#database-integration)
+4. [Subscription System](#subscription-system)
+5. [UI Components & Styling](#ui-components--styling)
+6. [Navigation & Routing](#navigation--routing)
+7. [Navigation Context Management](#navigation-context-management)
 8. [State Management](#state-management)
 9. [Performance Optimization](#performance-optimization)
 10. [Testing Strategy](#testing-strategy)
@@ -100,213 +100,6 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 SENTRY_DSN=your_sentry_dsn
 ANALYTICS_API_KEY=your_analytics_key
 ```
-
----
-
-## 🚨 Navigation Context Error Troubleshooting
-
-### Error: "Couldn't find a navigation context"
-
-**Common Error Message:**
-
-```
-Error: Couldn't find a navigation context. Have you wrapped your app with 'NavigationContainer'?
-```
-
-**When This Occurs:**
-
-- App startup with signed-in users
-- Components using `useRouter()` render before navigation context is ready
-- Complex component trees with async operations (e.g., Stripe integration)
-- Timing race conditions between authentication and navigation initialization
-
-### Root Cause Analysis
-
-**The Problem:** Timing race condition between Expo Router navigation context initialization and React component rendering.
-
-**App Initialization Sequence:**
-
-1. App starts, authentication loads, fonts load
-2. Navigation context starts initializing
-3. React renders component tree
-4. Components call `useRouter()` before navigation context is ready
-5. Error occurs in render phase
-
-**Why Error Attribution is Confusing:**
-
-- Error points to parent components (like `StaggeredContent`) that don't use navigation hooks
-- Real issue is in children components passed to parent components
-- React's rendering behavior attributes error to the component where it surfaces
-
-**Why Related to Complex Integrations:**
-
-- Additional async operations during startup (Stripe, Supabase, etc.)
-- More complex component tree with multiple providers
-- Increased bundle size and initialization time
-- Additional providers in the navigation tree
-
-### Solution: Navigation Readiness Pattern
-
-**Implementation:**
-
-```typescript
-// In your main screen component (e.g., app/(tabs)/index.tsx)
-import { useState, useEffect } from "react";
-
-export default function HomeScreen() {
-  const [navigationReady, setNavigationReady] = useState(false);
-
-  useEffect(() => {
-    // Give navigation context time to initialize
-    const timer = setTimeout(() => {
-      setNavigationReady(true);
-    }, 500); // 500ms buffer for navigation context
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!navigationReady) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#22c55e" />
-        <Text className="mt-4 text-gray-600">Loading...</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View className="flex-1">
-      {/* Your navigation-dependent components */}
-      <TasksSection />
-      <GardensSection />
-      <QuickActionsSection />
-    </View>
-  );
-}
-```
-
-**Key Points:**
-
-- **500ms delay** provides sufficient buffer for navigation context initialization
-- **Loading state** provides better UX than error boundaries
-- **Conditional rendering** prevents premature rendering of navigation-dependent components
-
-### Alternative Solutions
-
-**1. Error Boundary Approach (Less Recommended):**
-
-```typescript
-// For catching navigation errors if they still occur
-class NavigationErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    if (error.message.includes("navigation context")) {
-      return { hasError: true };
-    }
-    return null;
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <LoadingSpinner />;
-    }
-    return this.props.children;
-  }
-}
-```
-
-**2. Component-Level Guards:**
-
-```typescript
-// For individual components that use navigation
-const NavigationGuard = ({ children }) => {
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!isReady) return null;
-  return children;
-};
-```
-
-### Prevention Strategies
-
-**1. Delayed Component Mounting:**
-
-- Use `setTimeout` or `useEffect` to delay navigation-dependent components
-- Implement loading states for better UX
-
-**2. Navigation Readiness Checks:**
-
-- Check if navigation context exists before using navigation hooks
-- Implement fallback states for navigation-dependent UI
-
-**3. Component Structure:**
-
-- Avoid deeply nested components that depend on navigation
-- Keep navigation logic close to route components
-
-**4. Error Boundaries:**
-
-- Implement error boundaries around navigation-dependent sections
-- Provide fallback UI for navigation errors
-
-### Testing Navigation Context Issues
-
-**1. Reproduce the Error:**
-
-```bash
-# Clear cache and restart
-npx expo start --clear
-
-# Test with fresh app state
-# Navigate quickly between screens
-# Test with slow network conditions
-```
-
-**2. Debug Navigation State:**
-
-```typescript
-// Add to your component for debugging
-import { useRouter } from "expo-router";
-
-const DebugNavigation = () => {
-  try {
-    const router = useRouter();
-    console.log("Navigation ready:", !!router);
-  } catch (error) {
-    console.log("Navigation error:", error.message);
-  }
-  return null;
-};
-```
-
-**3. Monitor App Initialization:**
-
-```typescript
-// Add to your root layout
-console.log("App initializing...");
-console.log("Navigation context:", !!router);
-console.log("Auth state:", { isLoaded, isSignedIn });
-```
-
-### Related Issues and Solutions
-
-**Issue:** Error occurs after adding new providers or async operations
-**Solution:** Increase navigation readiness delay, ensure proper provider ordering
-
-**Issue:** Error only occurs on specific devices or conditions
-**Solution:** Test on various devices, implement device-specific timing adjustments
-
-**Issue:** Error persists despite navigation readiness pattern
-**Solution:** Check for components using navigation hooks outside of navigation context
 
 ---
 
@@ -1254,6 +1047,249 @@ const AnimatedCard = () => {
   );
 };
 ```
+
+---
+
+## 🧭 Navigation & Routing
+
+### Expo Router Setup
+
+This project uses Expo Router (v3+) for navigation, which provides file-based routing similar to Next.js.
+
+```typescript
+// app/_layout.tsx - Root layout
+import { Stack } from "expo-router";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+export default function RootLayout() {
+  return (
+    <ClerkProvider
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
+    >
+      <QueryClientProvider client={queryClient}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </QueryClientProvider>
+    </ClerkProvider>
+  );
+}
+```
+
+### Route Structure
+
+```
+app/
+├── _layout.tsx           # Root layout
+├── index.tsx            # Redirect to appropriate screen
+├── (auth)/              # Authentication group
+│   ├── _layout.tsx
+│   ├── sign-in.tsx
+│   ├── sign-up.tsx
+│   └── oauth-callback.tsx
+└── (tabs)/              # Main app tabs
+    ├── _layout.tsx
+    ├── index.tsx        # Home screen
+    ├── gardens/
+    │   ├── _layout.tsx
+    │   ├── index.tsx
+    │   ├── [id].tsx
+    │   └── new.tsx
+    ├── plants/
+    │   ├── _layout.tsx
+    │   ├── index.tsx
+    │   └── [slug].tsx
+    └── profile.tsx
+```
+
+### Navigation Patterns
+
+```typescript
+// Navigation with useRouter
+import { useRouter } from "expo-router";
+
+const MyComponent = () => {
+  const router = useRouter();
+
+  const handleNavigation = () => {
+    // Push new screen
+    router.push("/gardens/new");
+
+    // Replace current screen
+    router.replace("/auth/sign-in");
+
+    // Go back
+    router.back();
+
+    // Navigate with parameters
+    router.push({
+      pathname: "/gardens/[id]",
+      params: { id: gardenId },
+    });
+  };
+};
+```
+
+---
+
+## ⚡ Navigation Context Management
+
+### The Problem
+
+Expo Router's navigation context initializes asynchronously, which can cause "Couldn't find a navigation context" errors when components using `useRouter()` render before the navigation system is ready. This is especially common with:
+
+- Components wrapped in animations (StaggeredContent)
+- Subscription banners and modals
+- Quick action buttons
+- Components rendered immediately on app startup
+
+### Solution: Navigation Readiness Hook
+
+```typescript
+// lib/hooks/useNavigationReady.ts
+import { useState, useEffect } from "react";
+
+/**
+ * Hook to check if navigation context is ready.
+ * Uses a progressive delay approach to ensure navigation is available before components try to use it.
+ */
+export function useNavigationReady(): boolean {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    // Progressive delay approach - increases delay if navigation isn't ready
+    const checkWithDelay = (delay: number) => {
+      timeoutId = setTimeout(() => {
+        if (isMounted) {
+          setIsReady(true);
+        }
+      }, delay);
+    };
+
+    // Start with a base delay, which should be sufficient for most cases
+    // This is more reliable than trying to detect navigation state directly
+    checkWithDelay(600);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  return isReady;
+}
+```
+
+### Implementation Pattern
+
+#### 1. Safe Component Pattern
+
+Instead of calling `useRouter()` directly in components, pass navigation functions as props:
+
+```typescript
+// ❌ PROBLEMATIC - Direct router usage
+export function TasksSection() {
+  const router = useRouter(); // Can cause navigation context error
+
+  return (
+    <TouchableOpacity onPress={() => router.push("/calendar")}>
+      View Calendar
+    </TouchableOpacity>
+  );
+}
+
+// ✅ SAFE - Navigation function as prop
+interface TasksSectionProps {
+  onNavigate?: (route: string) => void;
+}
+
+export function TasksSection({ onNavigate }: TasksSectionProps) {
+  const safeNavigate = (route: string) => {
+    if (onNavigate) {
+      try {
+        onNavigate(route);
+      } catch (error) {
+        console.log("Navigation error:", error);
+      }
+    }
+  };
+
+  return (
+    <TouchableOpacity onPress={() => safeNavigate("/calendar")}>
+      View Calendar
+    </TouchableOpacity>
+  );
+}
+```
+
+#### 2. Parent Component Usage
+
+```typescript
+// app/(tabs)/index.tsx
+import { useNavigationReady } from "@/lib/hooks/useNavigationReady";
+
+export default function HomePage() {
+  const router = useRouter();
+  const navigationReady = useNavigationReady();
+
+  return (
+    <View>
+      {/* Only render navigation-dependent components when ready */}
+      {navigationReady ? (
+        <TasksSection onNavigate={(route) => router.push(route as any)} />
+      ) : (
+        <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
+      )}
+
+      {/* Subscription components also need navigation readiness */}
+      {navigationReady && <SmartSubscriptionPrompt />}
+
+      {navigationReady && showWelcomeBanner && (
+        <WelcomeSubscriptionBanner
+          onDismiss={() => setShowWelcomeBanner(false)}
+        />
+      )}
+    </View>
+  );
+}
+```
+
+### Best Practices
+
+1. **Always use navigation readiness checks** for components that use `useRouter()` and render immediately on app startup
+2. **Provide loading states** while waiting for navigation to be ready
+3. **Pass navigation functions as props** instead of calling `useRouter()` in child components
+4. **Wrap subscription components** in navigation readiness checks since they often contain navigation actions
+5. **Test on slower devices** where navigation context initialization may take longer
+
+### Common Errors and Solutions
+
+#### Error: "Couldn't find a navigation context"
+
+**Cause:** Component using `useRouter()` rendered before navigation context is ready.
+
+**Solutions:**
+
+1. Wrap component rendering in `navigationReady` check
+2. Pass navigation function as prop instead of using `useRouter()` directly
+3. Add loading state while navigation initializes
+
+#### Error: Intermittent navigation failures
+
+**Cause:** Race condition between navigation context initialization and component rendering.
+
+**Solutions:**
+
+1. Use `useNavigationReady` hook with progressive delays
+2. Increase delay time for slower devices/complex apps
+3. Add error boundaries around navigation-dependent components
 
 ---
 

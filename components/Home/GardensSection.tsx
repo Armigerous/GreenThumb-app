@@ -1,6 +1,5 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "./SectionHeader";
 import { StaggeredContent } from "@/components/UI/StaggeredContent";
@@ -11,13 +10,24 @@ import { BodyText } from "@/components/UI/Text";
 interface GardensSectionProps {
   gardens: GardenDashboard[] | undefined;
   isLoading?: boolean;
+  onNavigate?: (route: string) => void;
 }
 
 export function GardensSection({
   gardens,
   isLoading = false,
+  onNavigate,
 }: GardensSectionProps) {
-  const router = useRouter();
+  // Safe navigation function that handles potential navigation errors
+  const safeNavigate = (route: string) => {
+    if (onNavigate) {
+      try {
+        onNavigate(route);
+      } catch (error) {
+        console.log("Navigation error:", error);
+      }
+    }
+  };
 
   return (
     <View className="mb-6">
@@ -25,7 +35,9 @@ export function GardensSection({
         <SectionHeader
           title="Your Gardens"
           icon="leaf"
-          onSeeAll={() => router.push("/(tabs)/gardens")}
+          onSeeAll={
+            onNavigate ? () => safeNavigate("/(tabs)/gardens") : undefined
+          }
         />
       </StaggeredContent>
 
@@ -59,7 +71,7 @@ export function GardensSection({
                       shadowRadius: 2,
                       elevation: 1,
                     }}
-                    onPress={() => router.push("/(tabs)/gardens/new")}
+                    onPress={() => safeNavigate("/(tabs)/gardens/new")}
                   >
                     <View className="items-center">
                       <View className="w-10 h-8 items-center justify-center mb-2">
@@ -82,7 +94,7 @@ export function GardensSection({
                   shadowRadius: 2,
                   elevation: 1,
                 }}
-                onPress={() => router.push("/(tabs)/gardens/new")}
+                onPress={() => safeNavigate("/(tabs)/gardens/new")}
               >
                 <View className="items-center">
                   <View className="w-12 h-12 items-center justify-center mb-3">

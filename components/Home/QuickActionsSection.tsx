@@ -1,14 +1,25 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SectionHeader } from "./SectionHeader";
 import { StaggeredContent } from "@/components/UI/StaggeredContent";
 import { BodyText } from "@/components/UI/Text";
-import * as Sentry from "@sentry/react-native";
 
-export function QuickActionsSection() {
-  const router = useRouter();
+interface QuickActionsSectionProps {
+  onNavigate?: (route: string) => void;
+}
+
+export function QuickActionsSection({ onNavigate }: QuickActionsSectionProps) {
+  // Safe navigation function that handles potential navigation errors
+  const safeNavigate = (route: string) => {
+    if (onNavigate) {
+      try {
+        onNavigate(route);
+      } catch (error) {
+        console.log("Navigation error:", error);
+      }
+    }
+  };
 
   return (
     <View className="mb-6">
@@ -20,7 +31,7 @@ export function QuickActionsSection() {
         <View className="flex-row flex-wrap justify-between">
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-            onPress={() => router.push("/(tabs)/plants")}
+            onPress={() => safeNavigate("/(tabs)/plants")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="leaf" size={24} color="#5E994B" />
@@ -32,7 +43,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-            onPress={() => router.push("/(tabs)/gardens/new")}
+            onPress={() => safeNavigate("/(tabs)/gardens/new")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="grid" size={24} color="#5E994B" />
@@ -44,7 +55,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-            onPress={() => router.push("/(tabs)/calendar")}
+            onPress={() => safeNavigate("/(tabs)/calendar")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="calendar" size={24} color="#5E994B" />
@@ -56,7 +67,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-            onPress={() => router.push("/(tabs)/gardens")}
+            onPress={() => safeNavigate("/(tabs)/gardens")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="eye" size={24} color="#5E994B" />
