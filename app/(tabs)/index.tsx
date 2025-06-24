@@ -430,10 +430,12 @@ export default function Page() {
           {navigationReady && <SmartSubscriptionPrompt />}
 
           {/* Welcome banner for new users (first week only) - only show when navigation is ready */}
+          {/* Use variant="banner" for inline banner or variant="modal" for fullscreen modal */}
           {navigationReady && showWelcomeBanner && (
             <WelcomeSubscriptionBanner
               onDismiss={() => setShowWelcomeBanner(false)}
               showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
+              variant="modal" // Change to "modal" for fullscreen modal experience
             />
           )}
 
