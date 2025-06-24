@@ -1,7 +1,6 @@
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import {
-  Text,
   View,
   TouchableOpacity,
   ScrollView,
@@ -12,6 +11,7 @@ import {
 import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
+import { useNavigationReady } from "@/lib/hooks/useNavigationReady";
 import { useCallback, useMemo, useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
@@ -49,16 +49,8 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Add navigation readiness state
-  const [navigationReady, setNavigationReady] = useState(false);
-
-  // Initialize navigation readiness with a small delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setNavigationReady(true);
-    }, 500); // Increased delay to ensure navigation context is fully ready
-    return () => clearTimeout(timer);
-  }, []);
+  // Use the new navigation readiness hook
+  const navigationReady = useNavigationReady();
 
   // Usage tracking for subscription limits
   const usageSummary = useUsageSummary(user?.id);
@@ -434,19 +426,19 @@ export default function Page() {
     <PageContainer scroll={false} padded={false}>
       <SignedIn>
         <ScrollView className="flex-1">
-          {/* Smart subscription prompts (context-aware, non-intrusive) */}
-          <SmartSubscriptionPrompt />
+          {/* Smart subscription prompts (context-aware, non-intrusive) - only show when navigation is ready */}
+          {navigationReady && <SmartSubscriptionPrompt />}
 
-          {/* Welcome banner for new users (first week only) */}
-          {showWelcomeBanner && (
+          {/* Welcome banner for new users (first week only) - only show when navigation is ready */}
+          {navigationReady && showWelcomeBanner && (
             <WelcomeSubscriptionBanner
               onDismiss={() => setShowWelcomeBanner(false)}
               showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
             />
           )}
 
-          {/* Usage limit banners for free users */}
-          {!usageSummary.isPremium && (
+          {/* Usage limit banners for free users - only show when navigation is ready */}
+          {navigationReady && !usageSummary.isPremium && (
             <>
               {/* Show garden limit banner if close to limit */}
               {usageSummary.gardens.percentage >= 50 && (
@@ -495,6 +487,7 @@ export default function Page() {
                 hasError={!!hasError}
                 isOverdueTasksLoading={overdueTasksLoading}
                 isTasksLoading={tasksLoading}
+                onNavigate={(route) => router.push(route as any)}
               />
             ) : (
               <View className="mb-6">
@@ -504,7 +497,11 @@ export default function Page() {
 
             {/* GARDEN STATS SECTION */}
             {navigationReady ? (
-              <GardensSection gardens={gardens} isLoading={gardensLoading} />
+              <GardensSection
+                gardens={gardens}
+                isLoading={gardensLoading}
+                onNavigate={(route) => router.push(route as any)}
+              />
             ) : (
               <View className="mb-6">
                 <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
@@ -515,7 +512,9 @@ export default function Page() {
           {/* QUICK ACTIONS SECTION */}
           <View className="px-5 mb-6">
             {navigationReady ? (
-              <QuickActionsSection />
+              <QuickActionsSection
+                onNavigate={(route) => router.push(route as any)}
+              />
             ) : (
               <View className="mb-6">
                 <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
@@ -537,32 +536,43 @@ export default function Page() {
           <BodyText className="text-base text-foreground opacity-80 text-center mb-8">
             You need to sign in to access this page
           </BodyText>
-          <View className="w-full gap-4">
-            <TouchableOpacity
-              className="bg-primary py-4 rounded-lg items-center shadow-sm"
-              style={{
-                shadowColor: "#77B860",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 3,
-                elevation: 2,
-              }}
-              onPress={() => router.replace("/(auth)/sign-in")}
-            >
-              <BodyText className="text-primary-foreground font-bold text-base">
-                Sign in
-              </BodyText>
-            </TouchableOpacity>
+          {navigationReady ? (
+            <View className="w-full gap-4">
+              <TouchableOpacity
+                className="bg-primary py-4 rounded-lg items-center shadow-sm"
+                style={{
+                  shadowColor: "#77B860",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => router.replace("/(auth)/sign-in")}
+              >
+                <BodyText className="text-primary-foreground font-bold text-base">
+                  Sign in
+                </BodyText>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              className="bg-transparent border border-primary py-4 rounded-lg items-center"
-              onPress={() => router.replace("/(auth)/sign-up")}
-            >
-              <BodyText className="text-primary font-bold text-base">
-                Sign up
-              </BodyText>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                className="bg-transparent border border-primary py-4 rounded-lg items-center"
+                onPress={() => router.replace("/(auth)/sign-up")}
+              >
+                <BodyText className="text-primary font-bold text-base">
+                  Sign up
+                </BodyText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="w-full gap-4">
+              <View className="bg-gray-100 py-4 rounded-lg items-center animate-pulse">
+                <View className="w-16 h-4 bg-gray-200 rounded" />
+              </View>
+              <View className="bg-gray-100 py-4 rounded-lg items-center animate-pulse">
+                <View className="w-16 h-4 bg-gray-200 rounded" />
+              </View>
+            </View>
+          )}
         </View>
       </SignedOut>
     </PageContainer>

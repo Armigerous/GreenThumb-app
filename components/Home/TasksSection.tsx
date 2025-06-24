@@ -1,7 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { TaskWithDetails } from "@/types/garden";
 import { SectionHeader } from "./SectionHeader";
@@ -19,6 +18,7 @@ interface TasksSectionProps {
   hasError: boolean;
   isOverdueTasksLoading?: boolean;
   isTasksLoading?: boolean;
+  onNavigate?: (route: string) => void;
 }
 
 export function TasksSection({
@@ -31,15 +31,16 @@ export function TasksSection({
   hasError,
   isOverdueTasksLoading = false,
   isTasksLoading = false,
+  onNavigate,
 }: TasksSectionProps) {
-  const router = useRouter();
-
   // Safe navigation function that handles potential navigation errors
   const safeNavigate = (route: string) => {
-    try {
-      router.push(route as any);
-    } catch (error) {
-      console.log("Navigation error:", error);
+    if (onNavigate) {
+      try {
+        onNavigate(route);
+      } catch (error) {
+        console.log("Navigation error:", error);
+      }
     }
   };
 
