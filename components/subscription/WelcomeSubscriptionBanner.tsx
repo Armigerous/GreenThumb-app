@@ -61,48 +61,48 @@ export function WelcomeSubscriptionBanner({
   return (
     <RAnimated.View
       style={animatedStyle}
-      className="mx-5 mb-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4"
+      className="mx-4 mb-4 bg-brand-50 border border-brand-100 rounded-xl p-4 shadow-sm"
     >
       <View className="flex-row items-start">
-        <View className="bg-green-100 rounded-full p-2 mr-3">
-          <Ionicons name="leaf" size={20} color="#059669" />
+        <View className="bg-brand-100 rounded-full p-2 mr-3">
+          <Ionicons name="leaf" size={20} color="#5E994B" />
         </View>
 
         <View className="flex-1">
-          <Text className="text-green-800 font-semibold text-base mb-1">
-            🌱 Welcome to GreenThumb!
+          <Text className="text-cream-800 font-title-semibold text-base mb-1">
+            🌱 Welcome to Your Garden Journey!
           </Text>
-          <Text className="text-green-700 text-sm leading-5 mb-3">
-            You&apos;re starting with our free plan. Upgrade anytime for
-            unlimited gardens, AI insights, and expert support.
+          <Text className="text-cream-700 font-paragraph text-sm leading-5 mb-3">
+            You&apos;ve started with our free plan. Transform into a confident
+            plant parent with unlimited gardens and AI-powered insights.
           </Text>
 
-          <View className="flex-row space-x-2">
+          <View className="flex-row gap-2">
             {showUpgrade && (
               <TouchableOpacity
                 onPress={handleUpgrade}
-                className="bg-green-600 rounded-lg py-2 px-4 flex-row items-center"
+                className="bg-brand-600 rounded-lg py-2 px-4 flex-row items-center"
               >
-                <Ionicons name="star" size={14} color="white" />
-                <Text className="text-white font-medium ml-1 text-sm">
-                  See Premium
+                <Ionicons name="star" size={14} color="#fffefa" />
+                <Text className="text-primary-foreground font-paragraph-semibold ml-1 text-sm">
+                  Grow Premium
                 </Text>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity
               onPress={handleDismiss}
-              className="bg-white border border-green-300 rounded-lg py-2 px-4"
+              className="bg-cream-50 border border-brand-200 rounded-lg py-2 px-4"
             >
-              <Text className="text-green-700 font-medium text-sm">
-                Maybe Later
+              <Text className="text-cream-700 font-paragraph-semibold text-sm">
+                Later
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity onPress={handleDismiss} className="p-1">
-          <Ionicons name="close" size={16} color="#6b7280" />
+          <Ionicons name="close" size={16} color="#636059" />
         </TouchableOpacity>
       </View>
     </RAnimated.View>
@@ -155,40 +155,44 @@ export function FeatureDiscoveryCard({
   return (
     <RAnimated.View
       style={animatedStyle}
-      className="mx-5 mb-4 bg-white border border-blue-200 rounded-xl p-4 shadow-sm"
+      className="mx-4 mb-4 bg-cream-50 border border-brand-200 rounded-xl p-4 shadow-sm"
     >
       <View className="flex-row items-start">
-        <View className="bg-blue-100 rounded-full p-2 mr-3">
-          <Ionicons name={icon as any} size={20} color="#2563eb" />
+        <View className="bg-brand-100 rounded-full p-2 mr-3">
+          <Ionicons name={icon as any} size={20} color="#5E994B" />
         </View>
 
         <View className="flex-1">
-          <Text className="text-blue-800 font-semibold text-base mb-1">
+          <Text className="text-cream-800 font-title-semibold text-base mb-1">
             ✨ {title}
           </Text>
-          <Text className="text-blue-700 text-sm leading-5 mb-3">
+          <Text className="text-cream-700 font-paragraph text-sm leading-5 mb-3">
             {description}
           </Text>
 
-          <View className="flex-row space-x-2">
+          <View className="flex-row gap-2">
             <TouchableOpacity
               onPress={handleLearnMore}
-              className="bg-blue-600 rounded-lg py-2 px-4"
+              className="bg-brand-600 rounded-lg py-2 px-4"
             >
-              <Text className="text-white font-medium text-sm">Learn More</Text>
+              <Text className="text-primary-foreground font-paragraph-semibold text-sm">
+                See How
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleDismiss}
-              className="bg-gray-100 rounded-lg py-2 px-4"
+              className="bg-cream-100 border border-cream-300 rounded-lg py-2 px-4"
             >
-              <Text className="text-gray-700 font-medium text-sm">Not Now</Text>
+              <Text className="text-cream-700 font-paragraph-semibold text-sm">
+                Not Now
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <TouchableOpacity onPress={handleDismiss} className="p-1">
-          <Ionicons name="close" size={16} color="#6b7280" />
+          <Ionicons name="close" size={16} color="#636059" />
         </TouchableOpacity>
       </View>
     </RAnimated.View>

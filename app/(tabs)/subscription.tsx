@@ -12,7 +12,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -23,6 +22,8 @@ import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
+import SubmitButton from "@/components/UI/SubmitButton";
 import {
   useSubscriptionSummary,
   useSubscriptionAddons,
@@ -58,7 +59,7 @@ export default function SubscriptionScreen() {
 
     Alert.alert(
       "Cancel Subscription",
-      "Are you sure you want to cancel your subscription? You&apos;ll continue to have access until the end of your current billing period.",
+      "Are you sure you want to cancel your subscription? You'll continue to have access until the end of your current billing period.",
       [
         { text: "Keep Subscription", style: "cancel" },
         {
@@ -82,7 +83,7 @@ export default function SubscriptionScreen() {
 
       Alert.alert(
         "Subscription Canceled",
-        "Your subscription has been canceled. You&apos;ll continue to have access until the end of your current billing period."
+        "Your subscription has been canceled. You'll continue to have access until the end of your current billing period."
       );
     } catch (error) {
       console.error("Error canceling subscription:", error);
@@ -140,16 +141,18 @@ export default function SubscriptionScreen() {
   if (!subscriptionSummary?.is_premium) {
     return (
       <PageContainer>
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-lg text-muted-foreground mb-4">
+        <View className="flex-1 justify-center items-center px-4">
+          <BodyText className="text-lg text-muted-foreground mb-6 text-center">
             No active subscription found
-          </Text>
-          <TouchableOpacity
+          </BodyText>
+          <SubmitButton
             onPress={() => router.push("/pricing")}
-            className="bg-green-600 rounded-xl py-3 px-6"
+            color="primary"
+            size="lg"
+            width="full"
           >
-            <Text className="text-white font-semibold">View Plans</Text>
-          </TouchableOpacity>
+            View Plans
+          </SubmitButton>
         </View>
       </PageContainer>
     );
@@ -161,204 +164,209 @@ export default function SubscriptionScreen() {
     <PageContainer scroll={false} padded={false}>
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         {/* Header */}
-        <View className="px-5 pt-5 pb-8">
-          <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <Ionicons name="arrow-back" size={24} color="#374151" />
+        <View className="px-5 pt-4 pb-6">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mb-6 flex-row items-center"
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <Ionicons name="arrow-back" size={24} color="#2e2c29" />
           </TouchableOpacity>
 
-          <Text className="text-3xl font-bold text-foreground mb-2">
+          <TitleText className="text-3xl text-foreground mb-2">
             Subscription
-          </Text>
-          <Text className="text-lg text-muted-foreground">
+          </TitleText>
+          <BodyText className="text-lg text-muted-foreground">
             Manage your GreenThumb Premium subscription
-          </Text>
+          </BodyText>
         </View>
 
         {/* Current Plan */}
-        <View className="px-5 mb-8">
-          <View className="bg-white border border-gray-200 rounded-xl p-6">
+        <View className="px-5 mb-6">
+          <View className="bg-cream-50 border border-cream-200 rounded-xl p-6">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-xl font-bold text-foreground">
+              <SubtitleText className="text-xl text-foreground">
                 Current Plan
-              </Text>
+              </SubtitleText>
               <View
                 className={`rounded-full px-3 py-1 ${
                   subscription.status === "active"
-                    ? "bg-green-100"
+                    ? "bg-brand-100"
                     : subscription.status === "canceled"
                     ? "bg-red-100"
-                    : "bg-yellow-100"
+                    : "bg-accent-100"
                 }`}
               >
-                <Text
+                <BodyText
                   className={`text-xs font-semibold ${
                     subscription.status === "active"
-                      ? "text-green-800"
+                      ? "text-brand-800"
                       : subscription.status === "canceled"
                       ? "text-red-800"
-                      : "text-yellow-800"
+                      : "text-accent-800"
                   }`}
                 >
                   {subscription.status.charAt(0).toUpperCase() +
                     subscription.status.slice(1)}
-                </Text>
+                </BodyText>
               </View>
             </View>
 
             <View className="mb-4">
-              <Text className="text-lg font-semibold text-foreground">
+              <SubtitleText className="text-lg text-foreground">
                 {subscription.subscription_plan?.name || "Premium Plan"}
-              </Text>
-              <Text className="text-muted-foreground text-sm">
+              </SubtitleText>
+              <BodyText className="text-muted-foreground text-sm mt-1">
                 {subscription.subscription_plan?.description}
-              </Text>
+              </BodyText>
             </View>
 
-            <View className="space-y-2">
-              <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Price</Text>
-                <Text className="text-foreground font-medium">
+            <View className="space-y-3">
+              <View className="flex-row justify-between items-center">
+                <BodyText className="text-muted-foreground">Price</BodyText>
+                <BodyText className="text-foreground font-medium">
                   {subscription.subscription_plan
                     ? formatPrice(subscription.subscription_plan.price_cents)
                     : "N/A"}
                   {subscription.subscription_plan?.interval_type &&
                     ` per ${subscription.subscription_plan.interval_type}`}
-                </Text>
+                </BodyText>
               </View>
 
-              <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Next billing date</Text>
-                <Text className="text-foreground font-medium">
+              <View className="flex-row justify-between items-center">
+                <BodyText className="text-muted-foreground">
+                  Next billing date
+                </BodyText>
+                <BodyText className="text-foreground font-medium">
                   {subscription.current_period_end
                     ? formatDate(subscription.current_period_end)
                     : "N/A"}
-                </Text>
+                </BodyText>
               </View>
 
               {subscriptionSummary.days_remaining !== null && (
-                <View className="flex-row justify-between">
-                  <Text className="text-muted-foreground">Days remaining</Text>
-                  <Text className="text-foreground font-medium">
+                <View className="flex-row justify-between items-center">
+                  <BodyText className="text-muted-foreground">
+                    Days remaining
+                  </BodyText>
+                  <BodyText className="text-foreground font-medium">
                     {subscriptionSummary.days_remaining} days
-                  </Text>
+                  </BodyText>
                 </View>
               )}
 
-              <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Auto-renewal</Text>
-                <Text
+              <View className="flex-row justify-between items-center">
+                <BodyText className="text-muted-foreground">
+                  Auto-renewal
+                </BodyText>
+                <BodyText
                   className={`font-medium ${
                     subscriptionSummary.will_renew
-                      ? "text-green-600"
+                      ? "text-brand-600"
                       : "text-red-600"
                   }`}
                 >
                   {subscriptionSummary.will_renew ? "Enabled" : "Disabled"}
-                </Text>
+                </BodyText>
               </View>
             </View>
 
             {/* Cancellation Notice */}
             {subscription.cancel_at_period_end && (
-              <View className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <View className="mt-4 p-4 bg-accent-50 border border-accent-200 rounded-lg">
                 <View className="flex-row items-center">
                   <Ionicons name="warning" size={16} color="#d97706" />
-                  <Text className="text-yellow-800 font-medium ml-2">
+                  <BodyText className="text-accent-800 font-medium ml-2">
                     Subscription will cancel on{" "}
                     {formatDate(subscription.current_period_end!)}
-                  </Text>
+                  </BodyText>
                 </View>
-                <Text className="text-yellow-700 text-sm mt-1">
+                <BodyText className="text-accent-700 text-sm mt-1">
                   You&apos;ll continue to have access until then.
-                </Text>
+                </BodyText>
               </View>
             )}
           </View>
         </View>
 
         {/* Actions */}
-        <View className="px-5 mb-8">
-          <Text className="text-xl font-bold text-foreground mb-4">
+        <View className="px-5 mb-6">
+          <SubtitleText className="text-xl text-foreground mb-4">
             Manage Subscription
-          </Text>
+          </SubtitleText>
 
           <View className="space-y-3">
             {subscription.cancel_at_period_end ? (
-              <TouchableOpacity
+              <SubmitButton
                 onPress={handleReactivateSubscription}
-                disabled={isProcessing}
-                className="bg-green-600 rounded-xl py-4 px-6"
+                isLoading={isProcessing}
+                loadingLabel="Reactivating..."
+                color="primary"
+                size="lg"
+                width="full"
               >
-                {isProcessing ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-white text-center font-semibold">
-                    Reactivate Subscription
-                  </Text>
-                )}
-              </TouchableOpacity>
+                Reactivate Subscription
+              </SubmitButton>
             ) : (
-              <TouchableOpacity
+              <SubmitButton
                 onPress={handleCancelSubscription}
-                disabled={isProcessing}
-                className="bg-red-600 rounded-xl py-4 px-6"
+                isLoading={isProcessing}
+                loadingLabel="Canceling..."
+                color="destructive"
+                size="lg"
+                width="full"
               >
-                {isProcessing ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-white text-center font-semibold">
-                    Cancel Subscription
-                  </Text>
-                )}
-              </TouchableOpacity>
+                Cancel Subscription
+              </SubmitButton>
             )}
 
-            <TouchableOpacity
+            <SubmitButton
               onPress={handleUpgradeSubscription}
-              className="bg-blue-600 rounded-xl py-4 px-6"
+              color="secondary"
+              size="lg"
+              width="full"
             >
-              <Text className="text-white text-center font-semibold">
-                Change Plan
-              </Text>
-            </TouchableOpacity>
+              Change Plan
+            </SubmitButton>
           </View>
         </View>
 
         {/* Add-ons */}
         {!isLoadingAddons && addons && addons.length > 0 && (
-          <View className="px-5 mb-8">
-            <Text className="text-xl font-bold text-foreground mb-4">
+          <View className="px-5 mb-6">
+            <SubtitleText className="text-xl text-foreground mb-4">
               Available Add-ons
-            </Text>
+            </SubtitleText>
 
             <View className="space-y-3">
               {addons.map((addon) => (
                 <View
                   key={addon.id}
-                  className="bg-white border border-gray-200 rounded-xl p-6"
+                  className="bg-cream-50 border border-cream-200 rounded-xl p-6"
                 >
-                  <View className="flex-row justify-between items-start mb-3">
+                  <View className="flex-row justify-between items-start mb-4">
                     <View className="flex-1">
-                      <Text className="text-lg font-semibold text-foreground">
+                      <SubtitleText className="text-lg text-foreground">
                         {addon.name}
-                      </Text>
-                      <Text className="text-muted-foreground text-sm">
+                      </SubtitleText>
+                      <BodyText className="text-muted-foreground text-sm mt-1">
                         {addon.description}
-                      </Text>
+                      </BodyText>
                     </View>
-                    <Text className="text-lg font-bold text-foreground ml-4">
+                    <SubtitleText className="text-lg text-foreground ml-4">
                       {formatPrice(addon.price_cents)}
-                    </Text>
+                    </SubtitleText>
                   </View>
 
-                  <TouchableOpacity
+                  <SubmitButton
                     onPress={() => handlePurchaseAddon(addon.id)}
-                    className="bg-green-600 rounded-lg py-3 px-4"
+                    color="primary"
+                    size="md"
+                    width="full"
                   >
-                    <Text className="text-white text-center font-medium">
-                      Add to Subscription
-                    </Text>
-                  </TouchableOpacity>
+                    Add to Subscription
+                  </SubmitButton>
                 </View>
               ))}
             </View>
@@ -367,55 +375,55 @@ export default function SubscriptionScreen() {
 
         {/* Payment History */}
         {!isLoadingHistory && paymentHistory && paymentHistory.length > 0 && (
-          <View className="px-5 mb-8">
-            <Text className="text-xl font-bold text-foreground mb-4">
+          <View className="px-5 mb-6">
+            <SubtitleText className="text-xl text-foreground mb-4">
               Payment History
-            </Text>
+            </SubtitleText>
 
-            <View className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <View className="bg-cream-50 border border-cream-200 rounded-xl overflow-hidden">
               {paymentHistory.slice(0, 5).map((payment, index) => (
                 <View
                   key={payment.id}
                   className={`p-4 ${
-                    index < paymentHistory.length - 1
-                      ? "border-b border-gray-200"
+                    index < paymentHistory.length - 1 && index < 4
+                      ? "border-b border-cream-200"
                       : ""
                   }`}
                 >
                   <View className="flex-row justify-between items-start">
                     <View className="flex-1">
-                      <Text className="text-foreground font-medium">
+                      <BodyText className="text-foreground font-medium">
                         {payment.description || "Subscription Payment"}
-                      </Text>
-                      <Text className="text-muted-foreground text-sm">
+                      </BodyText>
+                      <BodyText className="text-muted-foreground text-sm mt-1">
                         {formatDate(payment.created_at)}
-                      </Text>
+                      </BodyText>
                     </View>
                     <View className="items-end">
-                      <Text className="text-foreground font-semibold">
+                      <BodyText className="text-foreground font-semibold">
                         {formatPrice(payment.amount_cents)}
-                      </Text>
+                      </BodyText>
                       <View
-                        className={`rounded-full px-2 py-1 ${
+                        className={`rounded-full px-2 py-1 mt-1 ${
                           payment.status === "succeeded"
-                            ? "bg-green-100"
+                            ? "bg-brand-100"
                             : payment.status === "pending"
-                            ? "bg-yellow-100"
+                            ? "bg-accent-100"
                             : "bg-red-100"
                         }`}
                       >
-                        <Text
+                        <BodyText
                           className={`text-xs font-medium ${
                             payment.status === "succeeded"
-                              ? "text-green-800"
+                              ? "text-brand-800"
                               : payment.status === "pending"
-                              ? "text-yellow-800"
+                              ? "text-accent-800"
                               : "text-red-800"
                           }`}
                         >
                           {payment.status.charAt(0).toUpperCase() +
                             payment.status.slice(1)}
-                        </Text>
+                        </BodyText>
                       </View>
                     </View>
                   </View>
@@ -423,10 +431,14 @@ export default function SubscriptionScreen() {
               ))}
 
               {paymentHistory.length > 5 && (
-                <TouchableOpacity className="p-4 bg-gray-50">
-                  <Text className="text-center text-blue-600 font-medium">
+                <TouchableOpacity
+                  className="p-4 bg-cream-100"
+                  accessibilityRole="button"
+                  accessibilityLabel="View all payments"
+                >
+                  <BodyText className="text-center text-brand-600 font-medium">
                     View All Payments
-                  </Text>
+                  </BodyText>
                 </TouchableOpacity>
               )}
             </View>
@@ -435,23 +447,27 @@ export default function SubscriptionScreen() {
 
         {/* Support */}
         <View className="px-5 mb-8">
-          <View className="bg-gray-50 rounded-xl p-6">
-            <Text className="text-lg font-semibold text-foreground mb-2">
+          <View className="bg-cream-100 rounded-xl p-6">
+            <SubtitleText className="text-lg text-foreground mb-2">
               Need Help?
-            </Text>
-            <Text className="text-muted-foreground text-sm mb-4">
+            </SubtitleText>
+            <BodyText className="text-muted-foreground text-sm mb-4">
               Our support team is here to help with any subscription questions.
-            </Text>
-            <TouchableOpacity className="bg-white border border-gray-300 rounded-lg py-3 px-4">
+            </BodyText>
+            <TouchableOpacity
+              className="bg-cream-50 border border-cream-300 rounded-lg py-3 px-4"
+              accessibilityRole="button"
+              accessibilityLabel="Contact support"
+            >
               <View className="flex-row items-center justify-center">
                 <Ionicons
                   name="chatbubble-ellipses"
                   size={16}
-                  color="#374151"
+                  color="#2e2c29"
                 />
-                <Text className="text-foreground font-medium ml-2">
+                <BodyText className="text-foreground font-medium ml-2">
                   Contact Support
-                </Text>
+                </BodyText>
               </View>
             </TouchableOpacity>
           </View>
