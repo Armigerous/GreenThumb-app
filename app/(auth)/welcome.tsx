@@ -1,26 +1,22 @@
+import { PageContainer } from "@/components/UI/PageContainer";
+import { BodyText, Text, TitleText } from "@/components/UI/Text";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
   Image,
-  Pressable,
-  SafeAreaView,
-  Text as RNText,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { PageContainer } from "@/components/UI/PageContainer";
-import { TitleText, SubtitleText, BodyText, Text } from "@/components/UI/Text";
 import RAnimated, {
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
-  withSequence,
   withDelay,
-  Easing,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 
 // Onboarding slides data
