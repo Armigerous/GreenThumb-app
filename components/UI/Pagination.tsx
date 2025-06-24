@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BodyText } from "./Text";
+import { BodyText, Text } from "./Text";
 
 interface PaginationProps {
   currentPage: number;
@@ -79,36 +79,62 @@ const Pagination = memo(
     if (variant === "simple") {
       return (
         <View
-          className={`py-3 px-4 flex-row justify-between items-center ${className}`}
+          className={`py-4 px-4 flex-row justify-between items-center bg-cream-50 rounded-lg border border-cream-200 ${className}`}
         >
           <TouchableOpacity
             onPress={() => !isFirstPage && onPageChange(currentPage - 1)}
             disabled={isFirstPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isFirstPage ? "opacity-40" : ""
+            className={`px-4 py-2.5 rounded-lg flex-row items-center ${
+              isFirstPage
+                ? "opacity-40 bg-cream-200"
+                : "bg-brand-600 active:bg-brand-700"
             }`}
             accessibilityLabel="Previous page"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isFirstPage }}
           >
-            <Ionicons name="chevron-back" size={18} color="#047857" />
-            <BodyText className="text-brand-700 ml-1 font-medium">
+            <Ionicons
+              name="chevron-back"
+              size={18}
+              color={isFirstPage ? "#636059" : "#fffefa"}
+            />
+            <BodyText
+              className={`ml-2 font-paragraph-semibold ${
+                isFirstPage ? "text-cream-600" : "text-primary-foreground"
+              }`}
+            >
               Previous
             </BodyText>
           </TouchableOpacity>
 
-          <BodyText className="text-cream-600">
+          <Text className="text-cream-700 font-paragraph-medium">
             Page {currentPage} of {totalPages}
-          </BodyText>
+          </Text>
 
           <TouchableOpacity
             onPress={() => !isLastPage && onPageChange(currentPage + 1)}
             disabled={isLastPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isLastPage ? "opacity-40" : ""
+            className={`px-4 py-2.5 rounded-lg flex-row items-center ${
+              isLastPage
+                ? "opacity-40 bg-cream-200"
+                : "bg-brand-600 active:bg-brand-700"
             }`}
             accessibilityLabel="Next page"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isLastPage }}
           >
-            <BodyText className="text-primary mr-1 font-medium">Next</BodyText>
-            <Ionicons name="chevron-forward" size={18} color="#047857" />
+            <BodyText
+              className={`mr-2 font-paragraph-semibold ${
+                isLastPage ? "text-cream-600" : "text-primary-foreground"
+              }`}
+            >
+              Next
+            </BodyText>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={isLastPage ? "#636059" : "#fffefa"}
+            />
           </TouchableOpacity>
         </View>
       );
@@ -117,19 +143,35 @@ const Pagination = memo(
     const pageNumbers = getPageNumbers();
 
     return (
-      <View className={`py-4 px-4 bg-white rounded-lg ${className}`}>
+      <View
+        className={`py-4 px-4 bg-cream-50 rounded-lg border border-cream-200 ${className}`}
+      >
         <View className="flex-row items-center justify-center">
           {/* Previous button */}
           <TouchableOpacity
             onPress={() => !isFirstPage && onPageChange(currentPage - 1)}
             disabled={isFirstPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isFirstPage ? "opacity-40" : ""
+            className={`px-3 py-2.5 rounded-lg flex-row items-center ${
+              isFirstPage
+                ? "opacity-40 bg-cream-200"
+                : "bg-brand-600 active:bg-brand-700"
             }`}
             accessibilityLabel="Previous page"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isFirstPage }}
           >
-            <Ionicons name="chevron-back" size={20} color="#047857" />
-            <BodyText className="text-primary ml-1 font-medium">Prev</BodyText>
+            <Ionicons
+              name="chevron-back"
+              size={20}
+              color={isFirstPage ? "#636059" : "#fffefa"}
+            />
+            <BodyText
+              className={`ml-1 font-paragraph-semibold ${
+                isFirstPage ? "text-cream-600" : "text-primary-foreground"
+              }`}
+            >
+              Prev
+            </BodyText>
           </TouchableOpacity>
 
           {/* Page numbers */}
@@ -138,14 +180,14 @@ const Pagination = memo(
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-              className="flex-row mx-2"
+              className="flex-row mx-3"
             >
               {pageNumbers.map((page, index) => {
                 if (page < 0) {
                   // Render ellipsis
                   return (
-                    <View key={`ellipsis-${index}`} className="px-2 py-1">
-                      <BodyText className="text-cream-500">...</BodyText>
+                    <View key={`ellipsis-${index}`} className="px-3 py-2">
+                      <Text className="text-cream-500 font-paragraph">...</Text>
                     </View>
                   );
                 }
@@ -156,18 +198,18 @@ const Pagination = memo(
                   <TouchableOpacity
                     key={`page-${page}`}
                     onPress={() => onPageChange(page)}
-                    className={`mx-1 px-3 py-1.5 rounded-lg ${
+                    className={`mx-1 px-4 py-2.5 rounded-lg min-w-[44px] items-center justify-center ${
                       isActive
-                        ? "bg-primary"
-                        : "bg-cream-50 border border-primary"
+                        ? "bg-brand-600 border border-brand-600"
+                        : "bg-white border border-cream-300 active:bg-cream-100"
                     }`}
                     accessibilityLabel={`Page ${page}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isActive }}
                   >
                     <BodyText
-                      className={`${
-                        isActive
-                          ? "text-primary-foreground font-medium"
-                          : "text-cream-600"
+                      className={`font-paragraph-semibold ${
+                        isActive ? "text-primary-foreground" : "text-cream-700"
                       }`}
                     >
                       {page}
@@ -182,13 +224,27 @@ const Pagination = memo(
           <TouchableOpacity
             onPress={() => !isLastPage && onPageChange(currentPage + 1)}
             disabled={isLastPage}
-            className={`px-3 py-2 rounded-lg flex-row items-center ${
-              isLastPage ? "opacity-40" : ""
+            className={`px-3 py-2.5 rounded-lg flex-row items-center ${
+              isLastPage
+                ? "opacity-40 bg-cream-200"
+                : "bg-brand-600 active:bg-brand-700"
             }`}
             accessibilityLabel="Next page"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isLastPage }}
           >
-            <BodyText className="text-primary mr-1 font-medium">Next</BodyText>
-            <Ionicons name="chevron-forward" size={20} color="#fffefa" />
+            <BodyText
+              className={`mr-1 font-paragraph-semibold ${
+                isLastPage ? "text-cream-600" : "text-primary-foreground"
+              }`}
+            >
+              Next
+            </BodyText>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={isLastPage ? "#636059" : "#fffefa"}
+            />
           </TouchableOpacity>
         </View>
       </View>

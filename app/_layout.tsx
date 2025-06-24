@@ -1,6 +1,6 @@
 import { tokenCache } from "@/cache";
 import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
-import { Slot, Redirect } from "expo-router";
+import { Slot, Redirect, useRouter, useSegments } from "expo-router";
 import { useEffect, useState } from "react";
 import { SWRConfig } from "swr";
 import "./globals.css";
@@ -107,6 +107,10 @@ const queryClient = new QueryClient({
 function RootNavigator() {
   const { isSignedIn, isLoaded, userId } = useAuth();
   const [navigationReady, setNavigationReady] = useState(false);
+  const segments = useSegments();
+
+  // Determine if the current route is an auth route
+  const isAuthRoute = segments[0] === "(auth)";
 
   useEffect(() => {
     console.log("📱 Root Navigator: Component mounted - App initialization");
@@ -221,6 +225,14 @@ function RootNavigator() {
   if (!isLoaded || !navigationReady) {
     console.log("⏳ Root Navigator: Auth state loading...");
     return <LoadingSpinner message="Loading..." />;
+  }
+
+  // Redirect unauthorized users to welcome screen, unless already on an auth route
+  if (!isSignedIn && navigationReady && !isAuthRoute) {
+    console.log(
+      "🔒 Unauthorized user detected, redirecting to / (auth)/welcome"
+    );
+    return <Redirect href="/(auth)/welcome" />;
   }
 
   console.log(

@@ -497,16 +497,16 @@
 #### 🔴 CRITICAL BUGS - Must Fix Before Launch
 
 **INTERVIEW-CRIT-001**: Database page not scrollable  
-**Status:** 🔴 **CRITICAL** - Core functionality broken  
+**Status:** ✅ **COMPLETE** - January 15, 2025  
 **Owner:** Development Team  
-**Due:** January 16, 2025  
+**Completed:** January 15, 2025  
 **User Impact:** "I can't scroll through the plant database to see more plants"  
 **Description:** Users cannot scroll through plant database results, severely limiting plant discovery  
 **Acceptance Criteria:**
 
-- [ ] Database page allows full scrolling functionality
-- [ ] All plants are accessible through scrolling
-- [ ] Smooth scrolling performance on all devices
+- [x] Database page allows full scrolling functionality
+- [x] All plants are accessible through scrolling
+- [x] Smooth scrolling performance on all devices
 
 **INTERVIEW-CRIT-002**: Database filters non-functional  
 **Status:** 🔴 **CRITICAL** - Core functionality broken  
@@ -709,28 +709,28 @@
 - [ ] Filter state persists correctly across navigation
 
 **UI-TEXT-003**: Sign in/up pages have black text on green background  
-**Status:** 🟡 **HIGH** - Accessibility and UX issue  
+**Status:** ✅ **COMPLETE** - January 15, 2025  
 **Owner:** Development Team  
-**Due:** January 17, 2025  
+**Completed:** January 15, 2025  
 **Description:** Phone and email input fields have poor contrast with black text on green background  
 **Root Cause:** AuthInput component using `text-foreground` class which resolves to dark text  
 **Acceptance Criteria:**
 
-- [ ] Input text is light colored and readable on green background
-- [ ] Placeholder text has appropriate contrast
-- [ ] Icon colors are adjusted for visibility
+- [x] Input text is light colored and readable on green background
+- [x] Placeholder text has appropriate contrast
+- [x] Icon colors are adjusted for visibility
 
 **UI-TEXT-004**: Database buttons have black text on green background  
-**Status:** 🟡 **HIGH** - Accessibility and UX issue  
+**Status:** ✅ **COMPLETE** - January 15, 2025  
 **Owner:** Development Team  
-**Due:** January 17, 2025  
+**Completed:** January 15, 2025  
 **Description:** Filter and other database buttons have poor contrast  
 **Root Cause:** Button components using dark text classes on primary background  
 **Acceptance Criteria:**
 
-- [ ] Button text is light colored and readable
-- [ ] Consistent button styling across database views
-- [ ] Proper contrast ratios for accessibility
+- [x] Button text is light colored and readable
+- [x] Consistent button styling across database views
+- [x] Proper contrast ratios for accessibility
 
 **UI-PROFILE-005**: Profile page needs complete redesign  
 **Status:** 🟡 **HIGH** - User experience improvement  
@@ -770,6 +770,37 @@
 - [ ] Tasks automatically adjust based on weather conditions
 - [ ] Weather-based notifications and recommendations
 - [ ] Visual weather indicators throughout the app
+
+**FEAT-WEATHER-008**: Weather API integration in home header  
+**Status:** 🟡 **HIGH** - User experience enhancement  
+**Owner:** Development Team  
+**Due:** January 19, 2025  
+**Description:** Integrate weather API data into the home page header for better user experience  
+**Requirements:**
+
+- [ ] Display current weather conditions in HomeHeader component
+- [ ] Show temperature, weather description, and weather icon
+- [ ] Use garden location coordinates for accurate weather data
+- [ ] Handle loading states and error cases gracefully
+- [ ] Update weather data periodically (every 30 minutes)
+- [ ] Ensure weather display doesn't interfere with existing header layout
+- [ ] Add weather-based greeting variations (e.g., "Good morning, it's 72°F and sunny")
+
+**Implementation Details:**
+
+- Use existing `getWeatherAndSeason()` function from `lib/services/weather.ts`
+- Modify `HomeHeader` component to accept and display weather data
+- Add weather state management in `app/(tabs)/index.tsx`
+- Consider using React Query for weather data caching and updates
+- Ensure weather data is fetched based on user's primary garden location
+
+**Acceptance Criteria:**
+
+- [ ] Weather information displays correctly in header
+- [ ] Weather updates automatically without manual refresh
+- [ ] Graceful fallback when weather API is unavailable
+- [ ] No performance impact on app loading
+- [ ] Weather data is accurate for user's garden location
 
 **FEAT-CALENDAR-008**: Calendar needs upcoming/overdue task panel  
 **Status:** 🟡 **HIGH** - User experience improvement  

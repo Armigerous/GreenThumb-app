@@ -4,14 +4,21 @@ import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { useNavigationReady } from "@/lib/hooks/useNavigationReady";
 
 export default function TabsLayout() {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
+  const navigationReady = useNavigationReady();
 
   // Get overdue task notifications using the correct hook
   const { loading, notifications, showModal, setShowModal } =
     useOverdueTasksNotifications();
+
+  if (!navigationReady) {
+    return <LoadingSpinner message="Loading..." />;
+  }
 
   return (
     <>
@@ -36,15 +43,6 @@ export default function TabsLayout() {
         }}
       >
         <Tabs.Screen
-          name="index"
-          options={{
-            title: "Home",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="gardens"
           options={{
             title: "Gardens",
@@ -59,6 +57,15 @@ export default function TabsLayout() {
             title: "Calendar",
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="calendar" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="home" size={size} color={color} />
             ),
           }}
         />
