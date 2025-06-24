@@ -3,16 +3,21 @@
  * Subtle introduction to premium features without disrupting flow
  */
 
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { useCurrentSeason } from "@/lib/hooks/useCurrentSeason";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import RAnimated, {
+  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
   withSequence,
+  withTiming,
 } from "react-native-reanimated";
+
+const AnimatedTouchableOpacity =
+  RAnimated.createAnimatedComponent(TouchableOpacity);
 
 interface WelcomeSubscriptionBannerProps {
   onDismiss?: () => void;
@@ -25,6 +30,7 @@ export function WelcomeSubscriptionBanner({
 }: WelcomeSubscriptionBannerProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
+  const season = useCurrentSeason();
 
   const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
@@ -36,24 +42,24 @@ export function WelcomeSubscriptionBanner({
   }));
 
   const handleDismiss = () => {
-    opacity.value = withTiming(0, { duration: 200 });
-    translateY.value = withTiming(-20, { duration: 200 });
+    opacity.value = withTiming(0, { duration: 300 });
+    translateY.value = withTiming(-40, { duration: 300 });
 
     setTimeout(() => {
       setIsVisible(false);
       onDismiss?.();
-    }, 200);
+    }, 300);
   };
 
   const handleUpgrade = () => {
     scale.value = withSequence(
-      withTiming(0.98, { duration: 100 }),
-      withTiming(1, { duration: 100 })
+      withTiming(0.97, { duration: 150 }),
+      withTiming(1, { duration: 250 })
     );
 
     setTimeout(() => {
       router.push("/pricing");
-    }, 150);
+    }, 200);
   };
 
   if (!isVisible) return null;
@@ -61,49 +67,35 @@ export function WelcomeSubscriptionBanner({
   return (
     <RAnimated.View
       style={animatedStyle}
-      className="mx-4 mb-4 bg-brand-50 border border-brand-100 rounded-xl p-4 shadow-sm"
+      className="mx-4 mb-6 bg-brand-50 rounded-2xl shadow-lg overflow-hidden"
     >
-      <View className="flex-row items-start">
-        <View className="bg-brand-100 rounded-full p-2 mr-3">
-          <Ionicons name="leaf" size={20} color="#5E994B" />
-        </View>
+      <View className="p-4">
+        <Text className="text-cream-800 font-title-bold text-lg mb-1">
+          Ready to See Your Garden Thrive?
+        </Text>
+        <Text className="text-cream-700 font-paragraph text-sm leading-5 mb-4">
+          Go from plant-killer to confident plant-parent. Unlock premium tools
+          guaranteed to help your plants flourish.
+        </Text>
 
-        <View className="flex-1">
-          <Text className="text-cream-800 font-title-semibold text-base mb-1">
-            🌱 Welcome to Your Garden Journey!
-          </Text>
-          <Text className="text-cream-700 font-paragraph text-sm leading-5 mb-3">
-            You&apos;ve started with our free plan. Transform into a confident
-            plant parent with unlimited gardens and AI-powered insights.
-          </Text>
-
-          <View className="flex-row gap-2">
-            {showUpgrade && (
-              <TouchableOpacity
-                onPress={handleUpgrade}
-                className="bg-brand-600 rounded-lg py-2 px-4 flex-row items-center"
-              >
-                <Ionicons name="star" size={14} color="#fffefa" />
-                <Text className="text-primary-foreground font-paragraph-semibold ml-1 text-sm">
-                  Grow Premium
-                </Text>
-              </TouchableOpacity>
-            )}
-
+        <View className="flex-row gap-3 items-center">
+          {showUpgrade && (
             <TouchableOpacity
-              onPress={handleDismiss}
-              className="bg-cream-50 border border-brand-200 rounded-lg py-2 px-4"
+              onPress={handleUpgrade}
+              className="bg-brand-600 rounded-lg py-2.5 px-5 flex-1"
             >
-              <Text className="text-cream-700 font-paragraph-semibold text-sm">
-                Later
+              <Text className="text-primary-foreground font-paragraph-semibold text-center text-sm">
+                Unlock Premium
               </Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          )}
 
-        <TouchableOpacity onPress={handleDismiss} className="p-1">
-          <Ionicons name="close" size={16} color="#636059" />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleDismiss}>
+            <Text className="text-cream-600 font-paragraph-semibold text-sm">
+              Maybe Later
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </RAnimated.View>
   );
@@ -119,7 +111,7 @@ export function FeatureDiscoveryCard({
   description,
 }: {
   feature: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
 }) {
@@ -127,12 +119,22 @@ export function FeatureDiscoveryCard({
   const [isVisible, setIsVisible] = useState(true);
 
   const opacity = useSharedValue(1);
-  const scale = useSharedValue(1);
+  const pressState = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
   }));
+
+  const animatedButton = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      pressState.value,
+      [0, 1],
+      ["#5E994B", "#4A7A3B"]
+    );
+    return {
+      backgroundColor,
+    };
+  });
 
   const handleDismiss = () => {
     opacity.value = withTiming(0, { duration: 200 });
@@ -140,14 +142,7 @@ export function FeatureDiscoveryCard({
   };
 
   const handleLearnMore = () => {
-    scale.value = withSequence(
-      withTiming(0.98, { duration: 100 }),
-      withTiming(1, { duration: 100 })
-    );
-
-    setTimeout(() => {
-      router.push("/pricing");
-    }, 150);
+    router.push("/pricing");
   };
 
   if (!isVisible) return null;
@@ -155,44 +150,47 @@ export function FeatureDiscoveryCard({
   return (
     <RAnimated.View
       style={animatedStyle}
-      className="mx-4 mb-4 bg-cream-50 border border-brand-200 rounded-xl p-4 shadow-sm"
+      className="mx-4 mb-4 bg-cream-50 border border-brand-100 rounded-2xl p-4 shadow-md"
     >
-      <View className="flex-row items-start">
-        <View className="bg-brand-100 rounded-full p-2 mr-3">
-          <Ionicons name={icon as any} size={20} color="#5E994B" />
+      <View className="flex-row items-center">
+        <View className="bg-brand-100 rounded-full p-2.5 mr-4">
+          <Ionicons name={icon} size={22} color="#5E994B" />
         </View>
 
         <View className="flex-1">
-          <Text className="text-cream-800 font-title-semibold text-base mb-1">
+          <Text className="text-cream-800 font-title-semibold text-base mb-0.5">
             ✨ {title}
           </Text>
-          <Text className="text-cream-700 font-paragraph text-sm leading-5 mb-3">
+          <Text className="text-cream-700 font-paragraph text-sm leading-5">
             {description}
           </Text>
-
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={handleLearnMore}
-              className="bg-brand-600 rounded-lg py-2 px-4"
-            >
-              <Text className="text-primary-foreground font-paragraph-semibold text-sm">
-                See How
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleDismiss}
-              className="bg-cream-100 border border-cream-300 rounded-lg py-2 px-4"
-            >
-              <Text className="text-cream-700 font-paragraph-semibold text-sm">
-                Not Now
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
+      </View>
 
-        <TouchableOpacity onPress={handleDismiss} className="p-1">
-          <Ionicons name="close" size={16} color="#636059" />
+      <View className="flex-row gap-3 mt-4">
+        <AnimatedTouchableOpacity
+          style={animatedButton}
+          onPressIn={() =>
+            (pressState.value = withTiming(1, { duration: 150 }))
+          }
+          onPressOut={() =>
+            (pressState.value = withTiming(0, { duration: 200 }))
+          }
+          onPress={handleLearnMore}
+          className="rounded-lg py-2.5 px-4 flex-1"
+        >
+          <Text className="text-primary-foreground font-paragraph-semibold text-sm text-center">
+            Learn More
+          </Text>
+        </AnimatedTouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleDismiss}
+          className="rounded-lg py-2.5 px-4"
+        >
+          <Text className="text-cream-600 font-paragraph-semibold text-sm">
+            Not Now
+          </Text>
         </TouchableOpacity>
       </View>
     </RAnimated.View>

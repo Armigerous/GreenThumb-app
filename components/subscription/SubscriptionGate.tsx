@@ -11,6 +11,7 @@ import {
   type UsageLimitKey,
 } from "@/lib/usageLimits";
 import { PaywallPrompt } from "./PaywallPrompt";
+import { TouchableOpacity } from "react-native";
 
 interface SubscriptionGateProps {
   feature: UsageLimitKey;
@@ -60,7 +61,9 @@ export function SubscriptionGate({
 
   return (
     <>
-      {fallback || <div onClick={handleBlock}>{children}</div>}
+      {fallback || (
+        <TouchableOpacity onPress={handleBlock}>{children}</TouchableOpacity>
+      )}
 
       <PaywallPrompt
         isVisible={showPaywall}
