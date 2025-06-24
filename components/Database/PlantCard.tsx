@@ -34,7 +34,7 @@ const PlantCard: React.FC<PlantCardProps> = memo(
     const handlePress = () => {
       // Navigate to the plant detail screen using stack navigation
       router.push({
-        pathname: "/(home)/plants/[slug]",
+        pathname: "/(tabs)/plants/[slug]",
         params: {
           // In common name mode, use the scientific_slug (which is the original slug)
           slug:

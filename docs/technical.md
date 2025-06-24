@@ -30,15 +30,16 @@
 ## 📋 Table of Contents
 
 1. [Development Environment](#development-environment)
-2. [Authentication Implementation](#authentication-implementation)
-3. [Database Integration](#database-integration)
-4. [Subscription System](#subscription-system)
-5. [UI Components & Styling](#ui-components--styling)
-6. [Navigation & Routing](#navigation--routing)
-7. [State Management](#state-management)
-8. [Performance Optimization](#performance-optimization)
-9. [Testing Strategy](#testing-strategy)
-10. [Deployment & CI/CD](#deployment--cicd)
+2. [Navigation Context Error Troubleshooting](#navigation-context-error-troubleshooting)
+3. [Authentication Implementation](#authentication-implementation)
+4. [Database Integration](#database-integration)
+5. [Subscription System](#subscription-system)
+6. [UI Components & Styling](#ui-components--styling)
+7. [Navigation & Routing](#navigation--routing)
+8. [State Management](#state-management)
+9. [Performance Optimization](#performance-optimization)
+10. [Testing Strategy](#testing-strategy)
+11. [Deployment & CI/CD](#deployment--cicd)
 
 ---
 
@@ -99,6 +100,213 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 SENTRY_DSN=your_sentry_dsn
 ANALYTICS_API_KEY=your_analytics_key
 ```
+
+---
+
+## 🚨 Navigation Context Error Troubleshooting
+
+### Error: "Couldn't find a navigation context"
+
+**Common Error Message:**
+
+```
+Error: Couldn't find a navigation context. Have you wrapped your app with 'NavigationContainer'?
+```
+
+**When This Occurs:**
+
+- App startup with signed-in users
+- Components using `useRouter()` render before navigation context is ready
+- Complex component trees with async operations (e.g., Stripe integration)
+- Timing race conditions between authentication and navigation initialization
+
+### Root Cause Analysis
+
+**The Problem:** Timing race condition between Expo Router navigation context initialization and React component rendering.
+
+**App Initialization Sequence:**
+
+1. App starts, authentication loads, fonts load
+2. Navigation context starts initializing
+3. React renders component tree
+4. Components call `useRouter()` before navigation context is ready
+5. Error occurs in render phase
+
+**Why Error Attribution is Confusing:**
+
+- Error points to parent components (like `StaggeredContent`) that don't use navigation hooks
+- Real issue is in children components passed to parent components
+- React's rendering behavior attributes error to the component where it surfaces
+
+**Why Related to Complex Integrations:**
+
+- Additional async operations during startup (Stripe, Supabase, etc.)
+- More complex component tree with multiple providers
+- Increased bundle size and initialization time
+- Additional providers in the navigation tree
+
+### Solution: Navigation Readiness Pattern
+
+**Implementation:**
+
+```typescript
+// In your main screen component (e.g., app/(tabs)/index.tsx)
+import { useState, useEffect } from "react";
+
+export default function HomeScreen() {
+  const [navigationReady, setNavigationReady] = useState(false);
+
+  useEffect(() => {
+    // Give navigation context time to initialize
+    const timer = setTimeout(() => {
+      setNavigationReady(true);
+    }, 500); // 500ms buffer for navigation context
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!navigationReady) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#22c55e" />
+        <Text className="mt-4 text-gray-600">Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1">
+      {/* Your navigation-dependent components */}
+      <TasksSection />
+      <GardensSection />
+      <QuickActionsSection />
+    </View>
+  );
+}
+```
+
+**Key Points:**
+
+- **500ms delay** provides sufficient buffer for navigation context initialization
+- **Loading state** provides better UX than error boundaries
+- **Conditional rendering** prevents premature rendering of navigation-dependent components
+
+### Alternative Solutions
+
+**1. Error Boundary Approach (Less Recommended):**
+
+```typescript
+// For catching navigation errors if they still occur
+class NavigationErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    if (error.message.includes("navigation context")) {
+      return { hasError: true };
+    }
+    return null;
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <LoadingSpinner />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+**2. Component-Level Guards:**
+
+```typescript
+// For individual components that use navigation
+const NavigationGuard = ({ children }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isReady) return null;
+  return children;
+};
+```
+
+### Prevention Strategies
+
+**1. Delayed Component Mounting:**
+
+- Use `setTimeout` or `useEffect` to delay navigation-dependent components
+- Implement loading states for better UX
+
+**2. Navigation Readiness Checks:**
+
+- Check if navigation context exists before using navigation hooks
+- Implement fallback states for navigation-dependent UI
+
+**3. Component Structure:**
+
+- Avoid deeply nested components that depend on navigation
+- Keep navigation logic close to route components
+
+**4. Error Boundaries:**
+
+- Implement error boundaries around navigation-dependent sections
+- Provide fallback UI for navigation errors
+
+### Testing Navigation Context Issues
+
+**1. Reproduce the Error:**
+
+```bash
+# Clear cache and restart
+npx expo start --clear
+
+# Test with fresh app state
+# Navigate quickly between screens
+# Test with slow network conditions
+```
+
+**2. Debug Navigation State:**
+
+```typescript
+// Add to your component for debugging
+import { useRouter } from "expo-router";
+
+const DebugNavigation = () => {
+  try {
+    const router = useRouter();
+    console.log("Navigation ready:", !!router);
+  } catch (error) {
+    console.log("Navigation error:", error.message);
+  }
+  return null;
+};
+```
+
+**3. Monitor App Initialization:**
+
+```typescript
+// Add to your root layout
+console.log("App initializing...");
+console.log("Navigation context:", !!router);
+console.log("Auth state:", { isLoaded, isSignedIn });
+```
+
+### Related Issues and Solutions
+
+**Issue:** Error occurs after adding new providers or async operations
+**Solution:** Increase navigation readiness delay, ensure proper provider ordering
+
+**Issue:** Error only occurs on specific devices or conditions
+**Solution:** Test on various devices, implement device-specific timing adjustments
+
+**Issue:** Error persists despite navigation readiness pattern
+**Solution:** Check for components using navigation hooks outside of navigation context
 
 ---
 

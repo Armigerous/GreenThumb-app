@@ -643,7 +643,7 @@ app/
 │   ├── sign-up.tsx
 │   ├── welcome.tsx
 │   └── _layout.tsx
-├── (home)/           # Main app screens
+├── (tabs)/           # Main app screens
 │   ├── gardens/      # Garden management
 │   ├── plants/       # Plant database
 │   ├── calendar.tsx  # Task calendar

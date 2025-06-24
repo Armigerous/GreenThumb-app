@@ -41,7 +41,7 @@ export default function NewGarden() {
         {
           text: "Cancel",
           style: "destructive",
-          onPress: () => router.replace("/(home)/gardens"),
+          onPress: () => router.replace("/(tabs)/gardens"),
         },
       ]
     );

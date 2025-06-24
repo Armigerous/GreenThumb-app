@@ -338,7 +338,7 @@ export const HtmlRenderer: React.FC<{ content: string }> = ({ content }) => {
               className="text-primary underline"
               onPress={() => {
                 const slug = url.split("/plants/")[1].replace(/\/$/, "");
-                router.push(`/(home)/plants/${slug}`);
+                router.push(`/(tabs)/plants/${slug}`);
               }}
             >
               {processedContent}

@@ -201,7 +201,7 @@ export default function GardenSelectionStep({
         <Text className="text-cream-600 mb-8 text-center">{error}</Text>
         <TouchableOpacity
           className="bg-brand-500 rounded-xl py-3 px-6 flex-row items-center"
-          onPress={() => router.replace("/(home)/gardens/plant/add")}
+          onPress={() => router.replace("/(tabs)/gardens/plant/add")}
           accessibilityRole="button"
           accessibilityLabel="Retry loading gardens"
         >
@@ -274,7 +274,7 @@ export default function GardenSelectionStep({
             </BodyText>
           </View>
           <SubmitButton
-            onPress={() => router.push("/(home)/gardens/new")}
+            onPress={() => router.push("/(tabs)/gardens/new")}
             iconName="add-circle-outline"
             iconPosition="left"
           >
@@ -385,7 +385,7 @@ export default function GardenSelectionStep({
       {/* Navigation buttons */}
       <View className="flex-row justify-between items-center py-6 mt-auto">
         <SubmitButton
-          onPress={() => router.push(`/(home)/plants/${plantSlug}`)}
+          onPress={() => router.push(`/(tabs)/plants/${plantSlug}`)}
           color="secondary"
           iconName="close"
           iconPosition="left"

@@ -1,9 +1,12 @@
-import { ReactNode } from "react";
-import { useRouter } from "expo-router";
+import { ReactNode, Component, ErrorInfo } from "react";
 
 interface NavigationGuardProps {
   children: ReactNode;
   fallback?: ReactNode;
+}
+
+interface NavigationGuardState {
+  hasNavigationError: boolean;
 }
 
 /**
@@ -11,21 +14,36 @@ interface NavigationGuardProps {
  * This prevents "Couldn't find a navigation context" errors when components using useRouter
  * are rendered before the navigation context is fully established.
  */
-export function NavigationGuard({
-  children,
-  fallback = null,
-}: NavigationGuardProps) {
-  try {
-    // Try to access the router - if it fails, we know navigation context isn't ready
-    const router = useRouter();
+export class NavigationGuard extends Component<
+  NavigationGuardProps,
+  NavigationGuardState
+> {
+  constructor(props: NavigationGuardProps) {
+    super(props);
+    this.state = { hasNavigationError: false };
+  }
 
-    // If we get here, navigation context is available
-    return <>{children}</>;
-  } catch (error) {
-    // Navigation context not available yet, render fallback
-    console.log(
-      "NavigationGuard: Navigation context not ready, rendering fallback"
-    );
-    return <>{fallback}</>;
+  static getDerivedStateFromError(error: Error): NavigationGuardState | null {
+    // Check if this is a navigation context error
+    if (error.message.includes("Couldn't find a navigation context")) {
+      return { hasNavigationError: true };
+    }
+    return null;
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (error.message.includes("Couldn't find a navigation context")) {
+      console.log(
+        "NavigationGuard: Navigation context not ready, rendering fallback"
+      );
+    }
+  }
+
+  render() {
+    if (this.state.hasNavigationError) {
+      return this.props.fallback || null;
+    }
+
+    return this.props.children;
   }
 }

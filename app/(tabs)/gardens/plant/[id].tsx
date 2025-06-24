@@ -74,7 +74,7 @@ export default function UserPlantDetailScreen() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.push(`/(home)/gardens/${plantData?.garden_id}`);
+    router.push(`/(tabs)/gardens/${plantData?.garden_id}`);
   };
 
   // Handle adding a new care log with notes

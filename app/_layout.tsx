@@ -223,8 +223,6 @@ function RootNavigator() {
     return <LoadingSpinner message="Loading..." />;
   }
 
-  // Let Expo Router handle the routing based on file structure
-  // The (auth) and (tabs) groups will handle their own auth checks
   console.log(
     "✅ Root Navigator: Navigation ready - allowing router to handle routing"
   );

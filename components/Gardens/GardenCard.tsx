@@ -104,7 +104,7 @@ export default function GardenCard({
         }}
         onPress={() =>
           router.push({
-            pathname: "/(home)/gardens/[id]",
+            pathname: "/(tabs)/gardens/[id]",
             params: { id: garden.garden_id },
           })
         }

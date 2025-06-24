@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 // Type for valid routes in the app
-type AppRoute = "/(home)/calendar" | "/(home)/gardens" | "/(home)/gardens/[id]";
+type AppRoute = "/(tabs)/calendar" | "/(tabs)/gardens" | "/(tabs)/gardens/[id]";
 
 interface TaskCompletionCelebrationProps {
   visible: boolean;
@@ -251,7 +251,7 @@ export function TaskCompletionCelebration({
           message:
             "Your plants are so grateful! You've completed all your overdue care tasks.",
           actionText: "View Calendar",
-          actionRoute: "/(home)/calendar" as AppRoute,
+          actionRoute: "/(tabs)/calendar" as AppRoute,
           showConfetti: true,
         };
       case "all":
@@ -261,7 +261,7 @@ export function TaskCompletionCelebration({
           title: "🌿 All done!",
           message: "Your garden is thriving thanks to your dedicated care!",
           actionText: "View More",
-          actionRoute: actionRoute || ("/(home)/calendar" as AppRoute),
+          actionRoute: actionRoute || ("/(tabs)/calendar" as AppRoute),
           showConfetti: true,
         };
       case "single":

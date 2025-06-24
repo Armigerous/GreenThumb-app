@@ -77,7 +77,7 @@ const QuickActions = ({ plant }: { plant: PlantData }) => {
   const handleAddToGarden = () => {
     // Navigate to add plant to garden flow with plant ID and slug as parameters
     router.push(
-      `/(home)/gardens/plant/add?plantId=${plant.id}&plantSlug=${plant.slug}`
+      `/(tabs)/gardens/plant/add?plantId=${plant.id}&plantSlug=${plant.slug}`
     );
   };
 

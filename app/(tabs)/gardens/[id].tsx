@@ -135,7 +135,7 @@ const GardenDetails = () => {
     // Navigate to garden conditions page
     if (gardenData?.id) {
       router.push({
-        pathname: "/(home)/gardens/conditions",
+        pathname: "/(tabs)/gardens/conditions",
         params: { id: gardenData.id.toString() },
       });
     }
@@ -144,7 +144,7 @@ const GardenDetails = () => {
   const handleAddPlant = () => {
     if (gardenData?.id) {
       router.push({
-        pathname: "/(home)/plants",
+        pathname: "/(tabs)/plants",
         params: { gardenId: gardenData.id.toString(), action: "add" },
       });
     }
@@ -152,7 +152,7 @@ const GardenDetails = () => {
 
   const handlePlantPress = (plant: UserPlant) => {
     router.push({
-      pathname: "/(home)/gardens/plant/[id]",
+      pathname: "/(tabs)/gardens/plant/[id]",
       params: { id: plant.id.toString() },
     });
   };
@@ -209,7 +209,7 @@ const GardenDetails = () => {
 
   const handleEditPlant = (plant: UserPlant) => {
     router.push({
-      pathname: "/(home)/gardens/plant/[id]",
+      pathname: "/(tabs)/gardens/plant/[id]",
       params: { id: plant.id.toString() },
     });
   };
@@ -324,7 +324,7 @@ const GardenDetails = () => {
               });
 
               Alert.alert("Success", "Garden deleted successfully");
-              router.push("/(home)/gardens");
+              router.push("/(tabs)/gardens");
             } catch (err) {
               console.error("Error deleting garden:", err);
               Alert.alert(
@@ -570,7 +570,7 @@ const GardenDetails = () => {
       {/* Header with Garden Name and Navigation */}
       <View className="flex-row justify-between items-center px-6">
         <SubmitButton
-          onPress={() => router.push("/(home)/gardens")}
+          onPress={() => router.push("/(tabs)/gardens")}
           iconName="arrow-back"
           iconPosition="left"
           type="outline"

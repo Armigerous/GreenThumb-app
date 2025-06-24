@@ -92,7 +92,7 @@ export default function GardensScreen() {
           </Text>
           <TouchableOpacity
             className="bg-primary rounded-lg px-4 py-2 flex-row items-center"
-            onPress={() => router.push("/(home)/gardens/new")}
+            onPress={() => router.push("/(tabs)/gardens/new")}
           >
             <Text className="text-primary-foreground font-medium mr-2">
               New Garden
@@ -177,7 +177,7 @@ export default function GardensScreen() {
                     </Text>
                     <TouchableOpacity
                       className="bg-primary rounded-lg px-6 py-3 flex-row items-center gap-2"
-                      onPress={() => router.push("/(home)/gardens/new")}
+                      onPress={() => router.push("/(tabs)/gardens/new")}
                     >
                       <Text className="text-primary-foreground font-paragraph font-medium">
                         Create Your First Garden

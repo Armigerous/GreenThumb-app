@@ -20,7 +20,7 @@ export function QuickActionsSection() {
         <View className="flex-row flex-wrap justify-between">
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-            onPress={() => router.push("/(home)/plants")}
+            onPress={() => router.push("/(tabs)/plants")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="leaf" size={24} color="#5E994B" />
@@ -32,7 +32,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%] mb-4"
-            onPress={() => router.push("/(home)/gardens/new")}
+            onPress={() => router.push("/(tabs)/gardens/new")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="grid" size={24} color="#5E994B" />
@@ -44,7 +44,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-            onPress={() => router.push("/(home)/calendar")}
+            onPress={() => router.push("/(tabs)/calendar")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="calendar" size={24} color="#5E994B" />
@@ -56,7 +56,7 @@ export function QuickActionsSection() {
 
           <TouchableOpacity
             className="bg-white rounded-xl p-4 items-center justify-center w-[48%]"
-            onPress={() => router.push("/(home)/gardens")}
+            onPress={() => router.push("/(tabs)/gardens")}
           >
             <View className="w-12 h-12 rounded-lg bg-brand-50 items-center justify-center mb-2">
               <Ionicons name="eye" size={24} color="#5E994B" />
