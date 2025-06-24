@@ -39,7 +39,7 @@ export function PhoneCollectionScreen({
       {/* Header */}
       <View className="mb-6">
         <View className="items-center mb-6">
-          <View className="w-16 h-16 bg-brand-100 rounded-full items-center justify-center mb-4">
+          <View className="w-16 h-16 bg-cream-100/40 rounded-xl items-center justify-center mb-4">
             <Ionicons name="call-outline" size={32} color="#5E994B" />
           </View>
           <TitleText className="text-2xl text-center mb-2 text-foreground">
@@ -80,6 +80,7 @@ export function PhoneCollectionScreen({
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
+          autoComplete="tel"
           validationType="phone"
           error={error}
           showValidation={true}
