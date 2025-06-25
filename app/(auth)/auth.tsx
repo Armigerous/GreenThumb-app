@@ -98,6 +98,12 @@ export default function UnifiedAuthScreen() {
   const [password, setPassword] = React.useState("");
   const [verificationCode, setVerificationCode] = React.useState("");
 
+  // Resend code state
+  const [isResending, setIsResending] = React.useState(false);
+  const [canResend, setCanResend] = React.useState(true);
+  const [resendCountdown, setResendCountdown] = React.useState(0);
+  const resendTimer = React.useRef<NodeJS.Timeout | null>(null);
+
   // Smart validation states
   const [shouldValidatePasswordStrength, setShouldValidatePasswordStrength] =
     React.useState(false);
@@ -826,6 +832,61 @@ export default function UnifiedAuthScreen() {
     }
   };
 
+  // Clear resend timer on unmount or step change
+  React.useEffect(() => {
+    if (currentStep !== "verification" && resendTimer.current) {
+      clearInterval(resendTimer.current);
+      resendTimer.current = null;
+      setResendCountdown(0);
+      setCanResend(true);
+    }
+    return () => {
+      if (resendTimer.current) {
+        clearInterval(resendTimer.current);
+        resendTimer.current = null;
+      }
+    };
+  }, [currentStep]);
+
+  const startResendCooldown = (duration: number = 30) => {
+    setCanResend(false);
+    setResendCountdown(duration);
+    resendTimer.current && clearInterval(resendTimer.current);
+    resendTimer.current = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          resendTimer.current && clearInterval(resendTimer.current);
+          resendTimer.current = null;
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResendCode = async () => {
+    if (!canResend || isResending) return;
+    setIsResending(true);
+    setError(null);
+    try {
+      if (authMode === "signin") {
+        // For sign-in, resend second factor code
+        await signIn?.prepareSecondFactor({ strategy: "phone_code" });
+      } else {
+        // For signup (manual or oauth), resend phone verification code
+        await signUp?.preparePhoneNumberVerification({
+          strategy: "phone_code",
+        });
+      }
+      startResendCooldown(30); // 30 seconds cooldown
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Failed to resend code");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case "auth":
@@ -928,6 +989,10 @@ export default function UnifiedAuthScreen() {
             emailAddress={authMode === "oauth_completion" ? oauthEmail : email}
             error={error}
             animatedStyle={stepAnimatedStyle}
+            onResend={handleResendCode}
+            isResending={isResending}
+            canResend={canResend}
+            resendCountdown={resendCountdown}
           />
         );
 
