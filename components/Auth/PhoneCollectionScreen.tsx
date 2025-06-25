@@ -51,7 +51,7 @@ export function PhoneCollectionScreen({
       </View>
 
       {/* Account info display */}
-      <View className="bg-brand-50 rounded-xl p-4 mb-6 border border-brand-100">
+      <View className="bg-cream-100/40 rounded-xl p-4 mb-6 border border-cream-300/40">
         <View className="flex-row items-center mb-2">
           <Ionicons name="mail-outline" size={16} color="#5E994B" />
           <BodyText className="text-brand-700 font-paragraph-medium ml-2">

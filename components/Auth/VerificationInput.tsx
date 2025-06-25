@@ -38,7 +38,6 @@ export function VerificationInput({
   animatedStyle,
 }: VerificationInputProps) {
   const contactInfo = isPhone ? phoneNumber : emailAddress;
-  const contactType = isPhone ? "phone" : "email";
   const iconName = isPhone ? "call-outline" : "mail-outline";
 
   const content = (
@@ -46,7 +45,7 @@ export function VerificationInput({
       {/* Header */}
       <View className="mb-6">
         <View className="items-center mb-6">
-          <View className="w-16 h-16 bg-brand-100 rounded-full items-center justify-center mb-4">
+          <View className="w-16 h-16 bg-cream-100/40 rounded-xl items-center justify-center mb-4">
             <Ionicons
               name="shield-checkmark-outline"
               size={32}
@@ -64,7 +63,7 @@ export function VerificationInput({
       </View>
 
       {/* Contact info display */}
-      <View className="bg-brand-50 rounded-xl p-4 mb-6 border border-brand-100">
+      <View className="bg-cream-100/40 rounded-xl p-4 mb-6 border border-cream-300/40">
         <View className="flex-row items-center justify-center">
           <Ionicons name={iconName} size={16} color="#5E994B" />
           <BodyText className="text-brand-700 font-paragraph-medium ml-2">
