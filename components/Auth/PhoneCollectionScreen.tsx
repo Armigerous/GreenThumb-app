@@ -14,7 +14,6 @@ type PhoneCollectionScreenProps = {
 
   // Actions
   onComplete: () => void;
-  onSkip?: () => void;
 
   // State
   isLoading: boolean;
@@ -29,7 +28,6 @@ export function PhoneCollectionScreen({
   phoneNumber,
   setPhoneNumber,
   onComplete,
-  onSkip,
   isLoading,
   error,
   animatedStyle,
@@ -119,18 +117,6 @@ export function PhoneCollectionScreen({
           icon="checkmark-circle-outline"
           loadingLabel="Setting up account..."
         />
-
-        {onSkip && (
-          <TouchableOpacity
-            onPress={onSkip}
-            disabled={isLoading}
-            className="py-3 mt-3"
-          >
-            <BodyText className="text-center text-cream-500 font-paragraph-medium">
-              Skip for now (limited features)
-            </BodyText>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
