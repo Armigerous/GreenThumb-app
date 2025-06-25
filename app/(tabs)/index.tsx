@@ -407,6 +407,15 @@ export default function Page() {
   const isLoading = gardensLoading || tasksLoading || overdueTasksLoading;
   const hasError = gardensError || tasksError;
 
+  // Only show full-page loading if navigation is not ready
+  if (!navigationReady) {
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading your garden..." />
+      </PageContainer>
+    );
+  }
+
   // Only show full-page loading if we have no data at all
   if (
     gardensLoading &&
@@ -427,11 +436,11 @@ export default function Page() {
       <SignedIn>
         <ScrollView className="flex-1">
           {/* Smart subscription prompts (context-aware, non-intrusive) - only show when navigation is ready */}
-          {navigationReady && <SmartSubscriptionPrompt />}
+          <SmartSubscriptionPrompt />
 
           {/* Welcome banner for new users (first week only) - only show when navigation is ready */}
           {/* Use variant="banner" for inline banner or variant="modal" for fullscreen modal */}
-          {navigationReady && showWelcomeBanner && (
+          {showWelcomeBanner && (
             <WelcomeSubscriptionBanner
               onDismiss={() => setShowWelcomeBanner(false)}
               showUpgrade={usageSummary.gardens.current > 0} // Only show upgrade if they've started using the app
@@ -440,7 +449,7 @@ export default function Page() {
           )}
 
           {/* Usage limit banners for free users - only show when navigation is ready */}
-          {navigationReady && !usageSummary.isPremium && (
+          {!usageSummary.isPremium && (
             <>
               {/* Show garden limit banner if close to limit */}
               {usageSummary.gardens.percentage >= 50 && (
@@ -478,50 +487,32 @@ export default function Page() {
             )}
 
             {/* TODAY'S TASKS SECTION */}
-            {navigationReady ? (
-              <TasksSection
-                allOverdueTasks={overdueTasksLoading ? [] : allOverdueTasks}
-                todaysTasks={todaysTasks}
-                handleCompleteTask={handleCompleteTask}
-                upcomingTasksCount={upcomingTasksCount}
-                userId={user?.id}
-                justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
-                hasError={!!hasError}
-                isOverdueTasksLoading={overdueTasksLoading}
-                isTasksLoading={tasksLoading}
-                onNavigate={(route) => router.push(route as any)}
-              />
-            ) : (
-              <View className="mb-6">
-                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
-              </View>
-            )}
+            <TasksSection
+              allOverdueTasks={overdueTasksLoading ? [] : allOverdueTasks}
+              todaysTasks={todaysTasks}
+              handleCompleteTask={handleCompleteTask}
+              upcomingTasksCount={upcomingTasksCount}
+              userId={user?.id}
+              justCompletedAllOverdueTasks={justCompletedAllOverdueTasks}
+              hasError={!!hasError}
+              isOverdueTasksLoading={overdueTasksLoading}
+              isTasksLoading={tasksLoading}
+              onNavigate={(route) => router.push(route as any)}
+            />
 
             {/* GARDEN STATS SECTION */}
-            {navigationReady ? (
-              <GardensSection
-                gardens={gardens}
-                isLoading={gardensLoading}
-                onNavigate={(route) => router.push(route as any)}
-              />
-            ) : (
-              <View className="mb-6">
-                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
-              </View>
-            )}
+            <GardensSection
+              gardens={gardens}
+              isLoading={gardensLoading}
+              onNavigate={(route) => router.push(route as any)}
+            />
           </View>
 
           {/* QUICK ACTIONS SECTION */}
           <View className="px-5 mb-6">
-            {navigationReady ? (
-              <QuickActionsSection
-                onNavigate={(route) => router.push(route as any)}
-              />
-            ) : (
-              <View className="mb-6">
-                <View className="bg-gray-100 rounded-xl p-4 mb-4 h-32 animate-pulse" />
-              </View>
-            )}
+            <QuickActionsSection
+              onNavigate={(route) => router.push(route as any)}
+            />
           </View>
         </ScrollView>
 
@@ -538,43 +529,32 @@ export default function Page() {
           <BodyText className="text-base text-foreground opacity-80 text-center mb-8">
             You need to sign in to access this page
           </BodyText>
-          {navigationReady ? (
-            <View className="w-full gap-4">
-              <TouchableOpacity
-                className="bg-primary py-4 rounded-lg items-center shadow-sm"
-                style={{
-                  shadowColor: "#77B860",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => router.replace("/(auth)/sign-in")}
-              >
-                <BodyText className="text-primary-foreground font-bold text-base">
-                  Sign in
-                </BodyText>
-              </TouchableOpacity>
+          <View className="w-full gap-4">
+            <TouchableOpacity
+              className="bg-primary py-4 rounded-lg items-center shadow-sm"
+              style={{
+                shadowColor: "#77B860",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => router.replace("/(auth)/sign-in")}
+            >
+              <BodyText className="text-primary-foreground font-bold text-base">
+                Sign in
+              </BodyText>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                className="bg-transparent border border-primary py-4 rounded-lg items-center"
-                onPress={() => router.replace("/(auth)/sign-up")}
-              >
-                <BodyText className="text-primary font-bold text-base">
-                  Sign up
-                </BodyText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View className="w-full gap-4">
-              <View className="bg-gray-100 py-4 rounded-lg items-center animate-pulse">
-                <View className="w-16 h-4 bg-gray-200 rounded" />
-              </View>
-              <View className="bg-gray-100 py-4 rounded-lg items-center animate-pulse">
-                <View className="w-16 h-4 bg-gray-200 rounded" />
-              </View>
-            </View>
-          )}
+            <TouchableOpacity
+              className="bg-transparent border border-primary py-4 rounded-lg items-center"
+              onPress={() => router.replace("/(auth)/sign-up")}
+            >
+              <BodyText className="text-primary font-bold text-base">
+                Sign up
+              </BodyText>
+            </TouchableOpacity>
+          </View>
         </View>
       </SignedOut>
     </PageContainer>
