@@ -1,49 +1,38 @@
 import {
+  AuthButton,
+  AuthInput,
   AuthSocialOptions,
   PhoneCollectionScreen,
   VerificationInput,
-  AuthInput,
-  AuthButton,
 } from "@/components/Auth";
-import {
-  validateFieldOnSubmit,
-  validateEmail,
-  validatePhoneNumber,
-  validatePassword,
-  validateVerificationCode,
-} from "@/lib/validation";
 import { PageContainer } from "@/components/UI/PageContainer";
-import { TitleText, BodyText } from "@/components/UI/Text";
+import { BodyText, TitleText } from "@/components/UI/Text";
+import { validateFieldOnSubmit } from "@/lib/validation";
 import { useSignIn, useSignUp, useSSO } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import * as React from "react";
 import {
-  Keyboard,
-  TouchableWithoutFeedback,
-  View,
-  ScrollView,
   Image,
-  TouchableOpacity,
-  TextInput,
-  useWindowDimensions,
-  Pressable,
-  Alert,
+  Keyboard,
   KeyboardEvent,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  withSpring,
-  interpolate,
   Extrapolation,
+  interpolate,
   runOnJS,
+  useAnimatedStyle,
   useDerivedValue,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -59,7 +48,7 @@ const useWarmUpBrowser = () => {
 };
 
 type AuthMode = "signin" | "signup" | "oauth_completion";
-type OnboardingStep = "auth" | "phone" | "verification";
+type OnboardingStep = "auth" | "phone" | "verification" | "email_verification";
 
 export default function UnifiedAuthScreen() {
   useWarmUpBrowser();
@@ -608,29 +597,129 @@ export default function UnifiedAuthScreen() {
   const handleAppleAuth = () => handleSocialAuth("oauth_apple");
   const handleFacebookAuth = () => handleSocialAuth("oauth_facebook");
 
-  // Manual auth handler - validates email + password, then proceeds to phone
+  // Add state for email verification
+  const [emailVerificationCode, setEmailVerificationCode] = React.useState("");
+  const [isResendingEmail, setIsResendingEmail] = React.useState(false);
+  const [canResendEmail, setCanResendEmail] = React.useState(true);
+  const [resendEmailCountdown, setResendEmailCountdown] = React.useState(0);
+  const resendEmailTimer = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Clear resend email timer on unmount or step change
+  React.useEffect(() => {
+    if (currentStep !== "email_verification" && resendEmailTimer.current) {
+      clearInterval(resendEmailTimer.current);
+      resendEmailTimer.current = null;
+      setResendEmailCountdown(0);
+      setCanResendEmail(true);
+    }
+    return () => {
+      if (resendEmailTimer.current) {
+        clearInterval(resendEmailTimer.current);
+        resendEmailTimer.current = null;
+      }
+    };
+  }, [currentStep]);
+
+  const startResendEmailCooldown = (duration: number = 30) => {
+    setCanResendEmail(false);
+    setResendEmailCountdown(duration);
+    resendEmailTimer.current && clearInterval(resendEmailTimer.current);
+    resendEmailTimer.current = setInterval(() => {
+      setResendEmailCountdown((prev) => {
+        if (prev <= 1) {
+          resendEmailTimer.current && clearInterval(resendEmailTimer.current);
+          resendEmailTimer.current = null;
+          setCanResendEmail(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResendEmailCode = async () => {
+    if (!canResendEmail || isResendingEmail) return;
+    setIsResendingEmail(true);
+    setError(null);
+    try {
+      await signUp?.prepareEmailAddressVerification({ strategy: "email_code" });
+      startResendEmailCooldown(30);
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Failed to resend code");
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
+  // Email verification handler
+  const handleEmailVerificationSubmit = async () => {
+    // Validate verification code
+    const codeValidation = validateFieldOnSubmit(
+      "verification",
+      emailVerificationCode
+    );
+    if (!codeValidation.isValid) {
+      setError(
+        codeValidation.error || "Please enter a valid verification code"
+      );
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!signUp) {
+        setError(
+          "Sign-up object is missing. Please restart the sign-up process."
+        );
+        return;
+      }
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+        code: emailVerificationCode,
+      });
+      if (
+        signUpAttempt?.status === "missing_requirements" ||
+        signUpAttempt?.unverifiedFields?.includes("phone_number")
+      ) {
+        // Email verified, proceed to phone collection
+        setEmailVerificationCode("");
+        animateToStep("phone");
+        return;
+      } else if (signUpAttempt?.status === "complete" && setActiveSignUp) {
+        // Account is complete (rare, but possible)
+        await setActiveSignUp({ session: signUpAttempt.createdSessionId });
+        router.replace("/(tabs)");
+        return;
+      } else {
+        setError(
+          "Email verification not complete. Status: " + signUpAttempt?.status
+        );
+      }
+    } catch (err: any) {
+      setError(
+        err.errors?.[0]?.message || err.message || "Invalid verification code"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Manual auth handler - validates email + password, then proceeds to email verification (for sign-up)
   const handleManualAuth = async () => {
     // Validate email and password
     const emailValidation = validateFieldOnSubmit("email", email);
-    // For password validation, we'll be more lenient initially since we try sign-in first
-    // If sign-in fails and we need to create an account, Clerk will enforce its own password requirements
     const passwordValidation = validateFieldOnSubmit("password", password, {
       isSignUp: false,
     });
-
     if (!emailValidation.isValid) {
       setError(emailValidation.error || "Please enter a valid email address");
       return;
     }
-
     if (!passwordValidation.isValid) {
       setError(passwordValidation.error || "Please enter a valid password");
       return;
     }
-
     setIsLoading(true);
     setError(null);
-
     try {
       // Try to sign in first
       if (signIn && isSignInLoaded) {
@@ -639,26 +728,11 @@ export default function UnifiedAuthScreen() {
             identifier: email,
             password,
           });
-
           if (signInAttempt?.status === "complete") {
-            // Existing user with complete sign in - go directly to home
-            console.log(
-              "🚀 Auth Screen: Manual sign-in complete - navigating to home"
-            );
-            console.log(
-              "📍 Navigation triggered from: Manual Auth -> Existing User Sign-in"
-            );
             await setActiveSignIn({ session: signInAttempt.createdSessionId });
             router.replace("/(tabs)");
             return;
           } else if (signInAttempt?.status === "needs_second_factor") {
-            // Needs verification
-            console.log(
-              "🔄 Auth Screen: Manual sign-in needs verification - moving to verification step"
-            );
-            console.log(
-              "📍 Step transition: Manual Auth -> Verification (2FA)"
-            );
             setAuthMode("signin");
             animateToStep("verification");
             return;
@@ -666,36 +740,29 @@ export default function UnifiedAuthScreen() {
         } catch (signInError: any) {
           // Sign in failed, try sign up
           if (signUp && isSignUpLoaded) {
-            // Enable validation since we're now creating an account
             setShouldValidatePasswordStrength(true);
             setShouldValidateEmailStrength(true);
-
             const signUpAttempt = await signUp.create({
               emailAddress: email,
               password,
             });
-
-            if (signUpAttempt?.status === "missing_requirements") {
-              // New user - proceed to phone step
-              console.log(
-                "🔄 Auth Screen: Manual sign-up needs requirements - moving to phone step"
-              );
-              console.log(
-                "📍 Step transition: Manual Auth -> Phone Collection (New User)"
-              );
+            if (
+              signUpAttempt?.status === "missing_requirements" ||
+              signUpAttempt?.unverifiedFields?.includes("email_address")
+            ) {
+              // Prepare email verification
+              await signUp.prepareEmailAddressVerification({
+                strategy: "email_code",
+              });
               setAuthMode("signup");
-              animateToStep("phone");
+              animateToStep("email_verification");
               return;
             } else if (signUpAttempt?.status === "complete") {
-              // Account created successfully - go to phone step
-              console.log(
-                "🔄 Auth Screen: Manual sign-up complete - moving to phone step"
-              );
-              console.log(
-                "📍 Step transition: Manual Auth -> Phone Collection (Account Created)"
-              );
-              setAuthMode("signup");
-              animateToStep("phone");
+              // Account created successfully (should be rare)
+              await setActiveSignUp({
+                session: signUpAttempt.createdSessionId,
+              });
+              router.replace("/(tabs)");
               return;
             }
           }
@@ -724,18 +791,31 @@ export default function UnifiedAuthScreen() {
 
     try {
       if (authMode === "oauth_completion" || authMode === "signup") {
-        // Add phone number to signup and prepare for verification
+        if (!signUp) {
+          setError(
+            "Sign-up object is missing. Please restart the sign-up process."
+          );
+          console.error(
+            "[Auth] handlePhoneSubmit: signUp object is undefined."
+          );
+          return;
+        }
+        console.log(
+          "[Auth] handlePhoneSubmit: Updating signUp with phoneNumber:",
+          phoneNumber
+        );
         const signUpAttempt = await signUp?.update({
           phoneNumber: phoneNumber,
         });
+        console.log(
+          "[Auth] handlePhoneSubmit: signUpAttempt after update:",
+          signUpAttempt
+        );
 
         if (signUpAttempt?.status === "complete" && setActiveSignUp) {
-          // Account is complete, no verification needed
           console.log(
-            "🚀 Auth Screen: Phone collection complete - navigating to home"
-          );
-          console.log(
-            "📍 Navigation triggered from: Phone Collection -> Account Complete"
+            "[Auth] handlePhoneSubmit: Account complete, setting session and navigating.",
+            signUpAttempt.createdSessionId
           );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
           router.replace("/(tabs)");
@@ -743,22 +823,18 @@ export default function UnifiedAuthScreen() {
           signUpAttempt?.status === "missing_requirements" ||
           signUpAttempt?.unverifiedFields?.includes("phone_number")
         ) {
-          // Phone verification is required
           console.log(
-            "🔄 Auth Screen: Phone verification required - moving to verification step"
+            "[Auth] handlePhoneSubmit: Phone verification required, preparing phone number verification."
           );
-          console.log("📍 Step transition: Phone Collection -> Verification");
           await signUp?.preparePhoneNumberVerification({
             strategy: "phone_code",
           });
           animateToStep("verification");
         } else {
           // Unexpected status, try to proceed to verification anyway
-          console.log(
-            "🔄 Auth Screen: Unexpected phone status - proceeding to verification"
-          );
-          console.log(
-            "📍 Step transition: Phone Collection -> Verification (Fallback)"
+          console.warn(
+            "[Auth] handlePhoneSubmit: Unexpected phone status, proceeding to verification anyway.",
+            signUpAttempt
           );
           await signUp?.preparePhoneNumberVerification({
             strategy: "phone_code",
@@ -767,7 +843,13 @@ export default function UnifiedAuthScreen() {
         }
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Failed to add phone number");
+      setError(
+        err.errors?.[0]?.message || err.message || "Failed to add phone number"
+      );
+      console.error(
+        "[Auth] handlePhoneSubmit: Error during phone submit:",
+        err
+      );
     } finally {
       setIsLoading(false);
     }
@@ -793,97 +875,90 @@ export default function UnifiedAuthScreen() {
     try {
       if (authMode === "signin") {
         // For sign-in, verify the second factor (phone code)
+        if (!signIn) {
+          setError(
+            "Sign-in object is missing. Please restart the sign-in process."
+          );
+          console.error(
+            "[Auth] handleVerificationSubmit: signIn object is undefined."
+          );
+          return;
+        }
+        console.log(
+          "[Auth] handleVerificationSubmit: Attempting second factor with code:",
+          verificationCode
+        );
         const signInAttempt = await signIn?.attemptSecondFactor({
           strategy: "phone_code",
           code: verificationCode,
         });
+        console.log(
+          "[Auth] handleVerificationSubmit: signInAttempt result:",
+          signInAttempt
+        );
 
         if (signInAttempt?.status === "complete" && setActiveSignIn) {
           console.log(
-            "🚀 Auth Screen: Verification complete (sign-in) - navigating to home"
-          );
-          console.log(
-            "📍 Navigation triggered from: Verification -> Sign-in Complete"
+            "[Auth] handleVerificationSubmit: Sign-in verification complete, setting session and navigating.",
+            signInAttempt.createdSessionId
           );
           await setActiveSignIn({ session: signInAttempt.createdSessionId });
           router.replace("/(tabs)");
+        } else {
+          setError("Sign-in not complete. Status: " + signInAttempt?.status);
+          console.error(
+            "[Auth] handleVerificationSubmit: Sign-in not complete. Full object:",
+            signInAttempt
+          );
         }
       } else {
         // For signup (both manual and oauth_completion), verify the phone number
+        if (!signUp) {
+          setError(
+            "Sign-up object is missing. Please restart the sign-up process."
+          );
+          console.error(
+            "[Auth] handleVerificationSubmit: signUp object is undefined."
+          );
+          return;
+        }
+        console.log(
+          "[Auth] handleVerificationSubmit: Attempting phone verification with code:",
+          verificationCode
+        );
         const signUpAttempt = await signUp?.attemptPhoneNumberVerification({
           code: verificationCode,
         });
+        console.log(
+          "[Auth] handleVerificationSubmit: signUpAttempt result:",
+          signUpAttempt
+        );
 
         if (signUpAttempt?.status === "complete" && setActiveSignUp) {
           console.log(
-            "🚀 Auth Screen: Verification complete (sign-up) - navigating to home"
-          );
-          console.log(
-            "📍 Navigation triggered from: Verification -> Sign-up Complete"
+            "[Auth] handleVerificationSubmit: Sign-up verification complete, setting session and navigating.",
+            signUpAttempt.createdSessionId
           );
           await setActiveSignUp({ session: signUpAttempt.createdSessionId });
           router.replace("/(tabs)");
+        } else {
+          setError("Sign-up not complete. Status: " + signUpAttempt?.status);
+          console.error(
+            "[Auth] handleVerificationSubmit: Sign-up not complete. Full object:",
+            signUpAttempt
+          );
         }
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid verification code");
+      setError(
+        err.errors?.[0]?.message || err.message || "Invalid verification code"
+      );
+      console.error(
+        "[Auth] handleVerificationSubmit: Error during verification:",
+        err
+      );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Clear resend timer on unmount or step change
-  React.useEffect(() => {
-    if (currentStep !== "verification" && resendTimer.current) {
-      clearInterval(resendTimer.current);
-      resendTimer.current = null;
-      setResendCountdown(0);
-      setCanResend(true);
-    }
-    return () => {
-      if (resendTimer.current) {
-        clearInterval(resendTimer.current);
-        resendTimer.current = null;
-      }
-    };
-  }, [currentStep]);
-
-  const startResendCooldown = (duration: number = 30) => {
-    setCanResend(false);
-    setResendCountdown(duration);
-    resendTimer.current && clearInterval(resendTimer.current);
-    resendTimer.current = setInterval(() => {
-      setResendCountdown((prev) => {
-        if (prev <= 1) {
-          resendTimer.current && clearInterval(resendTimer.current);
-          resendTimer.current = null;
-          setCanResend(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleResendCode = async () => {
-    if (!canResend || isResending) return;
-    setIsResending(true);
-    setError(null);
-    try {
-      if (authMode === "signin") {
-        // For sign-in, resend second factor code
-        await signIn?.prepareSecondFactor({ strategy: "phone_code" });
-      } else {
-        // For signup (manual or oauth), resend phone verification code
-        await signUp?.preparePhoneNumberVerification({
-          strategy: "phone_code",
-        });
-      }
-      startResendCooldown(30); // 30 seconds cooldown
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Failed to resend code");
-    } finally {
-      setIsResending(false);
     }
   };
 
@@ -989,10 +1064,28 @@ export default function UnifiedAuthScreen() {
             emailAddress={authMode === "oauth_completion" ? oauthEmail : email}
             error={error}
             animatedStyle={stepAnimatedStyle}
-            onResend={handleResendCode}
+            onResend={handleResendEmailCode}
             isResending={isResending}
             canResend={canResend}
             resendCountdown={resendCountdown}
+          />
+        );
+
+      case "email_verification":
+        return (
+          <VerificationInput
+            verificationCode={emailVerificationCode}
+            setVerificationCode={setEmailVerificationCode}
+            onVerify={handleEmailVerificationSubmit}
+            isLoading={isLoading}
+            isPhone={false}
+            emailAddress={email}
+            error={error}
+            animatedStyle={stepAnimatedStyle}
+            onResend={handleResendEmailCode}
+            isResending={isResendingEmail}
+            canResend={canResendEmail}
+            resendCountdown={resendEmailCountdown}
           />
         );
 
