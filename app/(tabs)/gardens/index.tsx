@@ -165,7 +165,7 @@ export default function GardensScreen() {
               <AnimatedTransition delay={350} initialY={10}>
                 <View className="flex-1 justify-center items-center py-8">
                   <View className="flex-col items-center justify-center gap-4">
-                    <View className="bg-brand-50 rounded-full p-4">
+                    <View className="bg-cream-100/40 rounded-xl p-4">
                       <Ionicons name="leaf" size={62} color="#5E994B" />
                     </View>
                     <Text className="text-foreground text-center font-title font-bold text-lg capitalize">
