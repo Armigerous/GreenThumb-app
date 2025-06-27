@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { captureException, addBreadcrumb } from "@/lib/sentry";
+import BrandedErrorPage from "@/components/UI/BrandedErrorPage";
 
 interface Props {
   children: ReactNode;
@@ -49,34 +50,12 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      // Default fallback UI
+      // Branded fallback UI
       return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.title}>Oops! Something went wrong</Text>
-            <Text style={styles.message}>
-              We&apos;ve encountered an unexpected error. The issue has been
-              reported and we&apos;re working on a fix.
-            </Text>
-
-            {__DEV__ && this.state.error && (
-              <View style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>
-                  Error Details (Development):
-                </Text>
-                <Text style={styles.errorText}>{this.state.error.message}</Text>
-                <Text style={styles.errorText}>{this.state.error.stack}</Text>
-              </View>
-            )}
-
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={this.handleRetry}
-            >
-              <Text style={styles.retryButtonText}>Try Again</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <BrandedErrorPage
+          message="We couldn't load the page. Please try again in a moment!"
+          onRetry={this.handleRetry}
+        />
       );
     }
 
