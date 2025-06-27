@@ -384,8 +384,7 @@ const GardenDetails = () => {
 
   // Check if garden has growing conditions
   const hasConditions = Boolean(
-    (gardenData.sunlight_conditions &&
-      gardenData.sunlight_conditions.length > 0) ||
+    (gardenData.sunlight && gardenData.sunlight.length > 0) ||
       (gardenData.soil_textures && gardenData.soil_textures.length > 0) ||
       (gardenData.soil_ph_ranges && gardenData.soil_ph_ranges.length > 0) ||
       (gardenData.soil_drainage && gardenData.soil_drainage.length > 0)

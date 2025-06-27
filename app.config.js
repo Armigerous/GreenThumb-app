@@ -41,6 +41,17 @@ module.exports = {
             "The app needs access to your camera to let you take photos of your plants.",
         },
       ],
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission:
+            "Allow GreenThumb to use your location to provide local weather updates and frost warnings for your garden.",
+          locationAlwaysPermission:
+            "Allow GreenThumb to use your location to provide local weather updates and frost warnings for your garden.",
+          locationWhenInUsePermission:
+            "Allow GreenThumb to use your location to provide local weather updates and frost warnings for your garden.",
+        },
+      ],
     ],
 
     // Experimental features

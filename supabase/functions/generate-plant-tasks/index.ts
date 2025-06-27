@@ -149,7 +149,7 @@ Garden Environment:
 - Soil Conditions:
   * Textures: ${garden.soil_textures?.join(", ") || "Not specified"}
   * Drainage: ${garden.soil_drainage?.join(", ") || "Not specified"}
-- Light Conditions: ${garden.sunlight_conditions?.join(", ") || "Not specified"}
+- Light Conditions: ${garden.sunlight?.join(", ") || "Not specified"}
 - Maintenance Level: ${garden.maintenance || "Not specified"}
 
 Current Plant Status:

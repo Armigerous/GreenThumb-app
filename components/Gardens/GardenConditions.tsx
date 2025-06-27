@@ -163,8 +163,7 @@ export default function GardenConditions({
   const completionStatus = getCompletionStatusText(completionPercentage);
 
   const hasConditions = Boolean(
-    (garden.sunlight_conditions && garden.sunlight_conditions.length > 0) ||
-      (garden.sunlight && garden.sunlight.length > 0) ||
+    (garden.sunlight && garden.sunlight.length > 0) ||
       (garden.soil_textures && garden.soil_textures.length > 0) ||
       (garden.soil_texture && garden.soil_texture.length > 0) ||
       (garden.soil_ph_ranges && garden.soil_ph_ranges.length > 0) ||
@@ -174,7 +173,6 @@ export default function GardenConditions({
 
   // Calculate if garden is ready to display recommendations
   const isGardenComplete =
-    (garden.sunlight_conditions && garden.sunlight_conditions.length > 0) ||
     (garden.sunlight && garden.sunlight.length > 0) ||
     (garden.soil_textures && garden.soil_textures.length > 0) ||
     (garden.soil_texture && garden.soil_texture.length > 0) ||
@@ -226,7 +224,7 @@ export default function GardenConditions({
         <ScrollView showsVerticalScrollIndicator={false} className="max-h-96">
           <View className="space-y-4">
             {/* Environment Section */}
-            {(garden.sunlight_conditions?.length > 0 ||
+            {(garden.sunlight?.length > 0 ||
               garden.soil_textures?.length > 0 ||
               garden.soil_ph_ranges?.length > 0 ||
               garden.soil_drainage?.length > 0 ||
@@ -242,7 +240,7 @@ export default function GardenConditions({
                 <ConditionCard
                   icon="sunny"
                   title="Sunlight"
-                  value={formatConditionValues(garden.sunlight_conditions)}
+                  value={formatConditionValues(garden.sunlight)}
                   category="environment"
                 />
 

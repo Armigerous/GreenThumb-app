@@ -12,7 +12,7 @@ type HelpIconProps = {
 export default function HelpIcon({
   title,
   explanation,
-  size = 18,
+  size = 22,
 }: HelpIconProps) {
   const [modalVisible, setModalVisible] = useState(false);
 

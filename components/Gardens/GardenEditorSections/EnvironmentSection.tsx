@@ -19,7 +19,6 @@ export default function EnvironmentSection({
       {/* Sunlight */}
       <CollapsibleSection title="Sunlight" icon="sunny-outline">
         <View className="mt-2">
-          {/* Note: sunlight_ids in the form maps to light_ids in the database */}
           <View className="flex-row items-center mb-1">
             <Text className="text-foreground font-medium text-base">
               Light Requirements
@@ -33,10 +32,8 @@ export default function EnvironmentSection({
             label="Light Requirements"
             placeholder="Select sunlight conditions"
             items={LOOKUP_TABLES.light}
-            value={formValues.sunlight_ids}
-            onChange={(value: number[]) =>
-              updateFormValues("sunlight_ids", value)
-            }
+            value={formValues.light_ids}
+            onChange={(value: number[]) => updateFormValues("light_ids", value)}
             labelHidden={true}
           />
         </View>

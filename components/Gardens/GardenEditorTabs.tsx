@@ -34,8 +34,7 @@ const FIELD_WEIGHTS = {
   usda_zone_ids: 1,
 
   // Environment - All fields are important
-  sunlight_ids: 2, // Used in form
-  light_ids: 2, // Used in database
+  light_ids: 2,
   soil_texture_ids: 2,
   soil_ph_ids: 2,
   soil_drainage_ids: 2,
@@ -43,7 +42,6 @@ const FIELD_WEIGHTS = {
 
   // Design - Location is most important
   landscape_location_ids: 2,
-  location_ids: 2, // Alternate field name
   landscape_theme_ids: 2,
   design_feature_ids: 1,
 
@@ -64,11 +62,9 @@ const FIELD_WEIGHTS = {
   leaf_value_ids: 1,
   fall_color_ids: 1,
   texture_id: 1,
-  texture_preference_id: 1, // Alternate field name
 
   // Preferences
   maintenance_id: 2,
-  maintenance_level_id: 2, // Alternate field name
   wants_recommendations: 1,
   year_round_interest: 1,
 };
@@ -81,7 +77,6 @@ const FIELD_TO_TAB = {
   usda_zone_ids: "basic-info",
 
   // Environment
-  sunlight_ids: "environment",
   light_ids: "environment",
   soil_texture_ids: "environment",
   soil_ph_ids: "environment",
@@ -90,7 +85,6 @@ const FIELD_TO_TAB = {
 
   // Design
   landscape_location_ids: "design",
-  location_ids: "design",
   landscape_theme_ids: "design",
   design_feature_ids: "design",
 
@@ -111,11 +105,9 @@ const FIELD_TO_TAB = {
   leaf_value_ids: "aesthetics",
   fall_color_ids: "aesthetics",
   texture_id: "aesthetics",
-  texture_preference_id: "aesthetics",
 
   // Preferences
   maintenance_id: "preferences",
-  maintenance_level_id: "preferences",
   wants_recommendations: "preferences",
   year_round_interest: "preferences",
 };

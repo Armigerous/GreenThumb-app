@@ -44,8 +44,8 @@ export default function GardenConditionsPage() {
       setFormValues({
         name: gardenData.name || "",
         // Environment settings
-        sunlight_ids: getIdsFromNames(
-          gardenData.sunlight_conditions || gardenData.sunlight,
+        light_ids: getIdsFromNames(
+          gardenData.light || gardenData.light_conditions,
           LOOKUP_TABLES.light
         ),
         soil_texture_ids: getIdsFromNames(
@@ -200,7 +200,7 @@ export default function GardenConditionsPage() {
       // Create the garden update object with all form values
       const gardenDbUpdate = {
         name: formValues.name,
-        light_ids: formValues.sunlight_ids,
+        light_ids: formValues.light_ids,
         soil_texture_ids: formValues.soil_texture_ids,
         soil_drainage_ids: formValues.soil_drainage_ids,
         soil_ph_ids: formValues.soil_ph_ids,

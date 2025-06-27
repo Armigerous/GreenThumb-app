@@ -211,9 +211,7 @@ export interface Garden {
   /** Alternate field for available space from the materialized view */
   available_space?: string[];
   /** Array of sunlight condition descriptions */
-  sunlight_conditions: string[];
-  /** Alternate field for sunlight from the materialized view */
-  sunlight?: string[];
+  sunlight: string[];
   /** Array of soil texture types */
   soil_textures: string[];
   /** Alternate field for soil texture from the materialized view */
@@ -285,10 +283,8 @@ export interface GardenDatabase {
   location_ids?: number[];
   /** JSON array of space availability IDs */
   available_space_to_plant_ids: number[];
-  /** JSON array of sunlight condition IDs - actual database field */
+  /** JSON array of light condition IDs */
   light_ids: number[];
-  /** Form field alias for light_ids - not in database */
-  sunlight_ids?: number[];
   /** JSON array of soil texture IDs */
   soil_texture_ids: number[];
   /** JSON array of soil drainage IDs */
