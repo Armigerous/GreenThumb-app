@@ -657,12 +657,12 @@ export default function NewGardenForm({
             {isSubmitting ? (
               <View className="flex-row items-center justify-center">
                 <LoadingSpinner />
-                <BodyText className="text-white font-paragraph-semibold ml-2 text-base">
+                <BodyText className="text-cream-50 font-paragraph-semibold ml-2 text-base">
                   Creating Garden...
                 </BodyText>
               </View>
             ) : (
-              <BodyText className="text-white font-paragraph-semibold text-center text-base">
+              <BodyText className="text-cream-50 font-paragraph-semibold text-center text-base">
                 {currentStep === totalSteps ? "Create Garden" : "Continue"}
               </BodyText>
             )}
