@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import {
   Keyboard,
   ScrollView,
@@ -10,15 +10,16 @@ import {
   TouchableWithoutFeedback,
   View,
   Alert,
+  AppState,
 } from "react-native";
-import { LoadingSpinner } from "../UI/LoadingSpinner";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CompactSpinner, LoadingSpinner } from "../UI/LoadingSpinner";
 import HelpIcon from "../UI/HelpIcon";
 import BetterSelector from "../UI/BetterSelector";
 import ProgressIndicator from "../UI/ProgressIndicator";
-import AddressAutocomplete from "../UI/AddressAutocomplete";
+import ZipCodeInput from "../UI/ZipCodeInput";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 import { Ionicons } from "@expo/vector-icons";
-import * as Location from "expo-location";
 import { BodyText, TitleText } from "../UI/Text";
 
 type NewGardenFormProps = {
@@ -45,8 +46,17 @@ export default function NewGardenForm({
 
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Form persistence state
+  const [isLoadingCachedData, setIsLoadingCachedData] = useState(true);
+  const [hasCachedData, setHasCachedData] = useState(false);
+  const [showCachedDataNotification, setShowCachedDataNotification] =
+    useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cache key for this user's garden form
+  const cacheKey = `garden_form_${user?.id || "anonymous"}`;
 
   // Essential form state - focused on the 6 most important fields plus location and style
   const [formValues, setFormValues] = useState({
@@ -54,9 +64,11 @@ export default function NewGardenForm({
     name: "",
 
     // Step 2: Location (moved early for weather integration)
-    location_address: "",
+    zip_code: "",
     latitude: null as number | null,
     longitude: null as number | null,
+    city: "",
+    county: "",
 
     // Step 3: Essential growing conditions (5 required fields)
     light_ids: [] as number[], // Essential for plant selection
@@ -68,6 +80,64 @@ export default function NewGardenForm({
     // Step 4: Optional style
     landscape_theme_ids: [] as number[], // For enhanced recommendations
   });
+
+  // Cache management functions
+  const saveFormDataToCache = useCallback(
+    async (formData: typeof formValues, step: number) => {
+      try {
+        const cacheData = {
+          formValues: formData,
+          currentStep: step,
+          timestamp: Date.now(),
+        };
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      } catch (error) {
+        console.error("Failed to save form data to cache:", error);
+      }
+    },
+    [cacheKey]
+  );
+
+  const loadFormDataFromCache = useCallback(async () => {
+    try {
+      const cachedData = await AsyncStorage.getItem(cacheKey);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        const {
+          formValues: cachedFormValues,
+          currentStep: cachedStep,
+          timestamp,
+        } = parsedData;
+
+        // Check if cache is not too old (24 hours)
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        if (Date.now() - timestamp < maxAge) {
+          setFormValues(cachedFormValues);
+          setCurrentStep(cachedStep);
+          setHasCachedData(true);
+          setShowCachedDataNotification(true);
+          return true;
+        } else {
+          // Cache is too old, remove it
+          await AsyncStorage.removeItem(cacheKey);
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to load form data from cache:", error);
+      return false;
+    }
+  }, [cacheKey]);
+
+  const clearFormCache = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem(cacheKey);
+      setHasCachedData(false);
+      setShowCachedDataNotification(false);
+    } catch (error) {
+      console.error("Failed to clear form cache:", error);
+    }
+  }, [cacheKey]);
 
   // Generate garden name suggestions that include the user's name
   const gardenNameSuggestions = useMemo(() => {
@@ -91,72 +161,115 @@ export default function NewGardenForm({
     return suggestions;
   }, [user?.firstName]);
 
-  // Handle form field changes
+  // Handle form field changes with automatic caching
   const updateFormValues = useCallback(
     (field: string, value: number | number[] | string | null) => {
-      setFormValues((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    },
-    []
-  );
-
-  // Get current location using device GPS and fill the address field
-  const getCurrentLocation = async () => {
-    setIsGettingLocation(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is needed to provide weather updates for your garden."
-        );
-        return;
+      // Hide the cached data notification once user starts making changes
+      if (showCachedDataNotification) {
+        setShowCachedDataNotification(false);
       }
 
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
+      setFormValues((prev) => {
+        const newFormValues = {
+          ...prev,
+          [field]: value,
+        };
 
-      const [address] = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
+        // Debounced save to cache to avoid too frequent writes
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+          saveFormDataToCache(newFormValues, currentStep);
+        }, 500);
+
+        return newFormValues;
       });
+    },
+    [currentStep, saveFormDataToCache, showCachedDataNotification]
+  );
 
-      // Format address as "City, State" for better UX
-      const addressString = [address.city, address.region]
-        .filter(Boolean)
-        .join(", ");
+  // Load cached form data on component mount
+  useEffect(() => {
+    const initializeForm = async () => {
+      if (user?.id) {
+        const hasCache = await loadFormDataFromCache();
+        if (hasCache) {
+          console.log("Loaded garden form data from cache");
+        }
+      }
+      setIsLoadingCachedData(false);
+    };
 
-      setFormValues((prev) => ({
-        ...prev,
-        latitude,
-        longitude,
-        location_address: addressString,
-      }));
-    } catch (error) {
-      console.error("Error getting location:", error);
-      Alert.alert(
-        "Location Error",
-        "Could not get your current location. Please enter your address manually."
-      );
-    } finally {
-      setIsGettingLocation(false);
-    }
-  };
+    initializeForm();
+  }, [user?.id, loadFormDataFromCache]);
 
-  // Handle address selection from autocomplete
-  const handleAddressSelect = (addressData: {
-    address: string;
-    latitude: number | null;
-    longitude: number | null;
+  // Enhanced app state handling for form persistence
+  useEffect(() => {
+    const handleFormPersistence = async (nextAppState: string) => {
+      if (nextAppState === "active") {
+        // When app becomes active, reload cached data in case it was updated
+        if (user?.id && !isLoadingCachedData) {
+          const hasCache = await loadFormDataFromCache();
+          if (hasCache) {
+            console.log("Reloaded garden form data after app resume");
+          }
+        }
+      } else if (nextAppState === "background" || nextAppState === "inactive") {
+        // Save current form state when app goes to background
+        if (user?.id) {
+          await saveFormDataToCache(formValues, currentStep);
+          console.log("Saved garden form data to cache before backgrounding");
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleFormPersistence
+    );
+    return () => subscription?.remove();
+  }, [
+    user?.id,
+    loadFormDataFromCache,
+    saveFormDataToCache,
+    formValues,
+    currentStep,
+    isLoadingCachedData,
+  ]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle ZIP code selection
+  const handleZipCodeSelect = (locationData: {
+    zipCode: string;
+    latitude: number;
+    longitude: number;
+    city?: string;
+    county?: string;
   }) => {
-    setFormValues((prev) => ({
-      ...prev,
-      location_address: addressData.address,
-      latitude: addressData.latitude,
-      longitude: addressData.longitude,
-    }));
+    setFormValues((prev) => {
+      const newFormValues = {
+        ...prev,
+        zip_code: locationData.zipCode,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        city: locationData.city || "",
+        county: locationData.county || "",
+      };
+
+      // Save to cache immediately since this is a significant change
+      saveFormDataToCache(newFormValues, currentStep);
+
+      return newFormValues;
+    });
   };
 
   // Step validation functions
@@ -192,13 +305,29 @@ export default function NewGardenForm({
   // Navigation functions
   const goToNextStep = () => {
     if (currentStep < totalSteps && isCurrentStepValid()) {
-      setCurrentStep(currentStep + 1);
+      // Hide cached data notification when user navigates
+      if (showCachedDataNotification) {
+        setShowCachedDataNotification(false);
+      }
+
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      // Save step change to cache immediately
+      saveFormDataToCache(formValues, nextStep);
     }
   };
 
   const goToPreviousStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      // Hide cached data notification when user navigates
+      if (showCachedDataNotification) {
+        setShowCachedDataNotification(false);
+      }
+
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      // Save step change to cache immediately
+      saveFormDataToCache(formValues, prevStep);
     }
   };
 
@@ -244,6 +373,9 @@ export default function NewGardenForm({
       queryClient.invalidateQueries({
         queryKey: ["gardenDashboard", user.id],
       });
+
+      // Clear form cache since garden was successfully created
+      await clearFormCache();
 
       onSuccess();
     } catch (err) {
@@ -319,8 +451,8 @@ export default function NewGardenForm({
                 Where&apos;s Your Garden?
               </TitleText>
               <BodyText className="text-cream-600 leading-relaxed mb-4">
-                Help us provide weather alerts, frost warnings, and optimal
-                planting times for your area.
+                Enter your NC ZIP code so we can send you frost alerts, rain
+                reminders, and optimal planting times for your area.
               </BodyText>
             </View>
 
@@ -328,18 +460,18 @@ export default function NewGardenForm({
               <View>
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center">
-                    <TitleText className="text-lg">Garden Location</TitleText>
+                    <TitleText className="text-lg">Garden ZIP Code</TitleText>
                     <BodyText className="text-primary ml-2 text-sm">
                       (Highly Recommended)
                     </BodyText>
                   </View>
                   <HelpIcon
-                    title="Location Privacy"
-                    explanation="We only use your location for weather data and growing zone detection. Your garden's exact address is never shared."
+                    title="ZIP Code Privacy"
+                    explanation="We only use your ZIP code for weather data and growing zone detection. Your location is never shared with anyone."
                   />
                 </View>
 
-                {/* Privacy note - moved up for better context */}
+                {/* Privacy note - updated for ZIP code */}
                 <View className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                   <View className="flex-row items-start">
                     <Ionicons
@@ -350,43 +482,32 @@ export default function NewGardenForm({
                     />
                     <View className="flex-1">
                       <BodyText className="text-blue-800 text-sm">
-                        Optional • We only store your city and state for weather
-                        data • Never shared with anyone
+                        Optional • We only store your ZIP code for weather data
+                        • Never shared with anyone
                       </BodyText>
                     </View>
                   </View>
                 </View>
 
-                <AddressAutocomplete
-                  value={formValues.location_address}
-                  onChangeText={(text) =>
-                    updateFormValues("location_address", text)
-                  }
-                  onAddressSelect={handleAddressSelect}
-                  placeholder="City, State (e.g., Asheville, NC)"
+                <ZipCodeInput
+                  value={formValues.zip_code}
+                  onChangeText={(text) => updateFormValues("zip_code", text)}
+                  onLocationSelect={handleZipCodeSelect}
+                  placeholder="Enter your 5-digit NC ZIP code"
                   className="mb-4"
                 />
 
-                <TouchableOpacity
-                  className="flex-row items-center justify-center bg-brand-100 border border-brand-200 rounded-lg p-4"
-                  onPress={getCurrentLocation}
-                  disabled={isGettingLocation}
-                >
-                  {isGettingLocation ? (
-                    <LoadingSpinner />
-                  ) : (
-                    <>
-                      <Ionicons
-                        name="location-outline"
-                        size={20}
-                        color="#5E994B"
-                      />
-                      <BodyText className="text-brand-700 font-medium ml-2">
-                        Fill with Current Location
+                {/* Show location info if ZIP is validated */}
+                {formValues.city && formValues.zip_code && (
+                  <View className="bg-brand-50 border border-brand-200 rounded-lg p-3">
+                    <View className="flex-row items-center">
+                      <Ionicons name="location" size={16} color="#5E994B" />
+                      <BodyText className="text-brand-800 text-sm ml-2">
+                        {formValues.city}, NC {formValues.zip_code}
                       </BodyText>
-                    </>
-                  )}
-                </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
               </View>
             </View>
           </View>
@@ -592,6 +713,18 @@ export default function NewGardenForm({
     }
   };
 
+  // Show loading state while loading cached data
+  if (isLoadingCachedData) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <LoadingSpinner />
+        <BodyText className="text-cream-600 mt-4">
+          Loading your garden...
+        </BodyText>
+      </View>
+    );
+  }
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className="flex-1">
@@ -603,6 +736,60 @@ export default function NewGardenForm({
           accentColor="brand-500"
           inactiveColor="cream-300"
         />
+
+        {/* Cached data notification */}
+        {showCachedDataNotification && (
+          <View className="bg-brand-50 border border-brand-100 rounded-lg p-3 mx-2 mb-4">
+            <View className="flex-row items-center">
+              <Ionicons
+                name="refresh-circle-outline"
+                size={16}
+                color="#5E994B"
+              />
+              <BodyText className="text-brand-700 text-sm ml-2 flex-1">
+                Continuing from where you left off
+              </BodyText>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert(
+                    "Start Fresh?",
+                    "This will clear your current progress and start over.",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Start Fresh",
+                        style: "destructive",
+                        onPress: async () => {
+                          await clearFormCache();
+                          setFormValues({
+                            name: "",
+                            zip_code: "",
+                            latitude: null,
+                            longitude: null,
+                            city: "",
+                            county: "",
+                            light_ids: [],
+                            soil_texture_ids: [],
+                            available_space_to_plant_ids: [],
+                            maintenance_id: null,
+                            growth_rate_id: null,
+                            landscape_theme_ids: [],
+                          });
+                          setCurrentStep(1);
+                          setShowCachedDataNotification(false);
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <BodyText className="text-brand-600 text-sm font-paragraph-semibold">
+                  Start Fresh
+                </BodyText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <ScrollView
           className="flex-1"
@@ -628,7 +815,15 @@ export default function NewGardenForm({
           {/* Back/Cancel button - Left side */}
           <TouchableOpacity
             className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
-            onPress={currentStep === 1 ? onCancel : goToPreviousStep}
+            onPress={async () => {
+              if (currentStep === 1) {
+                // Clear cache when canceling
+                await clearFormCache();
+                onCancel();
+              } else {
+                goToPreviousStep();
+              }
+            }}
           >
             <BodyText className="text-cream-700 font-paragraph-semibold text-center text-base">
               {currentStep === 1 ? "Cancel" : "Back"}
@@ -653,12 +848,12 @@ export default function NewGardenForm({
             {isSubmitting ? (
               <View className="flex-row items-center justify-center">
                 <LoadingSpinner />
-                <BodyText className="text-cream-50 font-paragraph-semibold ml-2 text-base">
+                <BodyText className="text-cream-50 ml-2 ">
                   Creating Garden...
                 </BodyText>
               </View>
             ) : (
-              <BodyText className="text-cream-50 font-paragraph-semibold text-center text-base">
+              <BodyText className="text-cream-50 text-center">
                 {currentStep === totalSteps ? "Create Garden" : "Continue"}
               </BodyText>
             )}

@@ -34,12 +34,13 @@
 3. [Database Integration](#database-integration)
 4. [Subscription System](#subscription-system)
 5. [UI Components & Styling](#ui-components--styling)
-6. [Navigation & Routing](#navigation--routing)
-7. [Navigation Context Management](#navigation-context-management)
-8. [State Management](#state-management)
-9. [Performance Optimization](#performance-optimization)
-10. [Testing Strategy](#testing-strategy)
-11. [Deployment & CI/CD](#deployment--cicd)
+6. [Location Input & Geocoding](#location-input--geocoding)
+7. [Navigation & Routing](#navigation--routing)
+8. [Navigation Context Management](#navigation-context-management)
+9. [State Management](#state-management)
+10. [Performance Optimization](#performance-optimization)
+11. [Testing Strategy](#testing-strategy)
+12. [Deployment & CI/CD](#deployment--cicd)
 
 ---
 
@@ -1045,6 +1046,230 @@ const AnimatedCard = () => {
       {/* Card content */}
     </Animated.View>
   );
+};
+```
+
+---
+
+## 📍 Location Input & Geocoding
+
+### ZIP Code Input Component
+
+The app uses a specialized ZIP code input for location data instead of complex address autocomplete to provide a better mobile experience.
+
+#### Component Implementation
+
+```typescript
+// components/UI/ZipCodeInput.tsx
+import React, { useState, useCallback, useEffect } from "react";
+import { View, TextInput } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+
+interface ZipCodeInputProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  onLocationSelect: (locationData: {
+    zipCode: string;
+    latitude: number;
+    longitude: number;
+    city?: string;
+    county?: string;
+  }) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+export default function ZipCodeInput({
+  value,
+  onChangeText,
+  onLocationSelect,
+  placeholder = "Enter NC ZIP code",
+  className = "",
+}: ZipCodeInputProps) {
+  const [isValidating, setIsValidating] = useState(false);
+  const [isValid, setIsValid] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Validate NC ZIP code format (27xxx or 28xxx)
+  const isValidNCZip = (zip: string): boolean => {
+    const zipRegex = /^(27|28)\d{3}$/;
+    return zipRegex.test(zip);
+  };
+
+  // Geocode ZIP code to get coordinates
+  const geocodeZipCode = useCallback(
+    async (zipCode: string) => {
+      if (!isValidNCZip(zipCode)) {
+        setError("Please enter a valid NC ZIP code (27xxx or 28xxx)");
+        setIsValid(false);
+        return;
+      }
+
+      setIsValidating(true);
+      setError(null);
+
+      try {
+        const results = await Location.geocodeAsync(
+          `${zipCode}, North Carolina, USA`
+        );
+
+        if (results.length > 0) {
+          const { latitude, longitude } = results[0];
+
+          // Reverse geocode to get city/county information
+          const [reverseResult] = await Location.reverseGeocodeAsync({
+            latitude,
+            longitude,
+          });
+
+          setIsValid(true);
+          onLocationSelect({
+            zipCode,
+            latitude,
+            longitude,
+            city: reverseResult.city || undefined,
+            county: reverseResult.subregion || undefined,
+          });
+        } else {
+          setError("Could not find location for this ZIP code");
+          setIsValid(false);
+        }
+      } catch (error) {
+        setError("Could not validate ZIP code. Please try again.");
+        setIsValid(false);
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [onLocationSelect]
+  );
+
+  // Debounce validation when ZIP is complete
+  useEffect(() => {
+    if (value.length === 5) {
+      const timeoutId = setTimeout(() => {
+        geocodeZipCode(value);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setIsValid(false);
+      setError(null);
+    }
+  }, [value, geocodeZipCode]);
+
+  return (
+    <View>
+      <TextInput
+        value={value}
+        onChangeText={(text) => {
+          // Only allow numbers and limit to 5 digits
+          const numericText = text.replace(/[^0-9]/g, "").slice(0, 5);
+          onChangeText(numericText);
+        }}
+        placeholder={placeholder}
+        keyboardType="numeric"
+        maxLength={5}
+        autoComplete="postal-code"
+        textContentType="postalCode"
+      />
+      {/* Status indicators and error messages */}
+    </View>
+  );
+}
+```
+
+#### Usage in Garden Form
+
+```typescript
+// components/Gardens/NewGardenForm.tsx
+const handleZipCodeSelect = (locationData: {
+  zipCode: string;
+  latitude: number;
+  longitude: number;
+  city?: string;
+  county?: string;
+}) => {
+  setFormValues((prev) => ({
+    ...prev,
+    zip_code: locationData.zipCode,
+    latitude: locationData.latitude,
+    longitude: locationData.longitude,
+    city: locationData.city || "",
+    county: locationData.county || "",
+  }));
+};
+
+// In render
+<ZipCodeInput
+  value={formValues.zip_code}
+  onChangeText={(text) => updateFormValues("zip_code", text)}
+  onLocationSelect={handleZipCodeSelect}
+  placeholder="Enter your 5-digit NC ZIP code"
+/>;
+```
+
+### Benefits of ZIP Code Approach
+
+**Mobile UX Improvements:**
+
+- No autocomplete dropdown blocking input field
+- Numeric keyboard for faster input
+- No complex location permissions required
+- Clear validation feedback
+- Faster input (5 digits vs full address)
+
+**Technical Benefits:**
+
+- Eliminates autocomplete z-index issues
+- No keyboard dismissal problems
+- Simpler state management
+- Still provides coordinates for weather integration
+- Works reliably across different screen sizes
+
+**Business Benefits:**
+
+- Reduced friction in garden creation flow
+- Better conversion rates for garden setup
+- Consistent UX across different devices
+- Less support burden from location issues
+
+### NC ZIP Code Validation
+
+The component specifically validates North Carolina ZIP codes:
+
+```typescript
+const isValidNCZip = (zip: string): boolean => {
+  const zipRegex = /^(27|28)\d{3}$/;
+  return zipRegex.test(zip);
+};
+```
+
+**NC ZIP Code Ranges:**
+
+- **27xxx**: Western and central NC (Charlotte, Asheville, Winston-Salem)
+- **28xxx**: Eastern NC (Raleigh, Greensboro, Fayetteville)
+
+### Error Handling
+
+The component provides clear error states:
+
+- **Invalid format**: "Please enter a valid NC ZIP code (27xxx or 28xxx)"
+- **Geocoding failure**: "Could not find location for this ZIP code"
+- **Network error**: "Could not validate ZIP code. Please try again."
+
+### Integration with Weather Services
+
+The geocoded coordinates from ZIP codes integrate seamlessly with weather APIs:
+
+```typescript
+// Weather service integration
+const getWeatherForZip = async (latitude: number, longitude: number) => {
+  const response = await fetch(
+    `https://api.weather.gov/points/${latitude},${longitude}`
+  );
+  const data = await response.json();
+  return data.properties.forecast;
 };
 ```
 
