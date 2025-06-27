@@ -1,198 +1,14 @@
 # ✅ GreenThumb - App Store Launch Tasks
 
-> **Launch Date:** January 27, 2025 (13 days remaining)  
-> **Current Status:** Feature-complete, pre-launch optimization phase  
-> **Last Updated:** January 14, 2025
+> **Launch Date:**  
+> **Current Status:**  
+> **Last Updated:**
 
 ---
 
 ## 🎯 Launch Overview
 
-**Core App Status:** ✅ **COMPLETE**
-
-- All major features implemented and functional
-- Authentication, garden management, plant care, task system working
-- Database schema stable and optimized
-- UI/UX polished with animations and responsive design
-
-**Subscription System Status:** ✅ **COMPLETE** (January 2025)
-
-- Full Stripe integration with payment processing
-- Database schema for subscriptions and add-ons
-- Complete UI screens for pricing, checkout, and management
-- Business model implementation with guarantee-based selling
-- React Query hooks for optimized data management
-- TypeScript type safety throughout subscription system
-- Mobile-optimized payment flows with Stripe Payment Sheet
-
-**Remaining Work:** 🔧 **OPTIMIZATION & LAUNCH PREP**
-
-- Fix animation bugs and performance issues
-- Create app store assets and marketing materials
-- Complete beta testing and bug fixes
-- Finalize legal documents and privacy policies
-
-**Recent Improvements (January 14, 2025):**
-
-- ✅ **AUTH-CONSOLIDATION**: Unified phone collection screens for OAuth and manual auth flows
-
-  - Replaced separate `OAuthCompletionScreen` and inline phone step with unified `PhoneCollectionScreen`
-  - Single component handles both OAuth completion and manual signup phone collection
-  - Consistent UI/UX across all authentication paths
-  - Reduced code duplication and maintenance overhead
-
-- ✅ **AUTH-ROUTING**: Implemented automatic redirection for unauthenticated users
-
-  - Modified `app/_layout.tsx` to redirect unauthenticated users to `/(auth)/welcome`
-  - Added proper loading states while authentication status is being determined
-  - Ensures users cannot access protected routes without authentication
-  - Maintains [navigation has been streamlined to use pure Expo Router][memory:4216459845467723475]] patterns
-
-- ✅ **INFINITE-LOOP-FIX**: Resolved critical navigation and Sentry initialization loop
-
-  - **Issue:** App was stuck in infinite loop with repeated Sentry initialization and navigation redirects
-  - **Root Cause:** Sentry.wrap() causing component reinitialization + race conditions in auth state
-  - **Solution:**
-    - Moved Sentry initialization to module level to prevent reinitialization
-    - Removed `Sentry.wrap()` from root layout export
-    - Added navigation delay states to prevent redirect race conditions
-    - Fixed auth layout to redirect to `/(tabs)` instead of `/` to prevent circular redirects
-    - Added proper cleanup and state management for navigation timing
-  - **Result:** App now loads cleanly without loops, proper navigation flow restored
-
-- ✅ **NAVIGATION-LOOP-FIX-V2**: Fixed recurring infinite loop in navigation (January 14, 2025)
-  - **Issue:** App returned to infinite loop state with repeated component mounting and auth redirects
-  - **Root Cause:** Circular redirects between root layout and auth layout, both trying to handle routing
-  - **Solution:**
-    - Created dedicated `app/index.tsx` to handle initial routing decisions
-    - Removed redirect logic from root layout, letting Expo Router handle file-based routing
-    - Updated auth layout to only redirect when navigationReady is true
-    - Increased navigation delay to 200ms to prevent race conditions
-    - Added proper dependency arrays to useEffect hooks
-  - **Result:** Clean navigation flow with single source of truth for initial routing
-
----
-
-## 💳 SUBSCRIPTION SYSTEM - COMPLETED (January 2025)
-
-### ✅ Backend Infrastructure Complete
-
-**SUBS-DB-001**: Database schema implementation  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**Implementation:**
-
-- [x] `subscription_plans` table with pricing and features
-- [x] `user_subscriptions` table with Stripe integration
-- [x] `subscription_addons` table for upsell products
-- [x] `user_subscription_addons` table for purchased add-ons
-- [x] `payment_history` table for transaction records
-- [x] Row Level Security (RLS) policies implemented
-- [x] Performance indexes added
-- [x] Default plans inserted matching business model
-
-**SUBS-STRIPE-002**: Stripe integration  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**Implementation:**
-
-- [x] Stripe SDK integration (`@stripe/stripe-react-native`)
-- [x] Payment intent creation API endpoint
-- [x] Customer creation and management
-- [x] Ephemeral key generation for mobile
-- [x] Error handling and validation
-- [x] Environment variable configuration
-
-**SUBS-TYPES-003**: TypeScript type definitions  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**Implementation:**
-
-- [x] `SubscriptionPlan` interface
-- [x] `UserSubscription` interface
-- [x] `SubscriptionAddon` interface
-- [x] `PaymentHistory` interface
-- [x] `SubscriptionSummary` type
-- [x] `PricingDisplay` type
-- [x] Status enums and helper types
-
-### ✅ Frontend Implementation Complete
-
-**SUBS-UI-004**: Pricing screen implementation  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `app/(tabs)/pricing.tsx`  
-**Features:**
-
-- [x] Guarantee-based selling strategy implementation
-- [x] Subscription plans with savings calculations
-- [x] Triple guarantee section (service, money-back, success)
-- [x] Social proof and value proposition
-- [x] Mobile-optimized UI with NativeWind
-- [x] Fixed linter errors with quote escaping
-
-**SUBS-UI-005**: Checkout screen implementation  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `app/(tabs)/checkout.tsx`  
-**Features:**
-
-- [x] Stripe payment processing with StripeProvider
-- [x] Order summary with plan details
-- [x] Payment sheet initialization and handling
-- [x] Success/error handling with user feedback
-- [x] Fixed TypeScript errors with subscription creation
-
-**SUBS-UI-006**: Subscription success screen  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `app/(tabs)/subscription-success.tsx`  
-**Features:**
-
-- [x] Success celebration UI
-- [x] Next steps guidance (add plants, notifications, tracking)
-- [x] Premium features unlocked list
-- [x] Guarantee reminders and support access
-
-**SUBS-UI-007**: Subscription management screen  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `app/(tabs)/subscription.tsx`  
-**Features:**
-
-- [x] Current subscription details view
-- [x] Cancel/reactivate subscription functionality
-- [x] Available add-ons display
-- [x] Payment history with transaction details
-- [x] Plan change options
-
-### ✅ Business Logic Complete
-
-**SUBS-LOGIC-008**: React Query hooks  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `lib/subscriptionQueries.ts`  
-**Implementation:**
-
-- [x] `useSubscriptionPlans()` - Fetch available plans
-- [x] `usePricingDisplay()` - Plans with calculated savings/badges
-- [x] `useUserSubscription()` - Current user subscription
-- [x] `useSubscriptionSummary()` - Dashboard summary data
-- [x] `useSubscriptionAddons()` - Available upsells
-- [x] `usePaymentHistory()` - Transaction history
-- [x] Mutation hooks for CRUD operations
-
-**SUBS-LOGIC-009**: Stripe utilities  
-**Status:** ✅ **COMPLETE**  
-**Completed:** January 2025  
-**File:** `lib/stripe.ts`  
-**Implementation:**
-
-- [x] Price formatting and calculation helpers
-- [x] Business logic for plan badges and recommendations
-- [x] Status mapping between Stripe and internal systems
-- [x] Date/period calculation utilities
-- [x] `formatDate` function for display
+**Core App Status:**
 
 ### 🧪 TESTING REQUIRED - High Priority
 
@@ -237,7 +53,7 @@
 
 ### 🔧 INTEGRATION WORK REQUIRED
 
-**SUBS-INT-013**: Environment configuration  
+**SUBS-INT-013**: Environment configuration
 **Status:** 🟡 **HIGH** - Required for production  
 **Owner:** DevOps Team  
 **Due:** January 20, 2025  
@@ -889,62 +705,6 @@
 
 ---
 
-## ✅ COMPLETED FEATURES
-
-### 💳 Subscription System (NEW - January 2025)
-
-- [x] **SUBS-BACKEND**: Complete database schema with RLS policies
-- [x] **SUBS-STRIPE**: Full Stripe integration with payment processing
-- [x] **SUBS-TYPES**: TypeScript interfaces for all subscription entities
-- [x] **SUBS-QUERIES**: React Query hooks for subscription management
-- [x] **SUBS-UI-PRICING**: Guarantee-based pricing screen
-- [x] **SUBS-UI-CHECKOUT**: Stripe payment processing screen
-- [x] **SUBS-UI-SUCCESS**: Subscription success celebration
-- [x] **SUBS-UI-MANAGE**: Subscription management dashboard
-- [x] **SUBS-API**: Payment intent creation endpoint
-- [x] **SUBS-UTILS**: Price calculation and formatting utilities
-
-### 🔐 Authentication System
-
-- [x] **AUTH-ANIM-001**: Expand animation to full screen area
-- [x] **AUTH-ANIM-002**: Prevent layout twitch when switching inputs
-- [x] **AUTH-ANIM-003**: Fix post-animation jump
-- [x] **AUTH-ANIM-004**: Fade out background elements
-- [x] **AUTH-ANIM-005**: Sync keyboard dismissal with UI
-- [x] **AUTH-ANIM-006**: Minimize "Forgot Password" layout shift
-- [x] **AUTH-ANIM-007**: Add password visibility toggle
-- [x] **AUTH-ANIM-008**: Ensure password field is recognized correctly
-
-### 🏠 Home Dashboard
-
-- [x] **HOME-LOAD-001**: Wrap loader with gradient container
-- [x] **ILLUST-001**: Display calm vs chaotic image
-- [x] **ILLUST-002**: Detect season from system date
-- [x] **ILLUST-003**: Render image below greeting
-- [x] **ILLUST-004**: Future-proof naming convention
-
-### 🌱 Core Features
-
-- [x] **GARDEN-MGMT**: Multi-garden management system
-- [x] **PLANT-CARE**: Plant status tracking and care logging
-- [x] **TASK-SYSTEM**: Automated task generation and completion
-- [x] **CALENDAR-VIEW**: Visual task calendar with scheduling
-- [x] **USER-PROFILE**: Profile management and preferences
-- [x] **DATA-SYNC**: Real-time data synchronization with Supabase
-- [x] **OFFLINE-SUPPORT**: Basic offline functionality
-- [x] **IMAGE-UPLOAD**: Plant photo upload and management
-
-### 🎨 UI/UX Implementation
-
-- [x] **DESIGN-SYSTEM**: Consistent component library
-- [x] **ANIMATIONS**: Smooth page transitions and micro-interactions
-- [x] **RESPONSIVE**: Adaptive layouts for different screen sizes
-- [x] **ACCESSIBILITY**: Screen reader support and keyboard navigation
-- [x] **DARK-MODE**: Theme switching capability
-- [x] **ONBOARDING**: First-time user experience flow
-
----
-
 ## 📈 POST-LAUNCH ROADMAP (Feb-Mar 2025)
 
 ### 🔄 Version 1.1 Features (February)
@@ -976,159 +736,105 @@
 
 ---
 
-## 🎯 Success Metrics
+### 🎯 USER INTERVIEW FINDINGS (January 26, 2025)
 
-### Launch Week Targets (Jan 27 - Feb 3)
+**Source:** User interview feedback session  
+**Participants:** Target users  
+**Priority:** Critical and high-priority UX improvements for launch
 
-- **Downloads:** 1,000+ in first week
-- **User Registration:** 60% conversion rate from download to signup
-- **App Store Rating:** 4.5+ stars average
-- **Crash Rate:** <1% of sessions
-- **User Retention:** 70% D1, 40% D7, 25% D30
-- **NEW - Subscription Conversion:** 5% of users start subscription trial
-- **NEW - Payment Success Rate:** >95% of payment attempts succeed
+#### 🔴 CRITICAL BUGS & BLOCKERS
 
-### Month 1 Targets (February 2025)
+**INTERVIEW-CRIT-016**: Garden creation form is too complex  
+**Status:** 🔴 **CRITICAL**  
+**Owner:** Product/Design/Development Team  
+**User Impact:** "The garden creation form asks too many questions. I just want to get started quickly."  
+**Description:** The current garden creation flow is overwhelming. Users should only be asked essential questions up front, with advanced customization available later.  
+**Acceptance Criteria:**
 
-- **Active Users:** 5,000+ monthly active users
-- **Garden Creation:** 80% of users create their first garden
-- **Task Completion:** 75% task completion rate
-- **User Feedback:** Net Promoter Score (NPS) of 50+
-- **Revenue:** $500+ from any premium features
-- **NEW - Subscription Revenue:** $5,000+ MRR from subscriptions
-- **NEW - Conversion Rate:** 10% free-to-premium conversion
-- **NEW - Churn Rate:** <5% monthly subscription churn
+- [ ] New garden creation form asks only essential questions
+- [ ] Advanced options are accessible after initial creation
+- [ ] User can create a garden in under 1 minute
+- [ ] No required fields that are not strictly necessary
 
----
+**INTERVIEW-CRIT-017**: Plant database is overwhelming  
+**Status:** 🔴 **CRITICAL**  
+**Owner:** Product/Content/Development Team  
+**User Impact:** "There are way too many plants in the database. It's scary to see 4500+ plants!"  
+**Description:** The plant database needs to be trimmed or filtered for each user. The current experience is overwhelming and not actionable.  
+**Acceptance Criteria:**
 
-## 🚨 Risk Mitigation
+- [ ] Users see a manageable, relevant subset of plants by default
+- [ ] There is a clear plan for how to filter or recommend plants per user
+- [ ] Database is not overwhelming on first open
 
-### Technical Risks
+#### 🟡 HIGH PRIORITY UX ISSUES
 
-1. **Animation Performance Issues**
+**INTERVIEW-HIGH-016**: Plant page navigation is confusing  
+**Status:** 🟡 **HIGH**  
+**Owner:** Design/Development Team  
+**User Impact:** "The navigation tabs (overview, care, features, taxonomy, problems) are confusing above the app navigation."  
+**Description:** Move plant page section navigation below the 'Add to Garden' button for clarity.  
+**Acceptance Criteria:**
 
-   - **Risk:** Poor performance affects user experience
-   - **Mitigation:** Priority fix in week 1, extensive device testing
+- [ ] Section navigation is below the 'Add to Garden' button
+- [ ] No confusion between app navigation and plant page navigation
 
-2. **App Store Rejection**
+**INTERVIEW-HIGH-017**: Add to Garden button is too small  
+**Status:** 🟡 **HIGH**  
+**Owner:** Design/Development Team  
+**User Impact:** "The 'Add to Garden' button should be thicker and more prominent."  
+**Description:** Increase the height and visual prominence of the 'Add to Garden' button on plant pages.  
+**Acceptance Criteria:**
 
-   - **Risk:** Delayed launch due to review issues
-   - **Mitigation:** Early submission, compliance checklist, rapid response team
+- [ ] Button height increased for better tap target
+- [ ] Button stands out visually
 
-3. **Scalability Issues**
+**INTERVIEW-HIGH-018**: WelcomeSubscriptionBanner modal is too aggressive  
+**Status:** 🟡 **HIGH**  
+**Owner:** Development Team  
+**User Impact:** "The subscription banner pops up every time I go to the home page. That's annoying."  
+**Description:** The WelcomeSubscriptionBanner should not show every time the user navigates home.  
+**Acceptance Criteria:**
 
-   - **Risk:** Server performance under load
-   - **Mitigation:** Load testing, Supabase scaling plan, monitoring alerts
+- [ ] Banner only shows once or at appropriate intervals
+- [ ] No repeated popups on every home navigation
 
-4. **NEW - Payment Processing Issues**
-   - **Risk:** Subscription payments fail or create poor user experience
-   - **Mitigation:** Extensive Stripe testing, error handling, fallback flows
+**INTERVIEW-HIGH-019**: Profile page lacks value  
+**Status:** 🟡 **HIGH**  
+**Owner:** Product/Design Team  
+**User Impact:** "The profile page is kind of useless right now."  
+**Description:** The profile page should provide more value, such as stats, achievements, or useful actions.  
+**Acceptance Criteria:**
 
-### Business Risks
+- [ ] Profile page has meaningful content and actions
+- [ ] Users find value in visiting their profile
 
-1. **User Acquisition**
+**INTERVIEW-HIGH-020**: No plant recommendations after garden creation  
+**Status:** 🟡 **HIGH**  
+**Owner:** Product/Development Team  
+**User Impact:** "After I create my garden, I want to see recommended plants for it."  
+**Description:** After garden creation, show recommended plants based on garden data.  
+**Acceptance Criteria:**
 
-   - **Risk:** Low initial downloads
-   - **Mitigation:** Marketing campaign, influencer partnerships, PR outreach
+- [ ] Recommended plants are shown after garden creation
+- [ ] Recommendations are relevant to the user's garden
 
-2. **Competition**
+**INTERVIEW-HIGH-021**: App needs better descriptions and explanations  
+**Status:** 🟡 **HIGH**  
+**Owner:** Product/Content/Design Team  
+**User Impact:** "I need better descriptions of how the app works. It's not always intuitive."  
+**Description:** Add more helpful descriptions and explanations throughout the app to improve intuitiveness.  
+**Acceptance Criteria:**
 
-   - **Risk:** Similar apps launching simultaneously
-   - **Mitigation:** Unique value proposition focus, rapid feature iteration
+- [ ] Key flows have clear, concise explanations
+- [ ] Users understand how to use the app without confusion
 
-3. **NEW - Subscription Adoption**
-   - **Risk:** Users don't convert to paid subscriptions
-   - **Mitigation:** Strong value proposition, guarantee-based selling, free trial optimization
+**INTERVIEW-HIGH-022**: Sign in/up page is confusing about password  
+**Status:** 🟡 **HIGH**  
+**Owner:** Design/Development Team  
+**User Impact:** "I thought I couldn't use the sign in/up page because it asked for a password, but I don't have one yet."  
+**Description:** Clarify on the sign in/up page that a password is not required if the user is signing up for the first time.  
+**Acceptance Criteria:**
 
----
-
-## 📞 Team Responsibilities
-
-### Development Team
-
-- **Lead:** Technical implementation and bug fixes
-- **Focus:** Animation fixes, performance optimization, builds, **subscription testing**
-- **Daily Standup:** 9:00 AM EST
-- **Communication:** Slack #dev-team
-
-### Design Team
-
-- **Lead:** App store assets and marketing materials
-- **Focus:** Screenshots, icons, promotional graphics, **subscription UI polish**
-- **Review Schedule:** Every Tuesday and Friday
-- **Communication:** Slack #design-team
-
-### Marketing Team
-
-- **Lead:** Launch strategy and user acquisition
-- **Focus:** ASO, press releases, social media, **subscription messaging**
-- **Planning Meetings:** Mondays 2:00 PM EST
-- **Communication:** Slack #marketing
-
-### QA Team
-
-- **Lead:** Beta testing and quality assurance
-- **Focus:** Bug discovery, user experience testing, **subscription flow testing**
-- **Testing Schedule:** Daily testing on latest builds
-- **Communication:** Slack #qa-team
-
-### NEW - Business Team
-
-- **Lead:** Subscription strategy and financial operations
-- **Focus:** Stripe configuration, pricing optimization, revenue tracking
-- **Review Schedule:** Weekly revenue reviews
-- **Communication:** Slack #business
-
----
-
-**🎯 TARGET LAUNCH: JANUARY 27, 2025**  
-**📱 PLATFORMS: iOS APP STORE & GOOGLE PLAY STORE**  
-**🌍 INITIAL MARKETS: UNITED STATES, CANADA**  
-**💳 MONETIZATION: SUBSCRIPTION-BASED WITH GUARANTEE SYSTEM**
-
----
-
-## 🚨 DISCOVERED DURING WORK
-
-### 🔴 CRITICAL: Navigation Context Error in Home Layout (January 14, 2025)
-
-**BUG-NAV-001**: "Couldn't find a navigation context" error preventing app from loading  
-**Status:** 🔴 **CRITICAL** - App completely broken  
-**Discovered:** January 14, 2025  
-**File:** `app/(tabs)/_layout.tsx`  
-**Severity:** App crashes immediately after authentication
-
-**Root Cause Analysis - CONFIRMED:**
-Through systematic commenting out of components, we identified that the navigation context error is caused by **expo-router's `<Tabs>` component itself** or its interaction with the app's navigation structure.
-
-**What We Tested (All NOT the cause):**
-
-- ❌ Custom tab bar component (`CustomTabBar`)
-- ❌ Overdue tasks notification system (`useOverdueTasksNotifications`, `OverdueTasksModal`)
-- ❌ Clerk authentication hooks (`useUser`)
-- ❌ State management and timing logic (`isInitialRender`, useEffect)
-- ❌ Icon imports and usage (`Ionicons`, `tabBarIcon` properties)
-- ❌ Individual tab screens (gardens, calendar, plants, profile)
-- ❌ React Native imports and basic components
-
-**What IS the cause:**
-
-- ✅ **The `<Tabs>` component from expo-router** - When completely removed and replaced with basic React Native components, the error disappears
-
-**Impact:**
-
-- App is completely unusable after authentication
-- Users cannot access any home screens
-- Blocks all testing and launch preparation
-
-**Next Steps Required:**
-
-1. Investigate expo-router `<Tabs>` component configuration
-2. Check if there's a navigation context provider missing in parent layouts
-3. Review expo-router setup in `app/_layout.tsx`
-4. Consider alternative navigation solutions if expo-router issue persists
-5. Test with different expo-router versions if necessary
-
-**Priority:** 🔥 **IMMEDIATE** - Must be fixed before any other work can continue
-
-_Last Updated: January 14, 2025 by Development Team_
+- [ ] Sign in/up page clearly explains password requirements
+- [ ] No user confusion about needing a password to sign up
