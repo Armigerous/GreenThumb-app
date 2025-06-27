@@ -1,6 +1,7 @@
 import NameToggle from "@/components/Database/NameToggle";
 import SearchBar from "@/components/Database/SearchBar";
 import SearchResults from "@/components/Database/SearchResults";
+import FilterSelector from "@/components/Database/FilterSelector";
 import { useUser } from "@clerk/clerk-expo";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -28,7 +29,7 @@ export default function PlantDatabaseScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // State for filter selection
-  const [activeFilters] = useAtom(activeFiltersAtom);
+  const [activeFilters, setActiveFilters] = useAtom(activeFiltersAtom);
   const [useCommonNames, setUseCommonNames] = useState(false);
 
   // Debounce search query
@@ -54,10 +55,14 @@ export default function PlantDatabaseScreen() {
     StatusBar.currentHeight && window.scrollTo(0, StatusBar.currentHeight);
   }, []);
 
-  // Handle opening filter modal
-  const handleOpenFilter = useCallback(() => {
-    router.push("/plants/filter");
-  }, [router]);
+  // Handle filter selection
+  const handleFilterSelect = useCallback(
+    (filter: string) => {
+      setActiveFilters(filter);
+      setPage(1); // Reset to first page on filter change
+    },
+    [setActiveFilters]
+  );
 
   return (
     <PageContainer scroll={false} padded={false}>
@@ -81,15 +86,11 @@ export default function PlantDatabaseScreen() {
                 useCommonNames={useCommonNames}
                 onToggle={handleNameTypeToggle}
               />
-              <TouchableOpacity
-                className="flex-row items-center justify-center bg-primary px-3 py-2 rounded-lg"
-                onPress={handleOpenFilter}
-              >
-                <Feather name="filter" color="#fffefa" size={16} />
-                <BodyText className="ml-2 text-sm font-medium text-primary-foreground">
-                  Filter
-                </BodyText>
-              </TouchableOpacity>
+              <FilterSelector
+                filters={[]}
+                activeFilter={activeFilters}
+                onSelectFilter={handleFilterSelect}
+              />
             </View>
           </View>
 

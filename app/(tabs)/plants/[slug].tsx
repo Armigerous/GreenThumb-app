@@ -1,6 +1,6 @@
 import CachedImage from "@/components/CachedImage";
 import { ErrorBoundary } from "@/components/Database/Plant/ErrorBoundary";
-import { ErrorView } from "@/components/Database/Plant/ErrorView";
+import BrandedErrorPage from "@/components/UI/BrandedErrorPage";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
@@ -154,7 +154,7 @@ export default function PlantDetailScreen() {
       queryError instanceof Error ? queryError.message : "Plant not found";
 
     return (
-      <ErrorView
+      <BrandedErrorPage
         message={errorMessage}
         onRetry={() => router.replace(`/plants/${slug}`)}
         onBack={() => router.back()}
