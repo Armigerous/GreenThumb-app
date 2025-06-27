@@ -20,8 +20,9 @@
 
 import { useCurrentSeason } from "@/lib/hooks/useCurrentSeason";
 import { Ionicons } from "@expo/vector-icons";
+import { useAtom } from "jotai";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, Modal, ScrollView } from "react-native";
 import RAnimated, {
   interpolateColor,
@@ -30,6 +31,7 @@ import RAnimated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { hasShownWelcomeBannerAtom } from "@/atoms/session";
 
 const AnimatedTouchableOpacity =
   RAnimated.createAnimatedComponent(TouchableOpacity);
@@ -48,6 +50,18 @@ export function WelcomeSubscriptionBanner({
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
   const season = useCurrentSeason();
+
+  const [hasShownInSession, setHasShownInSession] = useAtom(
+    hasShownWelcomeBannerAtom
+  );
+  const [canShow, setCanShow] = useState(false);
+
+  useEffect(() => {
+    if (!hasShownInSession) {
+      setHasShownInSession(true);
+      setCanShow(true);
+    }
+  }, [hasShownInSession, setHasShownInSession]);
 
   const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
@@ -89,7 +103,7 @@ export function WelcomeSubscriptionBanner({
     );
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || !canShow) return null;
 
   // Outcome-focused benefits (not technical features)
   const outcomes = [
