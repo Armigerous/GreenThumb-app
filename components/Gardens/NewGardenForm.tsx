@@ -83,11 +83,7 @@ export default function NewGardenForm({
     // Add user's name suggestions if available
     if (user?.firstName) {
       const firstName = user.firstName;
-      const personalSuggestions = [
-        `${firstName}'s Garden`,
-        `${firstName}'s Green Space`,
-        `${firstName}'s Plant Paradise`,
-      ];
+      const personalSuggestions = [`${firstName}'s Garden`];
       // Insert user name suggestions at the beginning
       suggestions.unshift(...personalSuggestions);
     }
