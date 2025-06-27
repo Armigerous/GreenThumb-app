@@ -294,10 +294,7 @@ export default function GardenConditionsEditor({
   const [formValues, setFormValues] = useState({
     name: garden.name || "",
     // Environment settings
-    sunlight_ids: getIdsFromNames(
-      garden.sunlight_conditions || garden.sunlight,
-      LOOKUP_TABLES.light
-    ),
+    light_ids: getIdsFromNames(garden.sunlight, LOOKUP_TABLES.light),
     soil_texture_ids: getIdsFromNames(
       garden.soil_textures || garden.soil_texture,
       LOOKUP_TABLES.soil_texture
@@ -425,7 +422,7 @@ export default function GardenConditionsEditor({
       // This prevents overwriting fields that might have been changed elsewhere
       const gardenDbUpdate = {
         name: formValues.name,
-        light_ids: formValues.sunlight_ids,
+        light_ids: formValues.light_ids,
         soil_texture_ids: formValues.soil_texture_ids,
         soil_drainage_ids: formValues.soil_drainage_ids,
         soil_ph_ids: formValues.soil_ph_ids,
@@ -526,7 +523,7 @@ export default function GardenConditionsEditor({
     // Track categories with at least one selection
     const filledCategories = {
       // Environment
-      sunlight: formValues.sunlight_ids.length > 0,
+      sunlight: formValues.light_ids.length > 0,
       soilTexture: formValues.soil_texture_ids.length > 0,
       soilPh: formValues.soil_ph_ids.length > 0,
       soilDrainage: formValues.soil_drainage_ids.length > 0,
@@ -596,8 +593,8 @@ export default function GardenConditionsEditor({
                 label="Select the amount of sunlight your garden receives"
                 placeholder="Select sunlight conditions"
                 items={LOOKUP_TABLES.light}
-                value={formValues.sunlight_ids}
-                onChange={(value) => updateFormValues("sunlight_ids", value)}
+                value={formValues.light_ids}
+                onChange={(value) => updateFormValues("light_ids", value)}
               />
             </CollapsibleSection>
 

@@ -65,7 +65,7 @@ export default function NewGarden() {
 
       <View className="pt-4 px-5">
         <Text className="text-2xl text-foreground font-title font-bold mb-6">
-          Create New Garden
+          Let&apos;s Create Your Garden
         </Text>
       </View>
 

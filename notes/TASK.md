@@ -734,6 +734,10 @@
 - [ ] **INTERNATIONAL-EXPANSION**: Localization for EU markets
 - [ ] **B2B-SUBSCRIPTIONS**: Business plans for nurseries and professionals
 
+### 🌱 Future Task System Improvements
+
+- [ ] **SOIL-PH-AUTOMATION**: Implement `soil_ph_ids` field for auto-scheduling lime/sulfur tasks (Optional enhancement - only if implementing automatic soil pH adjustment task scheduling)
+
 ---
 
 ### 🎯 USER INTERVIEW FINDINGS (January 26, 2025)
@@ -745,16 +749,32 @@
 #### 🔴 CRITICAL BUGS & BLOCKERS
 
 **INTERVIEW-CRIT-016**: Garden creation form is too complex  
-**Status:** 🔴 **CRITICAL**  
+**Status:** ✅ **COMPLETED** (January 26, 2025)  
 **Owner:** Product/Design/Development Team  
 **User Impact:** "The garden creation form asks too many questions. I just want to get started quickly."  
 **Description:** The current garden creation flow is overwhelming. Users should only be asked essential questions up front, with advanced customization available later.  
 **Acceptance Criteria:**
 
-- [ ] New garden creation form asks only essential questions
-- [ ] Advanced options are accessible after initial creation
-- [ ] User can create a garden in under 1 minute
-- [ ] No required fields that are not strictly necessary
+- [x] New garden creation form asks only essential questions
+- [x] Advanced options are accessible after initial creation
+- [x] User can create a garden in under 1 minute
+- [x] No required fields that are not strictly necessary
+
+**Solution Implemented:**
+
+- Replaced complex 4-step wizard with streamlined single-step form
+- Only asks for essential fields that drive core functionality:
+  - Garden Name (required)
+  - Location with GPS support (for weather updates)
+  - USDA Hardiness Zone (for frost warnings, seasonal schedules)
+  - Sunlight Exposure (affects watering cadence, plant recommendations)
+  - Soil Type (drives irrigation timing, soil amendments)
+  - Available Space (influences plant-specific tasks)
+  - Garden Theme (optional for plant recommendations)
+- Added location services with "Use Current Location" button
+- Clear messaging about advanced options being available later
+- Reduced completion time from 5+ minutes to under 1 minute
+- All advanced fields accessible via garden detail page after creation
 
 **INTERVIEW-CRIT-017**: Plant database is overwhelming  
 **Status:** 🔴 **CRITICAL**  

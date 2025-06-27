@@ -92,7 +92,7 @@ export const FIELD_TO_TAB_MAPPING = {
   'usda_zones_ids': 'basic-info',
   
   // Environment Tab
-  'sunlightIds': 'environment',
+  'lightIds': 'environment',
   'soilTextureIds': 'environment',
   'soilPhIds': 'environment',
   'soilDrainageIds': 'environment',
@@ -144,7 +144,7 @@ export interface UserGardens {
   
   // Environment
   /** Array of sunlight condition IDs */
-  sunlightIds?: string[];
+  lightIds?: string[];
   /** Array of soil texture type IDs */
   soilTextureIds?: string[];
   /** Array of soil pH range IDs */

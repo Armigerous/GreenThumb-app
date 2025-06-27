@@ -443,9 +443,7 @@ export const calculateGardenCompletion = (garden: any): number => {
     usda_zone_ids: 1,
 
     // Environment - All fields are important
-    sunlight_conditions: 2,
     sunlight: 2,
-    sunlight_ids: 2,
     light_ids: 2,
     soil_textures: 2,
     soil_texture: 2,
