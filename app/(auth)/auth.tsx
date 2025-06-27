@@ -990,6 +990,17 @@ export default function UnifiedAuthScreen() {
                 showValidation={true}
                 showValidationIndicator={shouldValidateEmailStrength}
               />
+
+              {/* Transparency message about email validation */}
+              {shouldValidateEmailStrength && (
+                <View className="mb-2 px-3 py-2 bg-brand-50 border border-brand-100 rounded-lg">
+                  <BodyText className="text-sm text-cream-700 leading-5">
+                    We check email format when you sign up manually to make sure
+                    everything works. Social sign-ins (Google, Apple, Facebook)
+                    skip this since they already verify your email.
+                  </BodyText>
+                </View>
+              )}
               <View className="mb-1 flex-row justify-between">
                 <BodyText className="text-lg font-paragraph-medium text-foreground">
                   Password
@@ -1015,6 +1026,17 @@ export default function UnifiedAuthScreen() {
                 showPasswordToggle={true}
                 isSignUp={shouldValidatePasswordStrength}
               />
+
+              {/* Transparency message about password validation */}
+              {shouldValidatePasswordStrength && (
+                <View className="mb-4 px-3 py-2 bg-brand-50 border border-brand-100 rounded-lg">
+                  <BodyText className="text-sm text-cream-700 leading-5">
+                    We check password strength for new accounts to help keep
+                    your plants safe. Social sign-ins use your existing secure
+                    accounts instead.
+                  </BodyText>
+                </View>
+              )}
 
               <AuthButton
                 label="Continue Manually"
