@@ -15,6 +15,7 @@ import { LoadingSpinner } from "../UI/LoadingSpinner";
 import HelpIcon from "../UI/HelpIcon";
 import BetterSelector from "../UI/BetterSelector";
 import ProgressIndicator from "../UI/ProgressIndicator";
+import AddressAutocomplete from "../UI/AddressAutocomplete";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -72,7 +73,7 @@ export default function NewGardenForm({
   const gardenNameSuggestions = useMemo(() => {
     const suggestions = [
       "Front Yard Garden",
-      "Backyard Oasis",
+      "Backyard",
       "Herb Garden",
       "Balcony Plants",
       "Kitchen Garden",
@@ -105,7 +106,7 @@ export default function NewGardenForm({
     []
   );
 
-  // Get current location using device GPS
+  // Get current location using device GPS and fill the address field
   const getCurrentLocation = async () => {
     setIsGettingLocation(true);
     try {
@@ -126,7 +127,8 @@ export default function NewGardenForm({
         longitude,
       });
 
-      const addressString = [address.city, address.region, address.country]
+      // Format address as "City, State" for better UX
+      const addressString = [address.city, address.region]
         .filter(Boolean)
         .join(", ");
 
@@ -147,21 +149,18 @@ export default function NewGardenForm({
     }
   };
 
-  // Simple geocoding function
-  const geocodeAddress = async (address: string) => {
-    try {
-      const results = await Location.geocodeAsync(address);
-      if (results.length > 0) {
-        const { latitude, longitude } = results[0];
-        setFormValues((prev) => ({
-          ...prev,
-          latitude,
-          longitude,
-        }));
-      }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-    }
+  // Handle address selection from autocomplete
+  const handleAddressSelect = (addressData: {
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+  }) => {
+    setFormValues((prev) => ({
+      ...prev,
+      location_address: addressData.address,
+      latitude: addressData.latitude,
+      longitude: addressData.longitude,
+    }));
   };
 
   // Step validation functions
@@ -212,11 +211,6 @@ export default function NewGardenForm({
 
     setError(null);
     setIsSubmitting(true);
-
-    // Try to geocode address if we don't have coordinates
-    if (formValues.location_address && !formValues.latitude) {
-      await geocodeAddress(formValues.location_address);
-    }
 
     try {
       const { error: submitError } = await supabase
@@ -271,7 +265,7 @@ export default function NewGardenForm({
         return (
           <View className="space-y-6">
             <View className="mb-6">
-              <TitleText className="text-2xl mb-2">Name Your Garden</TitleText>
+              <TitleText className="text-3xl mb-2">Name Your Garden</TitleText>
               <BodyText>
                 Give your garden a name that helps you identify it and makes it
                 feel like home.
@@ -323,99 +317,80 @@ export default function NewGardenForm({
 
       case 2:
         return (
-          <View className="space-y-6">
-            <View className="mb-6">
-              <TitleText className="text-2xl mb-2">
+          <View className="space-y-8">
+            <View className="mb-2">
+              <TitleText className="text-3xl mb-3">
                 Where&apos;s Your Garden?
               </TitleText>
-              <BodyText className="text-cream-600 leading-relaxed">
-                Tell us where your garden is so we can help with weather alerts,
-                frost warnings, and when to plant things.
+              <BodyText className="text-cream-600 leading-relaxed mb-4">
+                Help us provide weather alerts, frost warnings, and optimal
+                planting times for your area.
               </BodyText>
             </View>
 
-            <View className="bg-brand-50 border border-brand-200 rounded-lg p-4">
-              <View className="flex-row items-center mb-4">
-                <Ionicons
-                  name="partly-sunny-outline"
-                  size={24}
-                  color="#5E994B"
-                />
-                <BodyText className="text-brand-700 font-medium ml-2">
-                  Weather Integration Benefits
-                </BodyText>
-              </View>
-              <View className="space-y-2">
-                <BodyText className="text-brand-600 text-sm">
-                  • Get alerts when frost is coming
-                </BodyText>
-                <BodyText className="text-brand-600 text-sm">
-                  • Know when to plant and harvest
-                </BodyText>
-                <BodyText className="text-brand-600 text-sm">
-                  • Water less when it rains
-                </BodyText>
-                <BodyText className="text-brand-600 text-sm">
-                  • We&apos;ll figure out your growing zone
-                </BodyText>
-              </View>
-            </View>
-
-            <View className="space-y-4">
+            <View className="space-y-6">
               <View>
-                <View className="flex-row items-center mb-2">
-                  <TitleText className="text-lg">Garden Location</TitleText>
-                  <BodyText className="text-brand-600 ml-2 text-sm">
-                    (Highly Recommended)
-                  </BodyText>
+                <View className="flex-row items-center justify-between mb-3">
+                  <View className="flex-row items-center">
+                    <TitleText className="text-lg">Garden Location</TitleText>
+                    <BodyText className="text-primary ml-2 text-sm">
+                      (Highly Recommended)
+                    </BodyText>
+                  </View>
                   <HelpIcon
-                    title="Garden Location"
-                    explanation="Helps us send weather alerts, frost warnings, and know when to plant things in your area."
+                    title="Location Privacy"
+                    explanation="We only use your location for weather data and growing zone detection. Your garden's exact address is never shared."
                   />
                 </View>
 
-                <TextInput
-                  className="border border-cream-300 rounded-lg p-3.5 bg-cream-50 text-base"
+                {/* Privacy note - moved up for better context */}
+                <View className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <View className="flex-row items-start">
+                    <Ionicons
+                      name="shield-checkmark-outline"
+                      size={16}
+                      color="#3B82F6"
+                      className="mt-0.5 mr-2"
+                    />
+                    <View className="flex-1">
+                      <BodyText className="text-blue-800 text-sm">
+                        Optional • We only store your city and state for weather
+                        data • Never shared with anyone
+                      </BodyText>
+                    </View>
+                  </View>
+                </View>
+
+                <AddressAutocomplete
                   value={formValues.location_address}
                   onChangeText={(text) =>
                     updateFormValues("location_address", text)
                   }
-                  onBlur={() => {
-                    if (formValues.location_address && !formValues.latitude) {
-                      geocodeAddress(formValues.location_address);
-                    }
-                  }}
-                  placeholder="Enter your city and state (e.g., Raleigh, NC)"
-                  placeholderTextColor="#9e9a90"
+                  onAddressSelect={handleAddressSelect}
+                  placeholder="City, State (e.g., Asheville, NC)"
+                  className="mb-4"
                 />
-              </View>
 
-              <TouchableOpacity
-                className="flex-row items-center justify-center bg-brand-100 border border-brand-300 rounded-lg p-3"
-                onPress={getCurrentLocation}
-                disabled={isGettingLocation}
-              >
-                {isGettingLocation ? (
-                  <LoadingSpinner />
-                ) : (
-                  <>
-                    <Ionicons
-                      name="location-outline"
-                      size={20}
-                      color="#5E994B"
-                    />
-                    <BodyText className="text-brand-700 font-medium ml-2">
-                      Use Current Location
-                    </BodyText>
-                  </>
-                )}
-              </TouchableOpacity>
-
-              <View className="bg-accent-50 border border-accent-200 rounded-lg p-3">
-                <BodyText className="text-accent-800 text-sm text-center">
-                  Don&apos;t worry - you can skip this step and add location
-                  later if needed.
-                </BodyText>
+                <TouchableOpacity
+                  className="flex-row items-center justify-center bg-brand-100 border border-brand-200 rounded-lg p-4"
+                  onPress={getCurrentLocation}
+                  disabled={isGettingLocation}
+                >
+                  {isGettingLocation ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="location-outline"
+                        size={20}
+                        color="#5E994B"
+                      />
+                      <BodyText className="text-brand-700 font-medium ml-2">
+                        Fill with Current Location
+                      </BodyText>
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -593,22 +568,22 @@ export default function NewGardenForm({
               />
             </View>
 
-            {/* Advanced options callout */}
-            <View className="bg-brand-50 border border-brand-200 rounded-lg p-4">
+            {/* Advanced options callout - improved styling */}
+            <View className="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-4">
               <View className="flex-row items-start">
                 <Ionicons
                   name="settings-outline"
-                  size={20}
-                  color="#5E994B"
-                  className="mt-0.5 mr-3"
+                  size={16}
+                  color="#22C55E"
+                  className="mt-1 mr-3"
                 />
                 <View className="flex-1">
-                  <BodyText className="text-brand-700 font-medium mb-1">
+                  <BodyText className="text-green-800 font-medium mb-1">
                     Want more options?
                   </BodyText>
-                  <BodyText className="text-brand-600 text-sm leading-relaxed">
-                    After creating your garden, you can add more details like
-                    soil pH, drainage, and other features from your garden page.
+                  <BodyText className="text-green-700 text-sm leading-relaxed">
+                    After creating your garden, you can add soil pH, drainage,
+                    and other advanced features.
                   </BodyText>
                 </View>
               </View>
@@ -642,28 +617,13 @@ export default function NewGardenForm({
           {renderStepContent()}
         </ScrollView>
 
-        {/* Validation messages - positioned above buttons */}
-        {!isCurrentStepValid() && currentStep === 1 && (
-          <View className="mt-4 bg-accent-100 border border-accent-800 rounded-lg p-3">
-            <BodyText className="text-accent-800 text-sm text-center">
-              Please enter a garden name to continue
-            </BodyText>
-          </View>
-        )}
-
-        {!isCurrentStepValid() && currentStep === 3 && (
-          <View className="mt-4 bg-accent-100 border border-accent-800 rounded-lg p-3">
-            <BodyText className="text-accent-800 text-sm text-center">
-              Please fill in all required growing conditions to continue
-            </BodyText>
-          </View>
-        )}
-
+        {/* Error message for submission failures */}
         {error && (
-          <View className="mt-4 bg-destructive-50 border border-destructive-200 rounded-lg p-3">
-            <BodyText className="text-destructive-800 text-sm text-center">
-              {error}
-            </BodyText>
+          <View className="bg-red-50 border-l-4 border-red-400 rounded-r-lg p-4 mb-4">
+            <View className="flex-row items-center">
+              <Ionicons name="alert-circle-outline" size={16} color="#EF4444" />
+              <BodyText className="text-red-800 text-sm ml-2">{error}</BodyText>
+            </View>
           </View>
         )}
 
