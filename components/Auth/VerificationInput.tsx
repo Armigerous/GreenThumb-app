@@ -87,7 +87,7 @@ export function VerificationInput({
           validationType="verification"
           error={error}
           showValidation={true}
-          maxLength={8}
+          maxLength={6}
           autoFocus={true}
         />
       </View>
@@ -122,7 +122,7 @@ export function VerificationInput({
           loadingLabel="Verifying..."
           icon="checkmark-circle-outline"
           disabled={
-            !verificationCode || verificationCode.length < 4 || isLoading
+            !verificationCode || verificationCode.length < 6 || isLoading
           }
         />
 
