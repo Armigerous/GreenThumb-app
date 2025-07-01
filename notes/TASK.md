@@ -236,6 +236,84 @@
 
 ---
 
+## 🟡 NEW HIGH PRIORITY TASKS - Garden Setup UX Improvements
+
+### **UI-LOGIC-023**: Fix selector option ordering in garden setup
+
+**Status:** 🟡 **HIGH** - User experience consistency  
+**Owner:** Development Team  
+**Due:** July 20, 2025  
+**User Impact:** "The options in dropdowns don't follow logical order - growth rate shows medium, rapid, slow instead of slow to fast"  
+**Description:** All selector options in garden setup need logical, intuitive ordering
+
+**Affected Components:**
+
+- `GrowingConditionsStep.tsx` - All selectors need reordering
+- `StyleStep.tsx` - Garden style options need logical grouping
+- `lib/gardenHelpers.ts` - LOOKUP_TABLES need reordering
+
+**Required Changes:**
+
+**Growth Rate:** Currently `[Medium, Rapid, Slow]` → Should be `[Slow, Medium, Rapid]` (slowest to fastest)
+
+**Maintenance:** Currently `[Low, Medium, High]` → Should be `[Low, Medium, High]` (already correct)
+
+**Available Space:** Currently random order → Should be `[Less than 12 inches, 12 inches-3 feet, 3 feet-6 feet, 6 feet-12 feet, 12-24 feet, 24-60 feet, more than 60 feet]` (smallest to biggest)
+
+**Garden Style (landscape_theme):** Currently random order → Should be logically grouped:
+
+- **Popular Styles:** Cottage Garden, English Garden, Asian Garden
+- **Functional Gardens:** Edible Garden, Cutting Garden, Rain Garden
+- **Specialty Gardens:** Pollinator Garden, Butterfly Garden, Native Garden, Drought Tolerant Garden
+- **Unique Gardens:** Rock Garden, Water Garden, Winter Garden, Shade Garden
+- **Family Gardens:** Children's Garden, Fairy Garden
+- **Sensory Gardens:** Garden for the Blind, Nighttime Garden
+
+**Acceptance Criteria:**
+
+- [ ] Growth rate options appear as: Slow → Medium → Rapid
+- [ ] Available space options appear smallest to largest
+- [ ] Maintenance options remain: Low → Medium → High
+- [ ] Garden style options are logically grouped and alphabetized within groups
+- [ ] All existing functionality preserved
+- [ ] No breaking changes to database values
+
+### **UI-MULTI-024**: Add subtle multiple selection indicator to growth rate selector
+
+**Status:** 🟡 **HIGH** - User experience clarity  
+**Owner:** Development Team  
+**Due:** July 22, 2025  
+**User Impact:** "I didn't realize I could select multiple growth rates until I read the help text"  
+**Description:** Users need clear visual indication when multiple selections are allowed without text clutter
+
+**Implementation Options:**
+
+1. **Subtle label addition:** "Do You Want Quick Results or Long-Term Plants? (Select multiple)"
+2. **Visual indicator:** Small multi-select icon next to chevron
+3. **Placeholder text:** "Choose one or more growth rates"
+4. **Help text prominence:** Make help text more visible
+
+**Recommended Solution:** Update placeholder text to indicate multiple selection capability
+
+**Current:** `"Choose between fast or slow growing plants"`  
+**Proposed:** `"Choose one or more growth preferences"`
+
+**Alternative Approaches:**
+
+- Add small "(multiple)" text to label
+- Use different chevron icon that suggests multiple selection
+- Add subtle visual cue in selector button design
+
+**Acceptance Criteria:**
+
+- [ ] Users clearly understand multiple selection is possible
+- [ ] No visual clutter or overwhelming text
+- [ ] Solution works consistently across all multiple-selection selectors
+- [ ] Maintains brand design guidelines
+- [ ] Clear distinction between single and multiple selection selectors
+
+---
+
 ## 🔥 CRITICAL - Week of Jan 14-20 (T-7 days)
 
 ### 🐛 High Priority Bug Fixes
