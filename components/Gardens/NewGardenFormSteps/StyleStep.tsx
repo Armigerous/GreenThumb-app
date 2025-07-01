@@ -27,7 +27,9 @@ export default function StyleStep({
         label="Garden Style (Optional)"
         required={false}
         placeholder="e.g. Cottage, Modern, Rock Garden"
-        items={LOOKUP_TABLES.landscape_theme}
+        items={LOOKUP_TABLES.landscape_theme.filter(
+          (item) => item.label !== "none"
+        )}
         value={landscapeThemeIds}
         multiple={true}
         onChange={onLandscapeThemeChange}
