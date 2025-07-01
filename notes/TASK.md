@@ -64,6 +64,25 @@
 - [ ] **Environment Variables**: Set all required Stripe environment variables
 - [ ] **Security Review**: Ensure API keys are properly secured
 
+### 🔧 RECENTLY COMPLETED
+
+**DATABASE-FIX-001**: Fixed materialized view concurrent refresh error  
+**Status:** ✅ **COMPLETED** - July 1, 2025  
+**Owner:** Development Team  
+**Issue:** Garden creation was failing with error "cannot refresh materialized view 'public.user_gardens_full_data' concurrently"  
+**Solution:** Added unique index on `id` column of materialized view to enable concurrent refresh  
+**Files Modified:**
+
+- Applied migration: `fix_materialized_view_concurrent_refresh_v2`
+- Created unique index: `idx_user_gardens_full_data_id_unique`
+
+**Requirements Completed:**
+
+- [x] **Root Cause Analysis**: Identified missing unique index requirement for concurrent refresh
+- [x] **Database Migration**: Created unique index on materialized view
+- [x] **Testing**: Verified concurrent refresh now works without errors
+- [x] **Validation**: Confirmed garden creation flow now works properly
+
 **SUBS-INT-014**: App navigation integration  
 **Status:** 🟡 **HIGH** - User experience  
 **Owner:** Development Team  
