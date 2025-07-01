@@ -112,7 +112,7 @@ export default function GardenCard({
         <View className="flex-row h-full">
           {/* Plant Image - Only shown on gardens page */}
           {isGardensPage && (
-            <View className="mr-2 self-center rounded-md overflow-hidden h-24 w-24">
+            <View className="mr-2 self-center rounded-md overflow-hidden h-24 w-24 flex-shrink-0">
               {firstPlantImage ? (
                 <CachedImage
                   uri={firstPlantImage}
@@ -131,12 +131,18 @@ export default function GardenCard({
             </View>
           )}
 
-          <View className="flex-1 px-2 flex-col justify-between">
+          <View className="flex-1 px-2 flex-col justify-between min-w-0">
             {/* Garden Name and Alert Badges */}
-            <View>
-              <View className="flex-row justify-between items-start">
-                <View className="flex-row items-center flex-1 mr-2">
-                  <TitleText className="text-lg text-foreground flex-1">
+            <View className="flex-1">
+              <View className="flex-row justify-between items-start mb-1">
+                <View className="flex-row items-center flex-1 min-w-0 mr-2">
+                  <TitleText
+                    className={`${
+                      isGardensPage ? "text-lg" : "text-base"
+                    } text-foreground flex-1`}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {garden.name}
                   </TitleText>
                   {/* Overdue Task Indicator Dot */}
@@ -144,8 +150,9 @@ export default function GardenCard({
                     <TouchableOpacity
                       onPress={handleOverdueIndicatorPress}
                       hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                      className="ml-1 flex-shrink-0"
                     >
-                      <View className="w-3 h-3">
+                      <View className="w-3 h-3 relative">
                         {overdueTasksCount > 0 && (
                           <View className="absolute -top-1 -right-1 bg-destructive w-4 h-4 items-center justify-center rounded-md">
                             <Text className="text-[8px] text-cream-50 font-bold">
@@ -157,20 +164,26 @@ export default function GardenCard({
                     </TouchableOpacity>
                   )}
                 </View>
-                <View className="flex-row">
-                  {/* Plants Needing Care Badge */}
-                  {garden.plants_needing_care > 0 && (
-                    <View className="bg-accent-200 rounded-full px-2.5 py-1">
-                      <BodyText className="text-xs text-accent-800 font-medium">
-                        {garden.plants_needing_care} needs care
-                      </BodyText>
-                    </View>
-                  )}
-                </View>
+                {/* Plants Needing Care Badge */}
+                {garden.plants_needing_care > 0 && (
+                  <View className="bg-accent-200 rounded-full px-2 py-0.5 flex-shrink-0">
+                    <BodyText
+                      className={`${
+                        isGardensPage ? "text-xs" : "text-[10px]"
+                      } text-accent-800 font-medium`}
+                    >
+                      {garden.plants_needing_care} needs care
+                    </BodyText>
+                  </View>
+                )}
               </View>
 
               {/* Plant Count */}
-              <BodyText className="text-sm text-cream-700 mb-2">
+              <BodyText
+                className={`${
+                  isGardensPage ? "text-sm" : "text-xs"
+                } text-cream-700 ${isGardensPage ? "mb-2" : "mb-1"}`}
+              >
                 {garden.total_plants === 1
                   ? "1 Plant"
                   : `${garden.total_plants} Plants`}
@@ -179,7 +192,7 @@ export default function GardenCard({
 
             {/* Health Progress Bar and Percentage Side by Side */}
             <View className="flex-row items-center">
-              <View style={{ width: maxWidth }}>
+              <View style={{ width: maxWidth }} className="flex-shrink-0">
                 <AnimatedProgressBar
                   percentage={
                     startHealthAnimation ? garden.health_percentage : 0
@@ -189,7 +202,11 @@ export default function GardenCard({
                   duration={600}
                 />
               </View>
-              <BodyText className="text-sm text-cream-700 ml-2">
+              <BodyText
+                className={`${
+                  isGardensPage ? "text-sm" : "text-xs"
+                } text-cream-700 ml-2 flex-shrink-0`}
+              >
                 {garden.health_percentage}%
               </BodyText>
             </View>
@@ -197,7 +214,7 @@ export default function GardenCard({
 
           {/* Navigation arrow - Only shown on gardens page */}
           {isGardensPage && (
-            <View className="justify-center ml-2">
+            <View className="justify-center ml-2 flex-shrink-0">
               <Ionicons name="arrow-forward" size={22} color="#9e9a90" />
             </View>
           )}
