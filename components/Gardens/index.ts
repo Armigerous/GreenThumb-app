@@ -7,6 +7,9 @@ export { default as GardenConditionsEditor } from './GardenConditionsEditor';
 // Editor sections
 export * from './GardenEditorSections';
 
+// New Garden Form Steps
+export * from './NewGardenFormSteps';
+
 // Plant components 
 export { default as EditPlantModal } from './Plants/EditPlantModal';
 export { default as AddCareLogModal } from './Plants/AddCareLogModal';

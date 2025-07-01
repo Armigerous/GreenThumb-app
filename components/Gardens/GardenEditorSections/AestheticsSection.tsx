@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import CollapsibleSection from "@/components/UI/CollapsibleSection";
-import BetterSelector from "@/components/UI/BetterSelector";
+import Selector from "@/components/UI/Selector";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 
 type AestheticsSectionProps = {
@@ -16,9 +16,12 @@ export default function AestheticsSection({
   return (
     <View className="space-y-5 px-4">
       {/* Flower Characteristics */}
-      <CollapsibleSection title="Flower Characteristics" icon="flower-outline">
+      <CollapsibleSection
+        title="Flower Characteristics"
+        icon="color-palette-outline"
+      >
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="Flower Colors"
             placeholder="Select flower colors"
             items={LOOKUP_TABLES.flower_color}
@@ -30,9 +33,9 @@ export default function AestheticsSection({
 
           {LOOKUP_TABLES.flower_bloom_time && (
             <View className="mt-4">
-              <BetterSelector
-                label="Flower Bloom Time"
-                placeholder="Select bloom times"
+              <Selector
+                label="Flower Bloom Times"
+                placeholder="Select flower bloom times"
                 items={LOOKUP_TABLES.flower_bloom_time}
                 value={formValues.flower_bloom_time_ids}
                 onChange={(value: number[]) =>
@@ -44,8 +47,8 @@ export default function AestheticsSection({
 
           {LOOKUP_TABLES.flower_value_to_gardener && (
             <View className="mt-4">
-              <BetterSelector
-                label="Flower Value"
+              <Selector
+                label="Flower Value to Gardener"
                 placeholder="Select flower values"
                 items={LOOKUP_TABLES.flower_value_to_gardener}
                 value={formValues.flower_value_to_gardener_ids}
@@ -61,7 +64,7 @@ export default function AestheticsSection({
       {/* Leaf Characteristics */}
       <CollapsibleSection title="Leaf Characteristics" icon="leaf-outline">
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="Leaf Colors"
             placeholder="Select leaf colors"
             items={LOOKUP_TABLES.leaf_color}
@@ -73,7 +76,7 @@ export default function AestheticsSection({
 
           {LOOKUP_TABLES.leaf_feel && (
             <View className="mt-4">
-              <BetterSelector
+              <Selector
                 label="Leaf Feel"
                 placeholder="Select leaf textures"
                 items={LOOKUP_TABLES.leaf_feel}
@@ -87,7 +90,7 @@ export default function AestheticsSection({
 
           {LOOKUP_TABLES.leaf_value && (
             <View className="mt-4">
-              <BetterSelector
+              <Selector
                 label="Leaf Value"
                 placeholder="Select leaf values"
                 items={LOOKUP_TABLES.leaf_value}
@@ -103,9 +106,9 @@ export default function AestheticsSection({
 
       {/* Fall Color */}
       {LOOKUP_TABLES.fall_color && (
-        <CollapsibleSection title="Fall Colors" icon="leaf-outline">
+        <CollapsibleSection title="Fall Colors" icon="snow-outline">
           <View className="mt-2">
-            <BetterSelector
+            <Selector
               label="Fall Colors"
               placeholder="Select fall colors"
               items={LOOKUP_TABLES.fall_color}
@@ -119,9 +122,9 @@ export default function AestheticsSection({
       )}
 
       {/* Texture */}
-      <CollapsibleSection title="Texture" icon="apps-outline">
+      <CollapsibleSection title="Texture" icon="grid-outline">
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="Texture Preference"
             placeholder="Select texture preference"
             items={LOOKUP_TABLES.texture}

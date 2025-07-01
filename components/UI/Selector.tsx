@@ -11,31 +11,38 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import HelpIcon from "./HelpIcon";
+import { BodyText, TitleText } from "./Text";
 
-export type LookupItem = {
+export type LookupItem<T extends string | number> = {
   label: string;
-  value: number;
+  value: T;
 };
 
-type BetterSelectorProps<T extends boolean = true> = {
+type SelectorProps<T extends string | number, U extends boolean = true> = {
   label: string;
   placeholder: string;
-  items: LookupItem[];
-  value: T extends true ? number[] : number | null;
-  onChange: (value: T extends true ? number[] : number | null) => void;
-  multiple?: T;
-  labelHidden?: boolean;
+  items: LookupItem<T>[];
+  value: U extends true ? T[] : T | null;
+  onChange: (value: U extends true ? T[] : T | null) => void;
+  multiple?: U;
+  required?: boolean;
+  helpExplanation?: string;
 };
 
-export default function BetterSelector<T extends boolean = true>({
+export default function Selector<
+  T extends string | number,
+  U extends boolean = true
+>({
   label,
   placeholder,
   items,
   value,
   onChange,
-  multiple = true as T,
-  labelHidden = false,
-}: BetterSelectorProps<T>) {
+  multiple = true as U,
+  required = false,
+  helpExplanation,
+}: SelectorProps<T, U>) {
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -82,7 +89,7 @@ export default function BetterSelector<T extends boolean = true>({
   // Get the display value for the selector
   const getDisplayValue = () => {
     if (multiple) {
-      const selectedItems = (value as number[]) || [];
+      const selectedItems = (value as T[]) || [];
       if (selectedItems.length === 0) return placeholder;
 
       if (selectedItems.length === 1) {
@@ -94,7 +101,7 @@ export default function BetterSelector<T extends boolean = true>({
 
       return `${selectedItems.length} selected`;
     } else {
-      const selectedValue = value as number | null;
+      const selectedValue = value as T | null;
       if (selectedValue === null) return placeholder;
 
       const selectedItem = items.find((item) => item.value === selectedValue);
@@ -103,9 +110,9 @@ export default function BetterSelector<T extends boolean = true>({
   };
 
   // Handle item selection
-  const handleItemToggle = (itemValue: number) => {
+  const handleItemToggle = (itemValue: T) => {
     if (multiple) {
-      const selectedItems = [...((value as number[]) || [])];
+      const selectedItems = [...((value as T[]) || [])];
       const index = selectedItems.indexOf(itemValue);
 
       if (index === -1) {
@@ -128,35 +135,37 @@ export default function BetterSelector<T extends boolean = true>({
   };
 
   // Check if an item is selected
-  const isSelected = (itemValue: number) => {
+  const isSelected = (itemValue: T) => {
     if (multiple) {
-      return (value as number[])?.includes(itemValue) || false;
+      return (value as T[])?.includes(itemValue) || false;
     } else {
       return value === itemValue;
     }
   };
 
   return (
-    <View className="mb-5">
-      {!labelHidden && (
-        <Text className="text-foreground font-paragraph font-medium mb-1.5 text-base">
-          {label}
-        </Text>
-      )}
+    <View className="mb-6">
+      <View className="flex-row items-center mb-1.5">
+        <TitleText className="text-foreground font-medium">{label}</TitleText>
+        {required && <BodyText className="text-destructive ml-1">*</BodyText>}
+        {helpExplanation && (
+          <HelpIcon title={label} explanation={helpExplanation} />
+        )}
+      </View>
 
       <TouchableOpacity
         onPress={handleOpen}
-        className="flex-row items-center justify-between px-4 py-3.5 bg-white border border-cream-300 rounded-lg"
+        className="flex-row items-center justify-between px-4 py-3.5 bg-cream-50 border border-cream-300 rounded-lg"
       >
-        <Text
+        <BodyText
           className={`${
-            (multiple ? (value as number[])?.length || 0 : value)
-              ? "text-gray-800"
-              : "text-gray-300"
+            (multiple ? (value as T[])?.length || 0 : value)
+              ? "text-foreground"
+              : "text-cream-500/80"
           } text-base font-paragraph`}
         >
           {getDisplayValue()}
-        </Text>
+        </BodyText>
         <Ionicons name="chevron-down" size={18} color="#4b5563" />
       </TouchableOpacity>
 
@@ -170,7 +179,7 @@ export default function BetterSelector<T extends boolean = true>({
           <View className="flex-1 bg-black/50 justify-end">
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
               <Animated.View
-                className="bg-white rounded-t-xl max-h-[80%]"
+                className="bg-cream-50 rounded-t-xl max-h-[80%]"
                 style={{
                   transform: [
                     {
@@ -183,27 +192,34 @@ export default function BetterSelector<T extends boolean = true>({
                 }}
               >
                 {/* Modal header */}
-                <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+                <View className="flex-row items-center p-4 border-b border-cream-300">
                   <TouchableOpacity
                     onPress={handleClear}
                     className="px-3 py-1.5"
                   >
-                    <Text className="text-brand-500 font-paragraph font-medium">
+                    <BodyText className="text-destructive font-medium">
                       Clear
-                    </Text>
+                    </BodyText>
                   </TouchableOpacity>
 
-                  <Text className="text-lg font-title font-medium">
-                    {label}
-                  </Text>
+                  <View className="flex-1 px-3">
+                    <TitleText
+                      className="text-lg font-medium text-center"
+                      numberOfLines={2}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.8}
+                    >
+                      {label}
+                    </TitleText>
+                  </View>
 
                   <TouchableOpacity
                     onPress={handleClose}
                     className="px-3 py-1.5"
                   >
-                    <Text className="text-brand-500 font-paragraph font-medium">
+                    <BodyText className="text-primary font-medium">
                       Done
-                    </Text>
+                    </BodyText>
                   </TouchableOpacity>
                 </View>
 

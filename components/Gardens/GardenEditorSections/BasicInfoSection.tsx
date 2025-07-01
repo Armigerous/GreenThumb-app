@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput } from "react-native";
 import CollapsibleSection from "../../UI/CollapsibleSection";
-import BetterSelector from "../../UI/BetterSelector";
+import Selector from "../../UI/Selector";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 
 type BasicInfoSectionProps = {
@@ -45,7 +45,7 @@ export default function BasicInfoSection({
         initiallyExpanded={true}
       >
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="USDA Hardiness Zone"
             placeholder="Select hardiness zone"
             items={LOOKUP_TABLES.usda_zone}
@@ -62,7 +62,7 @@ export default function BasicInfoSection({
         initiallyExpanded={true}
       >
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="North Carolina Region"
             placeholder="Select NC region"
             items={LOOKUP_TABLES.nc_regions}

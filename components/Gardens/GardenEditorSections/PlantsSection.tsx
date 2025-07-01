@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import CollapsibleSection from "@/components/UI/CollapsibleSection";
-import BetterSelector from "@/components/UI/BetterSelector";
+import Selector from "@/components/UI/Selector";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 
 type PlantsSectionProps = {
@@ -19,7 +19,7 @@ export default function PlantsSection({
       {LOOKUP_TABLES.plant_type && (
         <CollapsibleSection title="Plant Types" icon="leaf-outline">
           <View className="mt-2">
-            <BetterSelector
+            <Selector
               label="Plant Types"
               placeholder="Select plant types"
               items={LOOKUP_TABLES.plant_type}
@@ -36,7 +36,7 @@ export default function PlantsSection({
       {LOOKUP_TABLES.habit_form && (
         <CollapsibleSection title="Plant Form/Habit" icon="git-branch-outline">
           <View className="mt-2">
-            <BetterSelector
+            <Selector
               label="Plant Form/Habit"
               placeholder="Select plant forms"
               items={LOOKUP_TABLES.habit_form}
@@ -52,7 +52,7 @@ export default function PlantsSection({
       {/* Growth Rate */}
       <CollapsibleSection title="Growth" icon="trending-up-outline">
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="Growth Rate"
             placeholder="Select growth rate preference"
             items={LOOKUP_TABLES.growth_rate}
@@ -66,7 +66,7 @@ export default function PlantsSection({
       {/* Wildlife */}
       <CollapsibleSection title="Wildlife & Challenges" icon="paw-outline">
         <View className="mt-2">
-          <BetterSelector
+          <Selector
             label="Attracts Wildlife"
             placeholder="Select wildlife attractions"
             items={LOOKUP_TABLES.attracts}
@@ -77,7 +77,7 @@ export default function PlantsSection({
           />
 
           <View className="mt-4">
-            <BetterSelector
+            <Selector
               label="Resistance Challenges"
               placeholder="Select resistance challenges"
               items={LOOKUP_TABLES.resistance_to_challenges}
@@ -89,7 +89,7 @@ export default function PlantsSection({
           </View>
 
           <View className="mt-4">
-            <BetterSelector
+            <Selector
               label="Problems to Exclude"
               placeholder="Select problems to exclude"
               items={LOOKUP_TABLES.problems}

@@ -220,7 +220,7 @@ function SelectionModal<T extends boolean = true>({
 }
 
 // Custom selector component that uses a modal for selection
-function BetterSelector<T extends boolean = true>({
+function Selector<T extends boolean = true>({
   label,
   placeholder,
   items,
@@ -589,7 +589,7 @@ export default function GardenConditionsEditor({
               icon="sunny"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Select the amount of sunlight your garden receives"
                 placeholder="Select sunlight conditions"
                 items={LOOKUP_TABLES.light}
@@ -603,7 +603,7 @@ export default function GardenConditionsEditor({
               icon="layers-outline"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Soil Texture"
                 placeholder="Select soil texture"
                 items={LOOKUP_TABLES.soil_texture}
@@ -613,7 +613,7 @@ export default function GardenConditionsEditor({
                 }
               />
 
-              <BetterSelector
+              <Selector
                 label="Soil pH"
                 placeholder="Select soil pH"
                 items={LOOKUP_TABLES.soil_ph}
@@ -621,7 +621,7 @@ export default function GardenConditionsEditor({
                 onChange={(value) => updateFormValues("soil_ph_ids", value)}
               />
 
-              <BetterSelector
+              <Selector
                 label="Soil Drainage"
                 placeholder="Select soil drainage"
                 items={LOOKUP_TABLES.soil_drainage}
@@ -633,7 +633,7 @@ export default function GardenConditionsEditor({
             </CollapsibleSection>
 
             <CollapsibleSection title="Location" icon="location-outline">
-              <BetterSelector
+              <Selector
                 label="Landscape Location"
                 placeholder="Select locations"
                 items={LOOKUP_TABLES.landscape_location}
@@ -644,7 +644,7 @@ export default function GardenConditionsEditor({
               />
 
               {LOOKUP_TABLES.nc_regions && (
-                <BetterSelector
+                <Selector
                   label="Region"
                   placeholder="Select region"
                   items={LOOKUP_TABLES.nc_regions}
@@ -654,7 +654,7 @@ export default function GardenConditionsEditor({
               )}
 
               {LOOKUP_TABLES.usda_zone && (
-                <BetterSelector
+                <Selector
                   label="USDA Zone"
                   placeholder="Select USDA zone"
                   items={LOOKUP_TABLES.usda_zone}
@@ -673,7 +673,7 @@ export default function GardenConditionsEditor({
               icon="color-palette-outline"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Garden Theme"
                 placeholder="Select garden themes"
                 items={LOOKUP_TABLES.landscape_theme}
@@ -683,7 +683,7 @@ export default function GardenConditionsEditor({
                 }
               />
 
-              <BetterSelector
+              <Selector
                 label="Wildlife Attraction"
                 placeholder="Select wildlife attractions"
                 items={LOOKUP_TABLES.attracts}
@@ -692,7 +692,7 @@ export default function GardenConditionsEditor({
               />
 
               {LOOKUP_TABLES.design_feature && (
-                <BetterSelector
+                <Selector
                   label="Design Features"
                   placeholder="Select design features"
                   items={LOOKUP_TABLES.design_feature}
@@ -709,7 +709,7 @@ export default function GardenConditionsEditor({
               icon="flower-outline"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Flower Colors"
                 placeholder="Select flower colors"
                 items={LOOKUP_TABLES.flower_color}
@@ -720,7 +720,7 @@ export default function GardenConditionsEditor({
               />
 
               {LOOKUP_TABLES.flower_bloom_time && (
-                <BetterSelector
+                <Selector
                   label="Flower Bloom Times"
                   placeholder="Select flower bloom times"
                   items={LOOKUP_TABLES.flower_bloom_time}
@@ -732,7 +732,7 @@ export default function GardenConditionsEditor({
               )}
 
               {LOOKUP_TABLES.flower_value_to_gardener && (
-                <BetterSelector
+                <Selector
                   label="Flower Values"
                   placeholder="Select flower values"
                   items={LOOKUP_TABLES.flower_value_to_gardener}
@@ -743,7 +743,7 @@ export default function GardenConditionsEditor({
                 />
               )}
 
-              <BetterSelector
+              <Selector
                 label="Leaf Colors"
                 placeholder="Select leaf colors"
                 items={LOOKUP_TABLES.leaf_color}
@@ -752,7 +752,7 @@ export default function GardenConditionsEditor({
               />
 
               {LOOKUP_TABLES.leaf_feel && (
-                <BetterSelector
+                <Selector
                   label="Leaf Textures"
                   placeholder="Select leaf textures"
                   items={LOOKUP_TABLES.leaf_feel}
@@ -762,7 +762,7 @@ export default function GardenConditionsEditor({
               )}
 
               {LOOKUP_TABLES.leaf_value && (
-                <BetterSelector
+                <Selector
                   label="Leaf Values"
                   placeholder="Select leaf values"
                   items={LOOKUP_TABLES.leaf_value}
@@ -774,7 +774,7 @@ export default function GardenConditionsEditor({
               )}
 
               {LOOKUP_TABLES.fall_color && (
-                <BetterSelector
+                <Selector
                   label="Fall Colors"
                   placeholder="Select fall colors"
                   items={LOOKUP_TABLES.fall_color}
@@ -785,7 +785,7 @@ export default function GardenConditionsEditor({
                 />
               )}
 
-              <BetterSelector
+              <Selector
                 label="Texture Preference"
                 placeholder="Select texture preference"
                 items={LOOKUP_TABLES.texture}
@@ -804,7 +804,7 @@ export default function GardenConditionsEditor({
               icon="resize-outline"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Available Space"
                 placeholder="Select available space"
                 items={LOOKUP_TABLES.available_space_to_plant}
@@ -814,7 +814,7 @@ export default function GardenConditionsEditor({
                 }
               />
 
-              <BetterSelector
+              <Selector
                 label="Growth Rate"
                 placeholder="Select growth rate preference"
                 items={LOOKUP_TABLES.growth_rate}
@@ -824,7 +824,7 @@ export default function GardenConditionsEditor({
               />
 
               {LOOKUP_TABLES.habit_form && (
-                <BetterSelector
+                <Selector
                   label="Plant Form/Habit"
                   placeholder="Select plant forms"
                   items={LOOKUP_TABLES.habit_form}
@@ -841,7 +841,7 @@ export default function GardenConditionsEditor({
               icon="construct-outline"
               initiallyExpanded={true}
             >
-              <BetterSelector
+              <Selector
                 label="Maintenance Level"
                 placeholder="Select maintenance level"
                 items={LOOKUP_TABLES.maintenance}
@@ -850,7 +850,7 @@ export default function GardenConditionsEditor({
                 multiple={false}
               />
 
-              <BetterSelector
+              <Selector
                 label="Resistance Challenges"
                 placeholder="Select resistance challenges"
                 items={LOOKUP_TABLES.resistance_to_challenges}
@@ -860,7 +860,7 @@ export default function GardenConditionsEditor({
                 }
               />
 
-              <BetterSelector
+              <Selector
                 label="Problems to Exclude"
                 placeholder="Select problems to exclude"
                 items={LOOKUP_TABLES.problems}
@@ -871,7 +871,7 @@ export default function GardenConditionsEditor({
 
             {LOOKUP_TABLES.plant_type && (
               <CollapsibleSection title="Plant Types" icon="leaf-outline">
-                <BetterSelector
+                <Selector
                   label="Plant Types"
                   placeholder="Select plant types"
                   items={LOOKUP_TABLES.plant_type}
