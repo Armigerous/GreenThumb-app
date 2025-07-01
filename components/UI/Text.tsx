@@ -4,6 +4,7 @@ import { FONTS } from "@/constants/fonts";
 
 interface EnhancedTextProps extends TextProps {
   className?: string;
+  numberOfLines?: number;
 }
 
 /**
@@ -13,6 +14,7 @@ export function TitleText({
   children,
   className = "",
   style,
+  numberOfLines,
   ...props
 }: EnhancedTextProps) {
   return (
@@ -25,6 +27,7 @@ export function TitleText({
         },
         style,
       ]}
+      numberOfLines={numberOfLines}
       {...props}
     >
       {children}
@@ -65,6 +68,7 @@ export function BodyText({
   children,
   className = "",
   style,
+  numberOfLines,
   ...props
 }: EnhancedTextProps) {
   return (
@@ -77,6 +81,7 @@ export function BodyText({
         },
         style,
       ]}
+      numberOfLines={numberOfLines}
       {...props}
     >
       {children}

@@ -1,8 +1,8 @@
 # ✅ GreenThumb - App Store Launch Tasks
 
-> **Launch Date:**  
-> **Current Status:**  
-> **Last Updated:**
+> **Launch Date:** August 15, 2025  
+> **Current Status:** Pre-launch development and testing phase  
+> **Last Updated:** July 1, 2025
 
 ---
 
@@ -15,7 +15,7 @@
 **SUBS-TEST-010**: Payment flow testing  
 **Status:** 🔴 **CRITICAL** - Must test before launch  
 **Owner:** QA Team  
-**Due:** January 18, 2025  
+**Due:** July 25, 2025  
 **Test Cases:**
 
 - [ ] **Stripe Test Mode**: Verify test card processing works
@@ -29,7 +29,7 @@
 **SUBS-TEST-011**: Subscription management testing  
 **Status:** 🔴 **CRITICAL** - Must test before launch  
 **Owner:** QA Team  
-**Due:** January 19, 2025  
+**Due:** July 26, 2025  
 **Test Cases:**
 
 - [ ] **Subscription Status Display**: Verify correct plan and status shown
@@ -42,7 +42,7 @@
 **SUBS-TEST-012**: Business logic testing  
 **Status:** 🟡 **HIGH** - Important for accuracy  
 **Owner:** Development Team  
-**Due:** January 17, 2025  
+**Due:** July 22, 2025  
 **Test Cases:**
 
 - [ ] **Price Calculations**: Verify savings calculations are accurate
@@ -56,7 +56,7 @@
 **SUBS-INT-013**: Environment configuration
 **Status:** 🟡 **HIGH** - Required for production  
 **Owner:** DevOps Team  
-**Due:** January 20, 2025  
+**Due:** July 28, 2025  
 **Requirements:**
 
 - [ ] **Production Stripe Keys**: Set up production Stripe account
@@ -67,7 +67,7 @@
 **SUBS-INT-014**: App navigation integration  
 **Status:** 🟡 **HIGH** - User experience  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 25, 2025  
 **Requirements:**
 
 - [ ] **Navigation Links**: Add subscription links to main app navigation
@@ -81,7 +81,7 @@
 **SUBS-ANALYTICS-015**: Subscription analytics  
 **Status:** 🟡 **MEDIUM** - Important for business insights  
 **Owner:** Development Team  
-**Due:** January 25, 2025  
+**Due:** August 5, 2025  
 **Requirements:**
 
 - [ ] **Conversion Tracking**: Track pricing page → checkout → success
@@ -104,7 +104,7 @@
 **SUBS-LEGAL-016**: Legal documentation updates  
 **Status:** 🔴 **CRITICAL** - Required for app store approval  
 **Owner:** Legal Team  
-**Due:** January 21, 2025  
+**Due:** July 30, 2025  
 **Requirements:**
 
 - [ ] **Terms of Service**: Update with subscription terms
@@ -166,7 +166,7 @@
 **SUBS-PROD-015**: Stripe production setup  
 **Status:** 🔴 **CRITICAL** - Required for launch  
 **Owner:** Business Team  
-**Due:** January 22, 2025  
+**Due:** August 1, 2025  
 **Requirements:**
 
 - [ ] **Stripe Account Verification**: Complete business verification
@@ -177,7 +177,7 @@
 **SUBS-PROD-016**: Legal and compliance  
 **Status:** 🔴 **CRITICAL** - Required for launch  
 **Owner:** Legal Team  
-**Due:** January 21, 2025  
+**Due:** July 30, 2025  
 **Requirements:**
 
 - [ ] **Terms of Service**: Update with subscription terms
@@ -190,7 +190,7 @@
 **SUBS-ANALYTICS-017**: Subscription analytics  
 **Status:** 🟡 **HIGH** - Business intelligence  
 **Owner:** Development Team  
-**Due:** January 25, 2025  
+**Due:** August 5, 2025  
 **Implementation:**
 
 - [ ] **Conversion Tracking**: Track pricing page → checkout → success
@@ -273,7 +273,7 @@
 **STORE-ASSETS-001**: Create app store screenshots  
 **Status:** 🔴 **CRITICAL** - Required for submission  
 **Owner:** Design Team  
-**Due:** January 17, 2025  
+**Due:** August 5, 2025  
 **Required Screenshots:**
 
 - [ ] iPhone 6.7" display (iPhone 15 Pro Max)
@@ -286,7 +286,7 @@
 **STORE-ASSETS-002**: App store descriptions and metadata  
 **Status:** 🔴 **CRITICAL** - Required for submission  
 **Owner:** Marketing Team  
-**Due:** January 18, 2025  
+**Due:** August 6, 2025  
 **Deliverables:**
 
 - [ ] App title and subtitle
@@ -300,7 +300,7 @@
 **STORE-ASSETS-003**: Legal documents  
 **Status:** 🔴 **CRITICAL** - Required for approval  
 **Owner:** Legal Team  
-**Due:** January 19, 2025  
+**Due:** August 7, 2025  
 **Documents:**
 
 - [ ] Privacy Policy - **Updated with payment data handling**
@@ -314,7 +314,7 @@
 **BETA-001**: TestFlight deployment  
 **Status:** 🟡 **HIGH** - Quality assurance  
 **Owner:** Development Team  
-**Due:** January 16, 2025  
+**Due:** July 20, 2025  
 **Requirements:**
 
 - [ ] Upload beta build to TestFlight
@@ -326,7 +326,7 @@
 **BETA-002**: Android internal testing  
 **Status:** 🟡 **HIGH** - Quality assurance  
 **Owner:** Development Team  
-**Due:** January 16, 2025  
+**Due:** July 20, 2025  
 **Requirements:**
 
 - [ ] Upload to Google Play Console internal testing
@@ -339,7 +339,7 @@
 
 ## 🔥 DISCOVERED DURING WORK - Critical Issues to Address
 
-### 🎯 USER INTERVIEW FINDINGS (January 14, 2025)
+### 🎯 USER INTERVIEW FINDINGS (July 1, 2025)
 
 **Source:** User interview feedback session  
 **Participants:** Beta testers and target users  
@@ -348,9 +348,9 @@
 #### 🔴 CRITICAL BUGS - Must Fix Before Launch
 
 **INTERVIEW-CRIT-001**: Database page not scrollable  
-**Status:** ✅ **COMPLETE** - January 15, 2025  
+**Status:** ✅ **COMPLETE** - July 2, 2025  
 **Owner:** Development Team  
-**Completed:** January 15, 2025  
+**Completed:** July 2, 2025  
 **User Impact:** "I can't scroll through the plant database to see more plants"  
 **Description:** Users cannot scroll through plant database results, severely limiting plant discovery  
 **Acceptance Criteria:**
@@ -360,9 +360,9 @@
 - [x] Smooth scrolling performance on all devices
 
 **INTERVIEW-CRIT-002**: Database filters non-functional  
-**Status:** ✅ **COMPLETE** - January 15, 2025  
+**Status:** ✅ **COMPLETE** - July 2, 2025  
 **Owner:** Development Team  
-**Completed:** January 15, 2025  
+**Completed:** July 2, 2025  
 **User Impact:** "The filter buttons don't work and the filter page doesn't load"  
 **Description:** Filter functionality completely broken, preventing users from finding specific plants  
 **Acceptance Criteria:**
@@ -374,7 +374,7 @@
 **INTERVIEW-CRIT-003**: Garden setup completion mismatch  
 **Status:** 🔴 **CRITICAL** - Data integrity issue  
 **Owner:** Development Team  
-**Due:** January 17, 2025  
+**Due:** July 10, 2025  
 **User Impact:** "My garden shows incomplete even after I set it up completely"  
 **Description:** Garden setup shows incomplete (not 100%) when editing conditions after creation  
 **Root Cause:** Mismatch between garden creation flow and edit flow data structures  
@@ -389,7 +389,7 @@
 **INTERVIEW-HIGH-004**: Typography inconsistency in quick actions  
 **Status:** 🟡 **HIGH** - Brand consistency issue  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "The font in quick actions doesn't match the rest of the app"  
 **Description:** Quick actions font doesn't match brand guidelines (should use Mali/Nunito system)  
 **Reference:** See `docs/fonts.md` and `notes/BRAND_IDENTITY.md`  
@@ -402,7 +402,7 @@
 **INTERVIEW-HIGH-005**: Garden setup UI bottom stack transparency  
 **Status:** 🟡 **HIGH** - Visual bug  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "The bottom part looks transparent during garden setup"  
 **Description:** Bottom stack doesn't extend fully to screen bottom during garden condition selection  
 **Acceptance Criteria:**
@@ -414,7 +414,7 @@
 **INTERVIEW-HIGH-006**: Selection logic allows invalid combinations  
 **Status:** 🟡 **HIGH** - Logic error  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "I can select 'none' plus other options which doesn't make sense"  
 **Description:** Users can select "none" plus other options simultaneously in garden setup  
 **Acceptance Criteria:**
@@ -426,7 +426,7 @@
 **INTERVIEW-HIGH-007**: Single selection questions allow multiple choices  
 **Status:** 🟡 **HIGH** - Logic error  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "I should only be able to pick one space size and one region since I'm setting up one garden"  
 **Description:** Available space and NC region questions should only allow single selection  
 **Acceptance Criteria:**
@@ -438,7 +438,7 @@
 **INTERVIEW-HIGH-008**: Long garden names break layout  
 **Status:** 🟡 **HIGH** - Layout bug  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "When I add plants with long names, the Next button disappears off screen"  
 **Description:** Long garden names push "Next" button off screen during plant addition flow  
 **Acceptance Criteria:**
@@ -450,7 +450,7 @@
 **INTERVIEW-HIGH-009**: Garden card name truncation missing  
 **Status:** 🟡 **HIGH** - Text display issue  
 **Owner:** Development Team  
-**Due:** January 18, 2025  
+**Due:** July 15, 2025  
 **User Impact:** "Garden names get cut off in weird ways on the cards"  
 **Description:** Garden card names need proper truncation (1 line for small cards, 2 lines for large cards)  
 **Acceptance Criteria:**
@@ -462,7 +462,7 @@
 **INTERVIEW-HIGH-010**: Inconsistent scrolling in garden setup  
 **Status:** 🟡 **HIGH** - UX consistency  
 **Owner:** Development Team  
-**Due:** January 19, 2025  
+**Due:** July 16, 2025  
 **User Impact:** "Some screens scroll smoothly, others feel jerky or don't scroll at all"  
 **Description:** Garden setup has inconsistent scrolling behavior across different screens  
 **Acceptance Criteria:**
