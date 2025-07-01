@@ -64,12 +64,12 @@ export default function NewGardenForm({
     // Step 1: Garden Name
     name: "",
 
-    // Step 2: Location (moved early for weather integration)
-    zip_code: "",
-    latitude: null as number | null,
-    longitude: null as number | null,
-    city: "",
-    county: "",
+    // Step 2: Location (for weather integration - only coordinates stored in DB)
+    zip_code: "", // Used for geocoding, not stored in database
+    latitude: null as number | null, // Stored in database for weather data
+    longitude: null as number | null, // Stored in database for weather data
+    city: "", // Used for display, not stored in database
+    county: "", // Used for display, not stored in database
 
     // Step 3: Essential growing conditions (5 required fields)
     light_id: null as number | null, // Essential for plant selection (single selection)
@@ -345,21 +345,24 @@ export default function NewGardenForm({
           {
             name: formValues.name.trim(),
             user_id: user.id,
-            // Location coordinates for weather (optional)
+
+            // Location data (optional but useful for weather integration)
             latitude: formValues.latitude,
             longitude: formValues.longitude,
-            // Essential growing conditions - all required
+            zip_code: formValues.zip_code || null,
+
+            // Essential growing conditions collected from the form
             light_id: formValues.light_id,
             soil_texture_id: formValues.soil_texture_id,
             available_space_to_plant_id: formValues.available_space_to_plant_id,
             maintenance_id: formValues.maintenance_id,
             growth_rate_ids: formValues.growth_rate_ids,
-            // Optional style
+
+            // Optional style preferences
             landscape_theme_ids: formValues.landscape_theme_ids,
-            // Set sensible defaults for fields not collected
+
+            // Set sensible defaults for user preferences
             wants_recommendations: true,
-            year_round_interest: false,
-            usda_zone_ids: [], // Can be populated later via location
           },
         ]);
 
