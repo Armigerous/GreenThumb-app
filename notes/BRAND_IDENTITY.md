@@ -2,7 +2,7 @@
 
 **⚡ UPDATED FOR CODEBASE CONSISTENCY** _(January 2025)_
 
-This document has been updated to reflect the actual implementation in the GreenThumb React Native app. All colors, typography, and technical specifications now match the codebase in `/app`, `/components`, and `tailwind.config.js`.
+This document has been updated to reflect the actual implementation in GreenThumb React Native app. All colors, typography, and technical specifications now match the codebase in `/app`, `/components`, and `tailwind.config.js`.
 
 **Key Updates Made**:
 
@@ -47,7 +47,7 @@ GreenThumb is the intelligent plant care companion that bridges the gap between 
 
 #### Core Aesthetic Philosophy
 
-Picture the cozy pages of a well‑loved children's book: everything is painted in soft gouache and watery‑light watercolor on textured paper, so the colors feel sun‑aged and nostalgic—never harsh, never neon. Each scene is washed in a single seasonal hue (buttery spring yellows, honey‑amber autumns, slate‑blue winters) that glows gently around rounded, outline‑less shapes. You see visible paper grain and a few speckles of "pollen dust," as if the image itself has been living in someone's garden journal. The mood is always warm, calm, and a little whimsical—friendly enough that a five‑year‑old would feel at home, yet sophisticated enough for adults to feel a tug of nostalgia. That's the GreenThumb Pastel‑Gouache vibe we want every new illustration to breathe.
+Picture the cozy pages of a well‑loved children's book: everything is painted in soft gouache and watery‑light watercolor on textured paper, so the colors feel sun‑aged and nostalgic—never harsh, never neon. Each scene is washed in a single seasonal hue (buttery spring yellows, honey‑amber autumns, slate‑blue winters) that glows gently around rounded, outline‑less shapes. You see visible paper grain and a few speckles of "pollen dust," as if the image itself has been living in someone's garden journal. The mood is always warm, calm, and a little whimsical—friendly enough that a five‑year‑old would feel at home, yet sophisticated enough for adults to feel a tug of nostalgia. That's GreenThumb Pastel‑Gouache vibe we want every new illustration to breathe.
 
 #### Technical Specifications
 
@@ -158,7 +158,7 @@ accent: {
 #### AI Generation Blueprint
 
 **Positive Prompt Template**:
-"A [subject] in the GreenThumb Pastel‑Gouache style: soft gouache + watercolor on textured cold‑press paper, nostalgic pastel palette dominated by [season wash color], diffused back‑lighting with gentle bloom, rounded forms, no hard outlines, visible brush granulation and paper grain overlay, whimsical child‑friendly proportions, cozy and serene mood, low contrast, vignette composition, subtle pigment speckles"
+"A [subject] in GreenThumb Pastel‑Gouache style: soft gouache + watercolor on textured cold‑press paper, nostalgic pastel palette dominated by [season wash color], diffused back‑lighting with gentle bloom, rounded forms, no hard outlines, visible brush granulation and paper grain overlay, whimsical child‑friendly proportions, cozy and serene mood, low contrast, vignette composition, subtle pigment speckles"
 
 **Negative Prompt**:
 "vector, neon, photorealism, comic ink, hard edges, modern plastic props"
@@ -458,7 +458,7 @@ fontFamily: {
 
 #### Simple Language First
 
-**The GreenThumb Rule**: If a 12-year-old can't understand it, we rewrite it.
+**GreenThumb Rule**: If a 12-year-old can't understand it, we rewrite it.
 
 **Core Principles**:
 
@@ -650,7 +650,7 @@ fontFamily: {
 - Complex explanations when simple ones work
 - Promises that sound too good to be true
 
-**The GreenThumb Test**: If you wouldn't say it to your neighbor while chatting over the fence about plants, don't put it in our marketing.
+**GreenThumb Test**: If you wouldn't say it to your neighbor while chatting over the fence about plants, don't put it in our marketing.
 
 ---
 

@@ -32,6 +32,7 @@ interface ZipCodeInputProps {
     city?: string;
     county?: string;
   }) => void;
+  onValidationChange?: (isValid: boolean, hasValue: boolean) => void;
   placeholder?: string;
   className?: string;
 }
@@ -40,6 +41,7 @@ export default function ZipCodeInput({
   value,
   onChangeText,
   onLocationSelect,
+  onValidationChange,
   placeholder = "Enter NC ZIP code",
   className = "",
 }: ZipCodeInputProps) {
@@ -50,6 +52,14 @@ export default function ZipCodeInput({
   // Track the last validated ZIP code to prevent redundant validation
   const lastValidatedZipRef = useRef<string>("");
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Notify parent of validation state changes
+  const notifyValidationChange = useCallback(
+    (valid: boolean, hasValue: boolean) => {
+      onValidationChange?.(valid, hasValue);
+    },
+    [onValidationChange]
+  );
 
   // Validate NC ZIP code format (27xxx or 28xxx)
   const isValidNCZip = (zip: string): boolean => {
@@ -69,6 +79,7 @@ export default function ZipCodeInput({
         setError("Please enter a valid NC ZIP code (27xxx or 28xxx)");
         setIsValid(false);
         lastValidatedZipRef.current = "";
+        notifyValidationChange(false, true);
         return;
       }
 
@@ -105,6 +116,7 @@ export default function ZipCodeInput({
 
           setIsValid(true);
           lastValidatedZipRef.current = zipCode;
+          notifyValidationChange(true, true);
           onLocationSelect({
             zipCode,
             latitude,
@@ -116,30 +128,39 @@ export default function ZipCodeInput({
           setError("Could not find location for this ZIP code");
           setIsValid(false);
           lastValidatedZipRef.current = "";
+          notifyValidationChange(false, true);
         }
       } catch (error) {
         console.error("Geocoding error:", error);
         setError("Could not validate ZIP code. Please try again.");
         setIsValid(false);
         lastValidatedZipRef.current = "";
+        notifyValidationChange(false, true);
       } finally {
         setIsValidating(false);
       }
     },
-    [onLocationSelect, isValid]
+    [onLocationSelect, isValid, notifyValidationChange]
   );
 
   // Handle text changes and reset validation state when ZIP changes
   const handleTextChange = (text: string) => {
     // Only allow numbers and limit to 5 digits
     const numericText = text.replace(/[^0-9]/g, "").slice(0, 5);
+
+    // Always call the parent's onChangeText first
     onChangeText(numericText);
 
-    // Reset validation state only if the ZIP actually changed
-    if (numericText !== value) {
+    // Reset validation state if the text changed from what was previously validated
+    if (numericText !== lastValidatedZipRef.current) {
       setIsValid(false);
       setError(null);
       lastValidatedZipRef.current = "";
+      // Notify parent that validation is no longer valid if there's text
+      notifyValidationChange(false, numericText.length > 0);
+    } else if (numericText.length === 0) {
+      // If field is empty, notify parent that it's valid (since optional)
+      notifyValidationChange(true, false);
     }
   };
 
@@ -155,11 +176,18 @@ export default function ZipCodeInput({
       validationTimeoutRef.current = setTimeout(() => {
         geocodeZipCode(value);
       }, 500);
-    } else if (value.length < 5) {
-      // Reset state for incomplete ZIP codes
+    } else if (value.length < 5 && value.length > 0) {
+      // Reset state for incomplete ZIP codes (but not empty)
       setIsValid(false);
       setError(null);
       lastValidatedZipRef.current = "";
+      notifyValidationChange(false, true);
+    } else if (value.length === 0) {
+      // Field is empty - this is valid since it's optional
+      setIsValid(false);
+      setError(null);
+      lastValidatedZipRef.current = "";
+      notifyValidationChange(true, false);
     }
 
     // Cleanup timeout
@@ -168,7 +196,7 @@ export default function ZipCodeInput({
         clearTimeout(validationTimeoutRef.current);
       }
     };
-  }, [value, geocodeZipCode]);
+  }, [value, geocodeZipCode, notifyValidationChange]);
 
   // Cleanup on unmount
   useEffect(() => {

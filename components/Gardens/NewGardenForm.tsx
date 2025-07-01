@@ -12,7 +12,7 @@ import {
   AppState,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LoadingSpinner } from "../UI/LoadingSpinner";
+import { CompactSpinner, LoadingSpinner } from "../UI/LoadingSpinner";
 import ProgressIndicator from "../UI/ProgressIndicator";
 import { Ionicons } from "@expo/vector-icons";
 import { BodyText } from "../UI/Text";
@@ -48,6 +48,10 @@ export default function NewGardenForm({
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ZIP code validation state
+  const [isZipCodeValid, setIsZipCodeValid] = useState(true); // Default to true since it's optional
+  const [hasZipCodeValue, setHasZipCodeValue] = useState(false);
 
   // Form persistence state
   const [isLoadingCachedData, setIsLoadingCachedData] = useState(true);
@@ -273,10 +277,19 @@ export default function NewGardenForm({
     });
   };
 
+  // Handle ZIP code validation state changes
+  const handleZipCodeValidationChange = (
+    isValid: boolean,
+    hasValue: boolean
+  ) => {
+    setIsZipCodeValid(isValid);
+    setHasZipCodeValue(hasValue);
+  };
+
   // Step validation functions
   const isStep1Valid = formValues.name.trim().length > 0;
 
-  const isStep2Valid = true; // Location is optional but recommended
+  const isStep2Valid = isZipCodeValid; // Either empty (optional) or valid if provided
 
   const isStep3Valid =
     formValues.light_id !== null &&
@@ -410,6 +423,7 @@ export default function NewGardenForm({
               updateFormValues("zip_code", text)
             }
             onLocationSelect={handleZipCodeSelect}
+            onZipCodeValidationChange={handleZipCodeValidationChange}
           />
         );
 
@@ -586,7 +600,7 @@ export default function NewGardenForm({
         >
           {isSubmitting ? (
             <View className="flex-row items-center justify-center">
-              <LoadingSpinner />
+              <CompactSpinner />
               <BodyText className="text-cream-50 ml-2 ">
                 Creating Garden...
               </BodyText>
