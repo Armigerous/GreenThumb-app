@@ -600,10 +600,7 @@ export default function NewGardenForm({
         >
           {isSubmitting ? (
             <View className="flex-row items-center justify-center">
-              <CompactSpinner />
-              <BodyText className="text-cream-50 ml-2 ">
-                Creating Garden...
-              </BodyText>
+              <CompactSpinner color="#FEFDF8" size={20} />
             </View>
           ) : (
             <BodyText className="text-cream-50 text-center">
