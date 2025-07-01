@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BodyText, TitleText } from "../../UI/Text";
 import HelpIcon from "../../UI/HelpIcon";
 import ZipCodeInput from "../../UI/ZipCodeInput";
+import { useState } from "react";
 
 type LocationStepProps = {
   zipCode: string;
@@ -15,6 +16,7 @@ type LocationStepProps = {
     city?: string;
     county?: string;
   }) => void;
+  onZipCodeValidationChange?: (isValid: boolean, hasValue: boolean) => void;
 };
 
 export default function LocationStep({
@@ -22,7 +24,17 @@ export default function LocationStep({
   city,
   onZipCodeChange,
   onLocationSelect,
+  onZipCodeValidationChange,
 }: LocationStepProps) {
+  const [isZipCodeValid, setIsZipCodeValid] = useState(false);
+  const [hasZipCodeValue, setHasZipCodeValue] = useState(false);
+
+  const handleValidationChange = (isValid: boolean, hasValue: boolean) => {
+    setIsZipCodeValid(isValid);
+    setHasZipCodeValue(hasValue);
+    onZipCodeValidationChange?.(isValid, hasValue);
+  };
+
   return (
     <View className="space-y-8">
       <View className="mb-2">
@@ -72,12 +84,13 @@ export default function LocationStep({
             value={zipCode}
             onChangeText={onZipCodeChange}
             onLocationSelect={onLocationSelect}
+            onValidationChange={handleValidationChange}
             placeholder="Enter your 5-digit NC ZIP code"
             className="mb-4"
           />
 
-          {/* Show location info if ZIP is validated */}
-          {city && zipCode && (
+          {/* Show location info only if ZIP is validated and has value */}
+          {isZipCodeValid && hasZipCodeValue && city && zipCode && (
             <View className="bg-brand-50 border border-brand-200 rounded-lg p-3">
               <View className="flex-row items-center">
                 <Ionicons name="location" size={16} color="#5E994B" />
