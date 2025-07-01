@@ -192,8 +192,8 @@ export interface Garden {
   wants_recommendations: boolean | null;
   /** Whether the garden should have year-round interest */
   year_round_interest: boolean | null;
-  /** Growth rate preference */
-  growth_rate: string | null;
+  /** Array of growth rate preferences (multiple selection) */
+  growth_rates: string[];
   /** Maintenance level preference */
   maintenance: string | null;
   /** Alternate field for maintenance from the materialized view */
@@ -206,16 +206,12 @@ export interface Garden {
   landscape_locations: string[];
   /** Alternate field for locations from the materialized view */
   locations?: string[];
-  /** Array of space availability options */
-  available_space_to_plant: string[];
-  /** Alternate field for available space from the materialized view */
-  available_space?: string[];
-  /** Array of sunlight condition descriptions */
-  sunlight: string[];
-  /** Array of soil texture types */
-  soil_textures: string[];
-  /** Alternate field for soil texture from the materialized view */
-  soil_texture?: string[];
+  /** Single available space option (single selection) */
+  available_space: string | null;
+  /** Single sunlight condition description (single selection) */
+  sunlight: string | null;
+  /** Single soil texture type (single selection) */
+  soil_texture: string | null;
   /** Array of soil drainage descriptions */
   soil_drainage: string[];
   /** Array of soil pH ranges */
@@ -281,12 +277,12 @@ export interface GardenDatabase {
   landscape_location_ids: number[];
   /** Alternate form field for landscape_location_ids - not in database */
   location_ids?: number[];
-  /** JSON array of space availability IDs */
-  available_space_to_plant_ids: number[];
-  /** JSON array of light condition IDs */
-  light_ids: number[];
-  /** JSON array of soil texture IDs */
-  soil_texture_ids: number[];
+  /** Single space availability ID (single selection) */
+  available_space_to_plant_id: number | null;
+  /** Single light condition ID (single selection) */
+  light_id: number | null;
+  /** Single soil texture ID (single selection) */
+  soil_texture_id: number | null;
   /** JSON array of soil drainage IDs */
   soil_drainage_ids: number[];
   /** JSON array of soil pH IDs */
@@ -299,8 +295,8 @@ export interface GardenDatabase {
   resistance_to_challenges_ids: number[];
   /** JSON array of problem IDs to exclude */
   problems_ids: number[];
-  /** Growth rate preference ID */
-  growth_rate_id: number | null;
+  /** JSON array of growth rate preference IDs (multiple selection) */
+  growth_rate_ids: number[];
   /** Maintenance level preference ID - actual database field */
   maintenance_id: number | null;
   /** Form field alias for maintenance_id - not in database */

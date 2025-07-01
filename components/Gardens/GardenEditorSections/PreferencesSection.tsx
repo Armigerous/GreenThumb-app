@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Switch } from "react-native";
 import CollapsibleSection from "@/components/UI/CollapsibleSection";
-import BetterSelector from "@/components/UI/BetterSelector";
+import Selector from "@/components/UI/Selector";
 import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
 import HelpIcon from "@/components/UI/HelpIcon";
 
@@ -28,7 +28,7 @@ export default function PreferencesSection({
               explanation="Selecting your preferred maintenance level helps us recommend plants that match the time and effort you want to invest in your garden. Low maintenance gardens require less pruning, watering, and care, while high maintenance gardens may offer more seasonal variety but need more attention."
             />
           </View>
-          <BetterSelector
+          <Selector
             label="Maintenance Level"
             placeholder="Select maintenance level"
             items={LOOKUP_TABLES.maintenance}
@@ -58,7 +58,7 @@ export default function PreferencesSection({
               <Text className="text-sm text-cream-700">Available Space</Text>
               <HelpIcon explanation="Plants need appropriate space to grow to their mature size. This helps us recommend plants that fit your available area." />
             </View>
-            <BetterSelector
+            <Selector
               label="Available Space"
               placeholder="Select available space"
               items={LOOKUP_TABLES.available_space_to_plant}
@@ -77,7 +77,7 @@ export default function PreferencesSection({
               </Text>
               <HelpIcon explanation="Select challenges in your area (deer, drought, salt, etc.) to find plants that can withstand these conditions." />
             </View>
-            <BetterSelector
+            <Selector
               label="Resistance Challenges"
               placeholder="Select resistance challenges"
               items={LOOKUP_TABLES.resistance_to_challenges}
