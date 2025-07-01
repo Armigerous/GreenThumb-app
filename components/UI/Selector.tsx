@@ -145,12 +145,23 @@ export default function Selector<
 
   return (
     <View className="mb-6">
-      <View className="flex-row items-center mb-1.5">
-        <TitleText className="text-foreground font-medium">{label}</TitleText>
-        {required && <BodyText className="text-destructive ml-1">*</BodyText>}
-        {helpExplanation && (
-          <HelpIcon title={label} explanation={helpExplanation} />
-        )}
+      <View className="mb-1.5">
+        <View className="flex-row items-start">
+          <View className="flex-1 flex-row items-start flex-wrap">
+            <TitleText
+              className="text-foreground font-medium flex-1"
+              numberOfLines={0}
+            >
+              {label}
+            </TitleText>
+            {required && (
+              <BodyText className="text-destructive ml-1">*</BodyText>
+            )}
+          </View>
+          {helpExplanation && (
+            <HelpIcon title={label} explanation={helpExplanation} />
+          )}
+        </View>
       </View>
 
       <TouchableOpacity
