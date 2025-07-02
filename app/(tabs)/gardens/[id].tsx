@@ -118,7 +118,8 @@ const GardenDetails = () => {
     if (!gardenData) return "Welcome to your garden!";
 
     const totalPlants = gardenData.dashboard?.total_plants || 0;
-    const plantsNeedingCare = gardenData.dashboard?.plants_needing_care || 0;
+    const plantsNeedingCare =
+      gardenData.dashboard?.plants_with_overdue_tasks || 0;
 
     if (totalPlants === 0) {
       return "Your garden is ready for new life. Add your first plant to begin!";
@@ -373,65 +374,135 @@ const GardenDetails = () => {
         } as UserPlant)
     ) || [];
 
-  // Group plants by status
-  const criticalPlants = plants.filter(
-    (p) => p.status === "Dead" || p.status === "Wilting"
-  );
-  const needsAttentionPlants = plants.filter(
-    (p) => p.status === "Needs Water" || p.status === "Dormant"
-  );
-  const healthyPlants = plants.filter((p) => p.status === "Healthy");
+  // Group plants by actual care urgency based on task timing, not just existence of tasks
+  const plantsWithOverdueTasks = plants.filter((plant) => {
+    if (!plant.plant_tasks || plant.plant_tasks.length === 0) return false;
+    const now = new Date();
+    return plant.plant_tasks.some(
+      (task) => !task.completed && new Date(task.due_date) < now
+    );
+  });
+
+  const plantsWithUrgentTasks = plants.filter((plant) => {
+    if (!plant.plant_tasks || plant.plant_tasks.length === 0) return false;
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(23, 59, 59, 999); // End of tomorrow
+
+    const incompleteTasks = plant.plant_tasks.filter((task) => !task.completed);
+    if (incompleteTasks.length === 0) return false;
+
+    // Check if already categorized as overdue
+    const hasOverdue = incompleteTasks.some(
+      (task) => new Date(task.due_date) < now
+    );
+    if (hasOverdue) return false; // Don't double-count overdue plants
+
+    // Check if has tasks due today or tomorrow
+    return incompleteTasks.some((task) => {
+      const taskDate = new Date(task.due_date);
+      return taskDate >= now && taskDate <= tomorrow;
+    });
+  });
+
+  const plantsWithRegularTasks = plants.filter((plant) => {
+    if (!plant.plant_tasks || plant.plant_tasks.length === 0) return true;
+
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(23, 59, 59, 999);
+
+    const incompleteTasks = plant.plant_tasks.filter((task) => !task.completed);
+    if (incompleteTasks.length === 0) return true;
+
+    // Check if has any overdue tasks
+    const hasOverdue = incompleteTasks.some(
+      (task) => new Date(task.due_date) < now
+    );
+    if (hasOverdue) return false;
+
+    // Check if has any urgent tasks (due today/tomorrow)
+    const hasUrgent = incompleteTasks.some((task) => {
+      const taskDate = new Date(task.due_date);
+      return taskDate >= now && taskDate <= tomorrow;
+    });
+    if (hasUrgent) return false;
+
+    // All remaining tasks are due later
+    return true;
+  });
 
   // Check if garden has growing conditions
   const hasConditions = Boolean(
     (gardenData.sunlight && gardenData.sunlight.length > 0) ||
-      (gardenData.soil_textures && gardenData.soil_textures.length > 0) ||
+      (gardenData.soil_texture && gardenData.soil_texture.length > 0) ||
       (gardenData.soil_ph_ranges && gardenData.soil_ph_ranges.length > 0) ||
       (gardenData.soil_drainage && gardenData.soil_drainage.length > 0)
   );
 
-  // Status configuration for consistent styling
-  const statusConfig = {
-    Healthy: {
-      bg: "bg-brand-100",
-      text: "text-brand-700",
-      icon: "checkmark-circle" as const,
-      color: "#059669",
-      description: "Thriving and happy",
-    },
-    "Needs Water": {
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      icon: "water" as const,
-      color: "#d97706",
-      description: "Time for a drink",
-    },
-    Wilting: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      icon: "alert-circle" as const,
-      color: "#dc2626",
-      description: "Urgent care needed",
-    },
-    Dormant: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      icon: "moon" as const,
-      color: "#d97706",
-      description: "Resting period",
-    },
-    Dead: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      icon: "alert-circle" as const,
-      color: "#dc2626",
-      description: "May need replacement",
-    },
-  } as const;
+  // Note: Plant status field removed - using task-based care indicators instead
 
   // Render a more iOS-like plant card with animation
   const renderPlantCard = (plant: UserPlant, index: number) => {
-    const status = statusConfig[plant.status as keyof typeof statusConfig];
+    // Get the most urgent task for this plant instead of using unreliable status
+    const getMostUrgentTask = () => {
+      if (!plant.plant_tasks || plant.plant_tasks.length === 0) return null;
+      const now = new Date();
+      const incompleteTasks = plant.plant_tasks.filter(
+        (task) => !task.completed
+      );
+      if (incompleteTasks.length === 0) return null;
+
+      return incompleteTasks.sort(
+        (a, b) =>
+          new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      )[0];
+    };
+
+    const urgentTask = getMostUrgentTask();
+
+    // Determine care status based on actual tasks
+    const getCareStatus = () => {
+      if (!urgentTask) {
+        return {
+          text: "All caught up",
+          color: "#77B860",
+          icon: "checkmark-circle" as const,
+        };
+      }
+
+      const now = new Date();
+      const dueDate = new Date(urgentTask.due_date);
+      const isOverdue = dueDate < now;
+
+      if (isOverdue) {
+        return {
+          text: `${urgentTask.task_type} overdue`,
+          color: "#dc2626",
+          icon:
+            urgentTask.task_type === "Water"
+              ? ("water" as const)
+              : urgentTask.task_type === "Fertilize"
+              ? ("leaf" as const)
+              : ("cut" as const),
+        };
+      } else {
+        return {
+          text: `${urgentTask.task_type} due soon`,
+          color: "#d97706",
+          icon:
+            urgentTask.task_type === "Water"
+              ? ("water" as const)
+              : urgentTask.task_type === "Fertilize"
+              ? ("leaf" as const)
+              : ("cut" as const),
+        };
+      }
+    };
+
+    const careStatus = getCareStatus();
 
     return (
       <AnimatedSection delay={100 + index * 50}>
@@ -521,9 +592,16 @@ const GardenDetails = () => {
                 {plant.nickname}
               </Text>
               <View className="flex-row items-center">
-                <Ionicons name={status.icon} size={16} color={status.color} />
-                <Text className={`text-sm font-paragraph ml-1 ${status.text}`}>
-                  {status.description}
+                <Ionicons
+                  name={careStatus.icon}
+                  size={16}
+                  color={careStatus.color}
+                />
+                <Text
+                  className="text-sm font-paragraph ml-1"
+                  style={{ color: careStatus.color }}
+                >
+                  {careStatus.text}
                 </Text>
               </View>
             </View>
@@ -662,7 +740,7 @@ const GardenDetails = () => {
                       name="water"
                       size={24}
                       color={
-                        dashboardData.plants_needing_care > 0
+                        dashboardData.plants_with_overdue_tasks > 0
                           ? "#d97706"
                           : "#9e9a90"
                       }
@@ -670,12 +748,12 @@ const GardenDetails = () => {
                   </View>
                   <Text
                     className={`text-xl font-title font-bold ${
-                      dashboardData.plants_needing_care > 0
+                      dashboardData.plants_with_overdue_tasks > 0
                         ? "text-yellow-600"
                         : "text-foreground"
                     }`}
                   >
-                    {dashboardData.plants_needing_care}
+                    {dashboardData.plants_with_overdue_tasks}
                   </Text>
                   <Text className="text-foreground font-paragraph text-xs">
                     NEED CARE
@@ -704,53 +782,65 @@ const GardenDetails = () => {
             renderEmptyState()
           ) : (
             <View className="mb-8">
-              {criticalPlants.length > 0 && (
+              {plantsWithOverdueTasks.length > 0 && (
                 <View className="my-4">
                   <AnimatedSection delay={400}>
                     <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
                       <Text className="text-destructive font-paragraph font-medium">
-                        Needs Immediate Care
+                        🚨 Needs Immediate Care
+                      </Text>
+                      <Text className="text-destructive text-xs">
+                        These plants have overdue care tasks
                       </Text>
                     </View>
                   </AnimatedSection>
-                  {criticalPlants.map((plant, index) => (
+                  {plantsWithOverdueTasks.map((plant, index) => (
                     <View key={plant.id}>{renderPlantCard(plant, index)}</View>
                   ))}
                 </View>
               )}
 
-              {needsAttentionPlants.length > 0 && (
+              {plantsWithUrgentTasks.length > 0 && (
                 <View className="my-4">
                   <AnimatedSection delay={500}>
                     <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
                       <Text className="text-yellow-700 font-paragraph font-medium">
-                        Due for Care
+                        ⚠️ Due Today/Tomorrow
+                      </Text>
+                      <Text className="text-yellow-700 text-xs">
+                        These plants need care within the next day
                       </Text>
                     </View>
                   </AnimatedSection>
-                  {needsAttentionPlants.map((plant, index) => (
+                  {plantsWithUrgentTasks.map((plant, index) => (
                     <View key={plant.id}>
-                      {renderPlantCard(plant, criticalPlants.length + index)}
+                      {renderPlantCard(
+                        plant,
+                        plantsWithOverdueTasks.length + index
+                      )}
                     </View>
                   ))}
                 </View>
               )}
 
-              {healthyPlants.length > 0 && (
+              {plantsWithRegularTasks.length > 0 && (
                 <View className="my-4">
                   <AnimatedSection delay={600}>
                     <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
                       <Text className="text-brand-700 font-paragraph font-medium">
-                        Looking Good
+                        ✅ All Good
+                      </Text>
+                      <Text className="text-brand-700 text-xs">
+                        These plants have care scheduled for later
                       </Text>
                     </View>
                   </AnimatedSection>
-                  {healthyPlants.map((plant, index) => (
+                  {plantsWithRegularTasks.map((plant, index) => (
                     <View key={plant.id}>
                       {renderPlantCard(
                         plant,
-                        criticalPlants.length +
-                          needsAttentionPlants.length +
+                        plantsWithOverdueTasks.length +
+                          plantsWithUrgentTasks.length +
                           index
                       )}
                     </View>

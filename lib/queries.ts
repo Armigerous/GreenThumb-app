@@ -225,8 +225,8 @@ export function useGardenDashboard(userId?: string) {
           name,
           updated_at,
           total_plants,
-          healthy_plants,
-          plants_needing_care,
+          plants_with_overdue_tasks,
+          plants_with_urgent_tasks,
           health_percentage,
           upcoming_tasks,
           upcoming_tasks_count,
@@ -308,7 +308,6 @@ export function useUserPlantDetails(userPlantId: string) {
           garden_id,
           plant_id,
           nickname,
-          status,
           images,
           created_at,
           updated_at
@@ -349,8 +348,7 @@ export function useUserPlantDetails(userPlantId: string) {
           task_id,
           task_type,
           due_date,
-          completed,
-          plant_status
+          completed
         `)
         .eq("plant_id", userPlantId)
         .order("due_date", { ascending: true });

@@ -64,7 +64,10 @@ export default function GardenCard({
 
   // Determine the garden health status color
   const getHealthStatusColor = () => {
-    if (!garden.total_plants) return "#484540"; // Darker gray for better contrast
+    // If no plants, show neutral gray
+    if (!garden.total_plants || garden.health_percentage === null) {
+      return "#484540"; // Darker gray for better contrast
+    }
     const healthPercentage = Number(garden.health_percentage);
     if (healthPercentage >= 80) return "#5E994B"; // Darker green for better contrast - brand-600
     if (healthPercentage >= 50) return "#9e8600"; // Darker amber for better contrast - accent-500
@@ -165,14 +168,14 @@ export default function GardenCard({
                   )}
                 </View>
                 {/* Plants Needing Care Badge */}
-                {garden.plants_needing_care > 0 && (
+                {garden.plants_with_overdue_tasks > 0 && (
                   <View className="bg-accent-200 rounded-full px-2 py-0.5 flex-shrink-0">
                     <BodyText
                       className={`${
                         isGardensPage ? "text-xs" : "text-[10px]"
                       } text-accent-800 font-medium`}
                     >
-                      {garden.plants_needing_care} needs care
+                      {garden.plants_with_overdue_tasks} needs care
                     </BodyText>
                   </View>
                 )}
@@ -195,7 +198,9 @@ export default function GardenCard({
               <View style={{ width: maxWidth }} className="flex-shrink-0">
                 <AnimatedProgressBar
                   percentage={
-                    startHealthAnimation ? garden.health_percentage : 0
+                    startHealthAnimation && garden.health_percentage !== null
+                      ? garden.health_percentage
+                      : 0
                   }
                   color={getHealthStatusColor()}
                   height={8}
@@ -207,7 +212,9 @@ export default function GardenCard({
                   isGardensPage ? "text-sm" : "text-xs"
                 } text-cream-700 ml-2 flex-shrink-0`}
               >
-                {garden.health_percentage}%
+                {garden.health_percentage !== null
+                  ? `${garden.health_percentage}%`
+                  : "N/A"}
               </BodyText>
             </View>
           </View>

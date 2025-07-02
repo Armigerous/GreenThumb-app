@@ -189,8 +189,8 @@ export async function getCurrentWeatherAndSeason(gardenId: string) {
 
 // Current Plant Status:
 // - Nickname: ${userPlant.nickname}
-// - Health Status: ${userPlant.status}
 // - Time in Garden: Since ${new Date(userPlant.created_at).toLocaleDateString()}
+// - Care Notes: Plant health is automatically tracked through task completion
 
 // Please generate a JSON array of tasks following this exact schema:
 // {

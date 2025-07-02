@@ -71,8 +71,6 @@ export interface UserPlant {
   plant_id: number;
   /** User-defined name for this specific plant */
   nickname: string;
-  /** Current health status of the plant */
-  status: "Healthy" | "Needs Water" | "Wilting" | "Dormant" | "Dead";
   /** Array of image URLs or references for this plant */
   images: string[];
   /** List of care logs associated with this plant */
@@ -86,21 +84,22 @@ export interface UserPlant {
 }
 
 /**
- * Represents plant health statistics for a garden.
+ * Represents plant care statistics for a garden.
  *
  * This interface maps to the `garden_health_stats` view in the database,
- * which provides aggregate statistics on plant health within a garden.
+ * which provides aggregate statistics on plant care within a garden.
+ * Health is calculated based on task completion, not user-inputted status.
  */
 export interface GardenHealthStats {
   /** Foreign key referencing the garden these stats apply to */
   garden_id: number;
   /** Total number of plants in the garden */
   total_plants: number;
-  /** Number of plants with 'Healthy' status */
-  healthy_plants: number;
-  /** Number of plants needing care (not 'Healthy') */
-  plants_needing_care: number;
-  /** Percentage of healthy plants (0-100) */
+  /** Number of plants with overdue tasks */
+  plants_with_overdue_tasks: number;
+  /** Number of plants with upcoming tasks due soon */
+  plants_with_urgent_tasks: number;
+  /** Health percentage based on task completion (0-100) */
   health_percentage: number;
 }
 
@@ -112,8 +111,6 @@ interface DashboardPlantSummary {
   id: UUID;
   /** User-defined name for this specific plant */
   nickname: string;
-  /** Current health status of the plant */
-  status: string;
   /** Array of image URLs or references for this plant */
   images: string[];
   /** Foreign key referencing the plant in main_plant_data */
@@ -160,12 +157,14 @@ export interface GardenDashboard {
   updated_at: string;
   /** Total number of plants in the garden */
   total_plants: number;
-  /** Number of plants with 'Healthy' status */
-  healthy_plants: number;
-  /** Number of plants needing care (not 'Healthy') */
-  plants_needing_care: number;
-  /** Percentage of healthy plants (0-100) */
-  health_percentage: number;
+  /** Number of plants with overdue tasks requiring immediate attention */
+  plants_with_overdue_tasks: number;
+  /** Number of plants with tasks due within the next 2 days */
+  plants_with_urgent_tasks: number;
+  /** Health percentage based on overdue tasks (0-100), null if no plants */
+  health_percentage: number | null;
+  /** Count of overdue tasks affecting health */
+  overdue_tasks_count: number;
   /** Array of upcoming tasks for plants in this garden */
   upcoming_tasks: UpcomingTask[] | null;
   /** Count of upcoming tasks */
@@ -361,6 +360,4 @@ export interface GardenTaskSummary {
   plant_id: string;
   /** Nickname of the plant this task is for */
   plant_nickname: string;
-  /** Current status of the plant */
-  plant_status: string;
 }

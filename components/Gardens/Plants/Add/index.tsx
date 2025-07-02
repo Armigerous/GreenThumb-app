@@ -8,11 +8,11 @@ export { default as Header } from "./Header";
 export { default as ProgressIndicator } from "../../../UI/ProgressIndicator";
 export { default as LoadingState } from "./LoadingState";
 export { default as ErrorMessage } from "./ErrorMessage";
-export { default as PlantStatusSelector } from "./PlantStatusSelector";
+// PlantStatusSelector removed - no longer expose plant status to users
 export { default as SubmitButton } from "../../../UI/SubmitButton";
 export { default as GardenSelectionStep } from "./GardenSelectionStep";
 export { default as PlantDetailsStep } from "./PlantDetailsStep";
 export { default as ConfirmationStep } from "./ConfirmationStep";
 export { default as ImagePicker } from "./ImagePicker";
 // Export types
-export type { StatusOption } from "./PlantStatusSelector";
+// StatusOption type removed with PlantStatusSelector component

@@ -73,7 +73,7 @@ export default function AddPlantToGardenScreen() {
     null
   );
   const [nickname, setNickname] = useState("");
-  const [status, setStatus] = useState<UserPlant["status"]>("Healthy");
+  // Plant status removed - will default to "Healthy" in database but not exposed to user
   const [image, setImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -399,7 +399,6 @@ export default function AddPlantToGardenScreen() {
         garden_id: selectedGarden.garden_id,
         plant_id: parseInt(plantId as string),
         nickname: nickname.trim(),
-        status: status,
         images: plantImageUrl ? [plantImageUrl] : [],
         care_logs: [],
         created_at: now,
@@ -418,7 +417,6 @@ export default function AddPlantToGardenScreen() {
           p_garden_id: plantData.garden_id,
           p_plant_id: plantData.plant_id,
           p_nickname: plantData.nickname,
-          p_status: plantData.status,
           p_images: plantData.images,
           p_care_logs: plantData.care_logs,
         });
@@ -592,8 +590,6 @@ export default function AddPlantToGardenScreen() {
               plant={plant as PlantData}
               nickname={nickname}
               setNickname={setNickname}
-              status={status}
-              setStatus={setStatus}
               image={image}
               setImage={setImage}
               onBack={handlePreviousStep}
@@ -606,7 +602,6 @@ export default function AddPlantToGardenScreen() {
             <ConfirmationStep
               plant={plant as PlantData}
               nickname={nickname}
-              status={status}
               image={image}
               selectedGarden={selectedGarden as GardenDashboard}
               isSubmitting={isSubmitting}

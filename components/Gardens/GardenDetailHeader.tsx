@@ -64,11 +64,14 @@ export default function GardenDetailHeader({
               </View>
             </View>
 
-            {dashboardData.plants_needing_care > 0 ? (
+            {dashboardData.plants_with_overdue_tasks > 0 ? (
               <TouchableOpacity className="bg-yellow-100 rounded-lg px-3 py-1.5">
                 <BodyText className="text-sm text-yellow-700 font-medium">
-                  {dashboardData.plants_needing_care} need
-                  {dashboardData.plants_needing_care === 1 ? "s" : ""} care
+                  {dashboardData.plants_with_overdue_tasks} need
+                  {dashboardData.plants_with_overdue_tasks === 1
+                    ? "s"
+                    : ""}{" "}
+                  care
                 </BodyText>
               </TouchableOpacity>
             ) : (
@@ -86,11 +89,13 @@ export default function GardenDetailHeader({
                 Garden Health
               </SubtitleText>
               <BodyText className="text-cream-600 text-sm">
-                {dashboardData.health_percentage}% Healthy
+                {dashboardData.health_percentage !== null
+                  ? `${dashboardData.health_percentage}% Healthy`
+                  : "No health data"}
               </BodyText>
             </View>
             <AnimatedProgressBar
-              percentage={dashboardData.health_percentage}
+              percentage={dashboardData.health_percentage ?? 0}
               color="#77B860" // brand-500
               height={8}
               duration={500}
