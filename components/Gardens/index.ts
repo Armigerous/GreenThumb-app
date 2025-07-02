@@ -23,8 +23,8 @@ export {
   ConfirmationStep,
   Header,
   LoadingState,
-  ImagePicker,
-  PlantStatusSelector
+  ImagePicker
+  // PlantStatusSelector removed - no longer expose plant status to users
 } from './Plants/Add';
 
 // Text components for consistent styling

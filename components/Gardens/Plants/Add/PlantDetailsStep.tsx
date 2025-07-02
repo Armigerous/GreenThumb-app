@@ -1,7 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { UserPlant } from "@/types/garden";
 import { PlantData } from "@/types/plant";
-import PlantStatusSelector from "./PlantStatusSelector";
 import SubmitButton from "../../../UI/SubmitButton";
 import { Ionicons } from "@expo/vector-icons";
 import ImagePicker from "./ImagePicker";
@@ -12,14 +11,11 @@ import { useState } from "react";
  *
  * This component allows users to:
  * - Set a nickname for their plant
- * - Select its current health status
  * - Take or choose a photo of their plant
  *
  * @param plant - Plant data from the API
  * @param nickname - Current nickname value
  * @param setNickname - Function to update the nickname
- * @param status - Current plant status
- * @param setStatus - Function to update the status
  * @param image - Current custom image URI
  * @param setImage - Function to update the image
  * @param onBack - Callback for the back button
@@ -29,8 +25,6 @@ interface PlantDetailsStepProps {
   plant: PlantData;
   nickname: string;
   setNickname: (name: string) => void;
-  status: UserPlant["status"];
-  setStatus: (status: UserPlant["status"]) => void;
   image: string | null;
   setImage: (image: string | null) => void;
   onBack: () => void;
@@ -88,8 +82,6 @@ export default function PlantDetailsStep({
   plant,
   nickname,
   setNickname,
-  status,
-  setStatus,
   image,
   setImage,
   onBack,
@@ -163,11 +155,16 @@ export default function PlantDetailsStep({
           </View>
         </View>
 
-        {/* Plant Status Selector */}
-        <PlantStatusSelector
-          selectedStatus={status}
-          onStatusChange={setStatus}
-        />
+        {/* Note about care tracking */}
+        <View className="mb-6 bg-brand-50 rounded-lg p-4">
+          <Text className="text-brand-700 font-medium text-sm mb-1">
+            📋 Automatic Care Tracking
+          </Text>
+          <Text className="text-brand-600 text-sm">
+            We&apos;ll create a personalized care schedule based on this
+            plant&apos;s specific needs and your local conditions.
+          </Text>
+        </View>
       </View>
 
       {/* Navigation buttons */}

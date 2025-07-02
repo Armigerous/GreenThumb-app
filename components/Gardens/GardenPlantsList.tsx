@@ -14,10 +14,10 @@ import CachedImage from "@/components/CachedImage";
 
 type PlantSection = {
   title: string;
-  status: string;
   data: UserPlant[];
-  icon: "alert-circle" | "water" | "checkmark-circle" | "moon";
+  icon: "alert-circle" | "time" | "checkmark-circle";
   color: string;
+  description: string;
 };
 
 /**
@@ -52,49 +52,82 @@ export default function GardenPlantsList({
   HeaderComponent,
   FooterComponent,
 }: GardenPlantsListProps) {
-  // Group plants by status
+  // Group plants by their care needs based on task urgency, not just existence of tasks
   const getGroupedPlants = () => {
     if (!plants || plants.length === 0) return [];
 
-    const criticalPlants: UserPlant[] = plants.filter(
-      (p) => p.status === "Dead" || p.status === "Wilting"
-    );
-    const needsAttentionPlants: UserPlant[] = plants.filter(
-      (p) => p.status === "Needs Water" || p.status === "Dormant"
-    );
-    const healthyPlants: UserPlant[] = plants.filter(
-      (p) => p.status === "Healthy"
-    );
+    const plantsWithOverdueTasks: UserPlant[] = [];
+    const plantsWithUrgentTasks: UserPlant[] = []; // Due today or tomorrow
+    const plantsWithRegularTasks: UserPlant[] = []; // Due later
+
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(23, 59, 59, 999); // End of tomorrow
+
+    plants.forEach((plant) => {
+      if (!plant.plant_tasks || plant.plant_tasks.length === 0) {
+        plantsWithRegularTasks.push(plant);
+        return;
+      }
+
+      const incompleteTasks = plant.plant_tasks.filter(
+        (task) => !task.completed
+      );
+      if (incompleteTasks.length === 0) {
+        plantsWithRegularTasks.push(plant);
+        return;
+      }
+
+      // Sort tasks by due date to get the most urgent
+      const sortedTasks = incompleteTasks.sort(
+        (a, b) =>
+          new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      );
+      const nextTask = sortedTasks[0];
+      const taskDueDate = new Date(nextTask.due_date);
+
+      if (taskDueDate < now) {
+        // Task is overdue
+        plantsWithOverdueTasks.push(plant);
+      } else if (taskDueDate <= tomorrow) {
+        // Task is due today or tomorrow
+        plantsWithUrgentTasks.push(plant);
+      } else {
+        // Task is due later
+        plantsWithRegularTasks.push(plant);
+      }
+    });
 
     const sections = [];
 
-    if (criticalPlants.length > 0) {
+    if (plantsWithOverdueTasks.length > 0) {
       sections.push({
         title: "Needs Immediate Care",
-        status: "Dead",
-        data: criticalPlants,
+        data: plantsWithOverdueTasks,
         icon: "alert-circle" as const,
         color: "#dc2626", // red-600
+        description: "These plants have overdue care tasks",
       });
     }
 
-    if (needsAttentionPlants.length > 0) {
+    if (plantsWithUrgentTasks.length > 0) {
       sections.push({
-        title: "Due for Care",
-        status: "Needs Water",
-        data: needsAttentionPlants,
-        icon: "water" as const,
+        title: "Due Today/Tomorrow",
+        data: plantsWithUrgentTasks,
+        icon: "time" as const,
         color: "#d97706", // yellow-600
+        description: "These plants need care within the next day",
       });
     }
 
-    if (healthyPlants.length > 0) {
+    if (plantsWithRegularTasks.length > 0) {
       sections.push({
-        title: "Looking Good",
-        status: "Healthy",
-        data: healthyPlants,
+        title: "All Good",
+        data: plantsWithRegularTasks,
         icon: "checkmark-circle" as const,
         color: "#77B860", // brand-600
+        description: "These plants have care scheduled for later",
       });
     }
 
@@ -123,37 +156,56 @@ export default function GardenPlantsList({
     return formatDate(lastLog.taken_care_at);
   };
 
-  const renderPlantCard = ({ item }: { item: UserPlant }) => {
-    const statusColors = {
-      Healthy: {
-        bg: "bg-brand-100",
-        text: "text-brand-700",
-        icon: "checkmark-circle" as const,
-      },
-      "Needs Water": {
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        icon: "water" as const,
-      },
-      Wilting: {
-        bg: "bg-red-100",
-        text: "text-red-700",
-        icon: "alert-circle" as const,
-      },
-      Dormant: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        icon: "moon" as const,
-      },
-      Dead: {
-        bg: "bg-red-100",
-        text: "text-red-700",
-        icon: "alert-circle" as const,
-      },
-    } as const;
+  // Get the most urgent task for a plant
+  const getMostUrgentTask = (plant: UserPlant) => {
+    if (!plant.plant_tasks || plant.plant_tasks.length === 0) return null;
 
-    const statusStyle = statusColors[item.status as keyof typeof statusColors];
+    const now = new Date();
+    const incompleteTasks = plant.plant_tasks.filter((task) => !task.completed);
+
+    if (incompleteTasks.length === 0) return null;
+
+    // Sort by due date and get the most urgent
+    const sortedTasks = incompleteTasks.sort(
+      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+    );
+
+    return sortedTasks[0];
+  };
+
+  const renderPlantCard = ({ item }: { item: UserPlant }) => {
     const lastWatered = getLastWateringDate(item);
+    const urgentTask = getMostUrgentTask(item);
+
+    // Determine care status based on tasks, not user status
+    const getCareStatus = () => {
+      if (!urgentTask)
+        return { text: "No tasks", color: "#77B860", bg: "bg-brand-100" };
+
+      const now = new Date();
+      const dueDate = new Date(urgentTask.due_date);
+      const isOverdue = dueDate < now;
+
+      if (isOverdue) {
+        const daysOverdue = differenceInDays(now, dueDate);
+        return {
+          text: `${urgentTask.task_type} overdue`,
+          color: "#dc2626",
+          bg: "bg-red-100",
+          detail: daysOverdue === 0 ? "Today" : `${daysOverdue}d ago`,
+        };
+      } else {
+        const daysUntilDue = differenceInDays(dueDate, now);
+        return {
+          text: `${urgentTask.task_type} due`,
+          color: "#d97706",
+          bg: "bg-yellow-100",
+          detail: daysUntilDue === 0 ? "Today" : `in ${daysUntilDue}d`,
+        };
+      }
+    };
+
+    const careStatus = getCareStatus();
 
     return (
       <TouchableOpacity
@@ -177,33 +229,35 @@ export default function GardenPlantsList({
                 </Text>
               </View>
               <View
-                className={`rounded-full px-3.5 py-1.5 flex-row items-center ${statusStyle.bg}`}
+                className={`rounded-full px-3.5 py-1.5 flex-row items-center ${careStatus.bg}`}
               >
                 <Ionicons
-                  name={statusStyle.icon}
-                  size={16}
-                  color={
-                    item.status === "Healthy"
-                      ? "#059669"
-                      : item.status === "Needs Water" ||
-                        item.status === "Dormant"
-                      ? "#d97706"
-                      : "#dc2626"
+                  name={
+                    urgentTask
+                      ? urgentTask.task_type === "Water"
+                        ? "water"
+                        : urgentTask.task_type === "Fertilize"
+                        ? "leaf"
+                        : "cut"
+                      : "checkmark-circle"
                   }
+                  size={16}
+                  color={careStatus.color}
                 />
                 <Text
-                  className={`text-xs font-medium ml-1.5 ${statusStyle.text}`}
+                  className="text-xs font-medium ml-1.5"
+                  style={{ color: careStatus.color }}
                 >
-                  {item.status === "Healthy"
-                    ? "Healthy"
-                    : item.status === "Needs Water"
-                    ? "Needs Water"
-                    : item.status === "Dormant"
-                    ? "Dormant"
-                    : item.status === "Wilting"
-                    ? "Wilting"
-                    : "Dead"}
+                  {careStatus.text}
                 </Text>
+                {careStatus.detail && (
+                  <Text
+                    className="text-xs ml-1"
+                    style={{ color: careStatus.color, opacity: 0.7 }}
+                  >
+                    ({careStatus.detail})
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -262,12 +316,15 @@ export default function GardenPlantsList({
   }: {
     section: SectionListData<UserPlant, PlantSection>;
   }) => (
-    <View className="flex-row items-center mb-3 mt-5 mx-4">
-      <Ionicons name={section.icon} size={22} color={section.color} />
-      <Text className="text-foreground text-lg font-semibold ml-2.5">
-        {section.title}
-      </Text>
-      <Text className="text-cream-500 ml-2.5">({section.data.length})</Text>
+    <View className="mb-3 mt-5 mx-4">
+      <View className="flex-row items-center mb-1">
+        <Ionicons name={section.icon} size={22} color={section.color} />
+        <Text className="text-foreground text-lg font-semibold ml-2.5">
+          {section.title}
+        </Text>
+        <Text className="text-cream-500 ml-2.5">({section.data.length})</Text>
+      </View>
+      <Text className="text-xs text-cream-600 ml-8">{section.description}</Text>
     </View>
   );
 

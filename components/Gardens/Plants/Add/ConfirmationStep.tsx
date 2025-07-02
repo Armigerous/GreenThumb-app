@@ -10,26 +10,21 @@ import { useEffect, useState } from "react";
 import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 
 /**
- * ConfirmationStep component for reviewing and confirming plant details
+ * ConfirmationStep component displays the final summary before adding the plant
  *
- * Shows a summary of plant details including image, nickname, status, and selected garden
- * Handles the final submission with loading state and error display
- *
- * @param plant - Plant data from API
- * @param nickname - Plant nickname
- * @param status - Plant health status
- * @param image - Custom image URI if any
- * @param selectedGarden - Selected garden to add the plant to
- * @param isSubmitting - Whether the form is currently submitting
- * @param uploadProgress - Upload progress percentage (0-100)
- * @param error - Error message if submission failed
- * @param onBack - Callback for back button
+ * @param plant - Plant data from the API
+ * @param nickname - The chosen nickname
+ * @param image - Custom image URI if selected
+ * @param selectedGarden - The selected garden for the plant
+ * @param isSubmitting - Whether the form is currently being submitted
+ * @param uploadProgress - Progress percentage for uploads
+ * @param error - Error message if any
+ * @param onBack - Callback for the back button
  * @param onSubmit - Callback for submission
  */
 interface ConfirmationStepProps {
   plant: PlantData;
   nickname: string;
-  status: UserPlant["status"];
   image: string | null;
   selectedGarden: GardenDashboard;
   isSubmitting: boolean;
@@ -42,7 +37,6 @@ interface ConfirmationStepProps {
 export default function ConfirmationStep({
   plant,
   nickname,
-  status,
   image,
   selectedGarden,
   isSubmitting,
@@ -80,26 +74,6 @@ export default function ConfirmationStep({
     image ||
     (plant?.images && plant.images.length > 0 ? plant.images[0]?.img : null) ||
     "https://theofficialgreenthumb.com/no-plant-image.png";
-
-  // Get status icon and color
-  const getStatusIcon = () => {
-    switch (status) {
-      case "Healthy":
-        return { icon: "checkmark-circle", color: "#059669" };
-      case "Needs Water":
-        return { icon: "water", color: "#d97706" };
-      case "Wilting":
-        return { icon: "alert-circle", color: "#dc2626" };
-      case "Dormant":
-        return { icon: "moon", color: "#d97706" };
-      case "Dead":
-        return { icon: "skull", color: "#991b1b" };
-      default:
-        return { icon: "help-circle", color: "#6b7280" };
-    }
-  };
-
-  const statusInfo = getStatusIcon();
 
   return (
     <View className="px-4 flex-1 flex">
@@ -153,19 +127,18 @@ export default function ConfirmationStep({
               </BodyText>
             </View>
 
-            {/* Status section */}
-            <View className="flex-row items-center mb-4 pb-4 border-b border-cream-100">
-              <BodyText className="text-cream-600 text-sm">Status</BodyText>
-              <View className="flex-row items-center">
-                <Ionicons
-                  name={statusInfo.icon as any}
-                  size={18}
-                  color={statusInfo.color}
-                />
-                <BodyText className="text-foreground text-base font-medium ml-1">
-                  {status}
+            {/* Care tracking note instead of status */}
+            <View className="mb-4 pb-4 border-b border-cream-100">
+              <View className="flex-row items-center mb-2">
+                <Ionicons name="calendar-outline" size={18} color="#77B860" />
+                <BodyText className="text-brand-600 text-sm font-medium ml-2">
+                  Care Schedule
                 </BodyText>
               </View>
+              <BodyText className="text-cream-600 text-sm">
+                We&apos;ll automatically create a personalized care schedule
+                based on this plant&apos;s needs and your local conditions.
+              </BodyText>
             </View>
 
             {/* Garden section */}

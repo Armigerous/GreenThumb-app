@@ -308,49 +308,78 @@ export default function UserPlantDetailScreen() {
     return sortedLogs[0];
   };
 
-  // Status configuration for consistent styling
-  const statusConfig = {
-    Healthy: {
-      bg: "bg-brand-100",
-      text: "text-brand-700",
-      icon: "checkmark-circle" as const,
-      color: "#059669",
-      emoji: "🌱",
-      description: "Thriving and happy",
-    },
-    "Needs Water": {
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      icon: "water" as const,
-      color: "#d97706",
-      emoji: "💧",
-      description: "Time for a drink",
-    },
-    Wilting: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      icon: "alert-circle" as const,
-      color: "#dc2626",
-      emoji: "🥀",
-      description: "Urgent care needed",
-    },
-    Dormant: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      icon: "moon" as const,
-      color: "#d97706",
-      emoji: "🌙",
-      description: "Resting period",
-    },
-    Dead: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      icon: "alert-circle" as const,
-      color: "#dc2626",
-      emoji: "💀",
-      description: "May need replacement",
-    },
-  } as const;
+  // Get next task and last care log
+  const nextTask = nextUpcomingTask;
+  const lastCareLog = getLastCareLog();
+
+  // Get current care status based on tasks, not user status
+  const getCurrentCareStatus = () => {
+    if (!plantData.plant_tasks || plantData.plant_tasks.length === 0) {
+      return {
+        text: "No tasks",
+        color: "#77B860",
+        bg: "bg-brand-100",
+        emoji: "✅",
+        description: "All good",
+      };
+    }
+
+    const now = new Date();
+    const incompleteTasks = plantData.plant_tasks.filter(
+      (task: PlantTask) => !task.completed
+    );
+
+    if (incompleteTasks.length === 0) {
+      return {
+        text: "All caught up",
+        color: "#77B860",
+        bg: "bg-brand-100",
+        emoji: "✅",
+        description: "No pending tasks",
+      };
+    }
+
+    // Sort by due date to get most urgent
+    const sortedTasks = incompleteTasks.sort(
+      (a: PlantTask, b: PlantTask) =>
+        new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+    );
+    const urgentTask = sortedTasks[0];
+    const taskDate = new Date(urgentTask.due_date);
+
+    if (taskDate < now) {
+      return {
+        text: `${urgentTask.task_type} overdue`,
+        color: "#dc2626",
+        bg: "bg-red-100",
+        emoji: "🚨",
+        description: "Needs immediate care",
+      };
+    } else {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      if (taskDate <= tomorrow) {
+        return {
+          text: `${urgentTask.task_type} due soon`,
+          color: "#d97706",
+          bg: "bg-yellow-100",
+          emoji: "⚠️",
+          description: "Care needed soon",
+        };
+      } else {
+        return {
+          text: `${urgentTask.task_type} scheduled`,
+          color: "#77B860",
+          bg: "bg-brand-100",
+          emoji: "📅",
+          description: "Care scheduled",
+        };
+      }
+    }
+  };
+
+  const careStatus = getCurrentCareStatus();
 
   // Loading state
   if (isLoading) {
@@ -373,13 +402,6 @@ export default function UserPlantDetailScreen() {
       </PageContainer>
     );
   }
-
-  // Get status styling
-  const status = statusConfig[plantData.status as keyof typeof statusConfig];
-
-  // Get next task and last care log
-  const nextTask = nextUpcomingTask;
-  const lastCareLog = getLastCareLog();
 
   return (
     <PageContainer scroll={false} padded={false} safeArea={false}>
@@ -440,11 +462,14 @@ export default function UserPlantDetailScreen() {
 
                   {/* Health Status */}
                   <View
-                    className={`rounded-full px-3 py-1.5 flex-row items-center ${status.bg}`}
+                    className={`rounded-full px-3 py-1.5 flex-row items-center ${careStatus.bg}`}
                   >
-                    <Text className="text-lg mr-1">{status.emoji}</Text>
-                    <Text className={`text-sm font-medium ${status.text}`}>
-                      {plantData.status}
+                    <Text className="text-lg mr-1">{careStatus.emoji}</Text>
+                    <Text
+                      className="text-sm font-medium"
+                      style={{ color: careStatus.color }}
+                    >
+                      {careStatus.text}
                     </Text>
                   </View>
                 </View>

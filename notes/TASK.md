@@ -12,6 +12,73 @@
 
 ### 🧪 TESTING REQUIRED - High Priority
 
+**TEST-ORGANIZATION-001**: Test the new task-based plant organization across all screens  
+**Status:** 🟡 **HIGH** - Critical for user experience validation  
+**Owner:** QA Team  
+**Due:** January 28, 2025  
+**Description:** Comprehensive testing of the new task-based plant organization system that replaced status-based organization
+
+**Test Cases:**
+
+**Garden Detail Screen (`app/(tabs)/gardens/[id].tsx`):**
+
+- [ ] Plants are organized into "Needs Immediate Care", "Due Today/Tomorrow", and "All Good" sections
+- [ ] Overdue tasks show in "Needs Immediate Care" section
+- [ ] Tasks due within 48 hours show in "Due Today/Tomorrow" section
+- [ ] Plants with tasks due later than 48 hours show in "All Good" section
+- [ ] Empty sections display appropriate messages
+- [ ] Plant counts are accurate for each section
+
+**Garden Card Component (`components/Gardens/GardenCard.tsx`):**
+
+- [ ] Shows `plants_with_overdue_tasks` count instead of status-based count
+- [ ] Badge appears only when there are overdue tasks
+- [ ] Badge text reads "{count} needs care" correctly
+- [ ] Health percentage displays correctly based on overdue tasks
+
+**Garden Detail Header (`components/Gardens/GardenDetailHeader.tsx`):**
+
+- [ ] Shows `plants_with_overdue_tasks` count in care indicator
+- [ ] Displays "All plants healthy" when no overdue tasks
+- [ ] Health percentage handles null values gracefully
+- [ ] Care indicator only appears when there are overdue tasks
+
+**Gardens Index Page (`app/(tabs)/gardens/index.tsx`):**
+
+- [ ] Overall health calculation works with new metrics
+- [ ] Dashboard data displays correctly
+- [ ] No references to old status-based fields
+
+**Plant Creation Flow:**
+
+- [ ] Plants can be added without status selection
+- [ ] New plants default to no status in database
+- [ ] Plant creation completes successfully
+- [ ] Tasks are generated correctly for new plants
+
+**Database Integrity:**
+
+- [ ] No status column exists in user_plants table
+- [ ] Materialized views return new task-based metrics
+- [ ] Database functions work without status parameter
+- [ ] All views and functions compile without errors
+
+**Edge Cases:**
+
+- [ ] Gardens with no plants handle organization correctly
+- [ ] Plants with no tasks display in appropriate section
+- [ ] Null health percentages are handled gracefully
+- [ ] Very old overdue tasks are counted correctly
+
+**Acceptance Criteria:**
+
+- [ ] All plant organization is based on task urgency, not user-inputted status
+- [ ] No UI references to plant status exist
+- [ ] Health calculations remain accurate (100 - overdue_tasks \* 5)
+- [ ] User experience is improved with actionable, time-based organization
+- [ ] No TypeScript errors or console warnings
+- [ ] Performance is maintained or improved
+
 **SUBS-TEST-010**: Payment flow testing  
 **Status:** 🔴 **CRITICAL** - Must test before launch  
 **Owner:** QA Team  
@@ -65,6 +132,43 @@
 - [ ] **Security Review**: Ensure API keys are properly secured
 
 ### 🔧 RECENTLY COMPLETED
+
+**STATUS-FIELD-REMOVAL-001**: Complete elimination of plant status field  
+**Status:** ✅ **COMPLETED** - January 26, 2025  
+**Owner:** Development Team  
+**Issue:** Plant status field contained unreliable user-inputted data that wasn't being used for health calculations  
+**Solution:** Completely removed status field from database, types, and UI components, replaced with task-based organization
+
+**Database Changes:**
+
+- Removed `status` column from `user_plants` table
+- Updated `user_gardens_dashboard` materialized view to use task-based metrics
+- Updated `user_gardens_full_data` materialized view to exclude status
+- Updated `garden_tasks_summary` view to remove status field
+- Updated `add_user_plant()` function to not expect status parameter
+
+**TypeScript Changes:**
+
+- Removed `status` field from `UserPlant` interface
+- Removed `status` field from `DashboardPlantSummary` interface
+- Removed `status` field from `GardenTaskSummary` interface
+- Updated `GardenDashboard` interface to use `plants_with_overdue_tasks` and `plants_with_urgent_tasks`
+
+**UI Component Updates:**
+
+- Updated plant creation flow to not collect status
+- Updated plant organization to use time-based urgency (overdue, urgent, all good)
+- Updated garden cards and detail headers to show task-based metrics
+- Updated Edge Function prompt to not reference plant status
+- Fixed all TypeScript errors related to status field removal
+
+**Benefits:**
+
+- Eliminated misleading UX with stale status badges
+- Aligned UI with actual health calculation logic (overdue tasks)
+- Created actionable, time-based plant organization
+- Reduced cognitive load on users
+- Removed technical debt from unreliable data field
 
 **DATABASE-FIX-001**: Fixed materialized view concurrent refresh error  
 **Status:** ✅ **COMPLETED** - July 1, 2025  

@@ -50,19 +50,23 @@ export default function GardensScreen() {
     gardens.forEach((garden) => {
       totalPlantsCount += garden.total_plants || 0;
 
-      // Use the health_percentage property directly from each garden
-      // Only include gardens that have plants
-      if (garden.total_plants && garden.total_plants > 0) {
+      // Only include gardens that have plants (health_percentage is not null)
+      if (
+        garden.total_plants &&
+        garden.total_plants > 0 &&
+        garden.health_percentage !== null
+      ) {
         totalHealthScores += garden.health_percentage || 0;
         totalGardensWithScore++;
       }
     });
 
-    // Calculate average health score across all gardens
+    // Calculate average health score across all gardens with plants
+    // If no gardens have plants, show neutral state (no percentage)
     const avgHealthPercentage =
       totalGardensWithScore > 0
         ? Math.round(totalHealthScores / totalGardensWithScore)
-        : 0;
+        : null;
 
     return {
       totalPlantsCount,
@@ -132,17 +136,23 @@ export default function GardensScreen() {
                     Health Score
                   </Text>
                   <View className="flex-row items-center">
-                    <Text
-                      className={`text-xl font-title font-bold ${
-                        overallHealth.avgHealthPercentage >= 80
-                          ? "text-brand-600"
-                          : overallHealth.avgHealthPercentage >= 50
-                          ? "text-accent-600"
-                          : "text-destructive"
-                      }`}
-                    >
-                      {overallHealth.avgHealthPercentage}%
-                    </Text>
+                    {overallHealth.avgHealthPercentage !== null ? (
+                      <Text
+                        className={`text-xl font-title font-bold ${
+                          overallHealth.avgHealthPercentage >= 80
+                            ? "text-brand-600"
+                            : overallHealth.avgHealthPercentage >= 50
+                            ? "text-accent-600"
+                            : "text-destructive"
+                        }`}
+                      >
+                        {overallHealth.avgHealthPercentage}%
+                      </Text>
+                    ) : (
+                      <Text className="text-xl font-title font-bold text-cream-500">
+                        N/A
+                      </Text>
+                    )}
                   </View>
                 </View>
               </View>

@@ -40,7 +40,7 @@ interface EditPlantModalProps {
 
 /**
  * Modal component for editing plant details
- * Allows users to update the plant's nickname, status, and image
+ * Allows users to update the plant's nickname and image
  */
 export default function EditPlantModal({
   plant,
@@ -48,7 +48,7 @@ export default function EditPlantModal({
   onClose,
 }: EditPlantModalProps) {
   const [nickname, setNickname] = useState(plant.nickname);
-  const [status, setStatus] = useState(plant.status);
+  // Plant status removed - no longer exposed to users
   const [image, setImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -130,7 +130,7 @@ export default function EditPlantModal({
     if (!contentPreloaded.current && plant) {
       // Set initial values
       setNickname(plant.nickname);
-      setStatus(plant.status);
+      // Status removed - no longer editable
       if (plant.images && plant.images.length > 0) {
         setImage(plant.images[0]);
       }
@@ -184,21 +184,12 @@ export default function EditPlantModal({
   useEffect(() => {
     if (isVisible) {
       setNickname(plant.nickname);
-      setStatus(plant.status);
+      // Status removed - no longer editable
       if (plant.images && plant.images.length > 0) {
         setImage(plant.images[0]);
       }
     }
   }, [isVisible, plant]);
-
-  // Available plant statuses for selection
-  const plantStatuses = [
-    "Healthy",
-    "Needs Water",
-    "Wilting",
-    "Dormant",
-    "Dead",
-  ] as const;
 
   const handleClose = () => {
     if (!animationInProgress.current) {
@@ -217,7 +208,7 @@ export default function EditPlantModal({
     try {
       const updates = {
         nickname: nickname.trim(),
-        status,
+        // Status removed - no longer updated by users
         images: image ? [image] : [],
         updated_at: new Date().toISOString(),
       };
@@ -341,32 +332,15 @@ export default function EditPlantModal({
                     />
                   </View>
 
-                  {/* Status Selection */}
-                  <View className="mb-6">
-                    <Text className="text-cream-600 mb-2">Status</Text>
-                    <View className="flex-row flex-wrap gap-2">
-                      {plantStatuses.map((plantStatus) => (
-                        <TouchableOpacity
-                          key={plantStatus}
-                          onPress={() => setStatus(plantStatus)}
-                          className={`px-4 py-2 rounded-lg ${
-                            status === plantStatus
-                              ? "bg-brand-500"
-                              : "bg-cream-100"
-                          }`}
-                        >
-                          <Text
-                            className={`${
-                              status === plantStatus
-                                ? "text-white"
-                                : "text-cream-700"
-                            } font-medium`}
-                          >
-                            {plantStatus}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                  {/* Note about automatic care tracking */}
+                  <View className="mb-6 bg-brand-50 rounded-lg p-4">
+                    <Text className="text-brand-700 font-medium text-sm mb-1">
+                      🤖 Smart Care Tracking
+                    </Text>
+                    <Text className="text-brand-600 text-sm">
+                      We automatically track your plant&apos;s care needs based
+                      on completed tasks and schedules.
+                    </Text>
                   </View>
 
                   {/* Save Button */}
