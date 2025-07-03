@@ -499,6 +499,7 @@
 - [ ] Expert consultation video calls (premium add-on)
 - [ ] Advanced analytics and insights
 - [ ] Social features and community sharing
+- [ ] **Multi-Agent AI System (Phase 1):** Deploy Garden Intelligence Coordinator and Care Task Orchestrator addressing user interview feedback (See `docs/crewai-strategy.md`)
 
 ### Phase 3: Ecosystem Expansion (March 2025)
 
@@ -508,6 +509,7 @@
 - [ ] Family sharing and multi-user gardens
 - [ ] Plant health AI diagnostics
 - [ ] Seasonal care optimization
+- [ ] **Multi-Agent AI System (Phase 2):** Enhanced agent coordination, user personalization, and seasonal optimization
 
 ### Phase 4: Platform Growth (Q2 2025)
 
@@ -517,6 +519,7 @@
 - [ ] Third-party integrations
 - [ ] Advanced subscription tiers
 - [ ] White-label solutions
+- [ ] **Multi-Agent AI System (Phase 3):** Full ecosystem with Plant Health Diagnostician, UX Optimizer, and Business Intelligence agents
 
 ---
 

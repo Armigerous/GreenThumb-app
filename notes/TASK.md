@@ -951,6 +951,7 @@
 - [ ] **PERFORMANCE-OPTIMIZATION**: Memory usage and startup time improvements
 - [ ] **ADVANCED-ANALYTICS**: Detailed plant health insights and trends
 - [ ] **SUBSCRIPTION-ANALYTICS**: Revenue tracking and churn analysis
+- [ ] **CREWAI-PHASE-1**: Deploy Garden Intelligence Coordinator and Care Task Orchestrator agents addressing user interview feedback (See `docs/crewai-strategy.md`)
 
 ### 🌟 Version 1.2 Features (March)
 
@@ -960,9 +961,12 @@
 - [ ] **MARKETPLACE-INTEGRATION**: Plant purchasing recommendations
 - [ ] **FAMILY-SHARING**: Multi-user garden management
 - [ ] **SUBSCRIPTION-TIERS**: Multiple subscription levels with different features
+- [ ] **CREWAI-PHASE-2**: Enhanced agent coordination, user personalization, and seasonal optimization
 
 ### 🚀 Future Considerations (Q2 2025)
 
+- [ ] **CREWAI-PHASE-3**: Add Plant Health Diagnostician, UX Optimizer, and Business Intelligence agents
+- [ ] **AI-POWERED-RECOMMENDATIONS**: Full multi-agent plant recommendation system
 - [ ] **AR-FEATURES**: Augmented reality plant care guidance
 - [ ] **IOT-INTEGRATION**: Smart sensor connectivity
 - [ ] **WEB-VERSION**: Browser-based garden management
@@ -973,6 +977,191 @@
 ### 🌱 Future Task System Improvements
 
 - [ ] **SOIL-PH-AUTOMATION**: Implement `soil_ph_ids` field for auto-scheduling lime/sulfur tasks (Optional enhancement - only if implementing automatic soil pH adjustment task scheduling)
+
+---
+
+## 🤖 CREWAI MULTI-AGENT SYSTEM IMPLEMENTATION
+
+> **Reference:** `docs/crewai-strategy.md`  
+> **Timeline:** August 2025 (Phase 0) → September 2025 (Phase 1) → November 2025 (Phase 2) → Q1 2026 (Phase 3)
+
+### Phase 0: Proof of Concept (August 2025)
+
+**CREWAI-POC-001**: Single Agent Validation  
+**Status:** ⚪ **PLANNED** - Lean validation approach  
+**Owner:** AI/ML Team  
+**Due:** August 15, 2025  
+**Priority:** Validate core value before full system build
+
+**Minimal Deliverables:**
+
+- [ ] **Garden Intelligence Coordinator Only:** Single agent for plant recommendations (defer Care Task Orchestrator)
+- [ ] **Core User Story:** "Garden creation → 5 plant recommendations → 3 care tasks"
+- [ ] **Data Schema Lock-down:** Define precise `GardenConditions` and `PlantRecommendation` interfaces
+- [ ] **Basic RAG:** 5-page knowledge base, no versioning system yet
+- [ ] **Memory-only Caching:** Skip Redis/database layers for now
+- [ ] **Token Monitoring:** Basic usage tracking and cost validation
+
+**A/B Testing:**
+
+- [ ] **Tone Variant A:** "Nurturing Grandparent" - Maximum warmth and encouragement
+- [ ] **Tone Variant B:** "Knowledgeable Friend" - Slightly more technical but still approachable
+- [ ] **Metrics:** User engagement time, plant addition rate, subscription conversion
+
+**Success Criteria:**
+
+- End-to-end flow works for 10 test users
+- <$0.10 per recommendation in token costs
+- 70%+ user acceptance of recommended plants
+- Data schema validation complete
+
+### Phase 1: MVP Foundation (September 2025)
+
+**CREWAI-MVP-001**: Garden Intelligence Coordinator Agent  
+**Status:** ⚪ **PLANNED** - Strategic initiative  
+**Owner:** AI/ML Team  
+**Due:** September 15, 2025  
+**Prerequisites:** Post-launch optimization complete and user interview insights integrated
+
+**Deliverables:**
+
+- [ ] **Knowledge Base Creation:** 15-20 page research document incorporating customer personas ("Anxious Plant Parent", "Scaling Gardener", etc.)
+- [ ] **Agent Implementation:** CrewAI framework setup with Garden Intelligence Coordinator using nurturing, mentor-like brand personality
+- [ ] **Database Curation:** Address "overwhelming 4500+ plants" user feedback with intelligent filtering and recommendation systems
+- [ ] **Post-Garden Recommendations:** Solve #1 user request for "recommended plants after garden creation"
+- [ ] **Performance Optimization:** <200ms response time, <$0.50 per user per month cost target (supporting $79.99 annual subscription ROI)
+
+**Success Metrics:**
+
+- Solve "overwhelming database" problem - users see manageable, relevant plant subsets
+- 40% increase in plant additions after garden creation (addressing top user request)
+- User acceptance rate >70% for AI-recommended plants
+- Support guarantee-based business model with reliable recommendations
+
+**CREWAI-MVP-002**: Care Task Orchestrator Agent  
+**Status:** ⚪ **PLANNED** - Strategic initiative  
+**Owner:** AI/ML Team  
+**Due:** September 30, 2025  
+**Dependencies:** CREWAI-MVP-001 completion
+
+**Deliverables:**
+
+- [ ] **Knowledge Base Creation:** 15-20 page research document on care scheduling with customer persona insights ("Busy Professional" automation, "Anxious Plant Parent" confidence-building)
+- [ ] **Agent Implementation:** Enhanced task generation supporting guarantee-based business model with empowering, growth-oriented brand personality
+- [ ] **Edge Function Replacement:** Replace existing task generation Edge Function with multi-agent system
+- [ ] **Travel-Friendly Scheduling:** Optimize for "Busy Professional" personas with travel considerations
+- [ ] **Cost Management:** Implement caching layer and model routing strategy maintaining <$0.50/user/month
+
+**Success Metrics:**
+
+- 30% increase in task completion rates (supporting triple guarantee system)
+- 20% reduction in overdue tasks per user (preventing plant failure anxiety)
+- Improved user satisfaction scores for task relevance
+- Support annual subscription value proposition with reliable, outcome-focused recommendations
+
+**CREWAI-MVP-003**: Agent Coordination Framework  
+**Status:** ⚪ **PLANNED** - Strategic initiative  
+**Owner:** AI/ML Team  
+**Due:** September 30, 2025  
+**Dependencies:** CREWAI-MVP-001, CREWAI-MVP-002
+
+**Deliverables:**
+
+- [ ] **Inter-Agent Communication:** Protocol for agent coordination using existing database schemas
+- [ ] **Performance Monitoring:** Cost tracking, response time monitoring, error handling
+- [ ] **Knowledge Management:** RAG implementation with Supabase Vector or Pinecone
+- [ ] **Caching Strategy:** Multi-layer caching (memory, Redis, database) for cost optimization
+- [ ] **A/B Testing Framework:** Compare AI recommendations vs. current system
+
+**Success Metrics:**
+
+- <500ms response time for multi-agent coordination
+- <$0.50 per user per month total AI costs
+- 99.9% uptime for agent services
+- Successful A/B test showing improved user outcomes
+
+### Phase 2: Enhanced Coordination (March 2025)
+
+**CREWAI-ENHANCED-001**: Advanced Agent Collaboration  
+**Status:** ⚪ **PLANNED** - Strategic expansion  
+**Owner:** AI/ML Team  
+**Due:** November 15, 2025  
+**Prerequisites:** Phase 1 successful deployment and user validation
+
+**Deliverables:**
+
+- [ ] **Task Delegation:** Advanced inter-agent task routing and specialization
+- [ ] **User Personalization:** Individual user preference learning and adaptation
+- [ ] **Seasonal Intelligence:** Dynamic care adjustments based on weather and season
+- [ ] **Feedback Loops:** User rating integration for continuous agent improvement
+
+**Success Metrics:**
+
+- 40% improvement in care schedule relevance
+- 15% increase in premium subscription conversion
+- <500ms response time for complex multi-agent queries
+
+### Phase 3: Ecosystem Expansion (Q2 2025)
+
+**CREWAI-ECOSYSTEM-001**: Specialized Agent Deployment  
+**Status:** ⚪ **PLANNED** - Future expansion  
+**Owner:** AI/ML Team  
+**Due:** March 30, 2026  
+**Prerequisites:** Phase 2 success and business case validation
+
+**New Agents:**
+
+- [ ] **Plant Health Diagnostician:** Disease/pest identification and treatment recommendations
+- [ ] **User Experience Optimizer:** Personalization and engagement optimization
+- [ ] **Business Intelligence Advisor:** Subscription optimization and growth analytics
+
+**Integration Points:**
+
+- [ ] Camera-based plant identification features
+- [ ] Expert consultation preparation and briefing
+- [ ] Advanced analytics and user insight generation
+- [ ] Community features and social recommendation moderation
+
+### Technical Infrastructure Requirements
+
+**CREWAI-INFRA-001**: Foundation Infrastructure  
+**Status:** ⚪ **PLANNED** - Technical prerequisite  
+**Owner:** DevOps/Backend Team  
+**Due:** September 1, 2025
+
+**Deliverables:**
+
+- [ ] **CrewAI Framework:** Production deployment with Supabase integration
+- [ ] **Vector Database:** Supabase Vector or Pinecone setup for RAG knowledge bases
+- [ ] **Caching Layer:** Redis implementation for performance optimization
+- [ ] **Monitoring Stack:** Cost tracking, performance monitoring, error alerting
+- [ ] **Model Router:** Intelligent routing between GPT-3.5, GPT-4, and GPT-O3 models
+
+**Cost Management:**
+
+- [ ] **Budget Controls:** $100/month per agent threshold monitoring
+- [ ] **Usage Analytics:** Per-user, per-agent, per-feature cost tracking
+- [ ] **Rate Limiting:** Intelligent throttling to prevent runaway costs
+- [ ] **Cache Optimization:** Monitor hit rates and cost savings
+
+**CREWAI-KNOWLEDGE-001**: Knowledge Base Development  
+**Status:** ⚪ **PLANNED** - Content creation  
+**Owner:** Content/Research Team  
+**Due:** September 10, 2025
+
+**Research Documents (30-40 pages each):**
+
+- [ ] **Garden Optimization Guide:** Companion planting, space optimization, environmental design with customer persona insights
+- [ ] **Plant Care Science Manual:** Species-specific care, seasonal adjustments, regional variations supporting guarantee-based outcomes
+- [ ] **User Psychology & Brand Voice Manual:** "Anxious Plant Parent" confidence-building, "Scaling Gardener" efficiency, brand personality implementation
+- [ ] **Business Model Integration Guide:** Supporting $79.99 annual subscription value, triple guarantee system, premium competitive positioning
+
+**Quality Assurance:**
+
+- [ ] Expert review by certified horticulturists
+- [ ] Fact-checking and scientific accuracy validation
+- [ ] User testing with research document recommendations
+- [ ] Version control and rollback capability implementation
 
 ---
 
