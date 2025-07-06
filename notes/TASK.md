@@ -1361,88 +1361,71 @@ Garden conditions are automatically converted to plant database filters includin
 
 ---
 
-## 🚀 NEW TASK: Profile Page Redesign (July 2025)
+## 🟢 NEW TASKS: UI/UX Improvements (July 2025)
 
-**Status:** 🟡 IN PROGRESS
-**Owner:** Design & Development Team
-**Description:**
-Implement a brand-aligned, emotionally supportive Profile page as outlined in PLANNING.md. The new design focuses on user identity, subscription status, support, and gentle encouragement, avoiding stats and gamification.
+### Profile Page UI Updates
 
-### Subtasks
+**PROFILE-UI-001**: Remove background container for profile name and profile picture  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Remove the background container (card or colored box) behind the profile name and profile picture on the Profile page for a cleaner, softer look.  
+**Acceptance Criteria:**
 
-- [ ] Design Figma mockup for new Profile page (brand colors, illustration, copy)
-- [ ] Implement user identity section (avatar, name, email, edit path, greeting)
-- [ ] Display subscription status and triple guarantee badge/info
-- [ ] Add notification preferences toggle (with clear, gentle copy)
-- [ ] Integrate support/help section (FAQ, contact, expert advice for premium)
-- [ ] Add privacy/legal links (privacy policy, terms, data export/delete)
-- [ ] Implement logout button (calm, clear)
-- [ ] Show app version (small, unobtrusive)
-- [ ] Add encouragement message and optional feedback link
+- [ ] No background container behind profile name and picture
+- [ ] Profile section appears visually soft and uncluttered
+- [ ] Matches brand guidelines and Figma design
 
-### Acceptance Criteria
+**PROFILE-UI-002**: Change notification toggle's colors in the profile page  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Update the notification preferences toggle on the Profile page to use brand-compliant colors for both on and off states, ensuring accessibility and visual clarity.  
+**Acceptance Criteria:**
 
-- Profile page matches Figma design and brand guidelines
-- No plant/task stats or gamification elements present
-- All copy is gentle, supportive, and brand-aligned
-- Subscription status and triple guarantee are clear and accessible
-- Support/help is easy to find and use
-- All actions are accessible and touch-friendly
-- Page is visually soft, uncluttered, and emotionally supportive
+- [ ] Toggle uses correct brand colors for on/off
+- [ ] Sufficient contrast for accessibility
+- [ ] Consistent with other toggles in the app
 
----
+**PROFILE-UI-003**: Implement the sections under Help & Support  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Build out the Help & Support section on the Profile page, including FAQ, contact options, and expert advice for premium users.  
+**Acceptance Criteria:**
 
-## 🟢 NEW TASK: Garden Page Tabbed Recommendations Redesign (July 2025)
+- [ ] FAQ section is present and functional
+- [ ] Contact/support options are accessible
+- [ ] Expert advice section visible for premium users
+- [ ] All links and actions work as expected
 
-**Status:** 🟢 IN PROGRESS
-**Owner:** Development Team
-**Due:** July 20, 2025
-**Description:**
-Fully implement a scrollable, tabbed "Recommended for You" section on individual garden pages. This supersedes the previous RecommendedPlantsSection task. The new design introduces a tabbed interface after the garden hero section: one tab for "Your Garden" (showing the user's plants), and one for "Recommended Plants" (showing personalized recommendations). Plant cards in the recommended tab must be fully visible, support vertical scrolling, and allow users to click a card to view the plant's detail page. Each card should also have a clear CTA button to add the plant directly to the current garden.
+**PROFILE-UI-004**: Implement the sections under Privacy & Legal  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Build out the Privacy & Legal section on the Profile page, including links to privacy policy, terms of service, and data export/delete options.  
+**Acceptance Criteria:**
 
-### Subtasks
+- [ ] Privacy policy and terms links are present and open correct documents
+- [ ] Data export and delete options are accessible
+- [ ] All actions are confirmed and safe for users
 
-- [ ] Implement tabbed interface after the garden hero section: "Your Garden" and "Recommended Plants"
-- [ ] In "Recommended Plants" tab, display up to 10 recommended plants for the current garden
-- [ ] Ensure plant cards are fully visible and support vertical scrolling (no clipping or overflow)
-- [ ] Clicking a plant card navigates to the correct plant detail page
-- [ ] Add a clear CTA button under each card to add the plant directly to the garden
-- [ ] Ensure the section is visually consistent with brand guidelines and mobile-friendly
-- [ ] Remove/replace the old RecommendedPlantsSection implementation
-- [ ] Test on both iOS and Android for scroll and navigation behavior
+### Tab Bar Icon Updates
 
-### Acceptance Criteria
+**NAV-UI-001**: Change the gardens' icon in tabs to use a grid  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Update the tab bar icon for Gardens to use a grid icon, improving clarity and visual association.  
+**Acceptance Criteria:**
 
-- Tabbed interface appears after the garden hero section
-- "Recommended Plants" tab is fully scrollable and shows up to 10 recommended plants
-- Plant cards are fully visible, not clipped, and support vertical scrolling
-- Clicking a card navigates to the correct plant detail page
-- Each card has a working CTA to add the plant to the garden
-- Section is visually consistent with brand and mobile UX best practices
-- Old RecommendedPlantsSection is removed or replaced
-- All functionality is tested and works on both iOS and Android
+- [ ] Gardens tab uses a grid icon
+- [ ] Icon is visually consistent with other tab icons
+- [ ] Icon meets brand and accessibility standards
 
----
+**NAV-UI-002**: Change the plants icon in tabs to use a leaf, flower, or book  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Update the tab bar icon for Plants to use a more appropriate symbol (leaf, flower, or book), based on brand and user feedback.  
+**Acceptance Criteria:**
 
-## 🟡 SUPERSEDED TASK: RecommendedPlantsSection on garden details page
-
-**Status:** 🟡 SUPERSEDED (see new task above)
-**Owner:** Development Team
-**Description:**
-Implement RecommendedPlantsSection on garden details page using real recommendations based on garden conditions. (This task is now superseded by the more comprehensive tabbed recommendations redesign above.)
-
-### Subtasks
-
-- [ ] Implement RecommendedPlantsSection on garden details page ([id].tsx) using real recommendations based on garden conditions
-  - Section now fetches and displays up to 10 recommended plants for the current garden
-  - Uses convertGardenToFilters utility for filter string
-  - Add handler is a placeholder alert (to be implemented)
-
-### Acceptance Criteria
-
-- RecommendedPlantsSection is implemented and live on garden details page
-- Section fetches and displays up to 10 recommended plants for the current garden
-- Uses convertGardenToFilters utility for filter string
-- Add handler is a placeholder alert (to be implemented)
+- [ ] Plants tab uses a leaf, flower, or book icon (final choice per design review)
+- [ ] Icon is visually consistent with other tab icons
+- [ ] Icon meets brand and accessibility standards
 
 ---

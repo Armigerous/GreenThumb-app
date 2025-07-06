@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -31,6 +31,7 @@ import PlantList from "@/components/Gardens/PlantList";
 import RecommendedPlantsSection from "@/components/Gardens/RecommendedPlantsSection";
 import { BodyText } from "@/components/Gardens";
 import { useGardenFilters } from "@/lib/hooks/useGardenFilters";
+import TabNavigation from "@/components/UI/TabNavigation";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -400,6 +401,13 @@ const GardenDetails = () => {
     );
   };
 
+  // Tab state for switching between My Plants and Recommendations
+  const [activeTab, setActiveTab] = useState<string>("plants");
+  const tabItems = [
+    { key: "plants", label: "My Plants" },
+    { key: "recommendations", label: "Recommendations" },
+  ];
+
   if (isLoading) {
     return (
       <PageContainer scroll={false} animate={false}>
@@ -675,10 +683,10 @@ const GardenDetails = () => {
     );
   };
 
-  // --- New: Unified page layout ---
+  // --- New: Unified page layout with tabs ---
   return (
     <PageContainer scroll={false} padded={false} safeArea={true}>
-      {/* Top bar: Back and Delete (minimal, not visually heavy) */}
+      {/* Top bar: Back and Settings */}
       <View className="flex-row justify-between items-center px-6 mt-2">
         <TouchableOpacity
           onPress={() => router.push("/(tabs)/gardens")}
@@ -705,11 +713,9 @@ const GardenDetails = () => {
               alignItems: "center",
             }}
           >
-            {/* Reason: Add a visible label for clarity and accessibility */}
             <Text className="text-foreground font-paragraph text-base mr-1">
               Settings
             </Text>
-
             <Ionicons name="settings-outline" size={22} color="#2e2c29" />
           </TouchableOpacity>
         </View>
@@ -735,104 +741,139 @@ const GardenDetails = () => {
         }}
       />
 
-      {/* Plant List or Empty State */}
-      {plants.length > 0 ? (
-        <PlantList
-          plants={plants}
-          onPlantPress={handlePlantPress}
-          onEditPlant={handleEditPlant}
-          onWaterPlant={handleWaterPlant}
-          onDeletePlant={(plant) => {
-            // Reason: Confirm before deleting a plant
-            Alert.alert(
-              "Delete Plant",
-              `Are you sure you want to delete ${plant.nickname}?`,
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Delete",
-                  style: "destructive",
-                  onPress: async () => {
-                    try {
-                      // Delete all plant images from storage first
-                      if (plant.images && plant.images.length > 0) {
-                        const imageDeletionPromises = plant.images.map(
-                          (imageUrl: string) => deleteImageFromStorage(imageUrl)
-                        );
-                        await Promise.all(imageDeletionPromises);
-                      }
-                      // Then delete the plant from the database
-                      const { error } = await supabase
-                        .from("user_plants")
-                        .delete()
-                        .eq("id", plant.id);
-                      if (error) throw error;
-                      // Invalidate queries
-                      queryClient.invalidateQueries({
-                        queryKey: ["gardenDetails", gardenData.id],
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: ["gardenDashboard", gardenData.user_id],
-                      });
-                      refetch();
-                    } catch (err) {
-                      Alert.alert(
-                        "Error",
-                        "Could not delete plant. Please try again."
-                      );
-                    }
-                  },
-                },
-              ]
-            );
-          }}
+      {/* Tab Navigation for switching between My Plants and Recommendations */}
+      <View className="px-6 mt-4 mb-2">
+        <TabNavigation
+          tabs={tabItems}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
-      ) : (
-        <View style={{ alignItems: "center", marginTop: 32, marginBottom: 24 }}>
-          <Ionicons
-            name="leaf-outline"
-            size={64}
-            color="#77B860"
-            style={{ marginBottom: 12 }}
-          />
-          <Text
-            style={{
-              fontSize: 22,
-              color: "#2e2c29",
-              fontFamily: "Mali-Bold",
-              marginBottom: 8,
-            }}
-          >
-            Your Garden Awaits
-          </Text>
-          <Text
-            style={{
-              color: "#9e9a90",
-              fontFamily: "Nunito-Regular",
-              fontSize: 16,
-              marginBottom: 18,
-              textAlign: "center",
-              maxWidth: 320,
-            }}
-          >
-            Add your first plant to start your gardening journey. Track growth,
-            care schedules, and watch them thrive!
-          </Text>
-          <SubmitButton
-            onPress={handleAddPlant}
-            iconName="add-circle-outline"
-            iconPosition="left"
-          >
-            Plant Something New
-          </SubmitButton>
-        </View>
-      )}
+      </View>
 
-      {/* Recommended Plants Section (always shown, can be empty) */}
-      <RecommendedPlantsSection
-        recommendedPlants={recommendedPlants}
-        onAddRecommended={handleAddRecommended}
-      />
+      {/* Tab Panels */}
+      <View className="flex-1">
+        {activeTab === "plants" ? (
+          // My Plants Tab: Show plant list or empty state, scrollable
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingBottom: 32,
+              flexGrow: 1,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            {plants.length > 0 ? (
+              <PlantList
+                plants={plants}
+                onPlantPress={handlePlantPress}
+                onEditPlant={handleEditPlant}
+                onWaterPlant={handleWaterPlant}
+                onDeletePlant={(plant) => {
+                  Alert.alert(
+                    "Delete Plant",
+                    `Are you sure you want to delete ${plant.nickname}?`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: async () => {
+                          try {
+                            if (plant.images && plant.images.length > 0) {
+                              const imageDeletionPromises = plant.images.map(
+                                (imageUrl: string) =>
+                                  deleteImageFromStorage(imageUrl)
+                              );
+                              await Promise.all(imageDeletionPromises);
+                            }
+                            const { error } = await supabase
+                              .from("user_plants")
+                              .delete()
+                              .eq("id", plant.id);
+                            if (error) throw error;
+                            queryClient.invalidateQueries({
+                              queryKey: ["gardenDetails", gardenData.id],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["gardenDashboard", gardenData.user_id],
+                            });
+                            refetch();
+                          } catch (err) {
+                            Alert.alert(
+                              "Error",
+                              "Could not delete plant. Please try again."
+                            );
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              />
+            ) : (
+              <View
+                style={{
+                  alignItems: "center",
+                  marginTop: 32,
+                  marginBottom: 24,
+                }}
+              >
+                <Ionicons
+                  name="leaf-outline"
+                  size={64}
+                  color="#77B860"
+                  style={{ marginBottom: 12 }}
+                />
+                <Text
+                  style={{
+                    fontSize: 22,
+                    color: "#2e2c29",
+                    fontFamily: "Mali-Bold",
+                    marginBottom: 8,
+                  }}
+                >
+                  Your Garden Awaits
+                </Text>
+                <Text
+                  style={{
+                    color: "#9e9a90",
+                    fontFamily: "Nunito-Regular",
+                    fontSize: 16,
+                    marginBottom: 18,
+                    textAlign: "center",
+                    maxWidth: 320,
+                  }}
+                >
+                  Add your first plant to start your gardening journey. Track
+                  growth, care schedules, and watch them thrive!
+                </Text>
+                <SubmitButton
+                  onPress={handleAddPlant}
+                  iconName="add-circle-outline"
+                  iconPosition="left"
+                >
+                  Plant Something New
+                </SubmitButton>
+              </View>
+            )}
+          </ScrollView>
+        ) : (
+          // Recommendations Tab: Show recommended plants, scrollable
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingBottom: 32,
+              flexGrow: 1,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            <RecommendedPlantsSection
+              recommendedPlants={recommendedPlants}
+              onAddRecommended={handleAddRecommended}
+            />
+          </ScrollView>
+        )}
+      </View>
     </PageContainer>
   );
 };
