@@ -112,22 +112,21 @@ export default function GardensScreen() {
           {/* Overall Health Summary */}
           {overallHealth && (
             <AnimatedTransition delay={250} initialY={10}>
-              <View className="flex-row justify-between mb-6 px-4">
-                <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
-                    Total Plants
-                  </Text>
-                  <Text className="text-xl font-title font-bold text-foreground">
-                    {overallHealth.totalPlantsCount}
-                  </Text>
-                </View>
-
+              <View className="flex-row justify-between mb-6 px-2">
                 <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
                   <Text className="text-xs text-cream-600 font-paragraph mb-1">
                     Gardens
                   </Text>
                   <Text className="text-xl font-title font-bold text-foreground">
                     {overallHealth.gardenCount}
+                  </Text>
+                </View>
+                <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
+                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
+                    Total Plants
+                  </Text>
+                  <Text className="text-xl font-title font-bold text-foreground">
+                    {overallHealth.totalPlantsCount}
                   </Text>
                 </View>
 

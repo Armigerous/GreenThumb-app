@@ -102,7 +102,7 @@ export default function GardenCard({
   return (
     <>
       <TouchableOpacity
-        className="bg-white rounded-xl p-2 max-h-28"
+        className="bg-white rounded-xl p-2 max-h-28 mb-2"
         style={{
           height: isGardensPage ? undefined : 90,
         }}
@@ -210,7 +210,9 @@ export default function GardenCard({
               </View>
               <BodyText
                 className={`$${
-                  isGardensPage ? "text-sm ml-2 flex-shrink-0" : "text-xs ml-1 flex-shrink"
+                  isGardensPage
+                    ? "text-sm ml-2 flex-shrink-0"
+                    : "text-xs ml-1 flex-shrink"
                 } text-cream-700`}
                 {...(!isGardensPage && {
                   numberOfLines: 1,

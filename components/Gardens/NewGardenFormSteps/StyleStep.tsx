@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BodyText, TitleText } from "../../UI/Text";
 import Selector from "../../UI/Selector";
-import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
+import { LOOKUP_TABLES, getOrderedOptions } from "@/lib/gardenHelpers";
 
 type StyleStepProps = {
   landscapeThemeIds: number[];
@@ -27,9 +27,7 @@ export default function StyleStep({
         label="Garden Style (Optional)"
         required={false}
         placeholder="e.g. Cottage, Modern, Rock Garden"
-        items={LOOKUP_TABLES.landscape_theme.filter(
-          (item) => item.label !== "none"
-        )}
+        items={getOrderedOptions("landscape_theme")}
         value={landscapeThemeIds}
         multiple={true}
         onChange={onLandscapeThemeChange}

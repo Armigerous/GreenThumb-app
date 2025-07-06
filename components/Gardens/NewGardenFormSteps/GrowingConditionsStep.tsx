@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { BodyText, TitleText } from "../../UI/Text";
 import Selector from "../../UI/Selector";
-import { LOOKUP_TABLES } from "@/lib/gardenHelpers";
+import { LOOKUP_TABLES, getOrderedOptions } from "@/lib/gardenHelpers";
 
 type GrowingConditionsStepProps = {
   lightId: number | null;
@@ -45,7 +45,7 @@ export default function GrowingConditionsStep({
         label="How Much Sunlight Does Your Garden Get?"
         required
         placeholder="Choose your garden's sun exposure"
-        items={LOOKUP_TABLES.light.filter((item) => item.label !== "none")}
+        items={getOrderedOptions("light")}
         value={lightId}
         multiple={false}
         onChange={onLightChange}
@@ -57,9 +57,7 @@ export default function GrowingConditionsStep({
         label="What Does Your Soil Feel Like When Dry?"
         required
         placeholder="Describe your garden's soil texture"
-        items={LOOKUP_TABLES.soil_texture.filter(
-          (item) => item.label !== "none"
-        )}
+        items={getOrderedOptions("soil_texture")}
         value={soilTextureId}
         multiple={false}
         onChange={onSoilTextureChange}
@@ -71,9 +69,7 @@ export default function GrowingConditionsStep({
         label="How Much Room Do Your Plants Have?"
         required
         placeholder="Choose your available growing space"
-        items={LOOKUP_TABLES.available_space_to_plant.filter(
-          (item) => item.label !== "none"
-        )}
+        items={getOrderedOptions("available_space_to_plant")}
         value={availableSpaceToPlantId}
         multiple={false}
         onChange={onAvailableSpaceChange}
@@ -85,9 +81,7 @@ export default function GrowingConditionsStep({
         label="How Much Time Can You Spend on Plant Care?"
         required
         placeholder="Choose your preferred time commitment"
-        items={LOOKUP_TABLES.maintenance.filter(
-          (item) => item.label !== "none"
-        )}
+        items={getOrderedOptions("maintenance")}
         value={maintenanceId}
         onChange={onMaintenanceChange}
         multiple={false}
@@ -99,9 +93,7 @@ export default function GrowingConditionsStep({
         label="Do You Want Quick Results or Long-Term Plants?"
         required
         placeholder="Choose between fast or slow growing plants"
-        items={LOOKUP_TABLES.growth_rate.filter(
-          (item) => item.label !== "none"
-        )}
+        items={getOrderedOptions("growth_rate")}
         value={growthRateIds}
         onChange={onGrowthRateChange}
         multiple={true}
