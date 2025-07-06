@@ -1,23 +1,10 @@
 # 🎨 GreenThumb - Brand Identity & Design Guidelines
 
-**⚡ UPDATED FOR CODEBASE CONSISTENCY** _(January 2025)_
-
-This document has been updated to reflect the actual implementation in GreenThumb React Native app. All colors, typography, and technical specifications now match the codebase in `/app`, `/components`, and `tailwind.config.js`.
-
-**Key Updates Made**:
-
-- ✅ Color palette now matches `tailwind.config.js` exactly
-- ✅ Typography reflects actual font implementation (Mali + Nunito)
-- ✅ File structure matches actual `/app` and `/components` directories
-- ✅ Technical specs updated for React Native/Expo/NativeWind stack
-- ✅ Logo section reflects current placeholder asset status
-- ✅ Implementation examples include actual CSS classes used
-
 ## 🌱 Brand Overview
 
 ### Mission Statement
 
-Empowering plant enthusiasts to cultivate thriving gardens through intelligent, personalized plant care management that transforms uncertainty into confidence and growth.
+Empowering North Carolina plant enthusiasts to cultivate thriving gardens through intelligent, personalized plant care management that transforms uncertainty into confidence and growth.
 
 ### Brand Positioning
 
@@ -178,59 +165,11 @@ accent: {
 
 **App Icon**:
 
-- Located in iOS splash screen assets (`ios/GreenThumb/Images.xcassets/SplashScreenLogo.imageset/`)
-- Referenced in Android launcher (`android/app/src/main/res/drawable/`)
-- Current implementation uses placeholder/temporary assets
+- Current implementation uses assets/images/logo.png
 
 **Splash Screen**:
 
-- Background color: White (#ffffff)
-- Logo centered on screen with 200x200px dimensions
-- Simple, clean presentation during app launch
-
-#### Proposed Logo Concepts
-
-#### Primary Logo: "The Growing Leaf"
-
-**Concept**: A stylized leaf with subtle growth rings or AI-inspired geometric patterns
-**Symbolism**:
-
-- Organic growth and natural beauty
-- Technology integration (geometric elements)
-- Progress and development (growth rings)
-- Life and vitality (using brand green #5E994B)
-
-**Usage**: App icon, primary brand mark, marketing materials
-**Variations**: Full color, monochrome, white/reversed, simplified icon
-
-#### Secondary Mark: "GT Monogram"
-
-**Concept**: Elegant "GT" letterform with leaf accent
-**Usage**: Favicon, social media profile images, compact applications
-**Style**: Clean, modern typography with organic flourish
-
-#### Implementation Requirements
-
-**Technical Specifications**:
-
-- App Icon: 1024x1024px master file
-- iOS: Multiple sizes from 20x20 to 1024x1024
-- Android: 48dp to 512dp adaptive icon
-- File formats: PNG for raster, SVG for vector
-
-**Asset Locations**:
-
-```
-ios/GreenThumb/Images.xcassets/
-├── AppIcon.appiconset/        # App icons
-├── SplashScreenLogo.imageset/ # Splash screen logo
-└── SplashScreenBackground.colorset/ # Splash background
-
-android/app/src/main/res/
-├── drawable/                  # Logo assets
-├── mipmap-*/                 # App icons (various densities)
-└── values/colors.xml         # Brand colors
-```
+- To be designed
 
 #### Icon System: "Plant Care Symbols"
 
@@ -612,24 +551,19 @@ fontFamily: {
 - "Tells you when to water, fertilize, and repot"
 - "Takes photos to track progress"
 - "Get help from plant experts when needed"
-- "Manage multiple plants in different rooms"
+- "Manage multiple plants in different gardens"
 
 #### Financial Confidence Messaging
 
 **Why We Can Guarantee Success**:
 
-- "Our 76% profit margins allow us to invest in the best AI technology"
-- "Negligible API costs mean we focus 100% on your plant success"
-- "We can afford to guarantee results because our costs are so low"
 - "Every dollar you pay goes toward making your plants thrive"
 
 #### Competitive Advantage Messaging
 
 **Why We Outspend Competitors**:
 
-- "Front-loaded annual pricing gives us 5x more ad budget than monthly competitors"
-- "We can afford the best plant experts because our margins are 76%"
-- "Low operating costs = higher investment in customer success"
+- "We can afford the best plant experts."
 - "While competitors worry about costs, we focus on your results"
 
 #### Simple Communication Checklist
@@ -655,52 +589,6 @@ fontFamily: {
 ---
 
 ## 📱 Digital Applications
-
-### Mobile App Technology Stack
-
-#### Frontend Architecture
-
-- **Framework**: React Native with Expo SDK 52
-- **Navigation**: Expo Router (file-based routing system)
-- **Styling**: NativeWind (Tailwind CSS for React Native)
-- **Animations**: React Native Reanimated 3
-- **State Management**: Jotai for global state, React Query for server state
-- **UI Components**: Custom component library with consistent design system
-
-#### Backend Infrastructure
-
-- **Database**: Supabase PostgreSQL with Row Level Security
-- **Authentication**: Clerk with Supabase integration
-- **File Storage**: Supabase Storage for plant images
-- **Edge Functions**: Supabase Edge Functions for AI processing
-- **Real-time**: Supabase Realtime for live updates
-
-#### File Structure
-
-```
-app/
-├── (auth)/           # Authentication screens
-│   ├── sign-in.tsx
-│   ├── sign-up.tsx
-│   ├── welcome.tsx
-│   └── _layout.tsx
-├── (tabs)/           # Main app screens
-│   ├── gardens/      # Garden management
-│   ├── plants/       # Plant database
-│   ├── calendar.tsx  # Task calendar
-│   ├── profile.tsx   # User profile
-│   └── _layout.tsx
-└── _layout.tsx       # Root layout
-
-components/
-├── Auth/             # Authentication components
-├── Database/         # Plant database components
-├── Gardens/          # Garden management components
-├── Home/             # Home screen components
-├── Task/             # Task management components
-├── UI/               # Reusable UI components
-└── icons/            # Custom icon components
-```
 
 ### Mobile App Design
 
@@ -744,27 +632,11 @@ components/
 - **Performance**: Use native driver when possible, optimize for 60fps
 - **Implementation**: React Native Reanimated 3 with `useNativeDriver: true`
 
-### Website Design
-
-#### Layout Structure
-
-- **Max Width**: 1200px for content, centered with auto margins
-- **Grid System**: 12-column responsive grid with 24px gutters
-- **Breakpoints**: Mobile (320px), Tablet (768px), Desktop (1024px)
-- **Typography Scale**: 1.25 ratio (16px, 20px, 25px, 31px, 39px)
-
-#### Component Library
-
-- **Headers**: Consistent navigation, clear hierarchy
-- **Cards**: Plant profiles, feature highlights, testimonials
-- **Forms**: App download, newsletter signup, contact
-- **Buttons**: Primary, secondary, text, icon combinations
-
 ### Social Media Guidelines
 
 #### Profile Consistency
 
-- **Profile Image**: GreenThumb logo on brand green background
+- **Profile Image**: GreenThumb logo
 - **Cover Images**: Seasonal plant photography with brand overlay
 - **Bio Format**: "AI-powered plant care • [Key benefit] • Download: [link]"
 
@@ -834,7 +706,7 @@ components/
 
 - **Clear Space**: Minimum 1x logo height on all sides
 - **Minimum Size**: 24px height for digital, 0.5" for print
-- **Backgrounds**: Use on white, light gray, or brand green only
+- **Backgrounds**: Use either assets/images/logo-transparent.png or assets/images/logo.png which has a cream background
 - **Placement**: Top-left for apps, centered for marketing materials
 
 #### Improper Usage
