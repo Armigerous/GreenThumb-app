@@ -11,7 +11,9 @@ import {
   UserSubscriptionAddon,
   PaymentHistory,
   SubscriptionSummary,
-  PricingDisplay
+  PricingDisplay,
+  UserSubscriptionWithAddons,
+  IntervalType
 } from '@/types/subscription';
 import { 
   formatPrice, 
@@ -62,8 +64,8 @@ export function usePricingDisplay() {
     return {
       plan,
       formatted_price: formatPrice(plan.price_cents),
-      monthly_equivalent: calculateMonthlyEquivalent(plan.price_cents, plan.interval_type, plan.interval_count),
-      savings_percent: calculateSavings(plan.price_cents, plan.interval_type, plan.interval_count, monthlyPrice),
+      monthly_equivalent: calculateMonthlyEquivalent(plan.price_cents, plan.interval_type as IntervalType, plan.interval_count),
+      savings_percent: calculateSavings(plan.price_cents, plan.interval_type as IntervalType, plan.interval_count, monthlyPrice),
       is_recommended: isPlanRecommended(plan.id),
       badge: getPlanBadge(plan.id),
     };
@@ -76,10 +78,12 @@ export function usePricingDisplay() {
 }
 
 /**
- * Fetch user's current subscription
+ * Fetch user's current subscription (with add-ons joined)
+ *
+ * Reason: We need a composite object for UI that includes add-ons, not just the base UserSubscription.
  */
 export function useUserSubscription(userId?: string) {
-  return useQuery<UserSubscription | null, Error>({
+  return useQuery<UserSubscriptionWithAddons | null, Error>({
     queryKey: ['userSubscription', userId],
     queryFn: async () => {
       if (!userId) return null;
@@ -107,7 +111,23 @@ export function useUserSubscription(userId?: string) {
         throw new Error(error.message);
       }
 
-      return data;
+      // Map the joined data to the composite type
+      const mapped: UserSubscriptionWithAddons = {
+        ...data,
+        addons: (data.addons || []).map((userAddon: any) => ({
+          userAddon: {
+            id: userAddon.id,
+            addon_id: userAddon.addon_id,
+            created_at: userAddon.created_at,
+            quantity: userAddon.quantity,
+            stripe_subscription_item_id: userAddon.stripe_subscription_item_id,
+            updated_at: userAddon.updated_at,
+            user_subscription_id: userAddon.user_subscription_id,
+          },
+          addon: userAddon.addon,
+        })),
+      };
+      return mapped;
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -116,6 +136,8 @@ export function useUserSubscription(userId?: string) {
 
 /**
  * Fetch subscription summary for dashboard
+ *
+ * Reason: Use the composite UserSubscriptionWithAddons type for the subscription property.
  */
 export function useSubscriptionSummary(userId?: string) {
   const { data: subscription, ...subscriptionQuery } = useUserSubscription(userId);
@@ -127,7 +149,7 @@ export function useSubscriptionSummary(userId?: string) {
     will_renew: !subscription.cancel_at_period_end,
     next_billing_date: subscription.current_period_end,
     addons_value_cents: subscription.addons?.reduce((total, addon) => 
-      total + (addon.addon?.price_cents || 0) * addon.quantity, 0
+      total + (addon.addon?.price_cents || 0) * (addon.userAddon.quantity || 1), 0
     ) || 0,
   } : {
     is_premium: false,

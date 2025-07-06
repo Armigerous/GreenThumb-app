@@ -7,6 +7,7 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/node';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-02-24.acacia',
@@ -30,6 +31,7 @@ export default async function handler(req: any, res: any) {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
+    Sentry.captureException(err);
     console.error('Webhook signature verification failed:', err);
     return res.status(400).json({ error: 'Invalid signature' });
   }
@@ -62,6 +64,7 @@ export default async function handler(req: any, res: any) {
 
     res.json({ received: true });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Webhook handler error:', error);
     res.status(500).json({ error: 'Webhook handler failed' });
   }
@@ -95,10 +98,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     return;
   }
 
-  // Create subscription record
+  // Create or update subscription record (idempotent)
   const { error } = await supabase
     .from('user_subscriptions')
-    .insert({
+    .upsert({
       user_id: userId,
       subscription_plan_id: plan.id,
       stripe_customer_id: customerId,
@@ -107,9 +110,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
       current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
-    });
+    }, { onConflict: 'stripe_subscription_id' });
 
   if (error) {
+    Sentry.captureException(error);
     console.error('Error creating subscription:', error);
   }
 }
@@ -130,6 +134,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .eq('stripe_subscription_id', subscriptionId);
 
   if (error) {
+    Sentry.captureException(error);
     console.error('Error updating subscription:', error);
   }
 }
@@ -148,6 +153,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .eq('stripe_subscription_id', subscriptionId);
 
   if (error) {
+    Sentry.captureException(error);
     console.error('Error canceling subscription:', error);
   }
 }
@@ -191,6 +197,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     });
 
   if (error) {
+    Sentry.captureException(error);
     console.error('Error adding payment history:', error);
   }
 }
@@ -234,6 +241,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     });
 
   if (error) {
+    Sentry.captureException(error);
     console.error('Error adding payment history:', error);
   }
 } 

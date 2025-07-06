@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useSubscriptionSummary } from "@/lib/subscriptionQueries";
+import type { UserSubscriptionWithAddons } from "@/types/subscription";
 
 // Components
 import { PageContainer } from "@/components/UI/PageContainer";
@@ -354,29 +355,33 @@ export default function ProfileScreen() {
                     </View>
                   </View>
                   {/* List add-ons if present */}
-                  {subscriptionSummary.subscription?.addons &&
-                    subscriptionSummary.subscription.addons.length > 0 && (
+                  {(
+                    subscriptionSummary.subscription as UserSubscriptionWithAddons
+                  )?.addons &&
+                    (
+                      subscriptionSummary.subscription as UserSubscriptionWithAddons
+                    ).addons.length > 0 && (
                       <View className="mt-3">
                         <BodyText className="text-sm text-cream-700 mb-1">
                           Add-ons:
                         </BodyText>
-                        {subscriptionSummary.subscription.addons.map(
-                          (addon) => (
-                            <View
-                              key={addon.id}
-                              className="flex-row items-center mb-1"
-                            >
-                              <Ionicons
-                                name="add-circle"
-                                size={14}
-                                color="#5E994B" /* brand-600 */
-                              />
-                              <BodyText className="text-xs text-cream-700 ml-2">
-                                {addon.addon?.name}
-                              </BodyText>
-                            </View>
-                          )
-                        )}
+                        {(
+                          subscriptionSummary.subscription as UserSubscriptionWithAddons
+                        ).addons.map((addon) => (
+                          <View
+                            key={addon.userAddon.id}
+                            className="flex-row items-center mb-1"
+                          >
+                            <Ionicons
+                              name="add-circle"
+                              size={14}
+                              color="#5E994B" /* brand-600 */
+                            />
+                            <BodyText className="text-xs text-cream-700 ml-2">
+                              {addon.addon?.name}
+                            </BodyText>
+                          </View>
+                        ))}
                       </View>
                     )}
                 </View>
