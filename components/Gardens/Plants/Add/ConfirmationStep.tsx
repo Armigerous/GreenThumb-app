@@ -1,7 +1,7 @@
 import { View, Text, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { UserPlant, GardenDashboard } from "@/types/garden";
-import { PlantData } from "@/types/plant";
+import { PlantFullDataUI } from "@/types/plant";
 import SubmitButton from "../../../UI/SubmitButton";
 import ErrorMessage from "./ErrorMessage";
 import AnimatedProgressBar from "../../../UI/AnimatedProgressBar";
@@ -23,7 +23,7 @@ import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
  * @param onSubmit - Callback for submission
  */
 interface ConfirmationStepProps {
-  plant: PlantData;
+  plant: PlantFullDataUI;
   nickname: string;
   image: string | null;
   selectedGarden: GardenDashboard;

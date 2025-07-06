@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
-import type { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
+import type { ApiResponse, PlantCardData, PlantFullDataUI } from "@/types/plant";
 import type { Garden, GardenDashboard, PlantTask, TaskWithDetails, GardenTaskSummary } from "@/types/garden";
 import { useEffect } from "react";
 import {
@@ -138,7 +138,7 @@ export function usePlantDetails(slug: string) {
 
     const checkAndUpdateCache = async () => {
       const storageKey = getPlantDetailKey(slug);
-      const cachedData = await getFromStorage<PlantData>(
+      const cachedData = await getFromStorage<PlantFullDataUI>(
         storageKey,
         ONE_DAY_MS
       );
@@ -155,7 +155,7 @@ export function usePlantDetails(slug: string) {
     checkAndUpdateCache();
   }, [queryClient, slug]);
 
-  return useQuery<PlantData, Error>({
+  return useQuery<PlantFullDataUI, Error>({
     queryKey: ["plantDetails", slug],
     queryFn: async () => {
       const result = await getPlantDetails(slug);
@@ -182,7 +182,7 @@ export function usePrefetchPlantDetails() {
     if (slug) {
       // First check if we have it in persistent storage
       const storageKey = getPlantDetailKey(slug);
-      const cachedData = await getFromStorage<PlantData>(
+      const cachedData = await getFromStorage<PlantFullDataUI>(
         storageKey,
         ONE_DAY_MS
       );
@@ -422,7 +422,7 @@ export function useUserPlantDetails(userPlantId: string) {
 export function usePlantDataById(plantId?: string) {
   const queryClient = useQueryClient();
 
-  return useQuery<PlantData, Error>({
+  return useQuery<PlantFullDataUI, Error>({
     queryKey: ["plantData", plantId],
     queryFn: async () => {
       if (!plantId) throw new Error("Plant ID is required");

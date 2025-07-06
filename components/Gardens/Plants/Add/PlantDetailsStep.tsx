@@ -1,17 +1,15 @@
+import { PlantFullDataUI } from "@/types/plant";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
-  View,
+  Keyboard,
   Text,
   TextInput,
   TouchableOpacity,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import { UserPlant } from "@/types/garden";
-import { PlantData } from "@/types/plant";
-import SubmitButton from "../../../UI/SubmitButton";
-import { Ionicons } from "@expo/vector-icons";
 import ImagePicker from "./ImagePicker";
-import { useState } from "react";
 
 /**
  * PlantDetailsStep component for customizing plant details
@@ -29,7 +27,7 @@ import { useState } from "react";
  * @param onNext - Callback for the next button
  */
 interface PlantDetailsStepProps {
-  plant: PlantData;
+  plant: PlantFullDataUI;
   nickname: string;
   setNickname: (name: string) => void;
   image: string | null;
@@ -99,7 +97,7 @@ export default function PlantDetailsStep({
   // Get the first image from the plant data to display as default
   const defaultPlantImage =
     plant?.images && plant.images.length > 0 && plant.images[0]?.img
-      ? plant.images[0]?.img
+      ? plant.images[0].img
       : null;
 
   // Function to set a random nickname
