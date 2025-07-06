@@ -62,16 +62,47 @@ export async function fetchPlantCards(
         .select("id", { count: "exact" });
 
       for (const [dbColumn, values] of Object.entries(groupedFilters)) {
-        // Debug logging to help diagnose filter issues
-        console.log(`Applying filter: ${dbColumn} with values:`, values);
-
-        // JSON.stringify(values) converts the JS array into a valid JSON array literal,
-        // e.g. [ 'Coastal', 'Mountains' ] becomes '["Coastal","Mountains"]'
-        supabaseFilterQuery = supabaseFilterQuery.filter(
-          dbColumn,
-          "cs",
-          JSON.stringify(values)
-        );
+        // Determine operator based on column type
+        // List of text columns (must match schema and filterData.ts comments)
+        const textColumns = [
+          "texture",
+          "leaf_feel"
+        ];
+        // Special handling for growth_rate - use OR logic for multiple values
+        if (dbColumn === "growth_rate") {
+          if (values.length === 1) {
+            // Single value - use eq
+            supabaseFilterQuery = supabaseFilterQuery.filter(
+              dbColumn,
+              "eq",
+              values[0]
+            );
+          } else {
+            // Multiple values - use OR logic with in operator
+            // PostgREST expects format: in.(value1,value2,value3)
+            const inValues = `(${values.join(',')})`;
+            supabaseFilterQuery = supabaseFilterQuery.filter(
+              dbColumn,
+              "in",
+              inValues
+            );
+          }
+        } else if (textColumns.includes(dbColumn)) {
+          // Only support single-value filters for other text columns
+          supabaseFilterQuery = supabaseFilterQuery.filter(
+            dbColumn,
+            "eq",
+            values[0]
+          );
+        } else {
+          // JSON.stringify(values) converts the JS array into a valid JSON array literal,
+          // e.g. [ 'Coastal', 'Mountains' ] becomes '["Coastal","Mountains"]'
+          supabaseFilterQuery = supabaseFilterQuery.filter(
+            dbColumn,
+            "cs",
+            JSON.stringify(values)
+          );
+        }
       }
 
       // Execute filter query

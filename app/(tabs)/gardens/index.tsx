@@ -150,7 +150,7 @@ export default function GardensScreen() {
                       </Text>
                     ) : (
                       <Text className="text-xl font-title font-bold text-cream-500">
-                        N/A
+                        No plants yet
                       </Text>
                     )}
                   </View>

@@ -292,6 +292,32 @@ components/
     └── GuaranteeSection.tsx # Triple guarantee display
 ```
 
+### Garden Overview HeroSection (Garden Details Screen)
+
+The `HeroSection` component, used at the top of the garden details screen (`app/(tabs)/gardens/[id].tsx`), provides a focused, actionable overview of the user's selected garden.
+
+**Displayed Elements:**
+
+- **Garden Name:** Always shown for context.
+- **Personalized Message:** Always shown. Summarizes the state of the garden (e.g., "Your garden is thriving!" or "2 of your plants need attention today.").
+- **'Need Care' Pill:** Only shown if one or more plants require care. Highlights actionable items for the user.
+
+**Omitted Elements:**
+
+- **Health Percentage:** Removed to avoid clutter and because it was not directly actionable.
+- **Total Plants:** Removed for clarity; users can see plant count elsewhere if needed.
+
+**Reasoning:**
+
+- Focuses the overview on what matters most: context and actionable next steps.
+- Reduces cognitive load and visual clutter, making the page more welcoming and easier to scan.
+- Celebrates positive states (all healthy) and highlights urgent needs (care required) without overwhelming the user.
+
+**Component Reference:**
+
+- Implementation: `components/Gardens/HeroSection.tsx`
+- Usage: `app/(tabs)/gardens/[id].tsx`
+
 ---
 
 ## 🔄 Data Flow Patterns

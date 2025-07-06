@@ -1,70 +1,75 @@
-import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { useGardenDashboard, useTasksForDate } from "@/lib/queries";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Switch,
+  Alert,
+  Linking,
+  Image,
+} from "react-native";
+import { useUser, useAuth } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-  Alert,
-  Image,
-  Linking,
-  SafeAreaView,
-  ScrollView,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useSubscriptionSummary } from "@/lib/subscriptionQueries";
+
+// Components
 import { PageContainer } from "@/components/UI/PageContainer";
+import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
+import SubmitButton from "@/components/UI/SubmitButton";
+
+// Types
+interface ProfileSectionProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+// Profile Section Component
+function ProfileSection({ children, className = "" }: ProfileSectionProps) {
+  return (
+    <View
+      className={`bg-cream-100 border border-cream-300 rounded-lg p-4 mb-4 shadow-sm ${className}`}
+    >
+      {children}
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
   const { user } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
+
+  // State
   const [isLoading, setIsLoading] = useState(false);
-  const [accountSummary, setAccountSummary] = useState({
-    plants: 0,
-    tasks: 0,
-  });
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showHelpContent, setShowHelpContent] = useState(false);
+  const [showSubscriptionDetails, setShowSubscriptionDetails] = useState(false);
 
-  // Get user gardens dashboard data to count plants
-  const { data: gardens, isLoading: isLoadingGardens } = useGardenDashboard(
-    user?.id
-  );
+  // Subscription summary (premium status, plan, etc.)
+  const {
+    data: subscriptionSummary,
+    isLoading: isSubscriptionLoading,
+    error: subscriptionError,
+  } = useSubscriptionSummary(user?.id);
 
-  // Get today's tasks
-  const today = new Date();
-  const { data: todayTasks, isLoading: isLoadingTasks } = useTasksForDate(
-    today,
-    user?.id
-  );
-
-  // Check if notifications are enabled on load
+  // Check notification status on load
   useEffect(() => {
     const checkNotificationStatus = async () => {
       try {
-        if (!Device.isDevice) {
-          return;
-        }
+        if (!Device.isDevice) return;
 
-        // Check device notification status
         const { status } = await Notifications.getPermissionsAsync();
-
-        // Get saved preference from AsyncStorage
         const savedPreference = await AsyncStorage.getItem(
           `notifications_${user?.id}`
         );
 
-        // If we have a saved preference and device permissions, use that
         if (savedPreference !== null) {
           setNotificationsEnabled(savedPreference === "true");
         } else {
-          // Otherwise use device permission status
           setNotificationsEnabled(status === "granted");
         }
       } catch (error) {
@@ -75,38 +80,26 @@ export default function ProfileScreen() {
     checkNotificationStatus();
   }, [user?.id]);
 
-  // Update account summary when data changes
-  useEffect(() => {
-    if (gardens) {
-      // Sum the total plants from all gardens
-      const totalPlants = gardens.reduce((total, garden) => {
-        return total + garden.total_plants;
-      }, 0);
-
-      setAccountSummary((prev) => ({
-        ...prev,
-        plants: totalPlants,
-      }));
-    }
-
-    if (todayTasks) {
-      setAccountSummary((prev) => ({
-        ...prev,
-        tasks: todayTasks.length,
-      }));
-    }
-  }, [gardens, todayTasks]);
-
+  // Handlers
   const handleLogout = async () => {
-    try {
-      setIsLoading(true);
-      await signOut();
-      router.replace("/(auth)/welcome");
-    } catch (error) {
-      Alert.alert("Error", "Failed to log out. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            setIsLoading(true);
+            await signOut();
+            router.replace("/(auth)/welcome");
+          } catch (error) {
+            Alert.alert("Error", "Failed to log out. Please try again.");
+          } finally {
+            setIsLoading(false);
+          }
+        },
+      },
+    ]);
   };
 
   const toggleNotifications = async (value: boolean) => {
@@ -119,7 +112,6 @@ export default function ProfileScreen() {
         return;
       }
 
-      // If enabling notifications, request permissions
       if (value) {
         const { status } = await Notifications.requestPermissionsAsync();
         if (status !== "granted") {
@@ -135,10 +127,7 @@ export default function ProfileScreen() {
         }
       }
 
-      // Update state
       setNotificationsEnabled(value);
-
-      // Save to AsyncStorage if we have a user
       if (user?.id) {
         await AsyncStorage.setItem(
           `notifications_${user.id}`,
@@ -151,217 +140,485 @@ export default function ProfileScreen() {
     }
   };
 
-  // Edit profile handler
   const handleEditProfile = () => {
-    // Navigate to settings section of Clerk (this will require implementation based on Clerk)
+    Alert.alert("Edit Profile", "Profile editing will be available soon!", [
+      { text: "OK", style: "default" },
+    ]);
+  };
+
+  const handleContactSupport = () => {
+    Linking.openURL(
+      "mailto:info@theofficialgreenthumb.com?subject=GreenThumb Support"
+    );
+  };
+
+  const handleManageSubscription = () => {
+    router.push("/(tabs)/subscription");
+  };
+
+  const handleRequestExpertAdvice = () => {
     Alert.alert(
-      "Edit Profile",
-      "Would you like to update your profile information?",
+      "Expert Advice",
+      "Expert consultation is available for Premium members. This feature will be available soon!",
+      [{ text: "OK", style: "default" }]
+    );
+  };
+
+  const handlePrivacyPolicy = () => {
+    Alert.alert("Privacy Policy", "Privacy policy will be available soon!");
+  };
+
+  const handleTerms = () => {
+    Alert.alert("Terms of Service", "Terms of service will be available soon!");
+  };
+
+  const handleExportData = () => {
+    Alert.alert("Export Data", "Data export will be available soon!");
+  };
+
+  const handleDeleteData = () => {
+    Alert.alert(
+      "Delete Data",
+      "This will permanently delete all your data. This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        {
-          text: "Update Name",
-          onPress: () => {
-            // This would navigate to Clerk's profile management
-            Alert.alert(
-              "Coming Soon",
-              "Profile editing will be available soon!"
-            );
-          },
-        },
-        {
-          text: "Change Password",
-          onPress: () => {
-            // This would navigate to Clerk's password reset
-            Alert.alert(
-              "Coming Soon",
-              "Password changing will be available soon!"
-            );
-          },
-        },
+        { text: "Delete", style: "destructive" },
       ]
     );
   };
 
+  const handleFeedback = () => {
+    Linking.openURL(
+      "mailto:feedback@theofficialgreenthumb.com?subject=GreenThumb Feedback"
+    );
+  };
+
+  // Get user's first name for greeting
+  const firstName = user?.firstName || "Plant Parent";
+  const userEmail = user?.emailAddresses[0]?.emailAddress || "";
+
   return (
     <PageContainer scroll={false} padded={false}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="px-5 pt-5">
-          <Text className="text-2xl font-bold text-foreground mb-6">
-            Profile
-          </Text>
+      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+        {/* Header */}
+        <View className="px-5 pt-5 pb-4">
+          <TitleText className="text-3xl text-cream-800">Profile</TitleText>
         </View>
 
-        <View className="px-5">
-          <View className="flex-row items-center mb-8">
-            {user?.imageUrl ? (
-              <Image
-                source={{ uri: user.imageUrl }}
-                className="w-20 h-20 rounded-full mr-4"
-              />
-            ) : (
-              <View className="w-20 h-20 rounded-full bg-cream-200 items-center justify-center mr-4">
-                <Ionicons name="person" size={40} color="#6b7280" />
-              </View>
-            )}
+        <View className="px-5 pb-8">
+          {/* User Identity Section */}
+          <ProfileSection>
+            <View className="flex-row items-center mb-4">
+              {user?.imageUrl ? (
+                <Image
+                  source={{ uri: user.imageUrl }}
+                  className="w-20 h-20 rounded-full mr-4"
+                />
+              ) : (
+                <View className="w-20 h-20 rounded-full bg-brand-100 border-2 border-brand-200 items-center justify-center mr-4">
+                  <Ionicons
+                    name="person"
+                    size={32}
+                    color="#5E994B" /* brand-600 */
+                  />
+                </View>
+              )}
 
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-foreground">
-                {user?.firstName} {user?.lastName}
-              </Text>
-              <Text className="text-base text-foreground opacity-70">
-                {user?.emailAddresses[0]?.emailAddress}
-              </Text>
-              <TouchableOpacity onPress={handleEditProfile}>
-                <Text className="text-sm text-primary mt-1">Edit Profile</Text>
+              <View className="flex-1">
+                <SubtitleText className="text-xl text-cream-800 mb-1">
+                  {user?.firstName} {user?.lastName}
+                </SubtitleText>
+                <BodyText className="text-sm text-cream-600 mb-2">
+                  {userEmail}
+                </BodyText>
+                <TouchableOpacity onPress={handleEditProfile}>
+                  <BodyText className="text-sm text-brand-700 font-paragraph-semibold underline">
+                    Edit Profile
+                  </BodyText>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Greeting */}
+            <View className="bg-brand-50 border border-brand-100 rounded-lg p-3">
+              <BodyText className="text-base text-brand-700 text-center">
+                Hi {firstName}! 🌱
+              </BodyText>
+              <BodyText className="text-sm text-brand-600 text-center mt-1">
+                Your plants are lucky to have you.
+              </BodyText>
+            </View>
+          </ProfileSection>
+
+          {/* Subscription Status Section */}
+          {isSubscriptionLoading ? (
+            // Loading state for subscription info
+            <ProfileSection>
+              <BodyText className="text-sm text-cream-700">
+                Loading subscription status...
+              </BodyText>
+            </ProfileSection>
+          ) : subscriptionError ? (
+            // Error state for subscription info
+            <ProfileSection>
+              <BodyText className="text-sm text-destructive">
+                Failed to load subscription status.
+              </BodyText>
+            </ProfileSection>
+          ) : subscriptionSummary?.is_premium ? (
+            // Premium member UI
+            <ProfileSection>
+              <View className="flex-row items-center justify-between mb-3">
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="star"
+                    size={20}
+                    color="#5E994B" /* brand-600 */
+                  />
+                  <SubtitleText className="text-lg text-cream-800 ml-2">
+                    Premium Member
+                  </SubtitleText>
+                </View>
+                <TouchableOpacity onPress={handleManageSubscription}>
+                  <BodyText className="text-sm text-primary-foreground font-paragraph-semibold px-4 py-2 rounded-lg bg-brand-600">
+                    Manage
+                  </BodyText>
+                </TouchableOpacity>
+              </View>
+              {/* Triple Guarantee Badge */}
+              <View className="bg-accent-200 border border-accent-300 rounded-lg p-3 mb-3">
+                <View className="flex-row items-center mb-2">
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={16}
+                    color="#483b00" /* accent-800 */
+                  />
+                  <BodyText className="text-sm font-paragraph-semibold text-accent-800 ml-2">
+                    Triple Guarantee
+                  </BodyText>
+                </View>
+                <BodyText className="text-xs text-accent-800">
+                  Service, money-back, and plant replacement guarantees
+                </BodyText>
+              </View>
+              <TouchableOpacity
+                onPress={() =>
+                  setShowSubscriptionDetails(!showSubscriptionDetails)
+                }
+                className="flex-row items-center justify-center"
+              >
+                <BodyText className="text-sm text-brand-600 mr-1">
+                  {showSubscriptionDetails ? "Hide details" : "Show details"}
+                </BodyText>
+                <Ionicons
+                  name={showSubscriptionDetails ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  color="#5E994B"
+                />
+              </TouchableOpacity>
+              {showSubscriptionDetails && (
+                <View className="mt-3 bg-white border border-cream-200 rounded-lg p-3">
+                  <BodyText className="text-sm text-cream-700 mb-2">
+                    Your subscription includes:
+                  </BodyText>
+                  <View className="space-y-1">
+                    <View className="flex-row items-center">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={14}
+                        color="#5E994B"
+                      />
+                      <BodyText className="text-xs text-cream-700 ml-2">
+                        Expert plant care guidance
+                      </BodyText>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={14}
+                        color="#5E994B"
+                      />
+                      <BodyText className="text-xs text-cream-700 ml-2">
+                        Advanced plant health tracking
+                      </BodyText>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={14}
+                        color="#5E994B"
+                      />
+                      <BodyText className="text-xs text-cream-700 ml-2">
+                        Priority customer support
+                      </BodyText>
+                    </View>
+                  </View>
+                  {/* List add-ons if present */}
+                  {subscriptionSummary.subscription?.addons &&
+                    subscriptionSummary.subscription.addons.length > 0 && (
+                      <View className="mt-3">
+                        <BodyText className="text-sm text-cream-700 mb-1">
+                          Add-ons:
+                        </BodyText>
+                        {subscriptionSummary.subscription.addons.map(
+                          (addon) => (
+                            <View
+                              key={addon.id}
+                              className="flex-row items-center mb-1"
+                            >
+                              <Ionicons
+                                name="add-circle"
+                                size={14}
+                                color="#5E994B" /* brand-600 */
+                              />
+                              <BodyText className="text-xs text-cream-700 ml-2">
+                                {addon.addon?.name}
+                              </BodyText>
+                            </View>
+                          )
+                        )}
+                      </View>
+                    )}
+                </View>
+              )}
+            </ProfileSection>
+          ) : (
+            // Not premium: show upgrade prompt
+            <ProfileSection>
+              <View className="flex-row items-center justify-between mb-3">
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="star-outline"
+                    size={20}
+                    color="#5E994B" /* brand-600 */
+                  />
+                  <SubtitleText className="text-lg text-cream-800 ml-2">
+                    Free Member
+                  </SubtitleText>
+                </View>
+                <TouchableOpacity onPress={handleManageSubscription}>
+                  <BodyText className="text-sm text-primary-foreground font-paragraph-semibold px-4 py-2 rounded-lg bg-brand-600">
+                    Upgrade
+                  </BodyText>
+                </TouchableOpacity>
+              </View>
+              <BodyText className="text-sm text-cream-700">
+                Unlock premium features and expert support by upgrading to
+                Premium.
+              </BodyText>
+            </ProfileSection>
+          )}
+
+          {/* Notification Preferences - Redesigned */}
+          <View className="bg-brand-50 border border-brand-100 rounded-lg p-4 mb-4 shadow-sm flex-row items-center justify-between">
+            <View className="flex-1 mr-4">
+              <View className="flex-row items-center mb-1">
+                <Ionicons
+                  name="notifications"
+                  size={22}
+                  color="#5E994B" /* brand-600 */
+                />
+                <SubtitleText className="text-lg text-cream-800 ml-2">
+                  Notifications
+                </SubtitleText>
+              </View>
+              <BodyText className="text-sm text-cream-700 mb-0.5">
+                Remind me to care for my plants
+              </BodyText>
+              <BodyText className="text-xs text-cream-600">
+                We&apos;ll send gentle reminders—never spam.
+              </BodyText>
+            </View>
+            <Switch
+              trackColor={{ false: "#ded8ca", true: "#77B860" }} // brand-500 for true, cream-300 for false
+              thumbColor={notificationsEnabled ? "#5E994B" : "#fffefa"} // brand-600 for true, cream-50 for false
+              onValueChange={toggleNotifications}
+              value={notificationsEnabled}
+              style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }} // Reason: Larger, more accessible switch
+            />
+          </View>
+
+          {/* Help & Support - Redesigned */}
+          <View className="bg-cream-100 border border-cream-300 rounded-lg p-4 mb-4 shadow-sm">
+            <View className="flex-row items-center mb-3">
+              <Ionicons
+                name="help-circle"
+                size={20}
+                color="#5E994B" /* brand-600 */
+              />
+              <SubtitleText className="text-lg text-cream-800 ml-2">
+                Help & Support
+              </SubtitleText>
+            </View>
+            <View className="divide-y divide-cream-200">
+              <TouchableOpacity
+                onPress={handleContactSupport}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="mail"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Contact Support
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleRequestExpertAdvice}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="person"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Request Expert Advice
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleFeedback}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="chatbubble"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Share Feedback
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
               </TouchableOpacity>
             </View>
           </View>
 
-          <View className="bg-cream-50 p-4 rounded-lg mb-6 border border-cream-300">
-            <Text className="text-lg font-semibold text-foreground mb-2">
-              Account Summary
-            </Text>
-            {isLoadingGardens || isLoadingTasks ? (
-              <View className="flex-1 items-center justify-center">
-                <LoadingSpinner message="Loading profile data..." />
-              </View>
-            ) : (
-              <View className="flex-row justify-around">
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-primary">
-                    {accountSummary.plants}
-                  </Text>
-                  <Text className="text-sm text-foreground opacity-70">
-                    Plants
-                  </Text>
-                </View>
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-primary">
-                    {accountSummary.tasks}
-                  </Text>
-                  <Text className="text-sm text-foreground opacity-70">
-                    {accountSummary.tasks === 0
-                      ? "No tasks"
-                      : accountSummary.tasks === 1
-                      ? "Task"
-                      : "Tasks"}
-                  </Text>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <View className="border-t border-cream-200 pt-6">
-            <View className="flex-row items-center justify-between py-4 border-b border-cream-100">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="notifications-outline"
-                  size={24}
-                  color="#6b7280"
-                />
-                <View className="ml-3">
-                  <Text className="text-base text-foreground">
-                    Notifications
-                  </Text>
-                  <Text className="text-xs text-foreground opacity-70">
-                    Receive plant care reminders
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                trackColor={{ false: "#d1d5db", true: "#77B860" }}
-                thumbColor={"#f4f3f4"}
-                onValueChange={toggleNotifications}
-                value={notificationsEnabled}
-              />
-            </View>
-
-            <TouchableOpacity
-              className="flex-row items-center py-4 border-b border-cream-100"
-              onPress={() => setShowHelpContent(!showHelpContent)}
-            >
-              <View className="flex-row items-center flex-1">
-                <Ionicons
-                  name="help-circle-outline"
-                  size={24}
-                  color="#6b7280"
-                />
-                <Text className="text-base text-foreground ml-3">
-                  Help & Support
-                </Text>
-              </View>
+          {/* Privacy & Legal - Redesigned */}
+          <View className="bg-cream-100 border border-cream-300 rounded-lg p-4 mb-4 shadow-sm">
+            <View className="flex-row items-center mb-3">
               <Ionicons
-                name={showHelpContent ? "chevron-up" : "chevron-down"}
+                name="shield-checkmark"
                 size={20}
-                color="#d1d5db"
+                color="#5E994B" /* brand-600 */
               />
-            </TouchableOpacity>
-
-            {showHelpContent && (
-              <View className="bg-cream-50 p-4 my-2 rounded-lg">
-                <Text className="text-base font-semibold text-foreground mb-2">
-                  Frequently Asked Questions
-                </Text>
-
-                <View className="mb-3">
-                  <Text className="text-sm font-medium text-foreground">
-                    How do I add a new plant?
-                  </Text>
-                  <Text className="text-xs text-foreground opacity-70 mt-1">
-                    Tap the &quot;+&quot; button on the home screen to add a new
-                    plant to your garden.
-                  </Text>
-                </View>
-
-                <View className="mb-3">
-                  <Text className="text-sm font-medium text-foreground">
-                    How do I mark a task as complete?
-                  </Text>
-                  <Text className="text-xs text-foreground opacity-70 mt-1">
-                    On the calendar or tasks screen, tap the checkbox next to a
-                    task to mark it as complete.
-                  </Text>
-                </View>
-
-                <View className="mb-3">
-                  <Text className="text-sm font-medium text-foreground">
-                    How do I contact support?
-                  </Text>
-                  <Text className="text-xs text-foreground opacity-70 mt-1">
-                    Email us at info@theofficialgreenthumb.com with any
-                    questions or issues.
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  className="bg-primary py-2 px-4 rounded-lg mt-2"
-                  onPress={() =>
-                    Linking.openURL("mailto:info@theofficialgreenthumb.com")
-                  }
-                >
-                  <Text className="text-white text-center font-medium">
-                    Contact Support
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <TouchableOpacity
-              className="flex-row items-center justify-center py-4 mt-6 bg-destructive rounded-lg"
-              onPress={handleLogout}
-              disabled={isLoading}
-            >
-              <Ionicons name="log-out-outline" size={24} color="#fffefa" />
-              <Text className="text-base text-destructive-foreground font-medium ml-3">
-                {isLoading ? "Logging out..." : "Logout"}
-              </Text>
-            </TouchableOpacity>
+              <SubtitleText className="text-lg text-cream-800 ml-2">
+                Privacy & Legal
+              </SubtitleText>
+            </View>
+            <View className="divide-y divide-cream-200">
+              <TouchableOpacity
+                onPress={handlePrivacyPolicy}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="document-text"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Privacy Policy
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleTerms}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="document"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Terms of Service
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleExportData}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="cloud-download"
+                  size={18}
+                  color="#5E994B" /* brand-600 */
+                />
+                <BodyText className="text-base text-cream-800 ml-3 flex-1">
+                  Export My Data
+                </BodyText>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A5D196" /* brand-300 */
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDeleteData}
+                className="flex-row items-center py-3 active:bg-brand-50 rounded-lg"
+              >
+                <Ionicons
+                  name="trash"
+                  size={18}
+                  color="#E50000" /* destructive */
+                />
+                <BodyText className="text-base text-destructive ml-3 flex-1">
+                  Delete My Data
+                </BodyText>
+                <Ionicons
+                  name="alert-circle"
+                  size={18}
+                  color="#E50000" /* destructive */
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <Text className="text-center text-xs text-gray-400 mt-8 mb-4">
-            Version 1.0.0
-          </Text>
+          {/* Logout Button */}
+          <View className="mt-6">
+            <SubmitButton
+              onPress={handleLogout}
+              isLoading={isLoading}
+              loadingLabel="Logging out..."
+              color="primary"
+              type="solid"
+              iconName="log-out-outline"
+              iconPosition="left"
+              width="full"
+              className="bg-brand-600 text-primary-foreground border-none"
+            >
+              Log Out
+            </SubmitButton>
+          </View>
+
+          {/* App Version */}
+          <View className="mt-8 items-center">
+            <BodyText className="text-xs text-cream-500">
+              Version 1.0.0
+            </BodyText>
+          </View>
         </View>
       </ScrollView>
     </PageContainer>

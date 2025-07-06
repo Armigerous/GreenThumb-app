@@ -563,3 +563,143 @@ export const getCompletionStatusText = (percent: number): string => {
   if (percent > 0) return "Just started";
   return "Not started";
 };
+
+/**
+ * Returns an array of filter keys for a given Garden, matching the logic in useGardenFilters.
+ * Use this for plant recommendations and garden-based filtering.
+ */
+import type { Garden } from "@/types/garden";
+
+export function getGardenFilterKeys(garden: Garden): string[] {
+  const filters: string[] = [];
+
+  // Light conditions
+  if (garden.sunlight) {
+    filters.push(`light|${garden.sunlight}`);
+  }
+
+  // Soil conditions
+  if (garden.soil_texture) {
+    filters.push(`soil-texture|${garden.soil_texture}`);
+  }
+
+  if (garden.soil_drainage && garden.soil_drainage.length > 0) {
+    garden.soil_drainage.forEach((drainage: string) => {
+      filters.push(`soil-drainage|${drainage}`);
+    });
+  }
+
+  if (garden.soil_ph_ranges && garden.soil_ph_ranges.length > 0) {
+    garden.soil_ph_ranges.forEach((ph: string) => {
+      filters.push(`soil-ph|${ph}`);
+    });
+  }
+
+  // Plant preferences
+  if (garden.plant_types && garden.plant_types.length > 0) {
+    garden.plant_types.forEach((type: string) => {
+      filters.push(`plant-type|${type}`);
+    });
+  }
+
+  if (garden.habit_forms && garden.habit_forms.length > 0) {
+    garden.habit_forms.forEach((form: string) => {
+      filters.push(`habit-form|${form}`);
+    });
+  }
+
+  // Garden themes
+  if (garden.garden_themes && garden.garden_themes.length > 0) {
+    garden.garden_themes.forEach((theme: string) => {
+      filters.push(`landscape-theme|${theme}`);
+    });
+  }
+
+  // Wildlife attractions
+  if (garden.wildlife_attractions && garden.wildlife_attractions.length > 0) {
+    garden.wildlife_attractions.forEach((attraction: string) => {
+      filters.push(`attracts|${attraction}`);
+    });
+  }
+
+  // Resistance challenges
+  if (garden.resistance_challenges && garden.resistance_challenges.length > 0) {
+    garden.resistance_challenges.forEach((challenge: string) => {
+      filters.push(`resistance-to-challenges|${challenge}`);
+    });
+  }
+
+  // Location preferences
+  if (garden.landscape_locations && garden.landscape_locations.length > 0) {
+    garden.landscape_locations.forEach((location: string) => {
+      filters.push(`landscape-location|${location}`);
+    });
+  }
+
+  // Growth rate
+  if (garden.growth_rates && garden.growth_rates.length > 0) {
+    garden.growth_rates.forEach((rate: string) => {
+      filters.push(`growth-rate|${rate}`);
+    });
+  }
+
+  // Maintenance level
+  if (garden.maintenance || garden.maintenance_level) {
+    const maintenanceLevel = garden.maintenance || garden.maintenance_level;
+    filters.push(`maintenance|${maintenanceLevel}`);
+  }
+
+  // Available space
+  if (garden.available_space) {
+    filters.push(`available-space-to-plant|${garden.available_space}`);
+  }
+
+  // NC regions
+  if (garden.nc_regions && garden.nc_regions.length > 0) {
+    garden.nc_regions.forEach((region: string) => {
+      filters.push(`nc-regions|${region}`);
+    });
+  }
+
+  // USDA zones
+  if (garden.usda_zones && garden.usda_zones.length > 0) {
+    garden.usda_zones.forEach((zone: string) => {
+      filters.push(`usda-zones|${zone}`);
+    });
+  }
+
+  // Flower characteristics
+  if (garden.flower_colors && garden.flower_colors.length > 0) {
+    garden.flower_colors.forEach((color: string) => {
+      filters.push(`flower-color|${color}`);
+    });
+  }
+
+  if (garden.flower_bloom_times && garden.flower_bloom_times.length > 0) {
+    garden.flower_bloom_times.forEach((time: string) => {
+      filters.push(`flower-bloom-time|${time}`);
+    });
+  }
+
+  // Leaf characteristics
+  if (garden.leaf_colors && garden.leaf_colors.length > 0) {
+    garden.leaf_colors.forEach((color: string) => {
+      filters.push(`leaf-color|${color}`);
+    });
+  }
+
+  if (garden.fall_colors && garden.fall_colors.length > 0) {
+    garden.fall_colors.forEach((color: string) => {
+      filters.push(`fall-color|${color}`);
+    });
+  }
+
+  // Exclude problems
+  if (garden.problems && garden.problems.length > 0) {
+    garden.problems.forEach((problem: string) => {
+      filters.push(`problems|${problem}`);
+    });
+  }
+
+  return filters;
+}

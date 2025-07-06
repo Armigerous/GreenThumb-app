@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -15,6 +16,8 @@ import { getIdsFromNames, LOOKUP_TABLES } from "@/lib/gardenHelpers";
 import { supabase } from "@/lib/supabaseClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageContainer } from "@/components/UI/PageContainer";
+// Reason: Needed for deleting plant images from Supabase storage when deleting a garden
+import { deleteImageFromStorage } from "@/lib/services/imageUpload";
 
 /**
  * Garden Conditions Page
@@ -45,11 +48,11 @@ export default function GardenConditionsPage() {
         name: gardenData.name || "",
         // Environment settings
         light_ids: getIdsFromNames(
-          gardenData.light || gardenData.light_conditions,
+          gardenData.sunlight ? [gardenData.sunlight] : undefined,
           LOOKUP_TABLES.light
         ),
         soil_texture_ids: getIdsFromNames(
-          gardenData.soil_textures || gardenData.soil_texture,
+          gardenData.soil_texture ? [gardenData.soil_texture] : undefined,
           LOOKUP_TABLES.soil_texture
         ),
         soil_drainage_ids: getIdsFromNames(
@@ -84,13 +87,14 @@ export default function GardenConditionsPage() {
               (option) => option.label === gardenData.maintenance
             )?.value || null
           : null,
-        growth_rate_id: gardenData.growth_rate
-          ? LOOKUP_TABLES.growth_rate.find(
-              (option) => option.label === gardenData.growth_rate
-            )?.value || null
-          : null,
+        growth_rate_id:
+          gardenData.growth_rates && gardenData.growth_rates.length > 0
+            ? LOOKUP_TABLES.growth_rate.find(
+                (option) => option.label === gardenData.growth_rates[0]
+              )?.value || null
+            : null,
         available_space_to_plant_ids: getIdsFromNames(
-          gardenData.available_space_to_plant || gardenData.available_space,
+          gardenData.available_space ? [gardenData.available_space] : undefined,
           LOOKUP_TABLES.available_space_to_plant
         ),
         texture_id: gardenData.texture_preference
@@ -266,6 +270,97 @@ export default function GardenConditionsPage() {
     setFormValues(null);
   };
 
+  // Reason: The delete garden logic is now in the settings/conditions page for better UX and to prevent accidental deletion from the main screen.
+  // Handles the deletion of the garden with confirmation. Deletes all associated plants and the garden itself.
+  const handleDeleteGarden = async () => {
+    if (!gardenData?.id) return;
+
+    // Reason: Confirm with the user before deleting the garden and all related data
+    Alert.alert(
+      "Delete Garden",
+      "Are you sure you want to delete this garden? This action cannot be undone and all plants in this garden will be deleted.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Get all plants in this garden to delete their images
+              const { data: gardenPlants, error: fetchError } = await supabase
+                .from("user_plants")
+                .select("*")
+                .eq("garden_id", gardenData.id);
+
+              if (fetchError) throw fetchError;
+
+              // Delete all plant images from storage
+              if (gardenPlants && gardenPlants.length > 0) {
+                // Collect all image deletion promises
+                const allImageDeletionPromises = [];
+                for (const plant of gardenPlants) {
+                  if (plant.images && plant.images.length > 0) {
+                    const plantImagePromises = plant.images.map(
+                      (imageUrl: string) => deleteImageFromStorage(imageUrl)
+                    );
+                    allImageDeletionPromises.push(...plantImagePromises);
+                  }
+                }
+                if (allImageDeletionPromises.length > 0) {
+                  await Promise.all(allImageDeletionPromises);
+                }
+              }
+
+              // Delete all tasks related to plants in this garden first to avoid FK constraint violations
+              if (gardenPlants && gardenPlants.length > 0) {
+                const plantIds = gardenPlants.map((plant) => plant.id);
+                const { error: tasksError } = await supabase
+                  .from("plant_tasks")
+                  .delete()
+                  .in("user_plant_id", plantIds);
+                if (tasksError) {
+                  // Continue with deletion anyway
+                  console.error("Error deleting plant tasks:", tasksError);
+                }
+              }
+
+              // Then delete all plants in the garden
+              const { error: plantsError } = await supabase
+                .from("user_plants")
+                .delete()
+                .eq("garden_id", gardenData.id);
+              if (plantsError) throw plantsError;
+
+              // Then delete the garden
+              const { error: gardenError } = await supabase
+                .from("user_gardens")
+                .delete()
+                .eq("id", gardenData.id);
+              if (gardenError) throw gardenError;
+
+              // Invalidate the garden dashboard query cache to trigger a refetch
+              queryClient.invalidateQueries({
+                queryKey: ["gardenDashboard", gardenData.user_id],
+              });
+
+              Alert.alert("Success", "Garden deleted successfully");
+              router.push("/(tabs)/gardens");
+            } catch (err) {
+              console.error("Error deleting garden:", err);
+              Alert.alert(
+                "Error",
+                "Failed to delete garden. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (isLoading) {
     return (
       <PageContainer scroll={false} animate={false}>
@@ -359,6 +454,58 @@ export default function GardenConditionsPage() {
                 if (updated) refetch();
               }}
             />
+            {/* Danger Zone: Delete Garden */}
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: "#dc2626", // Tailwind red-600
+                backgroundColor: "#fef2f2", // Tailwind red-50
+                borderRadius: 12,
+                padding: 20,
+                marginTop: 32,
+                marginBottom: 32,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#dc2626",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  marginBottom: 8,
+                }}
+              >
+                Danger Zone
+              </Text>
+              <Text
+                style={{
+                  color: "#b91c1c",
+                  fontSize: 14,
+                  marginBottom: 16,
+                  textAlign: "center",
+                }}
+              >
+                Deleting your garden will remove all plants, tasks, and images
+                associated with it. This action cannot be undone.
+              </Text>
+              <TouchableOpacity
+                onPress={handleDeleteGarden}
+                style={{
+                  backgroundColor: "#dc2626",
+                  paddingVertical: 12,
+                  paddingHorizontal: 32,
+                  borderRadius: 8,
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Delete garden"
+              >
+                <Text
+                  style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}
+                >
+                  Delete Garden
+                </Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         )}
       </View>
