@@ -76,7 +76,7 @@ export default function ConfirmationStep({
     "https://theofficialgreenthumb.com/no-plant-image.png";
 
   return (
-    <View className="px-4 flex-1 flex">
+    <View className="flex-1 flex">
       <View className="flex-1">
         <TitleText className="text-xl text-foreground mb-6">
           Confirm Plant Details
@@ -173,37 +173,7 @@ export default function ConfirmationStep({
       </View>
 
       {/* Navigation buttons */}
-      <View className="my-4 flex-row justify-between items-center gap-3">
-        <SubmitButton
-          onPress={onBack}
-          isDisabled={isSubmitting}
-          color="secondary"
-          iconName="arrow-back"
-          iconPosition="left"
-          width="full"
-          className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
-        >
-          <Text className="text-cream-700 font-paragraph-semibold text-center text-base">
-            Back
-          </Text>
-        </SubmitButton>
-        <SubmitButton
-          loadingLabel="Adding..."
-          onPress={onSubmit}
-          isLoading={isSubmitting}
-          iconName={isSubmitting ? undefined : "add-circle-outline"}
-          iconPosition="right"
-          width="full"
-          color="primary"
-          className={`flex-1 bg-brand-600 rounded-lg py-4 px-6 ${
-            isSubmitting ? "opacity-50" : ""
-          }`}
-        >
-          <Text className="text-cream-50 text-center font-paragraph-semibold text-base">
-            Add to Garden
-          </Text>
-        </SubmitButton>
-      </View>
+      {/* Removed: Action buttons are now rendered by the parent PlantForm for consistency across all steps. */}
     </View>
   );
 }

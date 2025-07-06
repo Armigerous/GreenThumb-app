@@ -286,7 +286,7 @@ export default function GardenSelectionStep({
   }
 
   return (
-    <View className="px-4 flex-1 flex">
+    <View className="flex-1 flex">
       <View className="flex-1">
         <View className="flex-row items-center mb-4">
           <TitleText className="text-xl text-foreground">
@@ -380,44 +380,6 @@ export default function GardenSelectionStep({
             )}
           </Animated.View>
         </ScrollView>
-      </View>
-
-      {/* Navigation buttons */}
-      <View className="flex-row justify-between items-center py-6 mt-auto">
-        <SubmitButton
-          onPress={() => router.push(`/(tabs)/plants/${plantSlug}`)}
-          color="secondary"
-          iconName="close"
-          iconPosition="left"
-        >
-          Cancel
-        </SubmitButton>
-
-        <View className="flex-row">
-          {selectedGarden && (
-            <View className="flex-row items-center mr-3">
-              <Ionicons
-                name="flower-outline"
-                size={16}
-                color="#5E994B"
-                style={{ marginRight: 4 }}
-              />
-              <Text className="text-sm text-primary">
-                {selectedGarden.name}
-              </Text>
-            </View>
-          )}
-          <SubmitButton
-            onPress={onNext}
-            isDisabled={!selectedGarden}
-            color={selectedGarden ? "primary" : "secondary"}
-            loadingLabel="Processing..."
-            iconName="arrow-forward"
-            iconPosition="right"
-          >
-            Next
-          </SubmitButton>
-        </View>
       </View>
     </View>
   );

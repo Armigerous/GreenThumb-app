@@ -1,7 +1,14 @@
 import { Feather } from "@expo/vector-icons";
+import type { Database } from "./supabase";
 
 // Define a type for Feather icon names
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
+
+/**
+ * Type-safe column names for plant_full_data view.
+ * Use this for dbColumn in filter categories to ensure only valid DB fields are referenced.
+ */
+export type PlantFullDataColumn = keyof Database["public"]["Views"]["plant_full_data"]["Row"];
 
 export type FilterCategory = {
   /**
@@ -12,7 +19,7 @@ export type FilterCategory = {
   /** The label to show in your UI, e.g. "NC Regions" */
   name: string;
   /** The actual Postgres column name in plant_full_data. */
-  dbColumn: string;
+  dbColumn: PlantFullDataColumn;
   /** The list of possible user-selectable values. */
   options: string[];
   /** Whether this category should only be shown in advanced mode */
@@ -128,7 +135,7 @@ export const allFilters: FilterSection[] = [
       {
         id: "nc-regions",
         name: "NC Regions",
-        dbColumn: "nc_region", // JSONB
+        dbColumn: "nc_regions", // JSONB
         options: ["Coastal", "Mountains", "Piedmont"],
         icon: "triangle",
       },

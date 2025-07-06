@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PageContainer } from "@/components/UI/PageContainer";
 import PlantForm from "../../../../components/Gardens/Plants/PlantForm";
 import { useSubscriptionGate } from "@/components/subscription/SubscriptionGate";
+import { TitleText } from "@/components/Gardens";
 
 export default function AddPlantScreen() {
   const router = useRouter();
@@ -51,9 +52,9 @@ export default function AddPlantScreen() {
         </TouchableOpacity>
       </View>
       <View className="pt-4 px-5">
-        <Text className="text-2xl text-foreground font-title font-bold mb-6">
+        <TitleText className="text-2xl mb-6">
           Add a Plant to Your Garden
-        </Text>
+        </TitleText>
       </View>
       <View className="flex-1 px-5">
         <PlantForm

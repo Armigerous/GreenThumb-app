@@ -1,29 +1,24 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-  Animated,
-  TouchableWithoutFeedback,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { BodyText, TitleText } from "@/components/UI/Text";
+import { useGardenFilters } from "@/lib/hooks/useGardenFilters";
 import { allFilters } from "@/types/filterData";
 import { premadeFilters } from "@/types/premadeFilters";
-import AnimatedProgressBar from "../UI/AnimatedProgressBar";
-import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
+import { Feather } from "@expo/vector-icons";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  useGardenFilters,
-  GardenFilterOption,
-} from "@/lib/hooks/useGardenFilters";
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Keyboard,
+  TouchableWithoutFeedback,
+  useWindowDimensions,
+} from "react-native";
+import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 import TabNavigation, { TabItem } from "../UI/TabNavigation";
 import FilterSearchBar from "./FilterModal/FilterSearchBar";
 import QuickFilterTooltip from "./FilterModal/QuickFilterTooltip";
+import GardenInfoTooltip from "./FilterModal/GardenInfoTooltip";
 
 // Define a type for Feather icon names
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
@@ -61,15 +56,25 @@ export default function FilterModal({
   );
   const [showQuickFilterDetails, setShowQuickFilterDetails] = useState(false);
   const [tooltipFilter, setTooltipFilter] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"gardens" | "quick">("gardens");
+  const [activeTab, setActiveTab] = useState<"gardens" | "quick" | "custom">(
+    "gardens"
+  );
   const [searchBarFocused, setSearchBarFocused] = useState(false);
+  const [tooltipGarden, setTooltipGarden] = useState<string | null>(null);
 
   // Garden filters hook
   const {
     gardenFilterOptions,
     hasGardens,
     isLoading: gardenFiltersLoading,
+    gardens,
   } = useGardenFilters();
+
+  // Responsive: get window width once at top level (hooks must be top-level)
+  // Reason: useWindowDimensions must be called at the top level, not inside render or callbacks
+  const { width } = useWindowDimensions();
+  const isSmallDevice = width < 380;
+  const columns = isSmallDevice ? 1 : 2;
 
   // Toggle section expansion
   const toggleSection = useCallback((sectionId: string) => {
@@ -276,8 +281,9 @@ export default function FilterModal({
 
   // Tab definitions for filter navigation
   const filterTabs: TabItem[] = [
-    { key: "gardens", label: "Your Gardens" },
+    { key: "gardens", label: "By Garden" },
     { key: "quick", label: "Quick Filters" },
+    { key: "custom", label: "Custom" },
   ];
 
   // Helper: Compare two filter option objects for equality
@@ -297,6 +303,10 @@ export default function FilterModal({
     initialSelectedOptions || {}
   );
 
+  // Accordion state for custom tab
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+
   return (
     <Modal
       visible={visible}
@@ -305,461 +315,473 @@ export default function FilterModal({
       onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1">
-        <View className="flex-row justify-between items-center p-4 border-b border-cream-300">
-          <TouchableOpacity onPress={onClose}>
-            <Feather name="x" size={24} color="#000" />
-          </TouchableOpacity>
-          <TitleText className="text-xl font-bold">Filter Plants</TitleText>
+        {/* Modal Title & Close Button */}
+        <View className="px-4 pt-4 pb-2 flex-row items-center justify-between">
+          <TitleText className="text-xl font-title-bold">
+            Filter Plants
+          </TitleText>
+
           <TouchableOpacity
-            onPress={filtersChanged ? handleApplyFilters : undefined}
-            disabled={!filtersChanged}
-            style={{ opacity: filtersChanged ? 1 : 0.5 }}
+            onPress={onClose}
+            accessibilityLabel="Close filter modal"
+            accessibilityRole="button"
+            className="ml-2 flex-row items-center p-2"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <BodyText className="text-brand-600 font-semibold">Apply</BodyText>
+            <Feather name="x" size={22} color="#2e2c29" />
+            <BodyText className="ml-1 text-sm text-cream-800">Close</BodyText>
           </TouchableOpacity>
         </View>
-
-        {/* Search Bar */}
-        <View className="px-4 py-2 border-b border-cream-300">
-          <FilterSearchBar value={searchTerm} onChange={setSearchTerm} />
-        </View>
-
-        {/* Tab Navigation for Gardens/Quick Filters */}
-        <View className="px-4 mt-2 mb-2">
+        {/* Tab Navigation */}
+        <View className="px-4 mb-2">
           <TabNavigation
             tabs={filterTabs}
             activeTab={activeTab}
-            onTabChange={(key) => setActiveTab(key as "gardens" | "quick")}
+            onTabChange={(key) =>
+              setActiveTab(key as "gardens" | "quick" | "custom")
+            }
           />
         </View>
-
-        {/* Tabbed Section: Only show the selected tab's content */}
+        {/* Tab Content */}
         {activeTab === "gardens" && hasGardens && (
-          <View className="p-4 border-b border-cream-300">
-            <View className="flex-row justify-between items-center mb-2">
-              <TitleText className="text-lg font-semibold">
-                Filter by Your Gardens
-              </TitleText>
-              {activeGardenFilter && (
-                <TouchableOpacity
-                  onPress={() => handleGardenFilterSelect(null)}
-                  className="bg-cream-400/60 px-2 py-1 rounded-md"
-                >
-                  <BodyText className="text-xs font-medium">Clear</BodyText>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <BodyText className="text-sm text-gray-600 mb-3">
-              Apply filters based on your garden conditions for personalized
-              plant recommendations.
-            </BodyText>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingVertical: 10,
-                paddingHorizontal: 2,
-              }}
-              style={{ marginHorizontal: -4 }}
-            >
-              {/* Clear filters option */}
-              <TouchableOpacity
-                className={`flex-row items-center px-3 py-2 rounded-lg mr-2 ${
-                  activeGardenFilter === null
-                    ? "bg-cream-200 border border-cream-300"
-                    : "bg-cream-50 border border-cream-200"
-                }`}
-                onPress={() => handleGardenFilterSelect(null)}
-              >
-                <Feather
-                  name="x-circle"
-                  size={14}
-                  color={activeGardenFilter === null ? "#7c2d12" : "#a3a3a3"}
-                />
-                <BodyText
-                  className={`ml-2 text-sm ${
-                    activeGardenFilter === null
-                      ? "text-cream-800 font-medium"
-                      : "text-cream-600"
-                  }`}
-                >
-                  All Plants
-                </BodyText>
-              </TouchableOpacity>
-
-              {/* Garden filter options */}
-              {gardenFilterOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  className={`flex-row items-center px-3 py-2 rounded-lg mr-2 ${
-                    activeGardenFilter === option.id
-                      ? "bg-brand-100 border border-brand-300"
-                      : "bg-cream-50 border border-cream-200"
-                  }`}
-                  onPress={() => handleGardenFilterSelect(option.id)}
-                >
-                  <Feather
-                    name="home"
-                    size={14}
-                    color={
-                      activeGardenFilter === option.id ? "#5E994B" : "#a3a3a3"
-                    }
-                  />
-                  <BodyText
-                    className={`ml-2 text-sm ${
-                      activeGardenFilter === option.id
-                        ? "text-brand-700 font-medium"
-                        : "text-cream-600"
-                    }`}
+          <View className="flex-1">
+            <View className="p-4 border-b border-cream-300 flex-shrink-0">
+              {/* Responsive grid: 2 columns on normal screens, 1 on small screens */}
+              {(() => {
+                // Group gardens into rows
+                const rows = [];
+                for (let i = 0; i < gardenFilterOptions.length; i += columns) {
+                  rows.push(gardenFilterOptions.slice(i, i + columns));
+                }
+                return (
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 16 }}
                   >
-                    {option.name}
-                  </BodyText>
-                  {option.isDefault && (
-                    <View className="ml-2 px-2 py-0.5 bg-brand-600/20 rounded-full">
-                      <BodyText className="text-xs text-brand-600 font-medium">
-                        Auto
-                      </BodyText>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            {/* Active Garden Filter Info */}
-            {activeGardenFilter && (
-              <View className="mt-3 bg-brand-50 border border-brand-200 rounded-lg p-3">
-                <View className="flex-row items-center">
-                  <Feather name="info" size={16} color="#5E994B" />
-                  <BodyText className="ml-2 text-sm text-brand-700">
-                    Showing plants personalized for your garden conditions
-                  </BodyText>
-                </View>
-              </View>
-            )}
+                    {rows.map((row, rowIndex) => (
+                      <View
+                        key={rowIndex}
+                        className="flex-row justify-between mb-4"
+                      >
+                        {row.map((option, colIndex) => {
+                          const isActive = activeGardenFilter === option.id;
+                          // Find the full Garden object for this card
+                          const fullGarden = gardens?.find(
+                            (g) => g.id === option.gardenId
+                          );
+                          return (
+                            <View
+                              key={option.id}
+                              className={
+                                columns === 1
+                                  ? "w-full"
+                                  : colIndex === 0 && row.length === 1
+                                  ? "w-full"
+                                  : "w-[48%]"
+                              }
+                            >
+                              <TouchableOpacity
+                                className={`rounded-lg p-3 items-center mb-2 relative ${
+                                  isActive
+                                    ? "bg-brand-600"
+                                    : "bg-cream-100 border border-cream-300"
+                                }`}
+                                onPress={() =>
+                                  handleGardenFilterSelect(option.id)
+                                }
+                              >
+                                <Feather
+                                  name="home"
+                                  size={24}
+                                  color={isActive ? "#fff" : "#555"}
+                                />
+                                <BodyText
+                                  className={`text-sm text-center mt-1 ${
+                                    isActive ? "text-white font-medium" : ""
+                                  }`}
+                                >
+                                  {option.name}
+                                </BodyText>
+                                {option.isDefault && (
+                                  <View className="mt-2 px-2 py-0.5 bg-brand-600/20 rounded-full">
+                                    <BodyText className="text-xs text-brand-600 font-medium">
+                                      Auto
+                                    </BodyText>
+                                  </View>
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                className={`py-1.5 px-2 rounded-md flex-row items-center justify-center mb-2 ${
+                                  isActive
+                                    ? "bg-brand-600/80"
+                                    : "bg-brand-600/20"
+                                }`}
+                                onPress={() =>
+                                  setTooltipGarden(
+                                    tooltipGarden === option.id
+                                      ? null
+                                      : option.id
+                                  )
+                                }
+                                accessibilityLabel={`Show information about ${option.name} garden`}
+                                accessibilityHint="Shows details about this garden filter"
+                              >
+                                <Feather
+                                  name="info"
+                                  size={14}
+                                  color={isActive ? "#fff" : "#555"}
+                                />
+                                <BodyText
+                                  className={`text-xs ml-1 ${
+                                    isActive ? "text-white" : "text-gray-700"
+                                  }`}
+                                >
+                                  Info
+                                </BodyText>
+                              </TouchableOpacity>
+                              {tooltipGarden === option.id && fullGarden && (
+                                <GardenInfoTooltip
+                                  garden={fullGarden}
+                                  visible={tooltipGarden === option.id}
+                                  onClose={() => setTooltipGarden(null)}
+                                />
+                              )}
+                            </View>
+                          );
+                        })}
+                        {/* If last row has only 1 garden and columns=2, add a spacer for alignment */}
+                        {columns === 2 && row.length === 1 && (
+                          <View className="w-[48%]" />
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
+                );
+              })()}
+            </View>
           </View>
         )}
         {activeTab === "quick" && (
-          <View className="p-4 border-b border-cream-300">
-            <View className="flex-row justify-between items-center mb-2">
-              <TitleText className="text-lg font-semibold">
-                Quick Filters
-              </TitleText>
-              {activeFilterDetails && (
-                <TouchableOpacity
-                  onPress={() =>
-                    setShowQuickFilterDetails(!showQuickFilterDetails)
-                  }
-                  className="flex-row items-center"
-                >
-                  <BodyText className="text-primary mr-1">
-                    {showQuickFilterDetails ? "Hide details" : "Show details"}
-                  </BodyText>
-                  <Feather
-                    name={
-                      showQuickFilterDetails ? "chevron-up" : "chevron-down"
+          <View className="flex-1">
+            <View className="p-4 border-b border-cream-300 flex-shrink-0">
+              {/* Responsive grid: 2 columns on normal screens, 1 on small screens */}
+              {(() => {
+                // Group filters into rows
+                const rows = [];
+                for (let i = 0; i < premadeFilters.length; i += columns) {
+                  rows.push(premadeFilters.slice(i, i + columns));
+                }
+                return (
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 16 }}
+                  >
+                    {rows.map((row, rowIndex) => (
+                      <View
+                        key={rowIndex}
+                        className="flex-row justify-between mb-4"
+                      >
+                        {row.map((filter, colIndex) => {
+                          const isActive = activeQuickFilter === filter.id;
+                          const isPartiallyApplied =
+                            getQuickFilterActiveCount(filter.id) > 0 &&
+                            !isQuickFilterFullyApplied(filter.id);
+                          return (
+                            <View
+                              key={filter.id}
+                              className={
+                                columns === 1
+                                  ? "w-full"
+                                  : colIndex === 0 && row.length === 1
+                                  ? "w-full"
+                                  : "w-[48%]"
+                              }
+                            >
+                              <TouchableOpacity
+                                className={`rounded-lg p-3 items-center mb-2 relative ${
+                                  isActive
+                                    ? "bg-brand-600"
+                                    : isPartiallyApplied
+                                    ? "bg-brand-600/30"
+                                    : "bg-cream-100 border border-cream-300"
+                                }`}
+                                onPress={() => {
+                                  setTooltipFilter(null);
+                                  applyPremadeFilter(filter.id, filter.filters);
+                                }}
+                                onLongPress={() => setTooltipFilter(filter.id)}
+                                delayLongPress={500}
+                              >
+                                <Feather
+                                  name={filter.icon}
+                                  size={24}
+                                  color={isActive ? "#fff" : "#555"}
+                                />
+                                <BodyText
+                                  className={`text-sm text-center mt-1 ${
+                                    isActive ? "text-white font-medium" : ""
+                                  }`}
+                                >
+                                  {filter.name}
+                                </BodyText>
+                                {isPartiallyApplied && (
+                                  <View className="absolute top-1 right-1 w-3 h-3 bg-accent-400 rounded-full" />
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                className={`py-1.5 px-2 rounded-md flex-row items-center justify-center mb-2 ${
+                                  isActive
+                                    ? "bg-brand-600/80"
+                                    : "bg-brand-600/20"
+                                }`}
+                                onPress={() =>
+                                  setTooltipFilter(
+                                    tooltipFilter === filter.id
+                                      ? null
+                                      : filter.id
+                                  )
+                                }
+                                accessibilityLabel={`Show information about ${filter.name} filter`}
+                                accessibilityHint="Shows details about what this quick filter includes"
+                              >
+                                <Feather
+                                  name="info"
+                                  size={14}
+                                  color={isActive ? "#fff" : "#555"}
+                                />
+                                <BodyText
+                                  className={`text-xs ml-1 ${
+                                    isActive ? "text-white" : "text-gray-700"
+                                  }`}
+                                >
+                                  Info
+                                </BodyText>
+                              </TouchableOpacity>
+                              {tooltipFilter === filter.id && (
+                                <QuickFilterTooltip
+                                  filter={filter}
+                                  visible={tooltipFilter === filter.id}
+                                  onClose={() => setTooltipFilter(null)}
+                                  onApply={(filterId) => {
+                                    applyPremadeFilter(
+                                      filterId,
+                                      filter.filters
+                                    );
+                                  }}
+                                />
+                              )}
+                            </View>
+                          );
+                        })}
+                        {/* If last row has only 1 filter and columns=2, add a spacer for alignment */}
+                        {columns === 2 && row.length === 1 && (
+                          <View className="w-[48%]" />
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
+                );
+              })()}
+              {/* Quick Filter Details (compact) */}
+              {activeQuickFilter && (
+                <View className="mt-3 bg-cream-100/20 p-3 rounded-lg border border-cream-300">
+                  <View className="flex-row items-center justify-between">
+                    <BodyText className="font-medium">
+                      {
+                        premadeFilters.find((f) => f.id === activeQuickFilter)
+                          ?.name
+                      }
+                    </BodyText>
+                    <TouchableOpacity
+                      onPress={clearAllFilters}
+                      className="bg-cream-400/60 px-2 py-1 rounded-md"
+                    >
+                      <BodyText className="text-xs font-medium">Clear</BodyText>
+                    </TouchableOpacity>
+                  </View>
+                  <BodyText className="text-xs text-gray-600 mt-1">
+                    {
+                      premadeFilters.find((f) => f.id === activeQuickFilter)
+                        ?.description
                     }
-                    size={16}
-                    color="#555"
-                  />
-                </TouchableOpacity>
+                  </BodyText>
+                </View>
               )}
             </View>
-
-            {activeFilterDetails && showQuickFilterDetails && (
-              <View className="mb-3 bg-cream-100/20 p-4 rounded-lg border border-cream-300">
-                <View className="flex-row items-start mb-3">
-                  <View className="bg-brand-600/10 p-2 rounded-full mr-3">
-                    <Feather
-                      name={activeFilterDetails.icon}
-                      size={20}
-                      color="#555"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <View className="flex-row items-center justify-between">
-                      <TitleText className="font-bold text-base text-gray-800">
-                        {activeFilterDetails.name}
-                      </TitleText>
-                      <TouchableOpacity
-                        onPress={clearAllFilters}
-                        className="bg-cream-400/60 px-2 py-1 rounded-md"
-                      >
-                        <BodyText className="text-xs font-medium">
-                          Clear
-                        </BodyText>
-                      </TouchableOpacity>
-                    </View>
-                    <BodyText className="text-sm text-gray-600 mt-1 leading-5">
-                      {activeFilterDetails.description}
-                    </BodyText>
-                  </View>
-                </View>
-
-                <View className="bg-white p-3 rounded-md mb-2">
-                  <BodyText className="text-xs font-medium mb-2 text-gray-700">
-                    Filter Progress
-                  </BodyText>
-                  <View className="flex-row items-center mb-1">
-                    <View className="flex-1">
-                      <AnimatedProgressBar
-                        percentage={
-                          (activeFilterDetails.appliedCount /
-                            activeFilterDetails.totalCount) *
-                          100
-                        }
-                        color="#5E994B" // brand-600
-                        height={12}
-                        duration={500}
-                      />
-                    </View>
-                    <BodyText className="text-xs ml-2 font-medium">
-                      {activeFilterDetails.appliedCount}/
-                      {activeFilterDetails.totalCount}
-                    </BodyText>
-                  </View>
-                  <BodyText className="text-xs text-gray-500 mt-1">
-                    {activeFilterDetails.isFullyApplied
-                      ? "All filters in this quick filter are applied"
-                      : "Some filters in this quick filter are not applied"}
-                  </BodyText>
-                </View>
-
-                <TouchableOpacity
-                  className="bg-brand-600/10 rounded-md p-2 flex-row items-center justify-center"
-                  onPress={() => {
-                    // Toggle tooltip for this filter to see details
-                    setTooltipFilter(activeQuickFilter);
-                  }}
-                >
-                  <Feather name="info" size={14} color="#555" />
-                  <BodyText className="text-sm ml-1 text-gray-700 font-medium">
-                    View Filter Details
-                  </BodyText>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Quick Filters ScrollView with padding to ensure tooltips are visible */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingVertical: 20,
-                paddingHorizontal: 10,
-              }}
-              style={{ marginHorizontal: -4 }}
-            >
-              {premadeFilters.map((filter, index) => {
-                const isActive = activeQuickFilter === filter.id;
-                const isPartiallyApplied =
-                  getQuickFilterActiveCount(filter.id) > 0 &&
-                  !isQuickFilterFullyApplied(filter.id);
-
-                return (
-                  <View key={filter.id} className="mx-2" style={{ width: 100 }}>
-                    <TouchableOpacity
-                      className={`rounded-lg p-3 items-center ${
-                        isActive
-                          ? "bg-brand-600"
-                          : isPartiallyApplied
-                          ? "bg-brand-600/30"
-                          : "bg-cream-100 border border-cream-300"
-                      }`}
-                      onPress={() => {
-                        // Close any open tooltip first
-                        setTooltipFilter(null);
-                        applyPremadeFilter(filter.id, filter.filters);
-                      }}
-                      onLongPress={() => setTooltipFilter(filter.id)}
-                      delayLongPress={500}
-                    >
-                      <Feather
-                        name={filter.icon}
-                        size={24}
-                        color={isActive ? "#fff" : "#555"}
-                      />
-                      <BodyText
-                        className={`text-sm text-center mt-1 ${
-                          isActive ? "text-white font-medium" : ""
-                        }`}
-                      >
-                        {filter.name}
-                      </BodyText>
-                      {isPartiallyApplied && (
-                        <View className="absolute top-1 right-1 w-3 h-3 bg-accent-400 rounded-full" />
-                      )}
-                    </TouchableOpacity>
-
-                    {/* Separate info button below the filter */}
-                    <TouchableOpacity
-                      className={`mt-1 py-1.5 px-2 rounded-md flex-row items-center justify-center ${
-                        isActive ? "bg-brand-600/80" : "bg-brand-600/20"
-                      }`}
-                      onPress={() => {
-                        // Toggle tooltip
-                        setTooltipFilter(
-                          tooltipFilter === filter.id ? null : filter.id
-                        );
-                      }}
-                      accessibilityLabel={`Show information about ${filter.name} filter`}
-                      accessibilityHint="Shows details about what this quick filter includes"
-                    >
-                      <Feather
-                        name="info"
-                        size={14}
-                        color={isActive ? "#fff" : "#555"}
-                      />
-                      <BodyText
-                        className={`text-xs ml-1 ${
-                          isActive ? "text-white" : "text-gray-700"
-                        }`}
-                      >
-                        Info
-                      </BodyText>
-                    </TouchableOpacity>
-
-                    {tooltipFilter === filter.id && (
-                      <QuickFilterTooltip
-                        filter={filter}
-                        visible={tooltipFilter === filter.id}
-                        onClose={() => setTooltipFilter(null)}
-                        onApply={(filterId) => {
-                          applyPremadeFilter(filterId, filter.filters);
-                        }}
-                      />
-                    )}
-                  </View>
-                );
-              })}
-            </ScrollView>
           </View>
         )}
-
-        {/* Filter Sections (accordions) always shown below tabs */}
-        <ScrollView className="flex-1">
-          {/* Show explicit message if no filters found after search */}
-          {filteredSections.length === 0 ? (
-            <View className="flex-1 items-center justify-center py-16">
-              <Feather name="search" size={32} color="#bbb" />
-              <BodyText className="text-lg text-gray-500 mt-3">
-                No filters found. Try a different search term.
-              </BodyText>
+        {activeTab === "custom" && (
+          <View className="flex-1">
+            {/* Search Bar */}
+            <View className="px-4 py-2">
+              <FilterSearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onFocus={() => setSearchBarFocused(true)}
+                onBlur={() => setSearchBarFocused(false)}
+              />
             </View>
-          ) : (
-            filteredSections.map((section) => (
-              <View key={section.id} className="border-b border-cream-300">
-                <TouchableOpacity
-                  className="flex-row justify-between items-center p-4"
-                  onPress={() => toggleSection(section.id)}
-                >
-                  <View className="flex-row items-center">
-                    <Feather name={section.icon} size={20} color="#555" />
-                    <BodyText className="text-lg font-medium ml-2">
-                      {section.name}
-                    </BodyText>
-                  </View>
-                  <Feather
-                    name={
-                      expandedSections[section.id]
-                        ? "chevron-down"
-                        : "chevron-right"
-                    }
-                    size={20}
-                    color="#555"
-                  />
-                </TouchableOpacity>
-
-                {expandedSections[section.id] && (
-                  <View className="pl-4 pr-2 pb-2">
-                    {section.categories.map((category) => (
-                      <View key={category.id}>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                if (searchBarFocused) Keyboard.dismiss();
+              }}
+              disabled={!searchBarFocused}
+            >
+              <View style={{ flex: 1 }}>
+                <ScrollView className="flex-1">
+                  {/* Show explicit message if no filters found after search */}
+                  {filteredSections.length === 0 ? (
+                    <View className="flex-1 items-center justify-center py-16">
+                      <Feather name="search" size={32} color="#bbb" />
+                      <BodyText className="text-lg text-gray-500 mt-3">
+                        No filters found. Try a different search term.
+                      </BodyText>
+                    </View>
+                  ) : (
+                    filteredSections.map((section) => (
+                      <View
+                        key={section.id}
+                        className="border-b border-cream-300"
+                      >
                         <TouchableOpacity
-                          className="flex-row justify-between items-center p-3"
+                          className="flex-row justify-between items-center p-4"
                           onPress={() =>
-                            toggleCategory(`${section.id}-${category.id}`)
+                            setOpenSection(
+                              openSection === section.id ? null : section.id
+                            )
                           }
                         >
                           <View className="flex-row items-center">
                             <Feather
-                              name={category.icon}
-                              size={18}
-                              color="#666"
+                              name={section.icon}
+                              size={20}
+                              color="#555"
                             />
-                            <BodyText className="text-base font-medium ml-2">
-                              {category.name}
-                              {category.isAdvanced && showAdvancedFilters && (
-                                <BodyText className="text-xs text-brand-600 ml-1">
-                                  {" "}
-                                  (Advanced)
-                                </BodyText>
-                              )}
+                            <BodyText className="text-lg font-medium ml-2">
+                              {section.name}
                             </BodyText>
                           </View>
                           <Feather
                             name={
-                              expandedCategories[`${section.id}-${category.id}`]
+                              openSection === section.id
                                 ? "chevron-down"
                                 : "chevron-right"
                             }
-                            size={18}
-                            color="#666"
+                            size={20}
+                            color="#555"
                           />
                         </TouchableOpacity>
-
-                        {expandedCategories[`${section.id}-${category.id}`] && (
-                          <View className="pl-8 pr-2 pb-2">
-                            {category.options.map((option) => {
-                              const optionKey = `${category.id}|${option}`;
-                              return (
+                        {openSection === section.id && (
+                          <View className="pl-4 pr-2 pb-2">
+                            {section.categories.map((category) => (
+                              <View key={category.id}>
                                 <TouchableOpacity
-                                  key={optionKey}
-                                  className="flex-row items-center py-2"
+                                  className="flex-row justify-between items-center p-3"
                                   onPress={() =>
-                                    toggleOption(
-                                      optionKey,
-                                      !selectedOptions[optionKey]
+                                    setOpenCategory(
+                                      openCategory ===
+                                        `${section.id}-${category.id}`
+                                        ? null
+                                        : `${section.id}-${category.id}`
                                     )
                                   }
                                 >
-                                  <View
-                                    className={`w-5 h-5 rounded border flex items-center justify-center ${
-                                      selectedOptions[optionKey]
-                                        ? "bg-brand-600 border-brand-600"
-                                        : "border-cream-300"
-                                    }`}
-                                  >
-                                    {selectedOptions[optionKey] && (
-                                      <Feather
-                                        name="check"
-                                        size={14}
-                                        color="#fff"
-                                      />
-                                    )}
+                                  <View className="flex-row items-center">
+                                    <Feather
+                                      name={category.icon}
+                                      size={18}
+                                      color="#666"
+                                    />
+                                    <BodyText className="text-base font-medium ml-2">
+                                      {category.name}
+                                      {category.isAdvanced &&
+                                        showAdvancedFilters && (
+                                          <BodyText className="text-xs text-brand-600 ml-1">
+                                            {" "}
+                                            (Advanced)
+                                          </BodyText>
+                                        )}
+                                    </BodyText>
                                   </View>
-                                  <BodyText className="text-base ml-2">
-                                    {option}
-                                  </BodyText>
+                                  <Feather
+                                    name={
+                                      openCategory ===
+                                      `${section.id}-${category.id}`
+                                        ? "chevron-down"
+                                        : "chevron-right"
+                                    }
+                                    size={18}
+                                    color="#666"
+                                  />
                                 </TouchableOpacity>
-                              );
-                            })}
+                                {openCategory ===
+                                  `${section.id}-${category.id}` && (
+                                  <View className="pl-8 pr-2 pb-2">
+                                    {category.options.map((option) => {
+                                      const optionKey = `${category.id}|${option}`;
+                                      return (
+                                        <TouchableOpacity
+                                          key={optionKey}
+                                          className="flex-row items-center py-2"
+                                          onPress={() =>
+                                            toggleOption(
+                                              optionKey,
+                                              !selectedOptions[optionKey]
+                                            )
+                                          }
+                                        >
+                                          <View
+                                            className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                              selectedOptions[optionKey]
+                                                ? "bg-brand-600 border-brand-600"
+                                                : "border-cream-300"
+                                            }`}
+                                          >
+                                            {selectedOptions[optionKey] && (
+                                              <Feather
+                                                name="check"
+                                                size={14}
+                                                color="#fff"
+                                              />
+                                            )}
+                                          </View>
+                                          <BodyText className="text-base ml-2">
+                                            {option}
+                                          </BodyText>
+                                        </TouchableOpacity>
+                                      );
+                                    })}
+                                  </View>
+                                )}
+                              </View>
+                            ))}
                           </View>
                         )}
                       </View>
-                    ))}
-                  </View>
-                )}
+                    ))
+                  )}
+                </ScrollView>
               </View>
-            ))
-          )}
-        </ScrollView>
-
+            </TouchableWithoutFeedback>
+          </View>
+        )}
         {/* Footer Buttons */}
         <View className="p-4 border-t border-cream-300">
-          {/* Selected Filters Summary */}
+          {/* Show info box above Clear All when filtering by garden and a garden is selected */}
+          {/* Reason: The info box should reinforce the context of personalized filters, but not interrupt the garden list UI. Placing it here keeps the action area clear and consistent. */}
+          {activeTab === "gardens" && activeGardenFilter && (
+            <View className="mb-3 bg-brand-50 border border-brand-200 rounded-lg p-3">
+              <View className="flex-row items-center">
+                <Feather name="info" size={16} color="#5E994B" />
+                <BodyText className="ml-2 text-sm text-brand-700">
+                  Personalized for your garden
+                </BodyText>
+              </View>
+            </View>
+          )}
+          {/* Selected Filters Summary (compact) */}
           {Object.keys(selectedOptions).filter((key) => selectedOptions[key])
-            .length > 0 && (
+            .length > 1 && (
             <View className="mb-3 bg-cream-400/20 p-3 rounded-lg">
               <View className="flex-row justify-between items-center mb-2">
                 <BodyText className="font-semibold">Selected Filters</BodyText>
@@ -770,15 +792,13 @@ export default function FilterModal({
                   <BodyText className="text-xs">Clear All</BodyText>
                 </TouchableOpacity>
               </View>
-              <ScrollView style={{ maxHeight: 100 }}>
+              <ScrollView style={{ maxHeight: 60 }} horizontal>
                 {Object.keys(selectedOptions)
                   .filter((key) => selectedOptions[key])
                   .map((key, index) => {
                     const [category, value] = key.split("|");
-                    // Find the category name from allFilters
                     let categoryName = category;
                     let categoryIcon: FeatherIconName = "filter";
-
                     allFilters.forEach((section) => {
                       section.categories.forEach((cat) => {
                         if (cat.id === category) {
@@ -787,9 +807,11 @@ export default function FilterModal({
                         }
                       });
                     });
-
                     return (
-                      <View key={index} className="flex-row items-center mb-1">
+                      <View
+                        key={index}
+                        className="flex-row items-center mr-3 mb-1"
+                      >
                         <Feather name={categoryIcon} size={12} color="#555" />
                         <BodyText className="text-xs ml-1">
                           <BodyText className="font-medium">
@@ -798,7 +820,7 @@ export default function FilterModal({
                           {value}
                         </BodyText>
                         <TouchableOpacity
-                          className="ml-auto p-1"
+                          className="ml-1 p-1"
                           onPress={() => toggleOption(key, false)}
                         >
                           <Feather name="x" size={12} color="#555" />
@@ -807,39 +829,8 @@ export default function FilterModal({
                     );
                   })}
               </ScrollView>
-
-              {/* Show active quick filter if applicable */}
-              {activeQuickFilter && (
-                <View className="mt-2 pt-2 border-t border-cream-300/50">
-                  <View className="flex-row items-center">
-                    <BodyText className="text-xs text-gray-600">
-                      Quick Filter:
-                    </BodyText>
-                    <View className="flex-row items-center ml-1 bg-brand-600/10 px-2 py-0.5 rounded-full">
-                      {premadeFilters.find(
-                        (f) => f.id === activeQuickFilter
-                      ) && (
-                        <Feather
-                          name={
-                            premadeFilters.find(
-                              (f) => f.id === activeQuickFilter
-                            )?.icon || "filter"
-                          }
-                          size={10}
-                          color="#555"
-                        />
-                      )}
-                      <BodyText className="text-xs ml-1 font-medium">
-                        {premadeFilters.find((f) => f.id === activeQuickFilter)
-                          ?.name || ""}
-                      </BodyText>
-                    </View>
-                  </View>
-                </View>
-              )}
             </View>
           )}
-
           <View className="flex-row justify-between mb-3">
             <TouchableOpacity
               className="flex-1 mr-2 py-3 bg-destructive rounded-lg items-center"
@@ -849,14 +840,17 @@ export default function FilterModal({
                 Clear All
               </BodyText>
             </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 ml-2 py-3 bg-cream-400/40 rounded-lg items-center"
-              onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            >
-              <BodyText className="font-semibold">
-                {showAdvancedFilters ? "Hide Advanced" : "Show Advanced"}
-              </BodyText>
-            </TouchableOpacity>
+            {/* Only show Show Advanced/Hide Advanced in Custom tab */}
+            {activeTab === "custom" && (
+              <TouchableOpacity
+                className="flex-1 ml-2 py-3 bg-cream-400/40 rounded-lg items-center"
+                onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              >
+                <BodyText className="font-semibold">
+                  {showAdvancedFilters ? "Hide Advanced" : "Show Advanced"}
+                </BodyText>
+              </TouchableOpacity>
+            )}
           </View>
           <TouchableOpacity
             className="py-3 bg-brand-600 rounded-lg items-center"
