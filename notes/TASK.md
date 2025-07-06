@@ -10,6 +10,81 @@
 
 **Core App Status:**
 
+### ✅ COMPLETED - Garden-Based Plant Filtering (January 2025)
+
+**GARDEN-FILTER-001**: Implement garden-based filtering for plants database  
+**Status:** ✅ **COMPLETED** - January 26, 2025  
+**Owner:** Development Team  
+**Description:** Implemented automatic garden condition filtering to reduce database clutter and personalize plant recommendations
+
+**Implementation Summary:**
+
+**New Features:**
+
+- Created `useGardenFilters` hook to fetch user gardens and convert conditions to plant database filters
+- Added `GardenFilterSelector` component for quick garden-based filtering
+- Implemented automatic application of first garden's conditions as default filters
+- Added personalization status indicator when garden filters are active
+- Integrated garden-based quick filters with existing manual filter system
+
+**Key Benefits:**
+
+- **Reduced Clutter**: Plants are automatically filtered based on user's garden conditions
+- **Personalized Experience**: Second a user creates their first garden, the app becomes more tailored
+- **Quick Garden Switching**: Users with multiple gardens can quickly switch between garden-specific filters
+- **Seamless Integration**: Works alongside existing manual filter system without conflicts
+
+**Technical Implementation:**
+
+- `lib/hooks/useGardenFilters.ts`: Custom hook managing garden data and filter conversion
+- `components/Database/GardenFilterSelector.tsx`: UI component for garden filter selection
+- Updated `app/(tabs)/plants/index.tsx`: Integrated garden filtering with existing plant database
+- Automatic filter application on first garden creation
+- Clear visual indicators for applied garden filters
+
+**User Experience Improvements:**
+
+- First garden created becomes default filter automatically
+- Multiple gardens show as quick filter options
+- "Auto" badge indicates which garden is default
+- "All Plants" option to clear garden filters
+- Status message shows when garden personalization is active
+
+**Filter Conversion Logic:**
+Garden conditions are automatically converted to plant database filters including:
+
+- Light requirements → light conditions
+- Soil texture/drainage/pH → soil characteristics
+- Plant types → plant categories
+- Garden themes → landscape themes
+- Wildlife attractions → pollinator preferences
+- Resistance challenges → plant hardiness
+- Location preferences → landscape locations
+- Growth rates → plant growth characteristics
+- Maintenance levels → care requirements
+- Available space → plant sizing
+- Regional preferences → NC regions and USDA zones
+- Aesthetic preferences → flower/leaf colors and characteristics
+
+**Follow-up Enhancement Suggestions:**
+
+1. **Smart Filter Recommendations**: Suggest additional filters based on garden conditions
+2. **Garden Condition Gaps**: Highlight missing garden information that could improve plant recommendations
+3. **Seasonal Adjustments**: Modify filters based on current season and plant care calendar
+4. **Plant Success Scoring**: Show compatibility scores for plants based on garden conditions
+5. **Garden-Specific Plant Collections**: Create curated collections for each garden type
+6. **Predictive Filtering**: Learn from user plant additions to refine filter suggestions
+7. **Weather Integration**: Adjust recommendations based on current weather conditions
+8. **Maintenance Level Matching**: Filter by user's available time for plant care
+9. **Plant Combination Suggestions**: Recommend plants that work well together in specific gardens
+10. **Progressive Personalization**: As users add plants, further refine recommendations
+
+**Recent Fixes (January 2025):**
+
+- **Growth Rate OR Logic**: ✅ **COMPLETED** - Fixed garden filtering to properly handle multiple growth rate selections with OR logic instead of AND logic. Updated PostgREST syntax to use correct `in.(value1,value2)` format. Users can now select both "Slow" and "Medium" growth rates and see plants that match either criteria, not just the first selected option.
+
+- **Garden Filter Integration**: ✅ **COMPLETED** - Moved garden filter functionality inside the FilterModal component for better user experience. Users can now access garden-based filtering through the main filter interface instead of having a separate selector. This consolidates all filtering options in one place and provides a more cohesive filtering experience. Removed the standalone `GardenFilterSelector` component as it's no longer needed.
+
 ### 🧪 TESTING REQUIRED - High Priority
 
 **TEST-ORGANIZATION-001**: Test the new task-based plant organization across all screens  
@@ -1283,3 +1358,91 @@
 
 - [ ] Sign in/up page clearly explains password requirements
 - [ ] No user confusion about needing a password to sign up
+
+---
+
+## 🚀 NEW TASK: Profile Page Redesign (July 2025)
+
+**Status:** 🟡 IN PROGRESS
+**Owner:** Design & Development Team
+**Description:**
+Implement a brand-aligned, emotionally supportive Profile page as outlined in PLANNING.md. The new design focuses on user identity, subscription status, support, and gentle encouragement, avoiding stats and gamification.
+
+### Subtasks
+
+- [ ] Design Figma mockup for new Profile page (brand colors, illustration, copy)
+- [ ] Implement user identity section (avatar, name, email, edit path, greeting)
+- [ ] Display subscription status and triple guarantee badge/info
+- [ ] Add notification preferences toggle (with clear, gentle copy)
+- [ ] Integrate support/help section (FAQ, contact, expert advice for premium)
+- [ ] Add privacy/legal links (privacy policy, terms, data export/delete)
+- [ ] Implement logout button (calm, clear)
+- [ ] Show app version (small, unobtrusive)
+- [ ] Add encouragement message and optional feedback link
+
+### Acceptance Criteria
+
+- Profile page matches Figma design and brand guidelines
+- No plant/task stats or gamification elements present
+- All copy is gentle, supportive, and brand-aligned
+- Subscription status and triple guarantee are clear and accessible
+- Support/help is easy to find and use
+- All actions are accessible and touch-friendly
+- Page is visually soft, uncluttered, and emotionally supportive
+
+---
+
+## 🟢 NEW TASK: Garden Page Tabbed Recommendations Redesign (July 2025)
+
+**Status:** 🟢 IN PROGRESS
+**Owner:** Development Team
+**Due:** July 20, 2025
+**Description:**
+Fully implement a scrollable, tabbed "Recommended for You" section on individual garden pages. This supersedes the previous RecommendedPlantsSection task. The new design introduces a tabbed interface after the garden hero section: one tab for "Your Garden" (showing the user's plants), and one for "Recommended Plants" (showing personalized recommendations). Plant cards in the recommended tab must be fully visible, support vertical scrolling, and allow users to click a card to view the plant's detail page. Each card should also have a clear CTA button to add the plant directly to the current garden.
+
+### Subtasks
+
+- [ ] Implement tabbed interface after the garden hero section: "Your Garden" and "Recommended Plants"
+- [ ] In "Recommended Plants" tab, display up to 10 recommended plants for the current garden
+- [ ] Ensure plant cards are fully visible and support vertical scrolling (no clipping or overflow)
+- [ ] Clicking a plant card navigates to the correct plant detail page
+- [ ] Add a clear CTA button under each card to add the plant directly to the garden
+- [ ] Ensure the section is visually consistent with brand guidelines and mobile-friendly
+- [ ] Remove/replace the old RecommendedPlantsSection implementation
+- [ ] Test on both iOS and Android for scroll and navigation behavior
+
+### Acceptance Criteria
+
+- Tabbed interface appears after the garden hero section
+- "Recommended Plants" tab is fully scrollable and shows up to 10 recommended plants
+- Plant cards are fully visible, not clipped, and support vertical scrolling
+- Clicking a card navigates to the correct plant detail page
+- Each card has a working CTA to add the plant to the garden
+- Section is visually consistent with brand and mobile UX best practices
+- Old RecommendedPlantsSection is removed or replaced
+- All functionality is tested and works on both iOS and Android
+
+---
+
+## 🟡 SUPERSEDED TASK: RecommendedPlantsSection on garden details page
+
+**Status:** 🟡 SUPERSEDED (see new task above)
+**Owner:** Development Team
+**Description:**
+Implement RecommendedPlantsSection on garden details page using real recommendations based on garden conditions. (This task is now superseded by the more comprehensive tabbed recommendations redesign above.)
+
+### Subtasks
+
+- [ ] Implement RecommendedPlantsSection on garden details page ([id].tsx) using real recommendations based on garden conditions
+  - Section now fetches and displays up to 10 recommended plants for the current garden
+  - Uses convertGardenToFilters utility for filter string
+  - Add handler is a placeholder alert (to be implemented)
+
+### Acceptance Criteria
+
+- RecommendedPlantsSection is implemented and live on garden details page
+- Section fetches and displays up to 10 recommended plants for the current garden
+- Uses convertGardenToFilters utility for filter string
+- Add handler is a placeholder alert (to be implemented)
+
+---

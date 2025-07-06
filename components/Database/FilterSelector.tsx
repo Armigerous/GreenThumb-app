@@ -9,12 +9,16 @@ interface FilterSelectorProps {
   filters: string[];
   activeFilter: string;
   onSelectFilter: (filter: string) => void;
+  activeGardenFilter?: string | null;
+  onGardenFilterChange?: (gardenId: string | null) => void;
 }
 
 const FilterSelector: React.FC<FilterSelectorProps> = ({
   filters,
   activeFilter,
   onSelectFilter,
+  activeGardenFilter,
+  onGardenFilterChange,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<{
@@ -151,6 +155,8 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
         onClose={() => setModalVisible(false)}
         selectedOptions={selectedOptions}
         onApplyFilters={handleApplyFilters}
+        activeGardenFilter={activeGardenFilter}
+        onGardenFilterChange={onGardenFilterChange}
       />
     </View>
   );

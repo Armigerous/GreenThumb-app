@@ -16,6 +16,7 @@
 5. [Feature Roadmap](#feature-roadmap)
 6. [Launch Strategy](#launch-strategy)
 7. [Success Metrics](#success-metrics)
+8. [Profile Page Redesign](#profile-page-redesign)
 
 ---
 
@@ -352,134 +353,6 @@
 
 ---
 
-## 💳 Subscription System Implementation
-
-### ✅ COMPLETED FEATURES (January 2025)
-
-#### Backend Infrastructure
-
-- [x] **Database Schema**: Complete subscription tables with RLS policies
-- [x] **Stripe Integration**: Payment processing, customer management, webhooks
-- [x] **API Endpoints**: Payment intent creation, subscription management
-- [x] **TypeScript Types**: Full type coverage for subscription entities
-- [x] **React Query Hooks**: Optimized data fetching and caching
-
-#### Frontend Implementation
-
-- [x] **Pricing Screen**: Guarantee-based selling with savings calculations
-- [x] **Checkout Flow**: Stripe payment sheet integration
-- [x] **Success Screen**: Celebration and next steps guidance
-- [x] **Subscription Management**: View, cancel, and modify subscriptions
-- [x] **Payment History**: Transaction records and receipts
-
-#### Business Logic
-
-- [x] **Price Calculations**: Automatic savings and badge assignment
-- [x] **Plan Recommendations**: "Most Popular" and "Best Value" logic
-- [x] **Guarantee Integration**: Triple guarantee messaging throughout flow
-- [x] **Mobile Optimization**: Native payment sheets and smooth UX
-
-### 🧪 CRITICAL TESTING REQUIRED
-
-#### Payment Flow Testing (Due: January 18, 2025)
-
-- [ ] **Stripe Test Mode**: Verify test card processing works correctly
-- [ ] **Payment Success**: Complete purchase → success screen → subscription active
-- [ ] **Payment Failure**: Failed payment → error handling → retry option
-- [ ] **Subscription Creation**: Verify database records created correctly
-- [ ] **Plan Selection**: Test all pricing tiers (Annual, 6-month, Monthly)
-- [ ] **Add-on Purchases**: Test upsell product purchases
-- [ ] **Error Handling**: Network failures, invalid cards, expired cards
-
-#### Subscription Management Testing (Due: January 19, 2025)
-
-- [ ] **Status Display**: Verify correct plan and status shown
-- [ ] **Payment History**: Verify transaction records display correctly
-- [ ] **Plan Changes**: Test upgrade/downgrade functionality
-- [ ] **Cancellation Flow**: Test subscription cancellation
-- [ ] **Reactivation Flow**: Test subscription reactivation
-- [ ] **Add-on Management**: Test purchasing and managing add-ons
-
-#### Business Logic Testing (Due: January 17, 2025)
-
-- [ ] **Price Calculations**: Verify savings calculations are accurate
-- [ ] **Plan Recommendations**: Test "Most Popular" and "Best Value" badges
-- [ ] **Date Calculations**: Verify subscription period calculations
-- [ ] **Status Mapping**: Test Stripe status → internal status mapping
-
-### 🔧 INTEGRATION WORK REQUIRED
-
-#### Production Setup (Due: January 22, 2025)
-
-- [ ] **Stripe Production Account**: Complete business verification
-- [ ] **Payment Methods**: Enable credit cards, Apple Pay, Google Pay
-- [ ] **Webhook Configuration**: Set up Stripe webhooks for subscription events
-- [ ] **Environment Variables**: Configure all production Stripe keys
-- [ ] **Tax Configuration**: Set up tax collection if required
-- [ ] **PCI Compliance**: Ensure security standards are met
-
-#### App Integration (Due: January 18, 2025)
-
-- [ ] **Navigation Links**: Add subscription links to main app navigation
-- [ ] **Premium Feature Gates**: Implement premium feature restrictions
-- [ ] **Subscription Status**: Show subscription status in profile/settings
-- [ ] **Upgrade Prompts**: Add upgrade prompts for free users
-- [ ] **Onboarding Integration**: Include subscription in user onboarding
-
-#### Legal & Compliance (Due: January 21, 2025)
-
-- [ ] **Terms of Service**: Update with subscription terms
-- [ ] **Privacy Policy**: Update with payment data handling
-- [ ] **Refund Policy**: Implement guarantee and refund policies
-- [ ] **Auto-renewal Disclosures**: Comply with app store requirements
-
-### 📊 Analytics & Monitoring Setup
-
-#### Subscription Analytics (Due: January 25, 2025)
-
-- [ ] **Conversion Tracking**: Track pricing page → checkout → success
-- [ ] **Revenue Metrics**: Track MRR, ARR, churn rate
-- [ ] **Plan Performance**: Track which plans convert best
-- [ ] **Error Monitoring**: Track payment failures and errors
-- [ ] **User Behavior**: Track subscription management actions
-
-#### Key Metrics to Track
-
-- **Conversion Rate**: Free users → premium subscribers
-- **Payment Success Rate**: Successful payments / payment attempts
-- **Churn Rate**: Monthly subscription cancellations
-- **Average Revenue Per User (ARPU)**
-- **Customer Lifetime Value (LTV)**
-- **Plan Distribution**: Annual vs monthly vs 6-month adoption
-
-### 🚀 REMAINING WORK FOR FULL FUNCTIONALITY
-
-#### High Priority (Week of January 14-20)
-
-1. **Complete Testing**: Execute all test cases listed above
-2. **Production Configuration**: Set up Stripe production environment
-3. **App Store Integration**: Configure in-app purchases for both stores
-4. **Legal Documentation**: Update all legal documents with subscription terms
-5. **Navigation Integration**: Add subscription links throughout the app
-
-#### Medium Priority (Week of January 21-26)
-
-1. **Analytics Implementation**: Set up comprehensive subscription tracking
-2. **Error Monitoring**: Configure alerts for payment failures
-3. **Performance Optimization**: Ensure smooth payment flows
-4. **Documentation**: Update user guides and support materials
-5. **Beta Testing**: Test subscription flows with real users
-
-#### Future Enhancements (Post-Launch)
-
-1. **Family Plans**: Multi-user subscription management
-2. **Gift Subscriptions**: Allow users to gift premium subscriptions
-3. **Corporate Plans**: B2B subscriptions for businesses
-4. **International Expansion**: Multi-currency and localized pricing
-5. **Advanced Analytics**: Detailed revenue and user behavior insights
-
----
-
 ## 🗺️ Feature Roadmap
 
 ### Phase 1: MVP Launch (January 2025) ✅ COMPLETE
@@ -673,6 +546,57 @@
 - **Educational Partnerships** with schools and universities
 - **Research Initiatives** in plant science and sustainability
 - **Acquisition Opportunities** of complementary businesses
+
+---
+
+## 🌱 Profile Page Redesign (July 2025)
+
+### Purpose
+
+The Profile page is a gentle, welcoming "home base" for user identity, preferences, subscription status, and support. It is not a dashboard or settings dump, but a brand-aligned, emotionally supportive space.
+
+### Must-Have Features
+
+- **User Identity**: Avatar, name, email (with edit path), gentle personalized greeting
+- **Subscription Status**: Clear, friendly display of current plan (e.g., "Premium Member" or "Free Plan"), easy access to manage/upgrade/cancel, triple guarantee badge/info
+- **Notification Preferences**: Toggle for care reminders (with clear, non-anxious copy)
+- **Support & Help**: FAQ (plain language), "Contact Support" (email or chat), "Request Expert Advice" (if premium)
+- **Privacy & Legal**: Links to privacy policy, terms, and data export/delete
+- **Logout**: Calm, clear, not alarming
+- **App Version**: Small, unobtrusive
+
+### Nice-to-Haves
+
+- Encouragement message ("Your plants are lucky to have you!")
+- Feedback ("Suggest a feature" or "Report a bug")
+- Personalization (seasonal illustration, user's first name, or favorite plant)
+
+### What to Avoid
+
+- No raw stats (plant/task counts) unless celebratory
+- No gamification, streaks, or comparison
+- No marketing banners or upsells outside the subscription context
+
+### Rationale
+
+- Directly supports GreenThumb's value proposition: confidence, support, personalization, and trust
+- Reduces anxiety: no numbers, no pressure, just support and clarity
+- Brand-aligned: gentle, nurturing, visually soft
+- Practical: users can manage their account, get help, and understand their subscription/guarantee
+
+### Example Structure
+
+| Section             | Why? (User Value)                                 |
+| ------------------- | ------------------------------------------------- |
+| Avatar/Name/Email   | Identity, trust, personalization                  |
+| Greeting            | Emotional support, brand voice                    |
+| Subscription Status | Transparency, control, trust, value reinforcement |
+| Triple Guarantee    | Reduces anxiety, builds confidence                |
+| Notifications       | Directly impacts plant care success               |
+| Help & Support      | Reduces frustration, builds trust                 |
+| Privacy/Legal       | Transparency, user rights                         |
+| Logout              | Control, security                                 |
+| App Version         | Support, transparency                             |
 
 ---
 

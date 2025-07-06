@@ -1,8 +1,7 @@
 ---
-description: 
-globs: 
 alwaysApply: true
 ---
+
 # Cursor Development Rules & AI Collaboration Guide – Expo Mobile App Edition
 
 > SDK Version: 50+ (2025) – Managed Workflow  
@@ -23,57 +22,64 @@ alwaysApply: true
 ## 📚 Project Context & Understanding
 
 1. **Documentation First:**
-   * Before beginning a task, review:
-     * `README.md` – project overview, stack, base conventions
-     * `docs/architecture.md` – app structure, data flow, screen/component relationships
-     * `docs/technical.md` – specific patterns (e.g. navigation, styling, data fetching)
-     * `notes/TASK.md` – currently scoped task definitions and status
-     * `notes/PLANNING.md` – project goals, timeline, and business strategy
-   * If documentation is unclear, missing, or inconsistent, **stop and ask for clarification** before continuing.
+
+   - Before beginning a task, review:
+     - `README.md` – project overview, stack, base conventions
+     - `docs/architecture.md` – app structure, data flow, screen/component relationships
+     - `docs/technical.md` – specific patterns (e.g. navigation, styling, data fetching)
+     - `notes/TASK.md` – currently scoped task definitions and status
+     - `notes/PLANNING.md` – project goals, timeline, and business strategy
+   - If documentation is unclear, missing, or inconsistent, **stop and ask for clarification** before continuing.
 
 2. **Architecture Adherence:**
-   * Use only file structure and data flow patterns approved in `docs/architecture.md`.
-   * Do not introduce cross-module dependencies without architecture update and review.
-   * Example folders: `screens/`, `components/`, `features/`, `lib/`, `hooks/`, `constants/`.
+
+   - Use only file structure and data flow patterns approved in `docs/architecture.md`.
+   - Do not introduce cross-module dependencies without architecture update and review.
+   - Example folders: `screens/`, `components/`, `features/`, `lib/`, `hooks/`, `constants/`.
 
 3. **Pattern & Tech Stack Awareness:**
-   * Follow patterns in `docs/technical.md` — this includes animation conventions, gesture handling, form control, and utility layers.
-   * Use established libraries from `README.md` before proposing new ones.
-   * For Expo-specific work (e.g. camera, permissions, routing), refer to documented approaches before inventing new ones.
+   - Follow patterns in `docs/technical.md` — this includes animation conventions, gesture handling, form control, and utility layers.
+   - Use established libraries from `README.md` before proposing new ones.
+   - For Expo-specific work (e.g. camera, permissions, routing), refer to documented approaches before inventing new ones.
 
 ---
 
 ## ⚙️ Task Execution & Workflow
 
 1. **Task Definition:**
-   * Tasks are assigned via `notes/TASK.md`. Confirm their status before beginning.
-   * Confirm all requirements are present, and validate dependencies or blockers with the team if needed.
+
+   - Tasks are assigned via `notes/TASK.md`. Confirm their status before beginning.
+   - Confirm all requirements are present, and validate dependencies or blockers with the team if needed.
 
 2. **Change Protocol:**
-   * Review affected modules using `docs/architecture.md`.
-   * Plan changes using task acceptance criteria and patterns in `docs/technical.md`.
-   * Isolate feature-specific changes. Avoid global refactoring unless explicitly requested.
+
+   - Review affected modules using `docs/architecture.md`.
+   - Plan changes using task acceptance criteria and patterns in `docs/technical.md`.
+   - Isolate feature-specific changes. Avoid global refactoring unless explicitly requested.
 
 3. **Progress Tracking:**
-   * Update status and issues in `notes/TASK.md` (status is tracked within the task file).
-   * When a task is complete or blocked, mark it in `notes/TASK.md` with reasoning or next steps.
+   - Update status and issues in `notes/TASK.md` (status is tracked within the task file).
+   - When a task is complete or blocked, mark it in `notes/TASK.md` with reasoning or next steps.
 
 ---
 
 ## 🤖 AI Collaboration & Prompting
 
 1. **Be Clear and Contextual:**
-   * Prompt with file paths, expected behavior, and edge case examples when possible.
+
+   - Prompt with file paths, expected behavior, and edge case examples when possible.
 
 2. **Reference Existing Docs:**
-   * Mention if the request builds on something in `docs/technical.md`, `docs/architecture.md`, or a specific section of `README.md`.
+
+   - Mention if the request builds on something in `docs/technical.md`, `docs/architecture.md`, or a specific section of `README.md`.
 
 3. **Use Prompt Directives:**
-   * `"Suggestion:"` for exploratory or multi-option help.
-   * `"Applying fix:"` for directly adding well-scoped logic that aligns with existing patterns.
+
+   - `"Suggestion:"` for exploratory or multi-option help.
+   - `"Applying fix:"` for directly adding well-scoped logic that aligns with existing patterns.
 
 4. **Break Large Tasks Down:**
-   * For animations, onboarding, or gesture handling: break into components/screens and confirm behavior incrementally.
+   - For animations, onboarding, or gesture handling: break into components/screens and confirm behavior incrementally.
 
 ---
 
@@ -81,56 +87,63 @@ alwaysApply: true
 
 1. **Strict Typing:** All files must be typed. No `any`, even temporarily.
 2. **Expo-Specific Design:**
-   * Use `KeyboardAvoidingView`, `SafeAreaView`, and `useSafeAreaInsets()` appropriately.
-   * Avoid scroll misuse. Use `FlatList` for scrollable content.
+
+   - Use `KeyboardAvoidingView`, `SafeAreaView`, and `useSafeAreaInsets()` appropriately.
+   - Avoid scroll misuse. Use `FlatList` for scrollable content.
 
 3. **File Organization:**
-   * Cap screen and component files to 300 lines.
-   * Prefer smaller, purpose-driven components for testability.
+
+   - Cap screen and component files to 300 lines.
+   - Prefer smaller, purpose-driven components for testability.
 
 4. **Linting & Format:**
-   * Follow ESLint/Prettier settings in the repo.
-   * Naming should reflect purpose, not intent (e.g., no `MyComponentImproved.tsx`).
+   - Follow ESLint/Prettier settings in the repo.
+   - Naming should reflect purpose, not intent (e.g., no `MyComponentImproved.tsx`).
 
 ---
 
 ## ♻️ Refactoring
 
 1. **Intentional Only:**
-   * Refactor only when part of a defined task, or when improving adjacent code to complete it effectively.
+
+   - Refactor only when part of a defined task, or when improving adjacent code to complete it effectively.
 
 2. **Check All Callers:**
-   * After changes, run through all components, screens, or hooks relying on the updated code. Cross-reference with `docs/architecture.md`.
+
+   - After changes, run through all components, screens, or hooks relying on the updated code. Cross-reference with `docs/architecture.md`.
 
 3. **Avoid Copying:**
-   * Modify or abstract logic into utils/hooks. Do not fork files (e.g., no `Modal-v2.tsx`).
+   - Modify or abstract logic into utils/hooks. Do not fork files (e.g., no `Modal-v2.tsx`).
 
 ---
 
 ## ✅ Testing & Validation
 
 1. **Tests Must Be Tied to Task Scope:**
-   * Include unit tests for logic utilities.
-   * Do not over-test UI unless animation or gesture behavior is critical and tricky to maintain.
+
+   - Include unit tests for logic utilities.
+   - Do not over-test UI unless animation or gesture behavior is critical and tricky to maintain.
 
 2. **Expo Testing Frameworks:**
-   * Use `jest-expo` for unit testing.
-   * Use manual testing via Expo Go on both iOS and Android for gestures, keyboar. **Bubmitting Work:**
-   * Validate the behavior with real interaction. Dark mode, small device screens, and back navigation should not break.
+   - Use `jest-expo` for unit testing.
+   - Use manual testing via Expo Go on both iOS and Android for gestures, keyboar. **Bubmitting Work:**
+   - Validate the behavior with real interaction. Dark mode, small device screens, and back navigation should not break.
 
 ---
 
 ## 🐛 Debugging & Troubleshooting
 
 1. **Check Logs:**
-   * Run `npx expo logs` on device or simulator for runtime warnings.
-   * Clear cache with `npx expo start --clear` if bugs appear after changes.
+
+   - Run `npx expo logs` on device or simulator for runtime warnings.
+   - Clear cache with `npx expo start --clear` if bugs appear after changes.
 
 2. **Expo Known Issues:**
-   * Search Expo Forums and GitHub before creating complex fixes. Link findings in `fixes/`.
+
+   - Search Expo Forums and GitHub before creating complex fixes. Link findings in `fixes/`.
 
 3. **Document Fixes in Place:**
-   * Place persistent issue breakdowns under `fixes/` with clear filename (`fixes/nativeDriver-animation-warning.md`).
+   - Place persistent issue breakdowns under `fixes/` with clear filename (`fixes/nativeDriver-animation-warning.md`).
 
 ---
 
@@ -138,8 +151,8 @@ alwaysApply: true
 
 1. **Expo Permissions:** Follow documented permission flows (camera, location, notifications) from `docs/technical.md`.
 2. **Credential Handling:**
-   * Use environment variables via `app.config.js`.
-   * Never commit secrets. Always provide `.env.example`.
+   - Use environment variables via `app.config.js`.
+   - Never commit secrets. Always provide `.env.example`.
 
 ---
 
@@ -148,59 +161,65 @@ alwaysApply: true
 **CRITICAL:** This project uses Clerk for authentication with Supabase as the database. Follow these rules strictly:
 
 1. **User ID Handling:**
-   * Clerk user IDs are TEXT strings (e.g., `user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5`), NOT UUIDs
-   * All `user_id` columns in database tables MUST be `TEXT NOT NULL`, never `UUID`
-   * Never use `auth.uid()` in RLS policies - it returns Supabase UUIDs, not Clerk IDs
+
+   - Clerk user IDs are TEXT strings (e.g., `user_2tj0mC9c8UaPRPo77HUDAQ9ZEs5`), NOT UUIDs
+   - All `user_id` columns in database tables MUST be `TEXT NOT NULL`, never `UUID`
+   - Never use `auth.uid()` in RLS policies - it returns Supabase UUIDs, not Clerk IDs
 
 2. **RLS Policies - ALWAYS use `requesting_user_id()`:**
+
    ```sql
    -- ✅ CORRECT - Use requesting_user_id() for Clerk integration
    CREATE POLICY "Users can view their own data" ON table_name FOR
    SELECT USING (requesting_user_id() = user_id);
-   
+
    -- ❌ WRONG - Never use auth.uid() with Clerk
    CREATE POLICY "Users can view their own data" ON table_name FOR
    SELECT USING (auth.uid()::text = user_id);
    ```
 
 3. **Database Schema Requirements:**
-   * All user-owned tables must have `user_id TEXT NOT NULL` 
-   * The `requesting_user_id()` function must exist in the database
-   * RLS policies must use `requesting_user_id() = user_id` pattern
+
+   - All user-owned tables must have `user_id TEXT NOT NULL`
+   - The `requesting_user_id()` function must exist in the database
+   - RLS policies must use `requesting_user_id() = user_id` pattern
 
 4. **Migration Standards:**
-   * When creating new tables with user ownership, always use `requesting_user_id()` in RLS policies
-   * Test RLS policies with actual Clerk user IDs before deployment
-   * Document any new user-owned tables in `docs/architecture.md`
+
+   - When creating new tables with user ownership, always use `requesting_user_id()` in RLS policies
+   - Test RLS policies with actual Clerk user IDs before deployment
+   - Document any new user-owned tables in `docs/architecture.md`
 
 5. **Error Prevention:**
-   * If you see "invalid input syntax for type uuid" errors, check RLS policies immediately
-   * Always verify user ID format matches Clerk's string format, not UUID format
-   * When in doubt, reference existing working tables like `user_subscriptions` or `user_usage`
+   - If you see "invalid input syntax for type uuid" errors, check RLS policies immediately
+   - Always verify user ID format matches Clerk's string format, not UUID format
+   - When in doubt, reference existing working tables like `user_subscriptions` or `user_usage`
 
 ---
 
 ## 🌳 Version Control & Environment
 
 1. **.env Discipline:**
-   * Never commit actual `.env`. Only provide `.env.example`.
+
+   - Never commit actual `.env`. Only provide `.env.example`.
 
 2. **Expo-Specific Commits:**
-   * Keep OTA support stable. When updating `app.json` (e.g. version bump), make sure CI/CD flows remain functional.
+
+   - Keep OTA support stable. When updating `app.json` (e.g. version bump), make sure CI/CD flows remain functional.
 
 3. **Branch Naming:**
-   * Use `feature/mobile-[scope]`, `bugfix/mobile-[issue]`, `refactor/mobile-[area]`.
+   - Use `feature/mobile-[scope]`, `bugfix/mobile-[issue]`, `refactor/mobile-[area]`.
 
 ---
 
 ## 📄 Documentation Maintenance
 
 1. **Always Update Docs:**
-   * Update `docs/architecture.md` for component hierarchy or data flow changes.
-   * Update `docs/technical.md` when a new reusable pattern, animation, or hook is introduced.
-   * Update `notes/TASK.md` for task tracking and progress.
-   * Update `notes/PLANNING.md` when project goals, timeline, or business strategy changes.
+
+   - Update `docs/architecture.md` for component hierarchy or data flow changes.
+   - Update `docs/technical.md` when a new reusable pattern, animation, or hook is introduced.
+   - Update `notes/TASK.md` for task tracking and progress.
+   - Update `notes/PLANNING.md` when project goals, timeline, or business strategy changes.
 
 2. **Keep This File Current:**
-   * Review `.cursorrules` when Expo upgrades (e.g., SDK bump), new docs are added, or patterns evolve.
-
+   - Review `.cursorrules` when Expo upgrades (e.g., SDK bump), new docs are added, or patterns evolve.

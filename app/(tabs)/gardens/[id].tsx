@@ -3,7 +3,11 @@ import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
 import SubmitButton from "@/components/UI/SubmitButton";
 import { SwipeableRow } from "@/components/UI/SwipeableRow";
-import { useGardenDetails, useGardenTasksSummary } from "@/lib/queries";
+import {
+  useGardenDetails,
+  useGardenTasksSummary,
+  usePlantCards,
+} from "@/lib/queries";
 import { deleteImageFromStorage } from "@/lib/services/imageUpload";
 import { supabase } from "@/lib/supabaseClient";
 import type { UserPlant } from "@/types/garden";
@@ -22,6 +26,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import HeroSection from "@/components/Gardens/HeroSection";
+import PlantList from "@/components/Gardens/PlantList";
+import RecommendedPlantsSection from "@/components/Gardens/RecommendedPlantsSection";
+import { BodyText } from "@/components/Gardens";
+import { useGardenFilters } from "@/lib/hooks/useGardenFilters";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -68,6 +77,13 @@ const AnimatedSection = ({
   );
 };
 
+// Define the type for recommended plants (should match RecommendedPlantsSection)
+type RecommendedPlant = {
+  id: string | number;
+  name: string;
+  imageUrl?: string;
+};
+
 const GardenDetails = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -87,6 +103,51 @@ const GardenDetails = () => {
   const { data: gardenTasks, isLoading: tasksLoading } = useGardenTasksSummary(
     Number(id)
   );
+
+  // --- Recommended Plants Logic ---
+  // Use the same logic as the plant database for garden-based filtering
+  const { gardenFilterOptions } = useGardenFilters();
+  // Find the current garden in the filter options (by id)
+  const currentGardenFilter = gardenFilterOptions.find(
+    (g) => g.gardenId === gardenData?.id
+  );
+  const recommendedFilterString = currentGardenFilter
+    ? currentGardenFilter.filters.join(",")
+    : "";
+  // TEMP DEBUG LOG: Print recommended filter string for current garden
+  console.log(
+    "[RecommendedPlants] Filter String (from useGardenFilters):",
+    recommendedFilterString
+  );
+
+  const {
+    data: recommendedData,
+    isLoading: recommendedLoading,
+    error: recommendedError,
+  } = usePlantCards(1, 10, "", recommendedFilterString, "scientific");
+
+  // Map to RecommendedPlant type for the section
+  // Reason: recommendedData.results is always PlantCardData[] (see fetchPlantCards/processPlantData)
+  const recommendedPlants: RecommendedPlant[] =
+    (
+      recommendedData?.results as
+        | import("@/types/plant").PlantCardData[]
+        | undefined
+    )?.map((plant) => ({
+      id: plant.id,
+      name: plant.common_name || plant.scientific_name || "Unknown Plant",
+      imageUrl: plant.first_image || undefined,
+    })) || [];
+
+  // Handler for adding a recommended plant (placeholder)
+  const handleAddRecommended = (plant: RecommendedPlant) => {
+    // Reason: Placeholder for adding a recommended plant to the garden
+    // TODO: Implement add logic when recommendations are live
+    Alert.alert(
+      "Coming soon",
+      `Add ${plant.name} to your garden (not yet implemented)`
+    );
+  };
 
   // Refetch garden data whenever the screen comes into focus
   useEffect(() => {
@@ -614,243 +675,164 @@ const GardenDetails = () => {
     );
   };
 
-  // Render empty state with more visual appeal
-  const renderEmptyState = () => (
-    <AnimatedSection delay={300}>
-      <View className="items-center px-6 py-10 mt-4">
-        <Ionicons
-          name="leaf-outline"
-          size={64}
-          color="#77B860"
-          className="mb-4"
-        />
-        <Text className="text-center text-foreground text-xl font-title font-bold mb-2">
-          Your Garden Awaits
-        </Text>
-        <Text className="text-center text-cream-600 font-paragraph mb-6 px-4">
-          Add your first plant to start your gardening journey. Track growth,
-          care schedules, and watch them thrive!
-        </Text>
-        <SubmitButton
-          onPress={handleAddPlant}
-          iconName="add-circle-outline"
-          iconPosition="left"
-        >
-          Plant Something New
-        </SubmitButton>
-      </View>
-    </AnimatedSection>
-  );
-
+  // --- New: Unified page layout ---
   return (
     <PageContainer scroll={false} padded={false} safeArea={true}>
-      {/* Header with Garden Name and Navigation */}
-      <View className="flex-row justify-between items-center px-6">
-        <SubmitButton
+      {/* Top bar: Back and Delete (minimal, not visually heavy) */}
+      <View className="flex-row justify-between items-center px-6 mt-2">
+        <TouchableOpacity
           onPress={() => router.push("/(tabs)/gardens")}
-          iconName="arrow-back"
-          iconPosition="left"
-          type="outline"
-          color="secondary"
+          className="flex-row items-center py-2"
+          style={{ minHeight: 44 }}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
         >
-          Back
-        </SubmitButton>
-
-        <SubmitButton
-          onPress={handleDeleteGarden}
-          color="destructive"
-          iconName="trash-outline"
-          iconOnly={true}
-        >
-          {""}
-        </SubmitButton>
-      </View>
-
-      {/* Content area with normal gradient background */}
-      <View className="flex-1">
-        {/* Garden Header with Gradient */}
-        <Animated.View
-          className="rounded-xl overflow-hidden shadow-md mx-6 my-4"
-          style={{
-            opacity: headerOpacityAnim,
-            transform: [{ scale: headerScaleAnim }],
-            shadowColor: "#333333",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 5,
-          }}
-        >
-          <LinearGradient
-            colors={["#3F6933", "#77B860"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ padding: 24, borderRadius: 12 }}
+          <Ionicons name="arrow-back-outline" size={20} color="#2e2c29" />
+          <Text className="text-foreground font-paragraph text-base ml-1">
+            Back
+          </Text>
+        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={handleConditionsPress}
+            accessibilityRole="button"
+            accessibilityLabel="Edit garden conditions"
+            style={{
+              padding: 6,
+              borderRadius: 20,
+              marginRight: 8,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
           >
-            <Text className="text-2xl font-title font-bold text-primary-foreground mb-2">
-              Welcome to {gardenData?.name}
+            {/* Reason: Add a visible label for clarity and accessibility */}
+            <Text className="text-foreground font-paragraph text-base mr-1">
+              Settings
             </Text>
-            <Text className="text-lg font-paragraph text-primary-foreground mb-2">
-              {getGardenMessage()}
-            </Text>
-          </LinearGradient>
-        </Animated.View>
 
-        {/* Garden Actions */}
-        <AnimatedSection delay={200}>
-          <View className="flex-row justify-between px-6 mb-4">
-            <SubmitButton
-              onPress={handleConditionsPress}
-              color="secondary"
-              iconName="sunny-outline"
-              iconPosition="left"
-            >
-              Conditions
-            </SubmitButton>
-            <SubmitButton
-              onPress={handleAddPlant}
-              iconName="add"
-              iconPosition="left"
-            >
-              Add Plant
-            </SubmitButton>
-          </View>
-        </AnimatedSection>
-
-        {/* Garden Stats Overview */}
-        {dashboardData && (
-          <AnimatedSection delay={300}>
-            <View className="px-6">
-              <View className="flex-row justify-between p-4 bg-cream-200 rounded-xl border border-cream-300">
-                <View className="items-center flex-1">
-                  <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                    <Ionicons name="leaf" size={24} color="#77B860" />
-                  </View>
-                  <Text className="text-xl font-title font-bold text-brand-700">
-                    {dashboardData.total_plants}
-                  </Text>
-                  <Text className="text-cream-600 font-paragraph text-xs">
-                    PLANTS
-                  </Text>
-                </View>
-
-                <View className="items-center flex-1">
-                  <View className="bg-yellow-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                    <Ionicons
-                      name="water"
-                      size={24}
-                      color={
-                        dashboardData.plants_with_overdue_tasks > 0
-                          ? "#d97706"
-                          : "#9e9a90"
-                      }
-                    />
-                  </View>
-                  <Text
-                    className={`text-xl font-title font-bold ${
-                      dashboardData.plants_with_overdue_tasks > 0
-                        ? "text-yellow-600"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {dashboardData.plants_with_overdue_tasks}
-                  </Text>
-                  <Text className="text-foreground font-paragraph text-xs">
-                    NEED CARE
-                  </Text>
-                </View>
-
-                <View className="items-center flex-1">
-                  <View className="bg-brand-50 w-12 h-12 rounded-full items-center justify-center mb-1">
-                    <Ionicons name="heart" size={24} color="#77B860" />
-                  </View>
-                  <Text className="text-xl font-title font-bold text-primary">
-                    {dashboardData.health_percentage}%
-                  </Text>
-                  <Text className="text-foreground font-paragraph text-xs">
-                    HEALTH
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </AnimatedSection>
-        )}
-
-        {/* Plants List */}
-        <ScrollView className="flex-1 pb-32">
-          {plants.length === 0 ? (
-            renderEmptyState()
-          ) : (
-            <View className="mb-8">
-              {plantsWithOverdueTasks.length > 0 && (
-                <View className="my-4">
-                  <AnimatedSection delay={400}>
-                    <View className="bg-red-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-destructive font-paragraph font-medium">
-                        🚨 Needs Immediate Care
-                      </Text>
-                      <Text className="text-destructive text-xs">
-                        These plants have overdue care tasks
-                      </Text>
-                    </View>
-                  </AnimatedSection>
-                  {plantsWithOverdueTasks.map((plant, index) => (
-                    <View key={plant.id}>{renderPlantCard(plant, index)}</View>
-                  ))}
-                </View>
-              )}
-
-              {plantsWithUrgentTasks.length > 0 && (
-                <View className="my-4">
-                  <AnimatedSection delay={500}>
-                    <View className="bg-yellow-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-yellow-700 font-paragraph font-medium">
-                        ⚠️ Due Today/Tomorrow
-                      </Text>
-                      <Text className="text-yellow-700 text-xs">
-                        These plants need care within the next day
-                      </Text>
-                    </View>
-                  </AnimatedSection>
-                  {plantsWithUrgentTasks.map((plant, index) => (
-                    <View key={plant.id}>
-                      {renderPlantCard(
-                        plant,
-                        plantsWithOverdueTasks.length + index
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {plantsWithRegularTasks.length > 0 && (
-                <View className="my-4">
-                  <AnimatedSection delay={600}>
-                    <View className="bg-brand-50 mx-5 px-4 py-2 rounded-lg mb-2">
-                      <Text className="text-brand-700 font-paragraph font-medium">
-                        ✅ All Good
-                      </Text>
-                      <Text className="text-brand-700 text-xs">
-                        These plants have care scheduled for later
-                      </Text>
-                    </View>
-                  </AnimatedSection>
-                  {plantsWithRegularTasks.map((plant, index) => (
-                    <View key={plant.id}>
-                      {renderPlantCard(
-                        plant,
-                        plantsWithOverdueTasks.length +
-                          plantsWithUrgentTasks.length +
-                          index
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
-        </ScrollView>
+            <Ionicons name="settings-outline" size={22} color="#2e2c29" />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Hero Section: Welcome, stats, main CTA */}
+      <HeroSection
+        gardenName={gardenData.name}
+        gardenMessage={(() => {
+          const totalPlants = dashboardData?.total_plants || 0;
+          const plantsNeedingCare =
+            dashboardData?.plants_with_overdue_tasks || 0;
+          if (totalPlants === 0) {
+            return "Your garden is ready for new life. Add your first plant to begin!";
+          }
+          if (plantsNeedingCare > 0) {
+            return `${plantsNeedingCare} of your plants need attention today.`;
+          }
+          return "Your garden is thriving! All your plants are healthy.";
+        })()}
+        stats={{
+          plantsNeedingCare: dashboardData?.plants_with_overdue_tasks || 0,
+        }}
+      />
+
+      {/* Plant List or Empty State */}
+      {plants.length > 0 ? (
+        <PlantList
+          plants={plants}
+          onPlantPress={handlePlantPress}
+          onEditPlant={handleEditPlant}
+          onWaterPlant={handleWaterPlant}
+          onDeletePlant={(plant) => {
+            // Reason: Confirm before deleting a plant
+            Alert.alert(
+              "Delete Plant",
+              `Are you sure you want to delete ${plant.nickname}?`,
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      // Delete all plant images from storage first
+                      if (plant.images && plant.images.length > 0) {
+                        const imageDeletionPromises = plant.images.map(
+                          (imageUrl: string) => deleteImageFromStorage(imageUrl)
+                        );
+                        await Promise.all(imageDeletionPromises);
+                      }
+                      // Then delete the plant from the database
+                      const { error } = await supabase
+                        .from("user_plants")
+                        .delete()
+                        .eq("id", plant.id);
+                      if (error) throw error;
+                      // Invalidate queries
+                      queryClient.invalidateQueries({
+                        queryKey: ["gardenDetails", gardenData.id],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["gardenDashboard", gardenData.user_id],
+                      });
+                      refetch();
+                    } catch (err) {
+                      Alert.alert(
+                        "Error",
+                        "Could not delete plant. Please try again."
+                      );
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+        />
+      ) : (
+        <View style={{ alignItems: "center", marginTop: 32, marginBottom: 24 }}>
+          <Ionicons
+            name="leaf-outline"
+            size={64}
+            color="#77B860"
+            style={{ marginBottom: 12 }}
+          />
+          <Text
+            style={{
+              fontSize: 22,
+              color: "#2e2c29",
+              fontFamily: "Mali-Bold",
+              marginBottom: 8,
+            }}
+          >
+            Your Garden Awaits
+          </Text>
+          <Text
+            style={{
+              color: "#9e9a90",
+              fontFamily: "Nunito-Regular",
+              fontSize: 16,
+              marginBottom: 18,
+              textAlign: "center",
+              maxWidth: 320,
+            }}
+          >
+            Add your first plant to start your gardening journey. Track growth,
+            care schedules, and watch them thrive!
+          </Text>
+          <SubmitButton
+            onPress={handleAddPlant}
+            iconName="add-circle-outline"
+            iconPosition="left"
+          >
+            Plant Something New
+          </SubmitButton>
+        </View>
+      )}
+
+      {/* Recommended Plants Section (always shown, can be empty) */}
+      <RecommendedPlantsSection
+        recommendedPlants={recommendedPlants}
+        onAddRecommended={handleAddRecommended}
+      />
     </PageContainer>
   );
 };

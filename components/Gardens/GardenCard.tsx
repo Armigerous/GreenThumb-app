@@ -13,6 +13,7 @@ import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
  * GardenCard displays summary information about a garden
  * Uses color-coding to indicate the health status of plants
  * Shows indicators for plants needing care and overdue tasks
+ * For gardens with no plants, shows "Add plants" instead of health percentage
  * @param garden - The garden data to display
  * @param maxWidth - Optional max width for the health bar (for different layouts)
  */
@@ -208,13 +209,17 @@ export default function GardenCard({
                 />
               </View>
               <BodyText
-                className={`${
-                  isGardensPage ? "text-sm" : "text-xs"
-                } text-cream-700 ml-2 flex-shrink-0`}
+                className={`$${
+                  isGardensPage ? "text-sm ml-2 flex-shrink-0" : "text-xs ml-1 flex-shrink"
+                } text-cream-700`}
+                {...(!isGardensPage && {
+                  numberOfLines: 1,
+                  ellipsizeMode: "tail",
+                })}
               >
                 {garden.health_percentage !== null
                   ? `${garden.health_percentage}%`
-                  : "N/A"}
+                  : "No plants yet"}
               </BodyText>
             </View>
           </View>
