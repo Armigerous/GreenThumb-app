@@ -1,4 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { UserPlant } from "@/types/garden";
 import { PlantData } from "@/types/plant";
 import SubmitButton from "../../../UI/SubmitButton";
@@ -106,89 +113,67 @@ export default function PlantDetailsStep({
   };
 
   return (
-    <View className="px-4 flex-1 flex">
-      <View className="flex-1">
-        <Text className="text-xl font-bold mb-4">Customize Your Plant</Text>
-        <Text className="text-cream-600 mb-6">
-          Add details to personalize your plant:
-        </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className="flex-1 flex">
+        <View className="flex-1">
+          <Text className="text-xl font-bold mb-4">Customize Your Plant</Text>
+          <Text className="text-cream-600 mb-6">
+            Add details to personalize your plant:
+          </Text>
 
-        {/* Plant Image Selector */}
-        <View className="mb-6 items-center">
-          <ImagePicker
-            currentImage={image || defaultPlantImage}
-            onImageSelected={handleImageSelected}
-            aspect={[1, 1]}
-            onUploadStatusChange={setIsImageUploading}
-          />
+          {/* Nickname Input with Randomize button */}
+          <View className="mb-6">
+            <Text className="text-base font-medium mb-2">Nickname</Text>
+            <View className="flex-row items-center">
+              <TextInput
+                className="bg-white border border-cream-300 rounded-lg p-3 text-foreground flex-1 mr-2"
+                value={nickname}
+                onChangeText={setNickname}
+                placeholder="Give your plant a name"
+                placeholderTextColor="#9e9a90"
+                maxLength={50}
+              />
+              <TouchableOpacity onPress={handleRandomizeName} className="p-3">
+                <Ionicons name="shuffle" size={24} color="#2A5D39" />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-          {/* Option to reset to default image */}
-          {image && defaultPlantImage && (
-            <TouchableOpacity
-              className="mt-2 py-1 px-3 bg-cream-100 rounded-lg self-center"
-              onPress={() => setImage(null)}
-              disabled={isImageUploading}
-            >
-              <Text className="text-sm text-cream-700">Use Default Image</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Nickname Input with Randomize button */}
-        <View className="mb-6">
-          <Text className="text-base font-medium mb-2">Nickname</Text>
-          <View className="flex-row items-center">
-            <TextInput
-              className="bg-white border border-cream-300 rounded-lg p-3 text-foreground flex-1 mr-2"
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder="Give your plant a name"
-              placeholderTextColor="#9e9a90"
-              maxLength={50}
+          {/* Plant Image Selector */}
+          <View className="mb-6 items-center">
+            <ImagePicker
+              currentImage={image || defaultPlantImage}
+              onImageSelected={handleImageSelected}
+              aspect={[1, 1]}
+              onUploadStatusChange={setIsImageUploading}
             />
-            <TouchableOpacity
-              onPress={handleRandomizeName}
-              className="bg-cream-100 p-3 rounded-lg"
-            >
-              <Ionicons name="shuffle" size={24} color="#2A5D39" />
-            </TouchableOpacity>
+
+            {/* Option to reset to default image */}
+            {image && defaultPlantImage && (
+              <TouchableOpacity
+                className="mt-2 py-1 px-3 bg-cream-100 rounded-lg self-center"
+                onPress={() => setImage(null)}
+                disabled={isImageUploading}
+              >
+                <Text className="text-sm text-cream-700">
+                  Use Default Image
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Note about care tracking */}
+          <View className="mb-6 bg-brand-50 rounded-lg p-4">
+            <Text className="text-brand-700 font-medium text-sm mb-1">
+              📋 Automatic Care Tracking
+            </Text>
+            <Text className="text-brand-600 text-sm">
+              We&apos;ll create a personalized care schedule based on this
+              plant&apos;s specific needs and your local conditions.
+            </Text>
           </View>
         </View>
-
-        {/* Note about care tracking */}
-        <View className="mb-6 bg-brand-50 rounded-lg p-4">
-          <Text className="text-brand-700 font-medium text-sm mb-1">
-            📋 Automatic Care Tracking
-          </Text>
-          <Text className="text-brand-600 text-sm">
-            We&apos;ll create a personalized care schedule based on this
-            plant&apos;s specific needs and your local conditions.
-          </Text>
-        </View>
       </View>
-
-      {/* Navigation buttons removed as per request: redundant Back/Next buttons */}
-      {/*
-      <View className="flex-row justify-between items-center py-6 mt-auto">
-        <SubmitButton
-          onPress={onBack}
-          color="secondary"
-          isDisabled={isImageUploading}
-          iconName="arrow-back"
-          iconPosition="left"
-        >
-          Back
-        </SubmitButton>
-        <SubmitButton
-          onPress={onNext}
-          isDisabled={!nickname.trim() || isImageUploading}
-          iconName={isImageUploading ? undefined : "arrow-forward"}
-          iconPosition="right"
-        >
-          {isImageUploading ? "Uploading..." : "Next"}
-        </SubmitButton>
-      </View>
-      */}
-    </View>
+    </TouchableWithoutFeedback>
   );
 }

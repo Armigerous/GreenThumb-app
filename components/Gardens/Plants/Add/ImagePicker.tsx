@@ -4,7 +4,14 @@ import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as ExpoImagePicker from "expo-image-picker";
 import { useState, useEffect } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+  StyleSheet,
+} from "react-native";
 
 interface ImagePickerProps {
   currentImage: string | null;
@@ -27,6 +34,10 @@ export default function ImagePicker({
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const { width: screenWidth } = useWindowDimensions();
+  // Calculate image size responsively
+  const imageWidth = Math.max(160, Math.min(0.7 * screenWidth, 320));
+  const imageHeight = Math.round(imageWidth * 0.7); // 70% of width for a landscape rectangle
 
   // Update parent when uploaded image URL changes
   useEffect(() => {
@@ -145,26 +156,30 @@ export default function ImagePicker({
     <TouchableOpacity
       onPress={handleImagePick}
       disabled={isUploading}
-      className="w-full h-40 bg-cream-100 rounded-lg overflow-hidden items-center justify-center max-w-52 self-center"
+      style={[
+        styles.imageContainer,
+        { width: imageWidth, height: imageHeight },
+      ]}
+      className="bg-cream-100 rounded-lg overflow-hidden items-center justify-center self-center"
     >
       {imageToDisplay ? (
         localImageUri && !uploadedImageUrl ? (
           // Display local image directly without cache for immediate feedback
           <Image
             source={{ uri: localImageUri }}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: imageWidth, height: imageHeight }}
             resizeMode="cover"
           />
         ) : (
           // Use CachedImage for remote URLs - with preventTransform for fresh uploads
           <CachedImage
             uri={imageToDisplay}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: imageWidth, height: imageHeight }}
             resizeMode="cover"
-            preventTransform={!!uploadedImageUrl} // Prevent transforming freshly uploaded URLs
+            preventTransform={!!uploadedImageUrl}
             cacheKey={
               uploadedImageUrl ? `fresh-${uploadedImageUrl}` : undefined
-            } // Use unique cache key for fresh uploads
+            }
           />
         )
       ) : (
@@ -183,3 +198,12 @@ export default function ImagePicker({
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  imageContainer: {
+    maxWidth: 320,
+    minWidth: 160,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

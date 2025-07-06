@@ -311,50 +311,61 @@ export default function PlantForm({
           </View>
         </View>
       )}
-      {/* Only render navigation buttons for steps 1 and 2 */}
-      {(currentStep === 1 || currentStep === 2) && (
-        <View className="my-4 flex-row justify-between items-center gap-3">
-          {/* Cancel/Back button */}
-          <SubmitButton
-            onPress={async () => {
-              if (currentStep === 1) {
-                onCancel();
-              } else {
-                goToPreviousStep();
-              }
-            }}
-            color="secondary"
-            iconName={currentStep === 1 ? "close" : "arrow-back"}
-            iconPosition="left"
-            width="full"
-            className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
-          >
-            <Text className="text-cream-700 font-paragraph-semibold text-center text-base">
-              {currentStep === 1 ? "Cancel" : "Back"}
-            </Text>
-          </SubmitButton>
-          {/* Main action button */}
-          <SubmitButton
-            onPress={() => {
-              Keyboard.dismiss();
+      {/* Unified action bar for all steps */}
+      <View className="my-4 flex-row justify-between items-center gap-3">
+        {/* Cancel/Back button */}
+        <SubmitButton
+          onPress={async () => {
+            if (currentStep === 1) {
+              onCancel();
+            } else {
+              goToPreviousStep();
+            }
+          }}
+          color="secondary"
+          iconName={currentStep === 1 ? "close" : "arrow-back"}
+          iconPosition="left"
+          width="full"
+          isDisabled={isSubmitting}
+          className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
+        >
+          <Text className="text-cream-700 font-paragraph-semibold text-center text-base">
+            {currentStep === 1 ? "Cancel" : "Back"}
+          </Text>
+        </SubmitButton>
+        {/* Main action button */}
+        <SubmitButton
+          onPress={() => {
+            Keyboard.dismiss();
+            if (currentStep < totalSteps) {
               goToNextStep();
-            }}
-            isDisabled={!isCurrentStepValid() || isSubmitting}
-            iconName="arrow-forward"
-            iconPosition="right"
-            width="full"
-            color="primary"
-            className={`flex-1 bg-brand-600 rounded-lg py-4 px-6 ${
-              !isCurrentStepValid() ? "opacity-50" : ""
-            }`}
-          >
-            <Text className="text-cream-50 text-center font-paragraph-semibold text-base">
-              Continue
-            </Text>
-          </SubmitButton>
-        </View>
-      )}
-      {/* For step 3 (confirmation), navigation and submit handled by ConfirmationStep */}
+            } else {
+              handleSubmit();
+            }
+          }}
+          isDisabled={!isCurrentStepValid() || isSubmitting}
+          isLoading={isSubmitting && currentStep === totalSteps}
+          loadingLabel={currentStep === totalSteps ? "Adding..." : undefined}
+          iconName={
+            currentStep === totalSteps
+              ? isSubmitting
+                ? undefined
+                : "add-circle-outline"
+              : "arrow-forward"
+          }
+          iconPosition="right"
+          width="full"
+          color="primary"
+          className={`flex-1 bg-brand-600 rounded-lg py-4 px-6 ${
+            !isCurrentStepValid() || isSubmitting ? "opacity-50" : ""
+          }`}
+        >
+          <Text className="text-cream-50 text-center font-paragraph-semibold text-base">
+            {currentStep === totalSteps ? "Add to Garden" : "Continue"}
+          </Text>
+        </SubmitButton>
+      </View>
+      {/* For step 3 (confirmation), navigation and submit handled by unified action bar */}
     </View>
   );
 }
