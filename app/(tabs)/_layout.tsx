@@ -24,7 +24,6 @@ export default function TabsLayout() {
     <>
       <Tabs
         screenOptions={{
-          // Brand colors according to BRAND_IDENTITY.md
           tabBarActiveTintColor: "#5E994B", // brand-600 - Primary brand color
           tabBarInactiveTintColor: "#636059", // cream-600 - Medium-dark text with good contrast
           tabBarStyle: {

@@ -38,7 +38,7 @@ const RecommendedPlantsSection: React.FC<RecommendedPlantsSectionProps> = ({
   // Render a single recommended plant card
   const renderPlant = ({ item }: { item: PlantCardData }) => (
     <TouchableOpacity
-      className="flex-row items-center bg-white rounded-2xl p-3.5 mb-3.5 shadow-sm"
+      className="flex-row items-center bg-white rounded-2xl p-3 mb-3.5 shadow-sm"
       onPress={() => onPlantPress(item)}
       activeOpacity={0.85}
       accessibilityRole="button"
@@ -50,10 +50,10 @@ const RecommendedPlantsSection: React.FC<RecommendedPlantsSectionProps> = ({
       {item.first_image ? (
         <Image
           source={{ uri: item.first_image }}
-          className="w-14 h-14 rounded-full mr-3.5"
+          className="w-14 h-14 rounded-md mr-3.5"
         />
       ) : (
-        <View className="w-14 h-14 rounded-full bg-neutral-100 items-center justify-center mr-3.5">
+        <View className="w-14 h-14 rounded-md bg-neutral-100 items-center justify-center mr-3.5">
           <Ionicons name="leaf-outline" size={28} color="#9e9a90" />
         </View>
       )}
