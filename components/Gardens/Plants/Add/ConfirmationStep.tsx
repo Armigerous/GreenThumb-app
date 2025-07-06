@@ -77,75 +77,118 @@ export default function ConfirmationStep({
 
   return (
     <View className="flex-1 flex">
+      {/* Confirmation Card - Brand-aligned, soft, and visually grouped */}
       <View className="flex-1">
-        <TitleText className="text-xl text-foreground mb-6">
-          Confirm Plant Details
-        </TitleText>
+        <TitleText className="text-xl mb-1">Confirm Plant Details</TitleText>
         <BodyText className="text-cream-600 mb-6">
           Review the details of your plant before adding it to your garden:
         </BodyText>
 
-        {/* Summary card */}
-        <View className="bg-white rounded-xl overflow-hidden border border-cream-100 mb-6">
-          {/* Plant image header */}
-          <View className="h-44 w-full">
-            {isLocalImage ? (
-              // Use standard Image component for local file URIs
-              <Image
-                source={{ uri: displayImage }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
+        {/* Brand-styled summary card */}
+        <View className="bg-cream-50 rounded-2xl shadow-sm border border-cream-200 mb-6 overflow-hidden">
+          {/* Plant image header with fallback and badge */}
+          <View className="h-44 w-full bg-brand-100 justify-center items-center relative">
+            {displayImage ? (
+              isLocalImage ? (
+                <Image
+                  source={{ uri: displayImage }}
+                  className="w-full h-full rounded-t-2xl"
+                  resizeMode="cover"
+                />
+              ) : (
+                <CachedImage
+                  uri={displayImage}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                  }}
+                  resizeMode="cover"
+                  preventTransform={isSupabaseImage}
+                  cacheKey={
+                    isSupabaseImage ? `confirm-${displayImage}` : undefined
+                  }
+                />
+              )
             ) : (
-              // Use CachedImage for remote URLs
-              <CachedImage
-                uri={displayImage}
-                style={{ width: "100%", height: "100%" }}
-                resizeMode="cover"
-                preventTransform={isSupabaseImage} // Prevent transforming already uploaded Supabase URLs
-                cacheKey={
-                  isSupabaseImage ? `confirm-${displayImage}` : undefined
-                }
-              />
+              // Fallback: Branded placeholder if no image
+              <View className="w-full h-full flex items-center justify-center bg-brand-100">
+                <Ionicons name="leaf-outline" size={48} color="#A5D196" />
+                <Text className="text-cream-600 mt-2">No image available</Text>
+              </View>
             )}
+            {/* Optional: Overlay badge with plant name for personality */}
+            <View className="absolute top-3 left-3 bg-brand-500 px-3 py-1 rounded-full shadow-sm max-w-[120px]">
+              <Text
+                className="text-cream-50 text-xs font-paragraph-semibold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ maxWidth: 120 }}
+              >
+                {/* Use first common name if available, else fallback */}
+                {Array.isArray(plant.common_names) &&
+                plant.common_names.length > 0
+                  ? plant.common_names[0]
+                  : "Plant"}
+              </Text>
+            </View>
           </View>
 
-          {/* Plant details */}
+          {/* Plant details section - grouped and styled */}
           <View className="p-4">
-            <SubtitleText className="text-lg text-foreground mb-2">
-              Plant Information
-            </SubtitleText>
-
-            {/* Name section */}
-            <View className="mb-4 pb-4 border-b border-cream-100">
-              <BodyText className="text-cream-600 text-sm">Nickname</BodyText>
-              <BodyText className="text-foreground text-base font-medium">
-                {nickname}
+            {/* Nickname and scientific name */}
+            <View className="mb-4 pb-4 border-b border-cream-200">
+              <TitleText
+                className="text-lg text-foreground mb-1"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ maxWidth: 180 }}
+              >
+                {nickname || "No Nickname"}
+              </TitleText>
+              <BodyText
+                className="text-sm italic text-cream-500 mb-1"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ maxWidth: 180 }}
+              >
+                {plant.scientific_name || "No scientific name"}
               </BodyText>
-              <BodyText className="text-sm italic text-cream-500">
-                {plant.scientific_name}
+              {/* Optional: Plant type/category if available */}
+              {Array.isArray(plant.plant_types) &&
+                typeof plant.plant_types[0] === "string" &&
+                plant.plant_types.length > 0 && (
+                  <BodyText
+                    className="text-xs text-brand-600"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ maxWidth: 120 }}
+                  >
+                    {plant.plant_types[0]}
+                  </BodyText>
+                )}
+            </View>
+
+            {/* Care schedule section - brand accent, icon, and friendly text */}
+            <View className="mb-4 pb-4 border-b border-cream-200 bg-brand-100 rounded-lg px-3 py-2 flex-row items-center gap-2">
+              <Ionicons name="calendar-outline" size={18} color="#5E994B" />
+              <BodyText className="text-brand-700 text-sm font-medium">
+                Personalized care schedule will be created for this plant.
               </BodyText>
             </View>
 
-            {/* Care tracking note instead of status */}
-            <View className="mb-4 pb-4 border-b border-cream-100">
-              <View className="flex-row items-center mb-2">
-                <Ionicons name="calendar-outline" size={18} color="#77B860" />
-                <BodyText className="text-brand-600 text-sm font-medium ml-2">
-                  Care Schedule
-                </BodyText>
-              </View>
-              <BodyText className="text-cream-600 text-sm">
-                We&apos;ll automatically create a personalized care schedule
-                based on this plant&apos;s needs and your local conditions.
-              </BodyText>
-            </View>
-
-            {/* Garden section */}
-            <View className="flex-row items-center">
+            {/* Garden info section - icon and name */}
+            <View className="flex-row items-center gap-2 mt-2">
+              <Ionicons name="flower-outline" size={18} color="#A5D196" />
               <BodyText className="text-cream-600 text-sm">Garden</BodyText>
-              <BodyText className="text-foreground text-base font-medium">
-                {selectedGarden.name}
+              <BodyText
+                className="text-foreground text-base font-medium"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ maxWidth: 160 }}
+              >
+                {selectedGarden.name || "Unnamed Garden"}
               </BodyText>
             </View>
           </View>
@@ -172,8 +215,7 @@ export default function ConfirmationStep({
         )}
       </View>
 
-      {/* Navigation buttons */}
-      {/* Removed: Action buttons are now rendered by the parent PlantForm for consistency across all steps. */}
+      {/* Navigation buttons are rendered by the parent PlantForm for consistency */}
     </View>
   );
 }

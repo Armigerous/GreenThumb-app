@@ -2,7 +2,14 @@
 import { useUser } from "@clerk/clerk-expo";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { View, ScrollView, Keyboard, Text } from "react-native";
+import {
+  View,
+  ScrollView,
+  Keyboard,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { usePlantDetails, useGardenDashboard } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
@@ -16,7 +23,6 @@ import {
   ConfirmationStep,
   ErrorMessage,
 } from "./Add";
-import SubmitButton from "@/components/UI/SubmitButton";
 
 // Props for the plant addition form
 interface PlantFormProps {
@@ -319,7 +325,8 @@ export default function PlantForm({
       {/* Unified action bar for all steps */}
       <View className="my-4 flex-row justify-between items-center gap-3">
         {/* Cancel/Back button */}
-        <SubmitButton
+        <TouchableOpacity
+          className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
           onPress={async () => {
             if (currentStep === 1) {
               onCancel();
@@ -327,19 +334,17 @@ export default function PlantForm({
               goToPreviousStep();
             }
           }}
-          color="secondary"
-          iconName={currentStep === 1 ? "close" : "arrow-back"}
-          iconPosition="left"
-          width="full"
-          isDisabled={isSubmitting}
-          className="flex-1 bg-cream-100 border border-cream-300 rounded-lg py-4 px-6"
+          disabled={isSubmitting}
         >
           <Text className="text-cream-700 font-paragraph-semibold text-center text-base">
             {currentStep === 1 ? "Cancel" : "Back"}
           </Text>
-        </SubmitButton>
+        </TouchableOpacity>
         {/* Main action button */}
-        <SubmitButton
+        <TouchableOpacity
+          className={`flex-1 bg-brand-600 rounded-lg py-4 px-6 ${
+            !isCurrentStepValid() || isSubmitting ? "opacity-50" : ""
+          }`}
           onPress={() => {
             Keyboard.dismiss();
             if (currentStep < totalSteps) {
@@ -348,27 +353,19 @@ export default function PlantForm({
               handleSubmit();
             }
           }}
-          isDisabled={!isCurrentStepValid() || isSubmitting}
-          isLoading={isSubmitting && currentStep === totalSteps}
-          loadingLabel={currentStep === totalSteps ? "Adding..." : undefined}
-          iconName={
-            currentStep === totalSteps
-              ? isSubmitting
-                ? undefined
-                : "add-circle-outline"
-              : "arrow-forward"
-          }
-          iconPosition="right"
-          width="full"
-          color="primary"
-          className={`flex-1 bg-brand-600 rounded-lg py-4 px-6 ${
-            !isCurrentStepValid() || isSubmitting ? "opacity-50" : ""
-          }`}
+          disabled={!isCurrentStepValid() || isSubmitting}
         >
-          <Text className="text-cream-50 text-center font-paragraph-semibold text-base">
-            {currentStep === totalSteps ? "Add to Garden" : "Continue"}
-          </Text>
-        </SubmitButton>
+          {isSubmitting && currentStep === totalSteps ? (
+            <View className="flex-row items-center justify-center">
+              {/* Use ActivityIndicator for loading state, matching native spinner */}
+              <ActivityIndicator color="#FEFDF8" size={20} />
+            </View>
+          ) : (
+            <Text className="text-cream-50 text-center font-paragraph-semibold text-base">
+              {currentStep === totalSteps ? "Add to Garden" : "Continue"}
+            </Text>
+          )}
+        </TouchableOpacity>
       </View>
       {/* For step 3 (confirmation), navigation and submit handled by unified action bar */}
     </View>

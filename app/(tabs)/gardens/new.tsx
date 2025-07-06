@@ -12,6 +12,7 @@ import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import GardenForm from "@/components/Gardens/GardenForm";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { useSubscriptionGate } from "@/components/subscription/SubscriptionGate";
+import { TitleText } from "@/components/UI/Text";
 
 export default function NewGarden() {
   const router = useRouter();
@@ -64,9 +65,9 @@ export default function NewGarden() {
       </View>
 
       <View className="pt-4 px-5">
-        <Text className="text-2xl text-foreground font-title font-bold mb-6">
+        <TitleText className="text-2xl mb-6">
           Let&apos;s Create Your Garden
-        </Text>
+        </TitleText>
       </View>
 
       <View className="flex-1 px-5">
