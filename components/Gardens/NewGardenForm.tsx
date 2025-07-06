@@ -68,10 +68,8 @@ export default function NewGardenForm({
     // Step 1: Garden Name
     name: "",
 
-    // Step 2: Location (for weather integration - only coordinates stored in DB)
-    zip_code: "", // Used for geocoding, not stored in database
-    latitude: null as number | null, // Stored in database for weather data
-    longitude: null as number | null, // Stored in database for weather data
+    // Step 2: Location (for weather integration - only zip_code stored in DB)
+    zip_code: "", // Used for weather data, optional
     city: "", // Used for display, not stored in database
     county: "", // Used for display, not stored in database
 
@@ -255,8 +253,6 @@ export default function NewGardenForm({
   // Handle ZIP code selection
   const handleZipCodeSelect = (locationData: {
     zipCode: string;
-    latitude: number;
-    longitude: number;
     city?: string;
     county?: string;
   }) => {
@@ -264,15 +260,11 @@ export default function NewGardenForm({
       const newFormValues = {
         ...prev,
         zip_code: locationData.zipCode,
-        latitude: locationData.latitude,
-        longitude: locationData.longitude,
         city: locationData.city || "",
         county: locationData.county || "",
       };
-
       // Save to cache immediately since this is a significant change
       saveFormDataToCache(newFormValues, currentStep);
-
       return newFormValues;
     });
   };
@@ -358,22 +350,16 @@ export default function NewGardenForm({
           {
             name: formValues.name.trim(),
             user_id: user.id,
-
-            // Location data (optional but useful for weather integration)
-            latitude: formValues.latitude,
-            longitude: formValues.longitude,
+            // Only zip_code is stored for location (optional)
             zip_code: formValues.zip_code || null,
-
             // Essential growing conditions collected from the form
             light_id: formValues.light_id,
             soil_texture_id: formValues.soil_texture_id,
             available_space_to_plant_id: formValues.available_space_to_plant_id,
             maintenance_id: formValues.maintenance_id,
             growth_rate_ids: formValues.growth_rate_ids,
-
             // Optional style preferences
             landscape_theme_ids: formValues.landscape_theme_ids,
-
             // Set sensible defaults for user preferences
             wants_recommendations: true,
           },
@@ -514,8 +500,6 @@ export default function NewGardenForm({
                         setFormValues({
                           name: "",
                           zip_code: "",
-                          latitude: null,
-                          longitude: null,
                           city: "",
                           county: "",
                           light_id: null,

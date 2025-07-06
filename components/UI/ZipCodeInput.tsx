@@ -27,8 +27,6 @@ interface ZipCodeInputProps {
   onChangeText: (text: string) => void;
   onLocationSelect: (locationData: {
     zipCode: string;
-    latitude: number;
-    longitude: number;
     city?: string;
     county?: string;
   }) => void;
@@ -67,10 +65,9 @@ export default function ZipCodeInput({
     return zipRegex.test(zip);
   };
 
-  // Geocode ZIP code to get coordinates
+  // Geocode ZIP code to get city/county (no lat/lng returned)
   const geocodeZipCode = useCallback(
     async (zipCode: string) => {
-      // Don't validate if we've already validated this ZIP code
       if (lastValidatedZipRef.current === zipCode && isValid) {
         return;
       }
@@ -87,18 +84,16 @@ export default function ZipCodeInput({
       setError(null);
 
       try {
-        // Geocode the ZIP code
+        // Geocode the ZIP code (for city/county only)
         const results = await Location.geocodeAsync(
           `${zipCode}, North Carolina, USA`
         );
 
+        let city: string | undefined;
+        let county: string | undefined;
+
         if (results.length > 0) {
           const { latitude, longitude } = results[0];
-
-          // Try reverse geocoding but don't fail if it doesn't work
-          let city: string | undefined;
-          let county: string | undefined;
-
           try {
             const [reverseResult] = await Location.reverseGeocodeAsync({
               latitude,
@@ -111,25 +106,17 @@ export default function ZipCodeInput({
               "Reverse geocoding failed, continuing without city/county:",
               reverseError
             );
-            // Continue without city/county data
           }
-
-          setIsValid(true);
-          lastValidatedZipRef.current = zipCode;
-          notifyValidationChange(true, true);
-          onLocationSelect({
-            zipCode,
-            latitude,
-            longitude,
-            city,
-            county,
-          });
-        } else {
-          setError("Could not find location for this ZIP code");
-          setIsValid(false);
-          lastValidatedZipRef.current = "";
-          notifyValidationChange(false, true);
         }
+
+        setIsValid(true);
+        lastValidatedZipRef.current = zipCode;
+        notifyValidationChange(true, true);
+        onLocationSelect({
+          zipCode,
+          city,
+          county,
+        });
       } catch (error) {
         console.error("Geocoding error:", error);
         setError("Could not validate ZIP code. Please try again.");
