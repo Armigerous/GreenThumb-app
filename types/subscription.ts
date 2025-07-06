@@ -131,4 +131,19 @@ export interface SubscriptionChangeRequest {
   prorate?: boolean;
   /** When the change should take effect */
   effective_date?: 'now' | 'next_period';
+}
+
+/**
+ * Composite type for user subscription with add-ons (for UI/view models)
+ *
+ * Reason: Supabase canonical UserSubscription does not include add-ons directly. This type is used when you join user_subscription_addons and subscription_addons for display.
+ */
+export interface UserSubscriptionWithAddons extends UserSubscription {
+  /**
+   * List of add-ons for this subscription, each with both the join row and the add-on details
+   */
+  addons: Array<{
+    userAddon: UserSubscriptionAddon;
+    addon: SubscriptionAddon;
+  }>;
 } 
