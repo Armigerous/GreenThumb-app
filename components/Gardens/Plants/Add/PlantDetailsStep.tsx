@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import ImagePicker from "./ImagePicker";
+import { BodyText, TitleText } from "@/components/UI/Text";
 
 /**
  * PlantDetailsStep component for customizing plant details
@@ -114,20 +115,28 @@ export default function PlantDetailsStep({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View className="flex-1 flex">
         <View className="flex-1">
-          <Text className="text-xl font-bold mb-4">Customize Your Plant</Text>
-          <Text className="text-cream-600 mb-6">
-            Add details to personalize your plant:
-          </Text>
+          <TitleText className="text-xl mb-1">
+            {/* Reason: Brand voice—short, friendly, inviting (BRAND_IDENTITY.md) */}
+            Make it yours
+          </TitleText>
+          <BodyText className=" mb-6">
+            {/* Reason: Conversational, outcome-focused, plain language (BRAND_IDENTITY.md) */}
+            Give your plant a name and a photo. It's more fun that way!
+          </BodyText>
 
           {/* Nickname Input with Randomize button */}
           <View className="mb-6">
-            <Text className="text-base font-medium mb-2">Nickname</Text>
+            <TitleText className="mb-2">
+              {/* Reason: Simpler, less formal, plain-spoken (BRAND_IDENTITY.md) */}
+              Plant&apos;s name
+            </TitleText>
             <View className="flex-row items-center">
               <TextInput
                 className="bg-white border border-cream-300 rounded-lg p-3 text-foreground flex-1 mr-2"
                 value={nickname}
                 onChangeText={setNickname}
-                placeholder="Give your plant a name"
+                // Reason: Conversational, inviting (BRAND_IDENTITY.md)
+                placeholder="What should we call this plant?"
                 placeholderTextColor="#9e9a90"
                 maxLength={50}
               />
@@ -153,22 +162,25 @@ export default function PlantDetailsStep({
                 onPress={() => setImage(null)}
                 disabled={isImageUploading}
               >
-                <Text className="text-sm text-cream-700">
-                  Use Default Image
-                </Text>
+                {/* Reason: Simpler, less technical, plain-spoken (BRAND_IDENTITY.md) */}
+                <BodyText className="text-sm text-cream-700">
+                  Use the original photo
+                </BodyText>
               </TouchableOpacity>
             )}
           </View>
 
           {/* Note about care tracking */}
           <View className="mb-6 bg-brand-50 rounded-lg p-4">
-            <Text className="text-brand-700 font-medium text-sm mb-1">
-              📋 Automatic Care Tracking
-            </Text>
-            <Text className="text-brand-600 text-sm">
-              We&apos;ll create a personalized care schedule based on this
-              plant&apos;s specific needs and your local conditions.
-            </Text>
+            {/* Reason: Direct, outcome-focused, friendly (BRAND_IDENTITY.md) */}
+            <BodyText className="mb-1">
+              📋 We&apos;ll help you care for it
+            </BodyText>
+            <BodyText className="text-sm">
+              {/* Reason: Simple, specific, reassuring (BRAND_IDENTITY.md) */}
+              We&apos;ll remind you when to water and care for this plant, based
+              on what it needs and where you live.
+            </BodyText>
           </View>
         </View>
       </View>

@@ -156,14 +156,16 @@ export default function GardenSelectionStep({
   // Sort gardens alphabetically by name for better UX
   const sortedGardens = useMemo(() => {
     if (!gardens) return [];
-    return [...gardens].sort((a, b) => a.name.localeCompare(b.name));
+    return [...gardens].sort((a, b) =>
+      (a.name ?? "").localeCompare(b.name ?? "")
+    );
   }, [gardens]);
 
   // Filter gardens based on search query
   const filteredGardens = useMemo(() => {
     if (searchQuery.trim() === "") return sortedGardens;
     return sortedGardens.filter((garden) =>
-      garden.name.toLowerCase().includes(searchQuery.toLowerCase())
+      (garden.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [sortedGardens, searchQuery]);
 
@@ -356,9 +358,18 @@ export default function GardenSelectionStep({
                       <SubtitleText className="text-lg text-foreground mb-1">
                         {garden.name}
                       </SubtitleText>
+                      {/*
+                        Reason: If a garden has no plants, health is not meaningful (health is based on plant tasks).
+                        Only show health percentage if there is at least one plant in the garden.
+                      */}
                       <BodyText className="text-sm text-cream-600 mb-2">
-                        {garden.total_plants} plants ·{" "}
-                        {garden.health_percentage}% health
+                        {garden.total_plants ?? 0} plant
+                        {(garden.total_plants ?? 0) === 1 ? "" : "s"}
+                        {(garden.total_plants ?? 0) > 0 ? (
+                          <> · {garden.health_percentage}% health</>
+                        ) : (
+                          <></>
+                        )}
                       </BodyText>
                     </View>
                     {selectedGarden?.garden_id === garden.garden_id && (
