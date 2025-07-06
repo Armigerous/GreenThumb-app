@@ -1,12 +1,12 @@
 import CachedImage from "@/components/CachedImage";
 import { ErrorBoundary } from "@/components/Database/Plant/ErrorBoundary";
-import BrandedErrorPage from "@/components/UI/BrandedErrorPage";
 import { HtmlRenderer } from "@/components/Database/Plant/HtmlRenderer";
+import BrandedErrorPage from "@/components/UI/BrandedErrorPage";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
-import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
+import { BodyText, SubtitleText, TitleText } from "@/components/UI/Text";
 import { usePlantDetails } from "@/lib/queries";
-import { PlantFullDataUI, PlantImage } from "@/types/plant";
+import { PlantFullDataUI } from "@/types/plant";
 import { TabType } from "@/types/tab";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
