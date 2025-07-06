@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient";
-import { ApiResponse, PlantCardData, PlantData } from "@/types/plant";
+import { ApiResponse, PlantCardData, PlantFullDataUI } from "@/types/plant";
 import { allFilters } from "@/types/filterData";
 
 /**
@@ -223,7 +223,7 @@ export async function searchPlants(
 /**
  * Fetches detailed information about a specific plant
  */
-export async function getPlantDetails(slug: string): Promise<PlantData> {
+export async function getPlantDetails(slug: string): Promise<PlantFullDataUI> {
   try {
     // For detailed plant information, we should use the plant_full_data view
     const { data, error } = await supabase
@@ -241,7 +241,7 @@ export async function getPlantDetails(slug: string): Promise<PlantData> {
       throw new Error(`Plant with slug "${slug}" not found`);
     }
 
-    return data as unknown as PlantData;
+    return data as unknown as PlantFullDataUI;
   } catch (error) {
     console.error("Error fetching plant details:", error);
     throw error;

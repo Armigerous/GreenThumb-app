@@ -23,8 +23,9 @@ export interface PlantImage {
   attribution?: string | null;
 }
 
+// For plant card data (not full data)
 export interface ApiResponse {
-  results: PlantFullData[];
+  results: PlantCardData[];
   count: number;
 }
 
@@ -36,3 +37,8 @@ export interface SearchParams {
 }
 
 // PlantData is now replaced by PlantFullData/MainPlantData from Supabase. If you need a UI-only type, define it below with a clear comment.
+
+// UI-facing type: guarantees images is always PlantImage[]
+export interface PlantFullDataUI extends Omit<PlantFullData, "images"> {
+  images: PlantImage[];
+}

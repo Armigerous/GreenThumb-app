@@ -7,7 +7,6 @@ import { usePlantDetails, useGardenDashboard } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
 import { UserPlant, GardenDashboard } from "@/types/garden";
-import { PlantData } from "@/types/plant";
 import ProgressIndicator from "@/components/UI/ProgressIndicator";
 import { Ionicons } from "@expo/vector-icons";
 import { BodyText } from "@/components/UI/Text";
@@ -96,7 +95,11 @@ export default function PlantForm({
 
   // Step validation
   const isStep1Valid = !!selectedGarden;
-  const isStep2Valid = !!nickname.trim();
+  // Reason: If the plant has no default image, require the user to upload one before proceeding.
+  // This ensures that every plant added has an image, either from the database or user-uploaded.
+  const hasDefaultImage =
+    plant && plant.images && plant.images.length > 0 && !!plant.images[0]?.img;
+  const isStep2Valid = !!nickname.trim() && (hasDefaultImage || !!image);
   const isStep3Valid = isStep1Valid && isStep2Valid && !!plant;
 
   const isCurrentStepValid = () => {
@@ -177,8 +180,8 @@ export default function PlantForm({
       const now = new Date().toISOString();
       const plantData: UserPlant = {
         id: `${Math.random().toString(36).substr(2, 9)}-${Date.now()}`,
-        garden_id: selectedGarden.garden_id,
-        plant_id: plant.id,
+        garden_id: selectedGarden.garden_id ?? -1,
+        plant_id: plant.id ?? -1,
         nickname: nickname.trim(),
         images: plantImageUrl ? [plantImageUrl] : [],
         care_logs: [],
@@ -253,7 +256,7 @@ export default function PlantForm({
       case 2:
         return (
           <PlantDetailsStep
-            plant={plant as PlantData}
+            plant={plant as any}
             nickname={nickname}
             setNickname={setNickname}
             image={image}
@@ -265,7 +268,7 @@ export default function PlantForm({
       case 3:
         return (
           <ConfirmationStep
-            plant={plant as PlantData}
+            plant={plant as any}
             nickname={nickname}
             image={image}
             selectedGarden={selectedGarden as GardenDashboard}

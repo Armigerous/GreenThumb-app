@@ -6,7 +6,7 @@ import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { TitleText, SubtitleText, BodyText } from "@/components/UI/Text";
 import { usePlantDetails } from "@/lib/queries";
-import { PlantData, PlantImage } from "@/types/plant";
+import { PlantFullDataUI, PlantImage } from "@/types/plant";
 import { TabType } from "@/types/tab";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -70,7 +70,7 @@ const TabBar = ({
 };
 
 // Quick actions component
-const QuickActions = ({ plant }: { plant: PlantData }) => {
+const QuickActions = ({ plant }: { plant: PlantFullDataUI }) => {
   const router = useRouter();
 
   // Handle adding plant to garden
@@ -490,7 +490,7 @@ export default function PlantDetailScreen() {
                   <View className="pb-16">
                     {/* Flower Features */}
                     {(plant.flower_description ||
-                      plant.flower_color ||
+                      plant.flower_colors ||
                       plant.flower_bloom_time) && (
                       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
                         <View className="border-b border-cream-100 pb-3 mb-4">
