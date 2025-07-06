@@ -11,8 +11,6 @@ type LocationStepProps = {
   onZipCodeChange: (text: string) => void;
   onLocationSelect: (locationData: {
     zipCode: string;
-    latitude: number;
-    longitude: number;
     city?: string;
     county?: string;
   }) => void;

@@ -167,7 +167,8 @@ export default function PlantDetailsStep({
         </View>
       </View>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons removed as per request: redundant Back/Next buttons */}
+      {/*
       <View className="flex-row justify-between items-center py-6 mt-auto">
         <SubmitButton
           onPress={onBack}
@@ -187,6 +188,7 @@ export default function PlantDetailsStep({
           {isImageUploading ? "Uploading..." : "Next"}
         </SubmitButton>
       </View>
+      */}
     </View>
   );
 }
