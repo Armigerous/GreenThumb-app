@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, ScrollView, Alert } from "react-native";
+import { View, ScrollView, Alert, Text, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { usePlantDetails, useGardenDashboard } from "@/lib/queries";
 import { useUser } from "@clerk/clerk-expo";
@@ -14,6 +14,7 @@ import {
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { Ionicons } from "@expo/vector-icons";
 
 // Import our modular components
 import {
@@ -46,9 +47,10 @@ function generateUUID(): string {
  * 3. Confirm and add the plant to their garden
  */
 export default function AddPlantToGardenScreen() {
-  const { plantId, plantSlug } = useLocalSearchParams<{
+  const { plantId, plantSlug, gardenId } = useLocalSearchParams<{
     plantId: string;
     plantSlug: string;
+    gardenId?: string;
   }>();
   const router = useRouter();
   const { user } = useUser();
@@ -102,6 +104,17 @@ export default function AddPlantToGardenScreen() {
       setNickname(randomName);
     }
   }, [plant]);
+
+  // Pre-select garden if gardenId param is present and valid
+  useEffect(() => {
+    if (gardenId && gardens && !selectedGarden) {
+      const found = gardens.find((g) => g.garden_id?.toString() === gardenId);
+      if (found) {
+        setSelectedGarden(found);
+        setStep(2); // Skip to plant details step
+      }
+    }
+  }, [gardenId, gardens, selectedGarden]);
 
   /**
    * Debug function to check authentication status
@@ -586,15 +599,41 @@ export default function AddPlantToGardenScreen() {
 
           {/* Step 2: Plant Details */}
           {step === 2 && (
-            <PlantDetailsStep
-              plant={plant as PlantData}
-              nickname={nickname}
-              setNickname={setNickname}
-              image={image}
-              setImage={setImage}
-              onBack={handlePreviousStep}
-              onNext={handleNextStep}
-            />
+            <>
+              {/* Pre-selected garden indicator */}
+              {gardenId && selectedGarden && (
+                <View className="flex-row items-center bg-brand-50 border border-brand-200 rounded-lg px-4 py-2 mb-4">
+                  <Ionicons
+                    name="leaf-outline"
+                    size={20}
+                    color="#5E994B"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text className="text-brand-700 font-medium mr-2">
+                    Adding to: {selectedGarden.name}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setStep(1);
+                    }}
+                    className="ml-auto px-3 py-1 bg-brand-100 rounded"
+                  >
+                    <Text className="text-brand-600 text-sm font-medium">
+                      Change Garden
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              <PlantDetailsStep
+                plant={plant as PlantData}
+                nickname={nickname}
+                setNickname={setNickname}
+                image={image}
+                setImage={setImage}
+                onBack={handlePreviousStep}
+                onNext={handleNextStep}
+              />
+            </>
           )}
 
           {/* Step 3: Confirmation */}

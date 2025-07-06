@@ -127,27 +127,47 @@ const GardenDetails = () => {
     error: recommendedError,
   } = usePlantCards(1, 10, "", recommendedFilterString, "scientific");
 
-  // Map to RecommendedPlant type for the section
-  // Reason: recommendedData.results is always PlantCardData[] (see fetchPlantCards/processPlantData)
-  const recommendedPlants: RecommendedPlant[] =
+  // Map to PlantCardData type for the section
+  const recommendedPlants: import("@/types/plant").PlantCardData[] =
     (
       recommendedData?.results as
         | import("@/types/plant").PlantCardData[]
         | undefined
     )?.map((plant) => ({
       id: plant.id,
-      name: plant.common_name || plant.scientific_name || "Unknown Plant",
-      imageUrl: plant.first_image || undefined,
+      slug: plant.slug,
+      scientific_slug: plant.scientific_slug,
+      scientific_name: plant.scientific_name,
+      common_name: plant.common_name,
+      first_image: plant.first_image,
+      first_tag: plant.first_tag,
+      description: plant.description,
+      first_image_alt_text: plant.first_image_alt_text,
     })) || [];
 
-  // Handler for adding a recommended plant (placeholder)
-  const handleAddRecommended = (plant: RecommendedPlant) => {
-    // Reason: Placeholder for adding a recommended plant to the garden
-    // TODO: Implement add logic when recommendations are live
-    Alert.alert(
-      "Coming soon",
-      `Add ${plant.name} to your garden (not yet implemented)`
-    );
+  // Handler for adding a recommended plant to the garden
+  const handleAddRecommended = (
+    plant: import("@/types/plant").PlantCardData
+  ) => {
+    if (!gardenData?.id) return;
+    router.push({
+      pathname: "/(tabs)/gardens/plant/add",
+      params: {
+        plantId: plant.id,
+        plantSlug: plant.slug,
+        gardenId: gardenData.id,
+      },
+    });
+  };
+
+  // Handler for navigating to plant details
+  const handleRecommendedPlantPress = (
+    plant: import("@/types/plant").PlantCardData
+  ) => {
+    router.push({
+      pathname: "/(tabs)/plants/[slug]",
+      params: { slug: plant.slug },
+    });
   };
 
   // Refetch garden data whenever the screen comes into focus
@@ -690,8 +710,7 @@ const GardenDetails = () => {
       <View className="flex-row justify-between items-center px-6 mt-2">
         <TouchableOpacity
           onPress={() => router.push("/(tabs)/gardens")}
-          className="flex-row items-center py-2"
-          style={{ minHeight: 44 }}
+          className="flex-row items-center py-2 min-h-[44px]"
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
@@ -705,13 +724,7 @@ const GardenDetails = () => {
             onPress={handleConditionsPress}
             accessibilityRole="button"
             accessibilityLabel="Edit garden conditions"
-            style={{
-              padding: 6,
-              borderRadius: 20,
-              marginRight: 8,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
+            className="p-1.5 rounded-[20px] mr-2 flex-row items-center"
           >
             <Text className="text-foreground font-paragraph text-base mr-1">
               Settings
@@ -751,15 +764,11 @@ const GardenDetails = () => {
       </View>
 
       {/* Tab Panels */}
-      <View className="flex-1">
+      <View className="flex-1 px-6">
         {activeTab === "plants" ? (
           // My Plants Tab: Show plant list or empty state, scrollable
           <ScrollView
-            contentContainerStyle={{
-              paddingHorizontal: 24,
-              paddingBottom: 32,
-              flexGrow: 1,
-            }}
+            className="px-6 pb-8 flex-grow"
             showsVerticalScrollIndicator={false}
           >
             {plants.length > 0 ? (
@@ -811,39 +820,17 @@ const GardenDetails = () => {
                 }}
               />
             ) : (
-              <View
-                style={{
-                  alignItems: "center",
-                  marginTop: 32,
-                  marginBottom: 24,
-                }}
-              >
+              <View className="items-center mt-8 mb-6">
                 <Ionicons
                   name="leaf-outline"
                   size={64}
                   color="#77B860"
-                  style={{ marginBottom: 12 }}
+                  className="mb-3"
                 />
-                <Text
-                  style={{
-                    fontSize: 22,
-                    color: "#2e2c29",
-                    fontFamily: "Mali-Bold",
-                    marginBottom: 8,
-                  }}
-                >
+                <Text className="text-[22px] text-foreground font-mali-bold mb-2">
                   Your Garden Awaits
                 </Text>
-                <Text
-                  style={{
-                    color: "#9e9a90",
-                    fontFamily: "Nunito-Regular",
-                    fontSize: 16,
-                    marginBottom: 18,
-                    textAlign: "center",
-                    maxWidth: 320,
-                  }}
-                >
+                <Text className="text-[#9e9a90] font-nunito-regular text-base mb-4 text-center max-w-[320px]">
                   Add your first plant to start your gardening journey. Track
                   growth, care schedules, and watch them thrive!
                 </Text>
@@ -859,19 +846,11 @@ const GardenDetails = () => {
           </ScrollView>
         ) : (
           // Recommendations Tab: Show recommended plants, scrollable
-          <ScrollView
-            contentContainerStyle={{
-              paddingHorizontal: 24,
-              paddingBottom: 32,
-              flexGrow: 1,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <RecommendedPlantsSection
-              recommendedPlants={recommendedPlants}
-              onAddRecommended={handleAddRecommended}
-            />
-          </ScrollView>
+          <RecommendedPlantsSection
+            recommendedPlants={recommendedPlants}
+            onAddRecommended={handleAddRecommended}
+            onPlantPress={handleRecommendedPlantPress}
+          />
         )}
       </View>
     </PageContainer>
