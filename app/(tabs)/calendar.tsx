@@ -592,9 +592,7 @@ export default function CalendarScreen() {
       {/* Header */}
       <View className="px-5 pt-5">
         <View className="flex-row justify-between items-center mb-4">
-          <TitleText className="text-2xl text-foreground">
-            Calendar of Care
-          </TitleText>
+          <TitleText className="text-3xl">Calendar of Care</TitleText>
           <TouchableOpacity
             onPress={() => setIsMonthPickerVisible(true)}
             className="flex-row items-center bg-brand-50 px-3 py-1 rounded-lg border border-brand-100"
