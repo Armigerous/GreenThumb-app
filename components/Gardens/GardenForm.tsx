@@ -149,6 +149,7 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
       "Balcony Plants",
       "Kitchen Garden",
       "Flower Sanctuary",
+      "The Most Beautiful Garden Ever",
     ];
 
     // Add user's name suggestions if available

@@ -703,3 +703,48 @@ export function getGardenFilterKeys(garden: Garden): string[] {
 
   return filters;
 }
+
+/**
+ * Get selector options in the correct display order for the UI, without changing their IDs.
+ * This is for display only; do not use for DB writes.
+ *
+ * @param field The lookup table key (e.g., 'growth_rate', 'available_space_to_plant')
+ * @returns Array of options in the correct display order
+ */
+export function getOrderedOptions(field: keyof typeof LOOKUP_TABLES) {
+  const options = LOOKUP_TABLES[field].filter((item) => item.label !== "none");
+
+  switch (field) {
+    case "growth_rate":
+      // Order: Slow, Medium, Rapid
+      return [
+        ...options.filter((o) => o.label.startsWith("Slow")),
+        ...options.filter((o) => o.label.startsWith("Medium")),
+        ...options.filter((o) => o.label.startsWith("Rapid")),
+      ];
+    case "maintenance":
+      // Order: Low, Medium, High
+      return [
+        ...options.filter((o) => o.label === "Low"),
+        ...options.filter((o) => o.label === "Medium"),
+        ...options.filter((o) => o.label === "High"),
+      ];
+    case "available_space_to_plant":
+      // Order: Less than 12 inches, 12 inches-3 feet, 3 feet-6 feet, 6 feet-12 feet, 12-24 feet, 24-60 feet, more than 60 feet
+      return [
+        ...options.filter((o) => o.label === "Less than 12 inches"),
+        ...options.filter((o) => o.label === "12 inches-3 feet"),
+        ...options.filter((o) => o.label === "3 feet-6 feet"),
+        ...options.filter((o) => o.label === "6-feet-12 feet"),
+        ...options.filter((o) => o.label === "12-24 feet"),
+        ...options.filter((o) => o.label === "24-60 feet"),
+        ...options.filter((o) => o.label === "more than 60 feet"),
+      ];
+    case "landscape_theme":
+      // Alphabetical order, minus "none"
+      return [...options].sort((a, b) => a.label.localeCompare(b.label));
+    default:
+      // Default: as defined, minus "none"
+      return options;
+  }
+}
