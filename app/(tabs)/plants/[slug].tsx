@@ -96,13 +96,270 @@ const QuickActions = ({ plant }: { plant: PlantFullDataUI }) => {
   );
 };
 
-// Plant Detail Screen Component wrapped with ErrorBoundary
+// Overview Section: Description, quick facts, uses, edibility, wildlife value, attracts
+const OverviewSection: React.FC<{ plant: PlantFullDataUI }> = ({ plant }) => {
+  // Reason: Only display fields if present, and map arrays/objects safely
+  return (
+    <View className="pb-16">
+      {/* Description */}
+      {plant.description && (
+        <SectionCard title="Description">
+          <HtmlRenderer content={plant.description} />
+        </SectionCard>
+      )}
+      {/* Quick Facts */}
+      {(plant.height_min ||
+        plant.height_max ||
+        plant.width_min ||
+        plant.width_max ||
+        plant.growth_rate ||
+        plant.origin) && (
+        <SectionCard title="Quick Facts">
+          {plant.height_min || plant.height_max ? (
+            <FactRow
+              label="Height"
+              value={`${plant.height_min ?? "?"}-${plant.height_max ?? "?"} in`}
+            />
+          ) : null}
+          {plant.width_min || plant.width_max ? (
+            <FactRow
+              label="Width"
+              value={`${plant.width_min ?? "?"}-${plant.width_max ?? "?"} in`}
+            />
+          ) : null}
+          {plant.growth_rate && (
+            <FactRow label="Growth Rate" value={plant.growth_rate} />
+          )}
+          {plant.origin && <FactRow label="Origin" value={plant.origin} />}
+        </SectionCard>
+      )}
+      {/* Uses, Edibility, Wildlife Value, Attracts */}
+      {(plant.uses ||
+        plant.edibility ||
+        plant.wildlife_value ||
+        (Array.isArray(plant.attracts) && plant.attracts.length > 0)) && (
+        <SectionCard title="Uses & Value">
+          {plant.uses && <FactBlock label="Uses" content={plant.uses} />}
+          {plant.edibility && (
+            <FactBlock label="Edibility" content={plant.edibility} />
+          )}
+          {plant.wildlife_value && (
+            <FactBlock label="Wildlife Value" content={plant.wildlife_value} />
+          )}
+          {Array.isArray(plant.attracts) && plant.attracts.length > 0 && (
+            <View className="mb-2">
+              <BodyText className="text-cream-500 text-base mb-1">
+                Attracts
+              </BodyText>
+              <View className="flex-row flex-wrap">
+                {plant.attracts.filter(Boolean).map((a, i) => (
+                  <View
+                    key={i}
+                    className="bg-brand-50 px-3 py-2 rounded-xl mr-2 mb-2"
+                  >
+                    <BodyText className="text-sm text-brand-700">
+                      {String(a)}
+                    </BodyText>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+        </SectionCard>
+      )}
+    </View>
+  );
+};
+
+// Care Section: Light, water, soil pH, soil texture, maintenance, USDA zones
+const CareSection: React.FC<{ plant: PlantFullDataUI }> = ({ plant }) => {
+  return (
+    <View className="pb-16">
+      <SectionCard title="Care Requirements">
+        {plant.light_requirements && (
+          <FactBlock label="Light" content={String(plant.light_requirements)} />
+        )}
+        {plant.maintenance && (
+          <FactBlock label="Maintenance" content={String(plant.maintenance)} />
+        )}
+        {plant.soil_ph && (
+          <FactRow label="Soil pH" value={String(plant.soil_ph)} />
+        )}
+        {plant.soil_texture && (
+          <FactRow label="Soil Texture" value={String(plant.soil_texture)} />
+        )}
+        {plant.usda_zones && (
+          <FactRow label="USDA Zones" value={String(plant.usda_zones)} />
+        )}
+      </SectionCard>
+    </View>
+  );
+};
+
+// Features Section: Flower, leaf, fruit details
+const FeaturesSection: React.FC<{ plant: PlantFullDataUI }> = ({ plant }) => {
+  return (
+    <View className="pb-16">
+      {/* Flower Features */}
+      {(plant.flower_description ||
+        plant.flower_colors ||
+        plant.flower_bloom_time) && (
+        <SectionCard title="Flower Features">
+          {plant.flower_description && (
+            <FactBlock content={plant.flower_description} />
+          )}
+          {plant.flower_colors && (
+            <FactRow label="Color" value={String(plant.flower_colors)} />
+          )}
+          {plant.flower_bloom_time && (
+            <FactRow
+              label="Bloom Time"
+              value={String(plant.flower_bloom_time)}
+            />
+          )}
+        </SectionCard>
+      )}
+      {/* Leaf Features */}
+      {(plant.leaf_description || plant.leaf_color || plant.leaf_shape) && (
+        <SectionCard title="Leaf Features">
+          {plant.leaf_description && (
+            <FactBlock content={plant.leaf_description} />
+          )}
+          {plant.leaf_color && (
+            <FactRow label="Color" value={String(plant.leaf_color)} />
+          )}
+          {plant.leaf_shape && (
+            <FactRow label="Shape" value={String(plant.leaf_shape)} />
+          )}
+        </SectionCard>
+      )}
+      {/* Fruit Features */}
+      {(plant.fruit_description || plant.fruit_color || plant.fruit_type) && (
+        <SectionCard title="Fruit Features">
+          {plant.fruit_description && (
+            <FactBlock content={plant.fruit_description} />
+          )}
+          {plant.fruit_color && (
+            <FactRow label="Color" value={String(plant.fruit_color)} />
+          )}
+          {plant.fruit_type && (
+            <FactRow label="Type" value={String(plant.fruit_type)} />
+          )}
+        </SectionCard>
+      )}
+    </View>
+  );
+};
+
+// Taxonomy Section: Family, genus, species, pronunciation
+const TaxonomySection: React.FC<{ plant: PlantFullDataUI }> = ({ plant }) => (
+  <View className="pb-16">
+    <SectionCard title="Classification">
+      {plant.family && <FactRow label="Family" value={plant.family} />}
+      {plant.genus && <FactRow label="Genus" value={plant.genus} />}
+      {plant.species && <FactRow label="Species" value={plant.species} />}
+      {plant.phonetic_spelling && (
+        <FactRow label="Pronunciation" value={plant.phonetic_spelling} />
+      )}
+    </SectionCard>
+  </View>
+);
+
+// Problems Section: Toxicity, common problems, resistances
+const ProblemsSection: React.FC<{ plant: PlantFullDataUI }> = ({ plant }) => (
+  <View className="pb-16">
+    {/* Toxicity */}
+    {(plant.poison_symptoms ||
+      plant.poison_toxic_principle ||
+      plant.poison_severity ||
+      (Array.isArray(plant.poison_parts) && plant.poison_parts.length > 0)) && (
+      <SectionCard title="Toxicity Information">
+        {plant.poison_symptoms && (
+          <FactBlock label="Symptoms" content={plant.poison_symptoms} />
+        )}
+        {plant.poison_toxic_principle && (
+          <FactBlock
+            label="Toxic Principle"
+            content={plant.poison_toxic_principle}
+          />
+        )}
+        {plant.poison_severity && (
+          <FactRow label="Severity" value={plant.poison_severity} />
+        )}
+        {Array.isArray(plant.poison_parts) && plant.poison_parts.length > 0 && (
+          <FactRow
+            label="Poisonous Parts"
+            value={plant.poison_parts.filter(Boolean).join(", ")}
+          />
+        )}
+      </SectionCard>
+    )}
+    {/* Common Problems */}
+    {Array.isArray(plant.problems) && plant.problems.length > 0 && (
+      <SectionCard title="Common Problems">
+        <BodyText className="text-foreground leading-relaxed">
+          {plant.problems.filter(Boolean).join(", ")}
+        </BodyText>
+      </SectionCard>
+    )}
+    {/* Resistances */}
+    {Array.isArray(plant.resistance_to_challenges) &&
+      plant.resistance_to_challenges.length > 0 && (
+        <SectionCard title="Resistances">
+          <BodyText className="text-foreground leading-relaxed">
+            {plant.resistance_to_challenges.filter(Boolean).join(", ")}
+          </BodyText>
+        </SectionCard>
+      )}
+  </View>
+);
+
+// --- Helper Components ---
+
+const SectionCard: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
+  <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+    <View className="border-b border-cream-100 pb-3 mb-4">
+      <TitleText className="text-lg font-bold text-foreground">
+        {title}
+      </TitleText>
+    </View>
+    {children}
+  </View>
+);
+
+const FactRow: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
+  <View className="flex-row justify-between mb-3">
+    <BodyText className="text-cream-500 text-base">{label}</BodyText>
+    <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
+      {value}
+    </BodyText>
+  </View>
+);
+
+const FactBlock: React.FC<{ label?: string; content: string }> = ({
+  label,
+  content,
+}) => (
+  <View className="mb-4 pb-4 border-b border-cream-50">
+    {label && (
+      <BodyText className="text-cream-500 text-base mb-2">{label}</BodyText>
+    )}
+    <HtmlRenderer content={content} />
+  </View>
+);
+
+// --- Main Plant Detail Screen ---
+
 export default function PlantDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
-
-  // Use our query hook to fetch plant data
   const {
     data: plant,
     isLoading: loading,
@@ -111,35 +368,22 @@ export default function PlantDetailScreen() {
 
   useEffect(() => {
     if (plant) {
-      // Use the first common name or scientific name for the title
       const title = plant.common_names?.[0] || plant.scientific_name;
       router.setParams({ title });
     }
   }, [plant, router]);
 
   // Process image data for the gallery
-  const galleryImages = useMemo(() => {
-    if (plant?.images && plant.images.length > 0) {
-      return plant.images
-        .filter((img: PlantImage) => img && img.img)
-        .map((img: PlantImage) => img.img as string);
-    }
-    return [];
-  }, [plant]);
-
-  // Get the first image from images array
-  const firstImage =
-    plant?.images && plant.images.length > 0 ? plant.images[0]?.img : null;
-
-  // Get common name from array
-  const commonName =
-    plant?.common_names && plant.common_names.length > 0
-      ? plant.common_names[0]
-      : undefined;
-
-  // Calculate bottom padding to account for bottom tabs
-  // This ensures content isn't hidden behind navigation elements
-  const bottomPadding = 60; // Approximate height of bottom tabs
+  const galleryImages = useMemo(
+    () =>
+      plant?.images
+        ?.filter((img) => img && img.img)
+        .map((img) => img.img as string) || [],
+    [plant]
+  );
+  const firstImage = plant?.images?.[0]?.img || null;
+  const commonName = plant?.common_names?.[0] || undefined;
+  const bottomPadding = 60;
 
   if (loading) {
     return (
@@ -148,11 +392,9 @@ export default function PlantDetailScreen() {
       </PageContainer>
     );
   }
-
   if (queryError || !plant) {
     const errorMessage =
       queryError instanceof Error ? queryError.message : "Plant not found";
-
     return (
       <BrandedErrorPage
         message={errorMessage}
@@ -162,12 +404,12 @@ export default function PlantDetailScreen() {
     );
   }
 
-  // Wrap the main content with ErrorBoundary
+  // --- Main Layout ---
   return (
     <PageContainer scroll={false} padded={false} safeArea={false}>
       <ErrorBoundary>
         <View className="flex-1">
-          {/* Fixed Header */}
+          {/* Header */}
           <View className="bg-white border-b border-cream-100 pt-12">
             <View className="flex-row justify-between items-center px-5 py-4">
               <TouchableOpacity
@@ -186,7 +428,7 @@ export default function PlantDetailScreen() {
             contentContainerStyle={{ paddingBottom: bottomPadding }}
             showsVerticalScrollIndicator={false}
           >
-            {/* Plant Image */}
+            {/* Hero Image */}
             <View className="w-full h-[300px]">
               <Image
                 source={{
@@ -194,9 +436,13 @@ export default function PlantDetailScreen() {
                     firstImage ||
                     "https://theofficialgreenthumb.com/no-plant-image.png",
                 }}
-                className="w-full h-full"
+                className="w-full h-full rounded-b-3xl"
                 resizeMode="cover"
-                alt={plant.images?.[0]?.alt_text || plant.scientific_name}
+                alt={
+                  plant.images?.[0]?.alt_text ||
+                  plant.scientific_name ||
+                  "Plant image"
+                }
               />
             </View>
             {/* Plant Information */}
@@ -214,10 +460,7 @@ export default function PlantDetailScreen() {
                 {plant.sound_file && (
                   <TouchableOpacity
                     className="ml-2 bg-brand-50 rounded-xl p-2"
-                    onPress={() => {
-                      /* Play pronunciation */
-                      console.log("Play pronunciation pressed");
-                    }}
+                    onPress={() => {}}
                   >
                     <Ionicons
                       name="volume-high-outline"
@@ -227,27 +470,64 @@ export default function PlantDetailScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-
-              {/* Display all tags if available */}
-              {plant.tags && plant.tags.length > 0 && (
-                <View className="mb-4">
-                  <FlatList
-                    horizontal
-                    data={plant.tags.filter(Boolean)}
-                    keyExtractor={(item, index) => `tag-${index}`}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                      <View className="bg-brand-100 px-3 py-1.5 rounded-xl mr-2">
-                        <BodyText className="text-xs text-brand-700 font-medium">
-                          {item}
-                        </BodyText>
-                      </View>
-                    )}
-                  />
-                </View>
-              )}
-
-              {/* Display multiple images if available */}
+              {/* Tags - horizontally scrollable, 2 stacked rows, single scroll, '+N more' if too many */}
+              {Array.isArray(plant.tags) &&
+                plant.tags.length > 0 &&
+                (() => {
+                  // Reason: Prevent visual overload by limiting to 2 stacked rows (12 tags max), with a single horizontal scroll for both rows. This keeps the UI clean and focused.
+                  const MAX_TAGS = 12;
+                  const TAGS_PER_ROW = 6;
+                  const tags = plant.tags.filter(Boolean).map(String);
+                  const displayTags = tags.slice(0, MAX_TAGS);
+                  const extraCount = tags.length - MAX_TAGS;
+                  const row1 = displayTags.slice(0, TAGS_PER_ROW);
+                  const row2 = displayTags.slice(TAGS_PER_ROW, MAX_TAGS);
+                  return (
+                    <View className="mb-4">
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                      >
+                        <View style={{ flexDirection: "column" }}>
+                          <View style={{ flexDirection: "row" }}>
+                            {row1.map((tag, i) => (
+                              <View
+                                key={`tag-row1-${i}`}
+                                className="bg-brand-100 px-3 py-1.5 rounded-xl mr-2 mb-1"
+                              >
+                                <BodyText className="text-xs text-brand-700 font-medium">
+                                  {tag}
+                                </BodyText>
+                              </View>
+                            ))}
+                          </View>
+                          {row2.length > 0 && (
+                            <View style={{ flexDirection: "row" }}>
+                              {row2.map((tag, i) => (
+                                <View
+                                  key={`tag-row2-${i}`}
+                                  className="bg-brand-100 px-3 py-1.5 rounded-xl mr-2 mb-1"
+                                >
+                                  <BodyText className="text-xs text-brand-700 font-medium">
+                                    {tag}
+                                  </BodyText>
+                                </View>
+                              ))}
+                              {extraCount > 0 && (
+                                <View className="bg-brand-200 px-3 py-1.5 rounded-xl mr-2 mb-1">
+                                  <BodyText className="text-xs text-brand-700 font-medium">
+                                    +{extraCount} more
+                                  </BodyText>
+                                </View>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      </ScrollView>
+                    </View>
+                  );
+                })()}
+              {/* Image Gallery */}
               {plant.images && plant.images.length > 1 && (
                 <View className="my-4">
                   <TitleText className="text-lg font-bold text-cream-800 mb-3">
@@ -255,10 +535,11 @@ export default function PlantDetailScreen() {
                   </TitleText>
                   <FlatList
                     horizontal
-                    data={plant.images.slice(1)} // Skip first image as it's already shown
+                    data={plant.images.slice(1)}
                     keyExtractor={(item, index) => `image-${index}`}
                     renderItem={({ item }) => (
                       <View className="mr-2">
+                        {/* Reason: Apply consistent, fully rounded corners to gallery images for UI consistency */}
                         <CachedImage
                           uri={item.img || ""}
                           style={{ height: 120, width: 180, borderRadius: 8 }}
@@ -275,506 +556,22 @@ export default function PlantDetailScreen() {
                   />
                 </View>
               )}
-
-              {/* Quick Actions - Add to Garden */}
+              {/* Quick Actions */}
               <QuickActions plant={plant} />
-
-              {/* Tab Content - Reduced margin top from mt-6 to mt-2 to reduce the gap */}
+              {/* Tab Bar (moved here, below Add to Garden) */}
+              <View className="mb-2">
+                <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
+              </View>
+              {/* Tab Content */}
               <View className="mt-2 mb-4">
-                {activeTab === "overview" && (
-                  <View className="pb-16">
-                    {/* Description */}
-                    {plant.description && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Description
-                          </TitleText>
-                        </View>
-                        <HtmlRenderer content={plant.description} />
-                      </View>
-                    )}
-
-                    {/* Quick Facts */}
-                    <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                      <View className="border-b border-cream-100 pb-3 mb-4">
-                        <TitleText className="text-lg font-bold text-foreground">
-                          Quick Facts
-                        </TitleText>
-                      </View>
-                      <View>
-                        {(plant.height_min || plant.height_max) && (
-                          <View className="flex-row justify-between mb-3">
-                            <BodyText className="text-cream-500 text-base">
-                              Height
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.height_min || "?"}-
-                              {plant.height_max || "?"} inches
-                            </BodyText>
-                          </View>
-                        )}
-                        {(plant.width_min || plant.width_max) && (
-                          <View className="flex-row justify-between mb-3">
-                            <BodyText className="text-cream-500 text-base">
-                              Width
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.width_min || "?"}-{plant.width_max || "?"}{" "}
-                              inches
-                            </BodyText>
-                          </View>
-                        )}
-                        <View className="flex-row justify-between mb-3">
-                          <BodyText className="text-cream-500 text-base">
-                            Growth Rate
-                          </BodyText>
-                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                            {plant.growth_rate}
-                          </BodyText>
-                        </View>
-                        <View className="flex-row justify-between">
-                          <BodyText className="text-cream-500 text-base">
-                            Origin
-                          </BodyText>
-                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                            {plant.origin}
-                          </BodyText>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Uses and Value */}
-                    {(plant.uses ||
-                      plant.wildlife_value ||
-                      plant.edibility ||
-                      plant.attracts?.length ||
-                      plant.design_features?.length) && (
-                      <View className="bg-white rounded-2xl py-5 mb-4 shadow-sm px-5">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Uses and Value
-                          </TitleText>
-                        </View>
-                        <View>
-                          {plant.uses && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <BodyText className="text-cream-500 text-base mb-2">
-                                Uses
-                              </BodyText>
-                              <HtmlRenderer content={plant.uses.toString()} />
-                            </View>
-                          )}
-                          {plant.edibility && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <BodyText className="text-cream-500 text-base mb-2">
-                                Edibility
-                              </BodyText>
-                              <HtmlRenderer
-                                content={plant.edibility.toString()}
-                              />
-                            </View>
-                          )}
-                          {plant.wildlife_value && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <BodyText className="text-cream-500 text-base mb-2">
-                                Wildlife Value
-                              </BodyText>
-                              <HtmlRenderer
-                                content={plant.wildlife_value.toString()}
-                              />
-                            </View>
-                          )}
-                          {plant.attracts && plant.attracts.length > 0 && (
-                            <View>
-                              <BodyText className="text-cream-500 text-base mb-3">
-                                Attracts
-                              </BodyText>
-                              <View className="flex-row flex-wrap">
-                                {plant.attracts
-                                  .filter(Boolean)
-                                  .map((attract, index) => (
-                                    <View
-                                      key={index}
-                                      className="bg-brand-50 px-3 py-2 rounded-xl mr-2 mb-2"
-                                    >
-                                      <BodyText className="text-sm text-brand-700">
-                                        {attract}
-                                      </BodyText>
-                                    </View>
-                                  ))}
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {activeTab === "care" && (
-                  <View className="pb-16">
-                    <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                      <View className="border-b border-cream-100 pb-3 mb-4">
-                        <TitleText className="text-lg font-bold text-foreground">
-                          Care Requirements
-                        </TitleText>
-                      </View>
-                      <View>
-                        {plant.light_requirements && (
-                          <View className="mb-4 pb-4 border-b border-cream-50">
-                            <BodyText className="text-cream-500 text-base mb-2">
-                              Light
-                            </BodyText>
-                            <HtmlRenderer
-                              content={plant.light_requirements.toString()}
-                            />
-                          </View>
-                        )}
-                        {plant.water_requirements && (
-                          <View className="mb-4 pb-4 border-b border-cream-50">
-                            <BodyText className="text-cream-500 text-base mb-2">
-                              Water
-                            </BodyText>
-                            <HtmlRenderer
-                              content={plant.water_requirements.toString()}
-                            />
-                          </View>
-                        )}
-                        {plant.soil_ph && (
-                          <View className="flex-row justify-between mb-3">
-                            <BodyText className="text-cream-500 text-base">
-                              Soil pH
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.soil_ph}
-                            </BodyText>
-                          </View>
-                        )}
-                        {plant.soil_texture && (
-                          <View className="flex-row justify-between mb-3">
-                            <BodyText className="text-cream-500 text-base">
-                              Soil Texture
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.soil_texture}
-                            </BodyText>
-                          </View>
-                        )}
-                        {plant.maintenance && (
-                          <View className="mb-4 pb-4 border-b border-cream-50">
-                            <BodyText className="text-cream-500 text-base mb-2">
-                              Maintenance
-                            </BodyText>
-                            <HtmlRenderer
-                              content={plant.maintenance.toString()}
-                            />
-                          </View>
-                        )}
-                        {plant.usda_hardiness_zones && (
-                          <View className="flex-row justify-between">
-                            <BodyText className="text-cream-500 text-base">
-                              USDA Zones
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.usda_hardiness_zones}
-                            </BodyText>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </View>
-                )}
-
-                {activeTab === "features" && (
-                  <View className="pb-16">
-                    {/* Flower Features */}
-                    {(plant.flower_description ||
-                      plant.flower_colors ||
-                      plant.flower_bloom_time) && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Flower Features
-                          </TitleText>
-                        </View>
-                        <View>
-                          {plant.flower_description && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <HtmlRenderer
-                                content={plant.flower_description}
-                              />
-                            </View>
-                          )}
-                          {plant.flower_color && (
-                            <View className="flex-row justify-between mb-3">
-                              <BodyText className="text-cream-500 text-base">
-                                Color
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.flower_color)
-                                  ? plant.flower_color
-                                      .filter(Boolean)
-                                      .join(", ")
-                                  : plant.flower_color}
-                              </BodyText>
-                            </View>
-                          )}
-                          {plant.flower_bloom_time && (
-                            <View className="flex-row justify-between">
-                              <BodyText className="text-cream-500 text-base">
-                                Bloom Time
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.flower_bloom_time)
-                                  ? plant.flower_bloom_time
-                                      .filter(Boolean)
-                                      .join(", ")
-                                  : plant.flower_bloom_time}
-                              </BodyText>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Leaf Features */}
-                    {(plant.leaf_description ||
-                      plant.leaf_color ||
-                      plant.leaf_shape) && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Leaf Features
-                          </TitleText>
-                        </View>
-                        <View>
-                          {plant.leaf_description && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <HtmlRenderer content={plant.leaf_description} />
-                            </View>
-                          )}
-                          {plant.leaf_color && (
-                            <View className="flex-row justify-between mb-3">
-                              <BodyText className="text-cream-500 text-base">
-                                Color
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.leaf_color)
-                                  ? plant.leaf_color.filter(Boolean).join(", ")
-                                  : plant.leaf_color}
-                              </BodyText>
-                            </View>
-                          )}
-                          {plant.leaf_shape && (
-                            <View className="flex-row justify-between">
-                              <BodyText className="text-cream-500 text-base">
-                                Shape
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.leaf_shape)
-                                  ? plant.leaf_shape.filter(Boolean).join(", ")
-                                  : plant.leaf_shape}
-                              </BodyText>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Fruit Features */}
-                    {(plant.fruit_description ||
-                      plant.fruit_color ||
-                      plant.fruit_type) && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Fruit Features
-                          </TitleText>
-                        </View>
-                        <View>
-                          {plant.fruit_description && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <HtmlRenderer content={plant.fruit_description} />
-                            </View>
-                          )}
-                          {plant.fruit_color && (
-                            <View className="flex-row justify-between mb-3">
-                              <BodyText className="text-cream-500 text-base">
-                                Color
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.fruit_color)
-                                  ? plant.fruit_color.filter(Boolean).join(", ")
-                                  : plant.fruit_color}
-                              </BodyText>
-                            </View>
-                          )}
-                          {plant.fruit_type && (
-                            <View className="flex-row justify-between">
-                              <BodyText className="text-cream-500 text-base">
-                                Type
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {Array.isArray(plant.fruit_type)
-                                  ? plant.fruit_type.filter(Boolean).join(", ")
-                                  : plant.fruit_type}
-                              </BodyText>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {activeTab === "taxonomy" && (
-                  <View className="pb-16">
-                    <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                      <View className="border-b border-cream-100 pb-3 mb-4">
-                        <TitleText className="text-lg font-bold text-foreground">
-                          Classification
-                        </TitleText>
-                      </View>
-                      <View>
-                        <View className="flex-row justify-between mb-3">
-                          <BodyText className="text-cream-500 text-base">
-                            Family
-                          </BodyText>
-                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                            {plant.family}
-                          </BodyText>
-                        </View>
-                        <View className="flex-row justify-between mb-3">
-                          <BodyText className="text-cream-500 text-base">
-                            Genus
-                          </BodyText>
-                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                            {plant.genus}
-                          </BodyText>
-                        </View>
-                        <View className="flex-row justify-between mb-3">
-                          <BodyText className="text-cream-500 text-base">
-                            Species
-                          </BodyText>
-                          <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                            {plant.species}
-                          </BodyText>
-                        </View>
-                        {plant.phonetic_spelling && (
-                          <View className="flex-row justify-between">
-                            <BodyText className="text-cream-500 text-base">
-                              Pronunciation
-                            </BodyText>
-                            <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                              {plant.phonetic_spelling}
-                            </BodyText>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </View>
-                )}
-
-                {activeTab === "problems" && (
-                  <View className="pb-16">
-                    {(plant.poison_symptoms ||
-                      plant.poison_toxic_principle ||
-                      plant.poison_severity) && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Toxicity Information
-                          </TitleText>
-                        </View>
-                        <View>
-                          {plant.poison_symptoms && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <BodyText className="text-cream-500 text-base mb-2">
-                                Symptoms
-                              </BodyText>
-                              <HtmlRenderer
-                                content={plant.poison_symptoms.toString()}
-                              />
-                            </View>
-                          )}
-                          {plant.poison_toxic_principle && (
-                            <View className="mb-4 pb-4 border-b border-cream-50">
-                              <BodyText className="text-cream-500 text-base mb-2">
-                                Toxic Principle
-                              </BodyText>
-                              <HtmlRenderer
-                                content={plant.poison_toxic_principle.toString()}
-                              />
-                            </View>
-                          )}
-                          {plant.poison_severity && (
-                            <View className="flex-row justify-between mb-3">
-                              <BodyText className="text-cream-500 text-base">
-                                Severity
-                              </BodyText>
-                              <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                {plant.poison_severity}
-                              </BodyText>
-                            </View>
-                          )}
-                          {plant.poison_part &&
-                            plant.poison_part.length > 0 && (
-                              <View className="flex-row justify-between">
-                                <BodyText className="text-cream-500 text-base">
-                                  Poisonous Parts
-                                </BodyText>
-                                <BodyText className="text-foreground text-base font-medium max-w-[60%] text-right">
-                                  {plant.poison_part.filter(Boolean).join(", ")}
-                                </BodyText>
-                              </View>
-                            )}
-                        </View>
-                      </View>
-                    )}
-
-                    {plant.problems && plant.problems.length > 0 && (
-                      <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                        <View className="border-b border-cream-100 pb-3 mb-4">
-                          <TitleText className="text-lg font-bold text-foreground">
-                            Common Problems
-                          </TitleText>
-                        </View>
-                        <View>
-                          <BodyText className="text-foreground leading-relaxed">
-                            {plant.problems.filter(Boolean).join(", ")}
-                          </BodyText>
-                        </View>
-                      </View>
-                    )}
-
-                    {plant.resistance_to_challenges &&
-                      plant.resistance_to_challenges.length > 0 && (
-                        <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                          <View className="border-b border-cream-100 pb-3 mb-4">
-                            <TitleText className="text-lg font-bold text-foreground">
-                              Resistances
-                            </TitleText>
-                          </View>
-                          <View>
-                            <BodyText className="text-foreground leading-relaxed">
-                              {plant.resistance_to_challenges
-                                .filter(Boolean)
-                                .join(", ")}
-                            </BodyText>
-                          </View>
-                        </View>
-                      )}
-                  </View>
-                )}
+                {activeTab === "overview" && <OverviewSection plant={plant} />}
+                {activeTab === "care" && <CareSection plant={plant} />}
+                {activeTab === "features" && <FeaturesSection plant={plant} />}
+                {activeTab === "taxonomy" && <TaxonomySection plant={plant} />}
+                {activeTab === "problems" && <ProblemsSection plant={plant} />}
               </View>
             </View>
           </ScrollView>
-
-          {/* Tab Bar at the bottom */}
-          <View className="absolute bottom-0 left-0 right-0">
-            <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
-          </View>
         </View>
       </ErrorBoundary>
     </PageContainer>

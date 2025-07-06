@@ -250,7 +250,9 @@ export default function PlantForm({
             selectedGarden={selectedGarden}
             onSelectGarden={setSelectedGarden}
             onNext={goToNextStep}
-            plantName={plant.common_names?.[0] || plant.scientific_name}
+            plantName={
+              (plant.common_names?.[0] || plant.scientific_name) as string
+            }
           />
         );
       case 2:
