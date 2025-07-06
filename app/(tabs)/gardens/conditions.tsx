@@ -347,7 +347,10 @@ export default function GardenConditionsPage() {
               });
 
               Alert.alert("Success", "Garden deleted successfully");
-              router.push("/(tabs)/gardens");
+              // Reason: Use replace to prevent navigating back to a deleted garden. Delay ensures alert is visible before navigation.
+              setTimeout(() => {
+                router.replace("/(tabs)/gardens");
+              }, 500);
             } catch (err) {
               console.error("Error deleting garden:", err);
               Alert.alert(
