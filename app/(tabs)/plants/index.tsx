@@ -128,9 +128,7 @@ export default function PlantDatabaseScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="flex-1">
           <View className="pt-5 px-5">
-            <TitleText className="text-2xl text-foreground font-bold mb-4">
-              Plant Database
-            </TitleText>
+            <TitleText className="text-3xl mb-4">Plant Database</TitleText>
 
             {/* Status message for garden filtering */}
             {activeGardenFilter && (

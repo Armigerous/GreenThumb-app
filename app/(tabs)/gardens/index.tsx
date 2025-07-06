@@ -11,6 +11,7 @@ import AnimatedTransition from "@/components/UI/AnimatedTransition";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 
 import { useCallback, useEffect } from "react";
+import { BodyText, TitleText } from "@/components/Gardens";
 
 export default function GardensScreen() {
   const { user } = useUser();
@@ -91,16 +92,14 @@ export default function GardensScreen() {
       {/* Header */}
       <AnimatedTransition delay={150} initialY={10}>
         <View className="flex-row justify-between items-center mb-6 px-4 pt-4">
-          <Text className="text-2xl font-title font-bold text-foreground">
-            My Gardens
-          </Text>
+          <TitleText className="text-3xl">My Gardens</TitleText>
           <TouchableOpacity
             className="bg-primary rounded-lg px-4 py-2 flex-row items-center"
             onPress={() => router.push("/(tabs)/gardens/new")}
           >
-            <Text className="text-primary-foreground font-medium mr-2">
+            <BodyText className="text-primary-foreground mr-2">
               New Garden
-            </Text>
+            </BodyText>
             <Ionicons name="add" size={24} color="#fffefa" />
           </TouchableOpacity>
         </View>
