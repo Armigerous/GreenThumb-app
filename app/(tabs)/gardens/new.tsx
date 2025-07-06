@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { useSupabaseAuth } from "@/lib/hooks/useSupabaseAuth";
-import NewGardenForm from "@/components/Gardens/NewGardenForm";
+import GardenForm from "@/components/Gardens/GardenForm";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { useSubscriptionGate } from "@/components/subscription/SubscriptionGate";
 
@@ -70,7 +70,7 @@ export default function NewGarden() {
       </View>
 
       <View className="flex-1 px-5">
-        <NewGardenForm onSuccess={handleSuccess} onCancel={handleCancel} />
+        <GardenForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </View>
     </PageContainer>
   );

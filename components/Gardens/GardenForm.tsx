@@ -16,6 +16,7 @@ import { CompactSpinner, LoadingSpinner } from "../UI/LoadingSpinner";
 import ProgressIndicator from "../UI/ProgressIndicator";
 import { Ionicons } from "@expo/vector-icons";
 import { BodyText } from "../UI/Text";
+// Import step components for the multi-step garden form
 import {
   GardenNameStep,
   LocationStep,
@@ -23,15 +24,12 @@ import {
   StyleStep,
 } from "./NewGardenFormSteps";
 
-type NewGardenFormProps = {
+type GardenFormProps = {
   onSuccess: () => void;
   onCancel: () => void;
 };
 
-export default function NewGardenForm({
-  onSuccess,
-  onCancel,
-}: NewGardenFormProps) {
+export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
   const { user } = useUser();
   const queryClient = useQueryClient();
 
