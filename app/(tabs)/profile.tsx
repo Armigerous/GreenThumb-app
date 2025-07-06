@@ -206,16 +206,16 @@ export default function ProfileScreen() {
         </View>
 
         <View className="px-5 pb-8">
-          {/* User Identity Section */}
-          <ProfileSection>
-            <View className="flex-row items-center mb-4">
+          {/* User Identity Section - Improved layout */}
+          <View className="mb-4">
+            <View className="flex-row items-center gap-x-4">
               {user?.imageUrl ? (
                 <Image
                   source={{ uri: user.imageUrl }}
-                  className="w-20 h-20 rounded-full mr-4"
+                  className="w-20 h-20 rounded-full"
                 />
               ) : (
-                <View className="w-20 h-20 rounded-full bg-brand-100 border-2 border-brand-200 items-center justify-center mr-4">
+                <View className="w-20 h-20 rounded-full bg-brand-100 border-2 border-brand-200 items-center justify-center">
                   <Ionicons
                     name="person"
                     size={32}
@@ -224,7 +224,7 @@ export default function ProfileScreen() {
                 </View>
               )}
 
-              <View className="flex-1">
+              <View className="flex-1 justify-center">
                 <SubtitleText className="text-xl text-cream-800 mb-1">
                   {user?.firstName} {user?.lastName}
                 </SubtitleText>
@@ -239,16 +239,16 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Greeting */}
-            <View className="bg-brand-50 border border-brand-100 rounded-lg p-3">
-              <BodyText className="text-base text-brand-700 text-center">
+            {/* Greeting - no background for visual simplicity, but using darker text for contrast */}
+            <View className="my-6">
+              <BodyText className="text-base text-cream-800 text-center">
                 Hi {firstName}! 🌱
               </BodyText>
-              <BodyText className="text-sm text-brand-600 text-center mt-1">
+              <BodyText className="text-sm text-cream-700 text-center mt-1">
                 Your plants are lucky to have you.
               </BodyText>
             </View>
-          </ProfileSection>
+          </View>
 
           {/* Subscription Status Section */}
           {isSubscriptionLoading ? (
