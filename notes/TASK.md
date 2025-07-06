@@ -6,6 +6,33 @@
 
 ---
 
+## 🚀 DATABASE OPTIMIZATION - MATERIALIZED VIEWS
+
+**DB-VIEW-001**: Create fully materialized plant views for filtering, autocomplete, and card display  
+**Status:** 🟢 **NEW**  
+**Owner:** Development Team  
+**Description:**
+We need to create two new materialized views to replace the current card views. These views will be fully materialized representations of the plants table, one for common names and one for scientific names. Each view should include all fields required for:
+
+- Filtering (all filterable fields)
+- Autocomplete (name fields)
+- Card display (all card UI fields)
+
+This will allow us to efficiently filter, search, and display plant cards directly from the materialized views, improving performance and scalability.
+
+**Acceptance Criteria:**
+
+- [ ] `plants_common_name` materialized view exists with all required fields
+- [ ] `plants_scientific_name` materialized view exists with all required fields
+- [ ] Both views support all current and planned filters
+- [ ] Both views support autocomplete for their respective name fields
+- [ ] Both views provide all data needed for card display
+- [ ] Card, search, and filter queries use only these views (no fallback to full table)
+- [ ] Views are indexed for fast search and filtering
+- [ ] Views are refreshed on plant data changes
+
+---
+
 ## 🎯 Launch Overview
 
 **Core App Status:**
