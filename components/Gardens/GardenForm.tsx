@@ -1,26 +1,26 @@
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState, useMemo, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
+  AppState,
   Keyboard,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
-  Alert,
-  AppState,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CompactSpinner, LoadingSpinner } from "../UI/LoadingSpinner";
 import ProgressIndicator from "../UI/ProgressIndicator";
-import { Ionicons } from "@expo/vector-icons";
 import { BodyText } from "../UI/Text";
 // Import step components for the multi-step garden form
+import { getElevation, getUrbanIndexForZip } from "@/lib/services/weather";
 import {
   GardenNameStep,
-  LocationStep,
   GrowingConditionsStep,
+  LocationStep,
   StyleStep,
 } from "./NewGardenFormSteps";
 
@@ -80,6 +80,10 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
 
     // Step 4: Optional style
     landscape_theme_ids: [] as number[], // For enhanced recommendations
+
+    // New: Environmental data
+    elevation: null as number | null, // Elevation in meters
+    urban_index: null as number | null, // 0-1 normalized urban index
   });
 
   // Cache management functions
@@ -250,22 +254,57 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
   }, []);
 
   // Handle ZIP code selection
-  const handleZipCodeSelect = (locationData: {
+  const handleZipCodeSelect = async (locationData: {
     zipCode: string;
     city?: string;
     county?: string;
   }) => {
+    // Set initial location info
     setFormValues((prev) => {
       const newFormValues = {
         ...prev,
         zip_code: locationData.zipCode,
         city: locationData.city || "",
         county: locationData.county || "",
+        elevation: null,
+        urban_index: null,
       };
       // Save to cache immediately since this is a significant change
       saveFormDataToCache(newFormValues, currentStep);
       return newFormValues;
     });
+
+    // Fetch elevation and urban index asynchronously
+    try {
+      // Geocode again to get lat/lng (ZipCodeInput only provides city/county)
+      const geoResults = await import("expo-location").then((mod) =>
+        mod.geocodeAsync(`${locationData.zipCode}, North Carolina, USA`)
+      );
+      let elevation: number | null = null;
+      if (geoResults.length > 0) {
+        const { latitude, longitude } = geoResults[0];
+        elevation = await getElevation(latitude, longitude);
+        // Debug: Log elevation result
+        console.log("Elevation result:", elevation);
+      }
+      // Fetch urban index from local file (synchronous)
+      const urbanIndex = getUrbanIndexForZip(locationData.zipCode);
+      // Debug: Log computed urban index
+      console.log("Urban index result:", urbanIndex);
+      // Update form state with elevation and urban index
+      setFormValues((prev) => {
+        const newFormValues = {
+          ...prev,
+          elevation,
+          urban_index: urbanIndex,
+        };
+        saveFormDataToCache(newFormValues, currentStep);
+        return newFormValues;
+      });
+    } catch (err) {
+      console.warn("Failed to fetch elevation or urban index:", err);
+      // Leave elevation/urban_index as null if fetch fails
+    }
   };
 
   // Handle ZIP code validation state changes
@@ -361,6 +400,9 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
             landscape_theme_ids: formValues.landscape_theme_ids,
             // Set sensible defaults for user preferences
             wants_recommendations: true,
+            // New: Environmental data
+            elevation: formValues.elevation,
+            urban_index: formValues.urban_index,
           },
         ]);
 
@@ -507,6 +549,8 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
                           maintenance_id: null,
                           growth_rate_ids: [],
                           landscape_theme_ids: [],
+                          elevation: null,
+                          urban_index: null,
                         });
                         setCurrentStep(1);
                         setShowCachedDataNotification(false);

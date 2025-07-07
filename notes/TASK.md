@@ -2,7 +2,7 @@
 
 > **Launch Date:** August 15, 2025  
 > **Current Status:** Pre-launch development and testing phase  
-> **Last Updated:** July 7, 2025
+> **Last Updated:** July 1, 2025
 
 ---
 
@@ -799,13 +799,14 @@ Garden conditions are automatically converted to plant database filters includin
 - [ ] Interactive soil pyramid component
 - [ ] Visual representation of soil composition
 - [ ] Educational tooltips for soil types
-      **INTERVIEW-ENHANCE-013**: Icon improvement in info modals  
-       **Status:** 🟢 **ENHANCEMENT** - Visual improvement  
-       **Owner:** Design Team  
-       **Due:** Post-launch (February 2025)  
-       **User Suggestion:** "Replace question marks with exclamation points in info modal circles"  
-       **Description:** Info modal icons should use exclamation points instead of question marks  
-       **Implementation Ideas:**
+
+**INTERVIEW-ENHANCE-013**: Icon improvement in info modals  
+**Status:** 🟢 **ENHANCEMENT** - Visual improvement  
+**Owner:** Design Team  
+**Due:** Post-launch (February 2025)  
+**User Suggestion:** "Replace question marks with exclamation points in info modal circles"  
+**Description:** Info modal icons should use exclamation points instead of question marks  
+**Implementation Ideas:**
 
 - [ ] Update icon library usage
 - [ ] Consistent info icon treatment
@@ -1458,139 +1459,277 @@ Garden conditions are automatically converted to plant database filters includin
 
 ## Dynamic Plant Task Scheduling Plan
 
+### Core Task Types & Reasons
+
+| Task       | Reason/Explanation                    |
+| ---------- | ------------------------------------- |
+| Water      | Maintain soil moisture                |
+| Fertilize  | Nutrient boost                        |
+| Prune      | Shape & rebloom                       |
+| Inspect    | Pest & disease scouting               |
+| Mulch      | Weed suppression & moisture retention |
+| Weed       | Manual weed control                   |
+| Amend Soil | pH/nutrient correction                |
+| Propagate  | Division & cuttings                   |
+| Transplant | Relocation of seedlings               |
+| Log        | Phenology & journal                   |
+| Winterize  | Frost protection & container prep     |
+
+---
+
 ### Overview
 
-We are moving to a dynamic, climate-aware plant task scheduling system. All tasks are tied to a specific plant (user_plant_id) and generated when a plant is added to a garden. The system supports both a full-year plan and dynamic rescheduling based on weather and user actions.
+We are moving to a dynamic, climate-aware plant task scheduling system. All tasks are tied to a specific plant (`user_plant_id`) and generated when a plant is added to a garden. The system supports both a full-year plan and dynamic rescheduling based on weather and user actions.
+
+### Core Task Types, Timing, and Dynamic Tweaks
+
+Below is a mapping of each major task type, its base timing, and the research-driven dynamic adjustments that will be used in scheduling logic. Only the following 11 core tasks are supported:
+
+#### Task Mapping
+
+1. **Pruning** (`Prune` — Shape & rebloom)
+
+   - **Task Type:** `Prune`
+   - **Base Timing:**
+     - Spring-bloomers: 1 week after `flower_bloom_time`
+     - Fast-growing vines/shrubs: monthly (based on `growth_rate` + `plant_habit`)
+   - **Dynamic Tweaks:**
+     - Delay heavy pruning until 7 days after last frost (from ZIP/county climate data)
+     - Adjust for microclimate: ±2–3 days based on elevation/urban heat
+
+2. **Pest & Disease Inspection** (`Inspect` — Pest & disease scouting)
+
+   - **Task Type:** `Inspect`
+   - **Base Timing:**
+     - Bi-weekly during active growing season (`life_cycle`, `usda_zones`)
+     - Weekly if `plant.problems` is not null
+   - **Dynamic Tweaks:**
+     - After wet spells, increase frequency by 1–2 days
+     - Add extra inspection monthly for high-humidity microclimates
+
+3. **Mulching & Weed Control** (`Mulch` — Weed suppression & moisture retention, `Weed` — Manual weed control)
+
+   - **Task Types:** `Mulch`, `Weed`
+   - **Base Timing:**
+     - Mulch: once per season (spring/fall) at frost boundaries
+     - Weeding: every 2–4 weeks
+   - **Dynamic Tweaks:**
+     - Spring mulch: 7 days after last frost; fall mulch: 7 days before first frost
+     - Extra mulch in dry summer months (<4 in/mo rainfall)
+     - Weeding: every 14 days (full sun), 28 days (shade)
+
+4. **Soil Amendment** (`Amend Soil` — pH/nutrient correction)
+
+   - **Task Type:** `Amend Soil`
+   - **Base Timing:**
+     - Amend as recommended by plant type, typically early spring
+   - **Dynamic Tweaks:**
+     - After wet winters, schedule spring amendment
+     - Adjust timing for soil type (e.g., earlier in sandy soils)
+
+5. **Propagation** (`Propagate` — Division & cuttings)
+
+   - **Task Type:** `Propagate`
+   - **Base Timing:**
+     - Per plant propagation method (cuttings, division, etc.)
+   - **Dynamic Tweaks:**
+     - Only propagate when soil >50°F (use frost dates)
+     - Delay for high elevation
+
+6. **Transplanting** (`Transplant` — Relocation of seedlings)
+
+   - **Task Type:** `Transplant`
+   - **Base Timing:**
+     - 3–4 weeks after sowing or as recommended by plant
+   - **Dynamic Tweaks:**
+     - Transplant before 2-day dry window
+     - In hot urban plots, schedule for early/late day
+
+7. **Watering** (`Water` — Maintain soil moisture)
+
+   - **Task Type:** `Water`
+   - **Base Timing:**
+     - As recommended by plant type and season
+   - **Dynamic Tweaks:**
+     - Pull forward watering by 1 day during heat waves
+     - Adjust for rainfall and soil moisture
+
+8. **Fertilizing** (`Fertilize` — Nutrient boost)
+
+   - **Task Type:** `Fertilize`
+   - **Base Timing:**
+     - As recommended by plant type (e.g., early spring, midseason)
+   - **Dynamic Tweaks:**
+     - Adjust for heavy rain (may require reapplication)
+     - Delay if soil is saturated
+
+9. **Logging Observations** (`Log` — Phenology & journal)
+
+   - **Task Type:** `Log`
+   - **Base Timing:**
+     - Monthly journal/log
+     - At phenophases (first bloom, first fruit)
+   - **Dynamic Tweaks:**
+     - Add log after heavy spring rains (e.g., prompt "soil compaction" note)
+
+10. **Winterization** (`Winterize` — Frost protection & container prep)
+    - **Task Type:** `Winterize`
+    - **Base Timing:**
+      - Container plants: move/cover before first frost
+      - Tender perennials: insulate after last harvest
+    - **Dynamic Tweaks:**
+      - Schedule winterization 3–5 days before first frost (adjust for elevation)
+      - Coastal: push 7–10 days later than mountains
+
+---
+
+### Advanced Climate, Microclimate, and Soil-Driven Improvements
+
+To further increase the precision and value of dynamic plant task scheduling, the following actionable improvements should be integrated into both the scheduling logic and the metadata for each task:
+
+1. **Hardiness Zones & Regional Frost Dates**
+
+   - Anchor all frost-dependent scheduling to a daily-updated, county-level frost date API (e.g., NOAA), not static zone boundaries.
+   - Store both median and historical variance for frost dates in metadata, surfacing tasks as "likely" vs. "possible" risk (e.g., if variance is ±10 days, flag accordingly).
+
+2. **Microclimate Adjustments**
+
+   - Augment each plant's metadata with a microclimate score combining elevation (DEM), land cover (urban/rural), and aspect (degrees of southness).
+   - Dynamically compute date adjustments using regression (e.g., frost_date = zone_median + elevation_ft/1000×3 – urban_index×5).
+
+3. **Rainfall & Humidity Triggers**
+
+   - Tie "wet spell" to rolling 7-day precipitation totals (e.g., if >2" in 7 days, bump inspection frequency by 3 days).
+   - Flag "dry months" by regional climatology (e.g., <4"/month in Sandhills) to trigger extra mulching.
+
+4. **Growing-Season Phases**
+
+   - Compute growing-degree days (GDDs) per plant/location, so tasks like "fertilize after 300 GDDs" are seeded by actual heat accumulation, not just calendar date.
+   - Respect regional bloom and soil temperature windows for pruning, propagation, and transplanting.
+
+5. **Soil & Drainage Factors**
+   - Capture a soil-type code in metadata (from zip/county lookup).
+   - Adjust irrigation and amendment tasks based on soil type (e.g., schedule "Amend Soil" 2 weeks earlier in sandy soils).
+
+---
+
+**Bringing it all together:**
+
+- Integrate high-resolution climate data (GIS layers: elevation, land cover, frost-date grids).
+- Use degree-day triggers for some tasks instead of fixed calendar dates.
+- Quantify a microclimate index per garden location and use it as a numeric modifier in scheduling.
+- Leverage dynamic weather feeds (precipitation, temperature) to adjust tasks in near-real-time.
+
+**Result:**
+By anchoring all task scheduling to quantitative climate and microclimate metrics—rather than rough zone boundaries—each pruning, inspection, and mulch date will be as accurate and actionable as modern gardening science allows. All such adjustments and their rationale should be stored in the `metadata` field for transparency and future analysis.
+
+---
 
 ### Scheduling Workflow
 
 1. **Full-Year Seeding on Plant Add**
 
-   - When a user adds a plant, generate all expected tasks (watering, fertilizing, pruning, etc.) for the next 12 months using plant data and climate info.
-   - Store all tasks in the `plant_tasks` table with due dates and type.
+   - When a user adds a plant, generate all expected tasks (watering, fertilizing, pruning, etc.) for the next 12 months using plant data and climate info, following the above logic.
+   - Store all tasks in the `plant_tasks` table with due dates, type, and relevant metadata (including dynamic adjustments).
 
 2. **Rolling Refresh Job**
-
    - A background job runs daily/hourly, looking ahead 30–60 days.
    - Regenerates or reschedules tasks in that window based on:
      - Weather alerts (rain, frost, heat, etc.)
      - Plant/garden data changes
-   - Archives "stale" tasks (past due and not completed).
+   - Updates only tasks that are not completed.
+   - For any unexpected event, append an entry to the `adjustments` array in the `metadata` field of the affected task. Example patterns:
 
-3. **User-Driven Overrides**
+```json
+// 1. Frost warning (move earlier by 1 day)
+{
+  "adjustments": [
+    {
+      "type": "frost_warning",
+      "days": -1,
+      "explanation": "NWS frost alert for county XYZ on 2025-10-15"
+    }
+  ]
+}
 
-   - If a user marks a task complete or reschedules it, the system respects this and does not override it in future refreshes.
+// 2. Heavy rain spell (push out inspection by 2 days)
+{
+  "adjustments": [
+    {
+      "type": "rain_spell",
+      "days": +2,
+      "explanation": "7-day total precipitation > 2\u2033 (triggered on 2025-07-08)"
+    }
+  ]
+}
 
-4. **UI Feedback & Exports**
-   - Calendar view shows both original (planned) and dynamically updated tasks.
-   - Dynamic tasks are visually distinct and include tooltips for context (e.g., "Updated for tomorrow's frost warning").
-   - Users can export upcoming tasks (PDF/CSV).
+// 3. Heat wave (pull forward watering by 1 day)
+{
+  "adjustments": [
+    {
+      "type": "heat_wave",
+      "days": -1,
+      "explanation": "3-day forecast >95\u00b0F (triggered on 2025-08-12)"
+    }
+  ]
+}
 
-### Database Changes Required
+// 4. Drought alert (increase frequency of mulching)
+{
+  "adjustments": [
+    {
+      "type": "drought_alert",
+      "days": +7,
+      "explanation": "Regional drought declaration—added extra mulch in dry period"
+    }
+  ]
+}
+```
 
-- Expand allowed `task_type` values in `plant_tasks` (beyond Water/Fertilize/Harvest).
-- Add the following fields to `plant_tasks`:
-  - `archived` (boolean): for auto-archived/stale tasks
-  - `source` (text/enum): 'seeded', 'dynamic', 'user' (tracks origin of task)
-  - `original_due_date` (timestamptz): for rescheduled tasks
-  - `metadata` (jsonb): for weather notes, reschedule reasons, etc.
-- No recurrence field needed (tasks are regenerated as needed).
+---
+
+### Database Schema Changes (Required)
+
+1. **Expand Allowed `task_type` Values**
+
+   - Update the `task_type` enum to include only the following:
+     - `"Water"`, `"Fertilize"`, `"Prune"`, `"Inspect"`, `"Mulch"`, `"Weed"`, `"Amend Soil"`, `"Propagate"`, `"Transplant"`, `"Log"`, `"Winterize"`
+
+2. **Add `metadata` Field**
+
+   - Add a `metadata` column of type `jsonb` to the `plant_tasks` table.
+   - Purpose: Store weather notes, system explanations, and dynamic context for each task, including adjustment entries as shown above.
+
+3. **No Additional Recurrence or Source Fields**
+
+   - Do **not** add fields for recurrence, archiving, user rescheduling, or original due date at this time.
+
+4. **Indexing for Performance**
+
+   - Add indexes on `user_plant_id`, `due_date`, `completed`, and a GIN index on `metadata` for efficient querying.
+
+5. **Documentation**
+   - Update `docs/architecture.md` to reflect the new schema and document the intended use of the `metadata` field and the logic for each task type.
+
+---
 
 ### Implementation Tasks
 
-- [ ] Update `plant_tasks` table schema (add new fields, expand allowed types)
-- [ ] Implement full-year task seeding logic on plant add
+- [ ] Update `plant_tasks` table schema (add new task types, add `metadata` field, add indexes)
+- [ ] Implement full-year task seeding logic on plant add, using the above timing and dynamic rules
 - [ ] Build rolling refresh background job (daily/hourly)
-- [ ] Implement logic to respect user overrides
-- [ ] Update UI to distinguish planned vs. dynamic tasks
+- [ ] Maintain overdue task logic in UI (continue to display overdue tasks as missed)
 - [ ] Add export functionality (PDF/CSV)
-- [ ] Document new scheduling logic in `docs/architecture.md` and `docs/technical.md`
+- [ ] Update documentation (`docs/architecture.md`) to reflect schema and logic changes, including task type logic
+- [ ] Test with all new task types and metadata payloads; validate performance with large gardens
 
-// Reason: This plan enables flexible, climate-aware, and user-respecting plant care scheduling, supporting both automation and manual control.
+### Acceptance Criteria
 
-## [Planned] Complete Removal of Garden Health Feature (2024-06)
+- The `plant_tasks` table supports only the 11 core task types and a flexible `metadata` field.
+- The schema and task logic are documented and tested.
+- No breaking changes to existing task logic or UI.
+- Ready for use by the new edge function and rolling refresh job.
 
-### Rationale
-
-We are removing the "garden health" feature from the app. This feature previously tracked a score or status for each garden, decreasing when users had overdue tasks. With the move to a more dynamic, flexible, and positive user experience (and dynamic task scheduling), punitive or negative feedback is no longer aligned with our product philosophy. Instead, we will focus on positive reinforcement and clear, actionable feedback for users.
-
-### Scope
-
-This is a **major architectural and UX change**. It will affect the database, backend logic, UI components, hooks, tests, and documentation. All references to garden health must be removed or refactored.
-
-### Task Breakdown
-
-1. **Discovery & Impact Assessment**
-
-   - [ ] Search the entire codebase for all references to garden health (e.g., `gardenHealth`, `garden_health`, `health_score`, `setGardenHealth`, etc.).
-   - [ ] Identify all UI components, hooks, and utilities that display, calculate, or depend on garden health.
-   - [ ] List all database tables and columns related to garden health (likely in `user_gardens` or related tables).
-   - [ ] Find all backend/API logic that updates or returns garden health.
-   - [ ] Review documentation, onboarding, and tests for garden health references.
-
-2. **Planning the Removal**
-
-   - [ ] Plan SQL migrations to drop garden health columns/tables from Supabase.
-   - [ ] Plan refactors/removals for all affected frontend and backend code.
-   - [ ] Decide how to fill any UI/UX gaps left by removing garden health (e.g., replace with positive stats, streaks, or nothing).
-
-3. **Implementation**
-
-   - [ ] Write and apply database migrations to remove garden health fields.
-   - [ ] Refactor or remove all frontend code (components, hooks, context) that uses garden health.
-   - [ ] Remove or update backend logic and API endpoints related to garden health.
-   - [ ] Update or remove tests that check garden health logic.
-   - [ ] Update onboarding, tooltips, and help text to remove garden health references.
-
-4. **Testing & Validation**
-
-   - [ ] Test all user flows where garden health was previously shown or used.
-   - [ ] Ensure no errors, broken UI, or missing feedback.
-   - [ ] Validate that the user experience remains positive and clear.
-
-5. **Documentation & Communication**
-
-   - [ ] Update `README.md`, `docs/architecture.md`, and `docs/technical.md` to remove all references to garden health.
-   - [ ] Add a migration note in `TASK.md` and/or `PLANNING.md` explaining the rationale and what changed.
-
-6. **Release & Monitor**
-   - [ ] Deploy the changes.
-   - [ ] Monitor user feedback for confusion or requests for the old feature.
-
-// Reason: This ensures a clean, positive, and modern user experience, and prevents technical debt or confusion from legacy garden health logic.
-
----
-
-## 🌱 Garden Health Removal Implementation (July 7, 2025)
-
-**Status:** ✅ **COMPLETE**
-**Owner:** Development Team
-**Rationale:** Shifting away from "garden health" metric to focus on actionable, task-based plant care. Garden health percentages are now considered a gimmick and have been completely removed to focus on positive, actionable feedback.
-
-### ✅ COMPLETED FRONTEND CHANGES
-
-_All UI, types, queries, and hooks have been refactored to remove all garden health logic. No health scores, percentages, or impact fields remain. All status and feedback are now based on actionable task counts (overdue, upcoming, etc.)._
-
-### ✅ COMPLETED BACKEND CHANGES
-
-- All health-related functions, views, and fields have been dropped from Supabase.
-- The obsolete trigger function `trigger_refresh_garden_health_view` has been removed.
-- No health-related routines, columns, or logic remain in the database.
-
-### ✅ COMPLETED DOCUMENTATION CHANGES
-
-- All documentation, onboarding, and help text have been updated to remove garden health references.
-- Migration note: As of July 2025, all garden health logic, UI, and database routines have been fully removed. The app now focuses on positive, actionable plant care feedback only.
-
-### 🧪 VALIDATION
-
-- All user flows, UI, and API endpoints tested and confirmed to be free of garden health logic.
-- No errors, broken UI, or missing feedback.
-- User experience is positive and clear, with actionable feedback for plant care needs.
-
----
-
-**Migration Note (2025-07):**
-All garden health logic, UI, and database routines have been fully removed. This includes all health-related functions, views, columns, and documentation. The app now focuses on positive, actionable plant care feedback only.
+// Reason: This plan keeps the system focused, maintainable, and user-friendly, while supporting dynamic, climate-aware plant care scheduling.
 
 ---

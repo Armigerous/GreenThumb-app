@@ -1,0 +1,5407 @@
+[
+  {
+    "zip": "27867",
+    "density": 12.7,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "27869",
+    "density": 10.6,
+    "urban_index": 0.0021
+  },
+  {
+    "zip": "27876",
+    "density": 12.0,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "27877",
+    "density": 12.0,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "27897",
+    "density": 20.4,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28445",
+    "density": 42.0,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "28460",
+    "density": 84.9,
+    "urban_index": 0.017
+  },
+  {
+    "zip": "28539",
+    "density": 121.9,
+    "urban_index": 0.0244
+  },
+  {
+    "zip": "28540",
+    "density": 184.2,
+    "urban_index": 0.0368
+  },
+  {
+    "zip": "28541",
+    "density": 184.2,
+    "urban_index": 0.0368
+  },
+  {
+    "zip": "28542",
+    "density": 184.2,
+    "urban_index": 0.0368
+  },
+  {
+    "zip": "28543",
+    "density": 887.4,
+    "urban_index": 0.1775
+  },
+  {
+    "zip": "28544",
+    "density": 182.6,
+    "urban_index": 0.0365
+  },
+  {
+    "zip": "28545",
+    "density": 182.6,
+    "urban_index": 0.0365
+  },
+  {
+    "zip": "28546",
+    "density": 294.0,
+    "urban_index": 0.0588
+  },
+  {
+    "zip": "28547",
+    "density": 325.5,
+    "urban_index": 0.0651
+  },
+  {
+    "zip": "28574",
+    "density": 45.5,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "28584",
+    "density": 75.1,
+    "urban_index": 0.015
+  },
+  {
+    "zip": "27231",
+    "density": 22.8,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "27243",
+    "density": 42.3,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "27278",
+    "density": 92.5,
+    "urban_index": 0.0185
+  },
+  {
+    "zip": "27510",
+    "density": 1514.9,
+    "urban_index": 0.303
+  },
+  {
+    "zip": "27514",
+    "density": 637.7,
+    "urban_index": 0.1275
+  },
+  {
+    "zip": "27515",
+    "density": 637.7,
+    "urban_index": 0.1275
+  },
+  {
+    "zip": "27516",
+    "density": 150.1,
+    "urban_index": 0.03
+  },
+  {
+    "zip": "27517",
+    "density": 196.1,
+    "urban_index": 0.0392
+  },
+  {
+    "zip": "27599",
+    "density": 69.8,
+    "urban_index": 0.014
+  },
+  {
+    "zip": "28509",
+    "density": 29.9,
+    "urban_index": 0.006
+  },
+  {
+    "zip": "28510",
+    "density": 28.0,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "28515",
+    "density": 20.5,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28529",
+    "density": 20.0,
+    "urban_index": 0.004
+  },
+  {
+    "zip": "28537",
+    "density": 2.1,
+    "urban_index": 0.0004
+  },
+  {
+    "zip": "28552",
+    "density": 6.0,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "28556",
+    "density": 8.2,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "28571",
+    "density": 19.3,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "28583",
+    "density": 63.6,
+    "urban_index": 0.0127
+  },
+  {
+    "zip": "28587",
+    "density": 41.7,
+    "urban_index": 0.0083
+  },
+  {
+    "zip": "27906",
+    "density": 20.4,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27907",
+    "density": 20.4,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27909",
+    "density": 69.3,
+    "urban_index": 0.0139
+  },
+  {
+    "zip": "28421",
+    "density": 10.6,
+    "urban_index": 0.0021
+  },
+  {
+    "zip": "28425",
+    "density": 28.1,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "28435",
+    "density": 10.0,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "28443",
+    "density": 58.7,
+    "urban_index": 0.0117
+  },
+  {
+    "zip": "28454",
+    "density": 15.1,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "28457",
+    "density": 29.6,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "28478",
+    "density": 14.6,
+    "urban_index": 0.0029
+  },
+  {
+    "zip": "27919",
+    "density": 7.5,
+    "urban_index": 0.0015
+  },
+  {
+    "zip": "27930",
+    "density": 76.0,
+    "urban_index": 0.0152
+  },
+  {
+    "zip": "27944",
+    "density": 24.9,
+    "urban_index": 0.005
+  },
+  {
+    "zip": "27985",
+    "density": 117.6,
+    "urban_index": 0.0235
+  },
+  {
+    "zip": "27343",
+    "density": 14.4,
+    "urban_index": 0.0029
+  },
+  {
+    "zip": "27541",
+    "density": 20.9,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "27573",
+    "density": 247.7,
+    "urban_index": 0.0495
+  },
+  {
+    "zip": "27583",
+    "density": 57.7,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "27811",
+    "density": 13.0,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "27812",
+    "density": 16.2,
+    "urban_index": 0.0032
+  },
+  {
+    "zip": "27827",
+    "density": 133.2,
+    "urban_index": 0.0266
+  },
+  {
+    "zip": "27828",
+    "density": 45.6,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27829",
+    "density": 15.2,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "27833",
+    "density": 36.4,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "27834",
+    "density": 115.6,
+    "urban_index": 0.0231
+  },
+  {
+    "zip": "27835",
+    "density": 115.6,
+    "urban_index": 0.0231
+  },
+  {
+    "zip": "27836",
+    "density": 115.6,
+    "urban_index": 0.0231
+  },
+  {
+    "zip": "27837",
+    "density": 38.2,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "27858",
+    "density": 357.5,
+    "urban_index": 0.0715
+  },
+  {
+    "zip": "27879",
+    "density": 408.2,
+    "urban_index": 0.0816
+  },
+  {
+    "zip": "27884",
+    "density": 15.0,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "28513",
+    "density": 44.0,
+    "urban_index": 0.0088
+  },
+  {
+    "zip": "28530",
+    "density": 39.9,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "28590",
+    "density": 216.4,
+    "urban_index": 0.0433
+  },
+  {
+    "zip": "28722",
+    "density": 54.0,
+    "urban_index": 0.0108
+  },
+  {
+    "zip": "28750",
+    "density": 18.6,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "28756",
+    "density": 19.4,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "28773",
+    "density": 23.4,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28782",
+    "density": 51.3,
+    "urban_index": 0.0103
+  },
+  {
+    "zip": "27203",
+    "density": 372.5,
+    "urban_index": 0.0745
+  },
+  {
+    "zip": "27204",
+    "density": 372.5,
+    "urban_index": 0.0745
+  },
+  {
+    "zip": "27205",
+    "density": 57.3,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "27230",
+    "density": 17.2,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "27248",
+    "density": 50.7,
+    "urban_index": 0.0101
+  },
+  {
+    "zip": "27298",
+    "density": 42.0,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "27316",
+    "density": 37.1,
+    "urban_index": 0.0074
+  },
+  {
+    "zip": "27317",
+    "density": 122.0,
+    "urban_index": 0.0244
+  },
+  {
+    "zip": "27341",
+    "density": 21.9,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "27350",
+    "density": 67.7,
+    "urban_index": 0.0135
+  },
+  {
+    "zip": "27355",
+    "density": 29.8,
+    "urban_index": 0.006
+  },
+  {
+    "zip": "27370",
+    "density": 96.2,
+    "urban_index": 0.0192
+  },
+  {
+    "zip": "28330",
+    "density": 539.1,
+    "urban_index": 0.1078
+  },
+  {
+    "zip": "28338",
+    "density": 12.4,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "28345",
+    "density": 68.6,
+    "urban_index": 0.0137
+  },
+  {
+    "zip": "28347",
+    "density": 14.9,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "28363",
+    "density": 8.1,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "28367",
+    "density": 118.0,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "28379",
+    "density": 65.8,
+    "urban_index": 0.0132
+  },
+  {
+    "zip": "28380",
+    "density": 65.8,
+    "urban_index": 0.0132
+  },
+  {
+    "zip": "28271",
+    "density": 964.9,
+    "urban_index": 0.193
+  },
+  {
+    "zip": "28319",
+    "density": 22.4,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28340",
+    "density": 33.2,
+    "urban_index": 0.0066
+  },
+  {
+    "zip": "28357",
+    "density": 34.1,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "28358",
+    "density": 74.9,
+    "urban_index": 0.015
+  },
+  {
+    "zip": "28359",
+    "density": 74.9,
+    "urban_index": 0.015
+  },
+  {
+    "zip": "28360",
+    "density": 83.8,
+    "urban_index": 0.0168
+  },
+  {
+    "zip": "28362",
+    "density": 83.8,
+    "urban_index": 0.0168
+  },
+  {
+    "zip": "28364",
+    "density": 42.3,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28369",
+    "density": 13.8,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "28371",
+    "density": 72.5,
+    "urban_index": 0.0145
+  },
+  {
+    "zip": "28372",
+    "density": 130.3,
+    "urban_index": 0.0261
+  },
+  {
+    "zip": "28375",
+    "density": 137.8,
+    "urban_index": 0.0276
+  },
+  {
+    "zip": "28377",
+    "density": 48.5,
+    "urban_index": 0.0097
+  },
+  {
+    "zip": "28378",
+    "density": 48.5,
+    "urban_index": 0.0097
+  },
+  {
+    "zip": "28383",
+    "density": 29.9,
+    "urban_index": 0.006
+  },
+  {
+    "zip": "28384",
+    "density": 48.0,
+    "urban_index": 0.0096
+  },
+  {
+    "zip": "28386",
+    "density": 54.2,
+    "urban_index": 0.0108
+  },
+  {
+    "zip": "27025",
+    "density": 43.7,
+    "urban_index": 0.0087
+  },
+  {
+    "zip": "27027",
+    "density": 77.8,
+    "urban_index": 0.0156
+  },
+  {
+    "zip": "27048",
+    "density": 40.1,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "27288",
+    "density": 137.2,
+    "urban_index": 0.0274
+  },
+  {
+    "zip": "27289",
+    "density": 137.2,
+    "urban_index": 0.0274
+  },
+  {
+    "zip": "27320",
+    "density": 60.4,
+    "urban_index": 0.0121
+  },
+  {
+    "zip": "27323",
+    "density": 60.4,
+    "urban_index": 0.0121
+  },
+  {
+    "zip": "27326",
+    "density": 21.9,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "27375",
+    "density": 19.4,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "27013",
+    "density": 31.0,
+    "urban_index": 0.0062
+  },
+  {
+    "zip": "27054",
+    "density": 34.0,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "28023",
+    "density": 118.1,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "28039",
+    "density": 526.9,
+    "urban_index": 0.1054
+  },
+  {
+    "zip": "28041",
+    "density": 43.3,
+    "urban_index": 0.0087
+  },
+  {
+    "zip": "28071",
+    "density": 23.7,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28072",
+    "density": 482.8,
+    "urban_index": 0.0966
+  },
+  {
+    "zip": "28088",
+    "density": 417.2,
+    "urban_index": 0.0834
+  },
+  {
+    "zip": "28125",
+    "density": 25.3,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28138",
+    "density": 91.3,
+    "urban_index": 0.0183
+  },
+  {
+    "zip": "28144",
+    "density": 319.1,
+    "urban_index": 0.0638
+  },
+  {
+    "zip": "28145",
+    "density": 319.1,
+    "urban_index": 0.0638
+  },
+  {
+    "zip": "28146",
+    "density": 107.4,
+    "urban_index": 0.0215
+  },
+  {
+    "zip": "28147",
+    "density": 121.5,
+    "urban_index": 0.0243
+  },
+  {
+    "zip": "28159",
+    "density": 486.8,
+    "urban_index": 0.0974
+  },
+  {
+    "zip": "28018",
+    "density": 21.6,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "28019",
+    "density": 316.2,
+    "urban_index": 0.0632
+  },
+  {
+    "zip": "28024",
+    "density": 118.1,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "28040",
+    "density": 43.3,
+    "urban_index": 0.0087
+  },
+  {
+    "zip": "28043",
+    "density": 128.3,
+    "urban_index": 0.0257
+  },
+  {
+    "zip": "28074",
+    "density": 85.0,
+    "urban_index": 0.017
+  },
+  {
+    "zip": "28076",
+    "density": 208.4,
+    "urban_index": 0.0417
+  },
+  {
+    "zip": "28139",
+    "density": 44.4,
+    "urban_index": 0.0089
+  },
+  {
+    "zip": "28160",
+    "density": 270.3,
+    "urban_index": 0.0541
+  },
+  {
+    "zip": "28167",
+    "density": 12.7,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "28720",
+    "density": 13.5,
+    "urban_index": 0.0027
+  },
+  {
+    "zip": "28746",
+    "density": 19.7,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "28318",
+    "density": 22.4,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28328",
+    "density": 40.9,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "28329",
+    "density": 40.9,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "28366",
+    "density": 23.1,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "28382",
+    "density": 23.1,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "28385",
+    "density": 29.6,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "28393",
+    "density": 17.5,
+    "urban_index": 0.0035
+  },
+  {
+    "zip": "28441",
+    "density": 9.7,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "28444",
+    "density": 9.0,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28447",
+    "density": 4.6,
+    "urban_index": 0.0009
+  },
+  {
+    "zip": "28343",
+    "density": 36.4,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "28351",
+    "density": 32.4,
+    "urban_index": 0.0065
+  },
+  {
+    "zip": "28352",
+    "density": 79.5,
+    "urban_index": 0.0159
+  },
+  {
+    "zip": "28353",
+    "density": 79.5,
+    "urban_index": 0.0159
+  },
+  {
+    "zip": "28396",
+    "density": 21.1,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "28001",
+    "density": 77.7,
+    "urban_index": 0.0155
+  },
+  {
+    "zip": "28002",
+    "density": 77.7,
+    "urban_index": 0.0155
+  },
+  {
+    "zip": "28009",
+    "density": 151.2,
+    "urban_index": 0.0302
+  },
+  {
+    "zip": "28097",
+    "density": 68.2,
+    "urban_index": 0.0136
+  },
+  {
+    "zip": "28109",
+    "density": 88.7,
+    "urban_index": 0.0177
+  },
+  {
+    "zip": "28127",
+    "density": 42.2,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "28128",
+    "density": 42.3,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28129",
+    "density": 48.8,
+    "urban_index": 0.0098
+  },
+  {
+    "zip": "28137",
+    "density": 27.2,
+    "urban_index": 0.0054
+  },
+  {
+    "zip": "28163",
+    "density": 57.4,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "27016",
+    "density": 18.7,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "27019",
+    "density": 44.3,
+    "urban_index": 0.0089
+  },
+  {
+    "zip": "27021",
+    "density": 131.3,
+    "urban_index": 0.0263
+  },
+  {
+    "zip": "27022",
+    "density": 18.1,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "27042",
+    "density": 37.3,
+    "urban_index": 0.0075
+  },
+  {
+    "zip": "27043",
+    "density": 35.6,
+    "urban_index": 0.0071
+  },
+  {
+    "zip": "27046",
+    "density": 19.2,
+    "urban_index": 0.0038
+  },
+  {
+    "zip": "27052",
+    "density": 39.1,
+    "urban_index": 0.0078
+  },
+  {
+    "zip": "27007",
+    "density": 39.3,
+    "urban_index": 0.0079
+  },
+  {
+    "zip": "27017",
+    "density": 34.5,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27024",
+    "density": 23.8,
+    "urban_index": 0.0048
+  },
+  {
+    "zip": "27030",
+    "density": 86.8,
+    "urban_index": 0.0174
+  },
+  {
+    "zip": "27031",
+    "density": 86.8,
+    "urban_index": 0.0174
+  },
+  {
+    "zip": "27041",
+    "density": 49.4,
+    "urban_index": 0.0099
+  },
+  {
+    "zip": "27047",
+    "density": 22.6,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "27049",
+    "density": 40.1,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "27053",
+    "density": 17.2,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "28621",
+    "density": 57.7,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "28676",
+    "density": 47.0,
+    "urban_index": 0.0094
+  },
+  {
+    "zip": "28702",
+    "density": 7.1,
+    "urban_index": 0.0014
+  },
+  {
+    "zip": "28713",
+    "density": 24.6,
+    "urban_index": 0.0049
+  },
+  {
+    "zip": "28719",
+    "density": 23.0,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "28708",
+    "density": 6.0,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "28712",
+    "density": 59.4,
+    "urban_index": 0.0119
+  },
+  {
+    "zip": "28718",
+    "density": 12.9,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28747",
+    "density": 16.1,
+    "urban_index": 0.0032
+  },
+  {
+    "zip": "28766",
+    "density": 83.6,
+    "urban_index": 0.0167
+  },
+  {
+    "zip": "28768",
+    "density": 31.7,
+    "urban_index": 0.0063
+  },
+  {
+    "zip": "28772",
+    "density": 38.0,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "28774",
+    "density": 8.6,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "27925",
+    "density": 6.8,
+    "urban_index": 0.0014
+  },
+  {
+    "zip": "28079",
+    "density": 281.3,
+    "urban_index": 0.0563
+  },
+  {
+    "zip": "28103",
+    "density": 25.7,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28108",
+    "density": 104.3,
+    "urban_index": 0.0209
+  },
+  {
+    "zip": "28110",
+    "density": 150.9,
+    "urban_index": 0.0302
+  },
+  {
+    "zip": "28111",
+    "density": 150.9,
+    "urban_index": 0.0302
+  },
+  {
+    "zip": "28112",
+    "density": 76.8,
+    "urban_index": 0.0154
+  },
+  {
+    "zip": "28173",
+    "density": 161.8,
+    "urban_index": 0.0324
+  },
+  {
+    "zip": "28174",
+    "density": 92.2,
+    "urban_index": 0.0184
+  },
+  {
+    "zip": "27536",
+    "density": 522.7,
+    "urban_index": 0.1045
+  },
+  {
+    "zip": "27537",
+    "density": 49.2,
+    "urban_index": 0.0098
+  },
+  {
+    "zip": "27544",
+    "density": 28.2,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "27553",
+    "density": 30.6,
+    "urban_index": 0.0061
+  },
+  {
+    "zip": "27556",
+    "density": 69.9,
+    "urban_index": 0.014
+  },
+  {
+    "zip": "27584",
+    "density": 57.7,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "27502",
+    "density": 420.1,
+    "urban_index": 0.084
+  },
+  {
+    "zip": "27511",
+    "density": 1055.3,
+    "urban_index": 0.2111
+  },
+  {
+    "zip": "27512",
+    "density": 1055.3,
+    "urban_index": 0.2111
+  },
+  {
+    "zip": "27513",
+    "density": 995.7,
+    "urban_index": 0.1991
+  },
+  {
+    "zip": "27518",
+    "density": 788.0,
+    "urban_index": 0.1576
+  },
+  {
+    "zip": "27519",
+    "density": 694.3,
+    "urban_index": 0.1389
+  },
+  {
+    "zip": "27523",
+    "density": 89.3,
+    "urban_index": 0.0179
+  },
+  {
+    "zip": "27526",
+    "density": 154.9,
+    "urban_index": 0.031
+  },
+  {
+    "zip": "27529",
+    "density": 281.5,
+    "urban_index": 0.0563
+  },
+  {
+    "zip": "27539",
+    "density": 228.8,
+    "urban_index": 0.0458
+  },
+  {
+    "zip": "27540",
+    "density": 243.8,
+    "urban_index": 0.0488
+  },
+  {
+    "zip": "27545",
+    "density": 306.4,
+    "urban_index": 0.0613
+  },
+  {
+    "zip": "27560",
+    "density": 298.7,
+    "urban_index": 0.0597
+  },
+  {
+    "zip": "27562",
+    "density": 13.9,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "27571",
+    "density": 340.8,
+    "urban_index": 0.0682
+  },
+  {
+    "zip": "27587",
+    "density": 195.8,
+    "urban_index": 0.0392
+  },
+  {
+    "zip": "27588",
+    "density": 195.8,
+    "urban_index": 0.0392
+  },
+  {
+    "zip": "27591",
+    "density": 114.0,
+    "urban_index": 0.0228
+  },
+  {
+    "zip": "27592",
+    "density": 141.3,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "27597",
+    "density": 69.8,
+    "urban_index": 0.014
+  },
+  {
+    "zip": "27601",
+    "density": 2033.5,
+    "urban_index": 0.4067
+  },
+  {
+    "zip": "27602",
+    "density": 2033.5,
+    "urban_index": 0.4067
+  },
+  {
+    "zip": "27603",
+    "density": 351.9,
+    "urban_index": 0.0704
+  },
+  {
+    "zip": "27604",
+    "density": 754.6,
+    "urban_index": 0.1509
+  },
+  {
+    "zip": "27605",
+    "density": 1758.0,
+    "urban_index": 0.3516
+  },
+  {
+    "zip": "27606",
+    "density": 672.6,
+    "urban_index": 0.1345
+  },
+  {
+    "zip": "27607",
+    "density": 604.0,
+    "urban_index": 0.1208
+  },
+  {
+    "zip": "27608",
+    "density": 1252.2,
+    "urban_index": 0.2504
+  },
+  {
+    "zip": "27609",
+    "density": 1139.1,
+    "urban_index": 0.2278
+  },
+  {
+    "zip": "27610",
+    "density": 593.4,
+    "urban_index": 0.1187
+  },
+  {
+    "zip": "27611",
+    "density": 593.4,
+    "urban_index": 0.1187
+  },
+  {
+    "zip": "27612",
+    "density": 720.6,
+    "urban_index": 0.1441
+  },
+  {
+    "zip": "27613",
+    "density": 669.9,
+    "urban_index": 0.134
+  },
+  {
+    "zip": "27614",
+    "density": 448.3,
+    "urban_index": 0.0897
+  },
+  {
+    "zip": "27615",
+    "density": 842.2,
+    "urban_index": 0.1684
+  },
+  {
+    "zip": "27616",
+    "density": 734.6,
+    "urban_index": 0.1469
+  },
+  {
+    "zip": "27617",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27619",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27620",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27621",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27622",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27623",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27624",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27625",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27626",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27627",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27628",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27629",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27634",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27635",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27636",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27640",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27650",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27656",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27658",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27661",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27668",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27675",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27676",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27690",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27695",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27697",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27698",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27699",
+    "density": 701.4,
+    "urban_index": 0.1403
+  },
+  {
+    "zip": "27551",
+    "density": 9.0,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "27563",
+    "density": 27.3,
+    "urban_index": 0.0055
+  },
+  {
+    "zip": "27570",
+    "density": 38.0,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "27586",
+    "density": 57.7,
+    "urban_index": 0.0115
+  },
+  {
+    "zip": "27589",
+    "density": 18.6,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "27594",
+    "density": 141.3,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "27928",
+    "density": 11.2,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "27962",
+    "density": 33.8,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "27970",
+    "density": 11.6,
+    "urban_index": 0.0023
+  },
+  {
+    "zip": "28605",
+    "density": 45.5,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "28607",
+    "density": 129.0,
+    "urban_index": 0.0258
+  },
+  {
+    "zip": "28608",
+    "density": 129.0,
+    "urban_index": 0.0258
+  },
+  {
+    "zip": "28618",
+    "density": 23.0,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "28679",
+    "density": 30.6,
+    "urban_index": 0.0061
+  },
+  {
+    "zip": "28691",
+    "density": 166.2,
+    "urban_index": 0.0332
+  },
+  {
+    "zip": "28692",
+    "density": 40.8,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "28698",
+    "density": 34.7,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27530",
+    "density": 146.5,
+    "urban_index": 0.0293
+  },
+  {
+    "zip": "27531",
+    "density": 64.0,
+    "urban_index": 0.0128
+  },
+  {
+    "zip": "27532",
+    "density": 64.0,
+    "urban_index": 0.0128
+  },
+  {
+    "zip": "27533",
+    "density": 64.0,
+    "urban_index": 0.0128
+  },
+  {
+    "zip": "27534",
+    "density": 167.4,
+    "urban_index": 0.0335
+  },
+  {
+    "zip": "27830",
+    "density": 30.3,
+    "urban_index": 0.0061
+  },
+  {
+    "zip": "27863",
+    "density": 67.0,
+    "urban_index": 0.0134
+  },
+  {
+    "zip": "28333",
+    "density": 96.7,
+    "urban_index": 0.0193
+  },
+  {
+    "zip": "28365",
+    "density": 34.4,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "28578",
+    "density": 38.5,
+    "urban_index": 0.0077
+  },
+  {
+    "zip": "28606",
+    "density": 19.2,
+    "urban_index": 0.0038
+  },
+  {
+    "zip": "28624",
+    "density": 10.1,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "28635",
+    "density": 35.8,
+    "urban_index": 0.0072
+  },
+  {
+    "zip": "28649",
+    "density": 11.0,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28651",
+    "density": 31.4,
+    "urban_index": 0.0063
+  },
+  {
+    "zip": "28654",
+    "density": 21.5,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "28656",
+    "density": 66.8,
+    "urban_index": 0.0134
+  },
+  {
+    "zip": "28659",
+    "density": 80.0,
+    "urban_index": 0.016
+  },
+  {
+    "zip": "28665",
+    "density": 15.8,
+    "urban_index": 0.0032
+  },
+  {
+    "zip": "28669",
+    "density": 26.2,
+    "urban_index": 0.0052
+  },
+  {
+    "zip": "28670",
+    "density": 28.2,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "28683",
+    "density": 19.6,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "28685",
+    "density": 13.1,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28697",
+    "density": 78.6,
+    "urban_index": 0.0157
+  },
+  {
+    "zip": "27813",
+    "density": 259.9,
+    "urban_index": 0.052
+  },
+  {
+    "zip": "27822",
+    "density": 34.4,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27851",
+    "density": 45.4,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27873",
+    "density": 245.0,
+    "urban_index": 0.049
+  },
+  {
+    "zip": "27880",
+    "density": 49.1,
+    "urban_index": 0.0098
+  },
+  {
+    "zip": "27883",
+    "density": 18.0,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "27893",
+    "density": 139.2,
+    "urban_index": 0.0278
+  },
+  {
+    "zip": "27894",
+    "density": 139.2,
+    "urban_index": 0.0278
+  },
+  {
+    "zip": "27895",
+    "density": 139.2,
+    "urban_index": 0.0278
+  },
+  {
+    "zip": "27896",
+    "density": 224.8,
+    "urban_index": 0.045
+  },
+  {
+    "zip": "27011",
+    "density": 39.9,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "27018",
+    "density": 36.1,
+    "urban_index": 0.0072
+  },
+  {
+    "zip": "27020",
+    "density": 33.8,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "27055",
+    "density": 51.2,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "28642",
+    "density": 60.8,
+    "urban_index": 0.0122
+  },
+  {
+    "zip": "28714",
+    "density": 22.2,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "28740",
+    "density": 9.5,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "28755",
+    "density": 34.3,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27201",
+    "density": 184.1,
+    "urban_index": 0.0368
+  },
+  {
+    "zip": "27202",
+    "density": 184.1,
+    "urban_index": 0.0368
+  },
+  {
+    "zip": "27215",
+    "density": 240.7,
+    "urban_index": 0.0481
+  },
+  {
+    "zip": "27216",
+    "density": 240.7,
+    "urban_index": 0.0481
+  },
+  {
+    "zip": "27217",
+    "density": 115.9,
+    "urban_index": 0.0232
+  },
+  {
+    "zip": "27244",
+    "density": 108.4,
+    "urban_index": 0.0217
+  },
+  {
+    "zip": "27253",
+    "density": 130.7,
+    "urban_index": 0.0261
+  },
+  {
+    "zip": "27258",
+    "density": 136.3,
+    "urban_index": 0.0273
+  },
+  {
+    "zip": "27302",
+    "density": 87.3,
+    "urban_index": 0.0175
+  },
+  {
+    "zip": "27340",
+    "density": 819.9,
+    "urban_index": 0.164
+  },
+  {
+    "zip": "27349",
+    "density": 34.9,
+    "urban_index": 0.007
+  },
+  {
+    "zip": "27359",
+    "density": 99.8,
+    "urban_index": 0.02
+  },
+  {
+    "zip": "28636",
+    "density": 35.8,
+    "urban_index": 0.0072
+  },
+  {
+    "zip": "28678",
+    "density": 45.1,
+    "urban_index": 0.009
+  },
+  {
+    "zip": "28681",
+    "density": 59.8,
+    "urban_index": 0.012
+  },
+  {
+    "zip": "28623",
+    "density": 22.6,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28627",
+    "density": 22.2,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "28663",
+    "density": 13.6,
+    "urban_index": 0.0027
+  },
+  {
+    "zip": "28668",
+    "density": 8.9,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28675",
+    "density": 22.0,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "28007",
+    "density": 179.6,
+    "urban_index": 0.0359
+  },
+  {
+    "zip": "28091",
+    "density": 8.8,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28102",
+    "density": 59.5,
+    "urban_index": 0.0119
+  },
+  {
+    "zip": "28119",
+    "density": 16.4,
+    "urban_index": 0.0033
+  },
+  {
+    "zip": "28133",
+    "density": 13.9,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "28135",
+    "density": 23.6,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28170",
+    "density": 25.5,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28615",
+    "density": 10.9,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28617",
+    "density": 25.3,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28626",
+    "density": 32.4,
+    "urban_index": 0.0065
+  },
+  {
+    "zip": "28629",
+    "density": 12.1,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "28631",
+    "density": 9.9,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "28640",
+    "density": 46.9,
+    "urban_index": 0.0094
+  },
+  {
+    "zip": "28643",
+    "density": 19.5,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "28644",
+    "density": 8.4,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "28672",
+    "density": 6.9,
+    "urban_index": 0.0014
+  },
+  {
+    "zip": "28684",
+    "density": 15.6,
+    "urban_index": 0.0031
+  },
+  {
+    "zip": "28693",
+    "density": 25.4,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28694",
+    "density": 45.1,
+    "urban_index": 0.009
+  },
+  {
+    "zip": "28604",
+    "density": 36.7,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "28616",
+    "density": 70.5,
+    "urban_index": 0.0141
+  },
+  {
+    "zip": "28622",
+    "density": 31.5,
+    "urban_index": 0.0063
+  },
+  {
+    "zip": "28646",
+    "density": 6.1,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "28652",
+    "density": 220.3,
+    "urban_index": 0.0441
+  },
+  {
+    "zip": "28653",
+    "density": 220.3,
+    "urban_index": 0.0441
+  },
+  {
+    "zip": "28657",
+    "density": 22.9,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "28662",
+    "density": 30.2,
+    "urban_index": 0.006
+  },
+  {
+    "zip": "28664",
+    "density": 13.6,
+    "urban_index": 0.0027
+  },
+  {
+    "zip": "27806",
+    "density": 6.5,
+    "urban_index": 0.0013
+  },
+  {
+    "zip": "27808",
+    "density": 20.5,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27810",
+    "density": 13.0,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "27814",
+    "density": 10.1,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "27817",
+    "density": 25.3,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "27821",
+    "density": 21.3,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "27860",
+    "density": 6.0,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "27865",
+    "density": 8.5,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "27889",
+    "density": 53.6,
+    "urban_index": 0.0107
+  },
+  {
+    "zip": "27805",
+    "density": 13.9,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "27847",
+    "density": 9.7,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "27849",
+    "density": 7.8,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "27872",
+    "density": 11.5,
+    "urban_index": 0.0023
+  },
+  {
+    "zip": "27924",
+    "density": 12.9,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "27957",
+    "density": 12.3,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "27967",
+    "density": 38.0,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "27983",
+    "density": 12.1,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "28320",
+    "density": 29.7,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "28332",
+    "density": 94.1,
+    "urban_index": 0.0188
+  },
+  {
+    "zip": "28337",
+    "density": 25.8,
+    "urban_index": 0.0052
+  },
+  {
+    "zip": "28392",
+    "density": 15.4,
+    "urban_index": 0.0031
+  },
+  {
+    "zip": "28399",
+    "density": 8.9,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28433",
+    "density": 17.4,
+    "urban_index": 0.0035
+  },
+  {
+    "zip": "28434",
+    "density": 6.4,
+    "urban_index": 0.0013
+  },
+  {
+    "zip": "28448",
+    "density": 5.1,
+    "urban_index": 0.001
+  },
+  {
+    "zip": "28404",
+    "density": 989.2,
+    "urban_index": 0.1978
+  },
+  {
+    "zip": "28420",
+    "density": 10.7,
+    "urban_index": 0.0021
+  },
+  {
+    "zip": "28422",
+    "density": 27.9,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "28451",
+    "density": 74.9,
+    "urban_index": 0.015
+  },
+  {
+    "zip": "28452",
+    "density": 46.0,
+    "urban_index": 0.0092
+  },
+  {
+    "zip": "28459",
+    "density": 22.5,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28461",
+    "density": 82.3,
+    "urban_index": 0.0165
+  },
+  {
+    "zip": "28462",
+    "density": 48.4,
+    "urban_index": 0.0097
+  },
+  {
+    "zip": "28465",
+    "density": 238.3,
+    "urban_index": 0.0477
+  },
+  {
+    "zip": "28467",
+    "density": 186.6,
+    "urban_index": 0.0373
+  },
+  {
+    "zip": "28468",
+    "density": 96.1,
+    "urban_index": 0.0192
+  },
+  {
+    "zip": "28469",
+    "density": 101.4,
+    "urban_index": 0.0203
+  },
+  {
+    "zip": "28470",
+    "density": 86.3,
+    "urban_index": 0.0173
+  },
+  {
+    "zip": "28479",
+    "density": 20.4,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28701",
+    "density": 78.9,
+    "urban_index": 0.0158
+  },
+  {
+    "zip": "28704",
+    "density": 219.7,
+    "urban_index": 0.0439
+  },
+  {
+    "zip": "28709",
+    "density": 16.3,
+    "urban_index": 0.0033
+  },
+  {
+    "zip": "28711",
+    "density": 51.1,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "28715",
+    "density": 122.1,
+    "urban_index": 0.0244
+  },
+  {
+    "zip": "28728",
+    "density": 518.9,
+    "urban_index": 0.1038
+  },
+  {
+    "zip": "28730",
+    "density": 71.1,
+    "urban_index": 0.0142
+  },
+  {
+    "zip": "28748",
+    "density": 51.8,
+    "urban_index": 0.0104
+  },
+  {
+    "zip": "28757",
+    "density": 88.7,
+    "urban_index": 0.0177
+  },
+  {
+    "zip": "28759",
+    "density": 115.1,
+    "urban_index": 0.023
+  },
+  {
+    "zip": "28770",
+    "density": 31.7,
+    "urban_index": 0.0063
+  },
+  {
+    "zip": "28776",
+    "density": 11.6,
+    "urban_index": 0.0023
+  },
+  {
+    "zip": "28778",
+    "density": 116.6,
+    "urban_index": 0.0233
+  },
+  {
+    "zip": "28787",
+    "density": 95.7,
+    "urban_index": 0.0191
+  },
+  {
+    "zip": "28801",
+    "density": 1142.1,
+    "urban_index": 0.2284
+  },
+  {
+    "zip": "28802",
+    "density": 1142.1,
+    "urban_index": 0.2284
+  },
+  {
+    "zip": "28803",
+    "density": 289.0,
+    "urban_index": 0.0578
+  },
+  {
+    "zip": "28804",
+    "density": 297.9,
+    "urban_index": 0.0596
+  },
+  {
+    "zip": "28805",
+    "density": 262.0,
+    "urban_index": 0.0524
+  },
+  {
+    "zip": "28806",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28810",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28813",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28814",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28815",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28816",
+    "density": 392.0,
+    "urban_index": 0.0784
+  },
+  {
+    "zip": "28612",
+    "density": 57.2,
+    "urban_index": 0.0114
+  },
+  {
+    "zip": "28619",
+    "density": 491.8,
+    "urban_index": 0.0984
+  },
+  {
+    "zip": "28628",
+    "density": 358.9,
+    "urban_index": 0.0718
+  },
+  {
+    "zip": "28637",
+    "density": 234.6,
+    "urban_index": 0.0469
+  },
+  {
+    "zip": "28641",
+    "density": 46.9,
+    "urban_index": 0.0094
+  },
+  {
+    "zip": "28647",
+    "density": 5.7,
+    "urban_index": 0.0011
+  },
+  {
+    "zip": "28655",
+    "density": 66.8,
+    "urban_index": 0.0134
+  },
+  {
+    "zip": "28666",
+    "density": 305.5,
+    "urban_index": 0.0611
+  },
+  {
+    "zip": "28671",
+    "density": 310.9,
+    "urban_index": 0.0622
+  },
+  {
+    "zip": "28680",
+    "density": 30.6,
+    "urban_index": 0.0061
+  },
+  {
+    "zip": "28690",
+    "density": 166.2,
+    "urban_index": 0.0332
+  },
+  {
+    "zip": "28025",
+    "density": 174.3,
+    "urban_index": 0.0349
+  },
+  {
+    "zip": "28026",
+    "density": 174.3,
+    "urban_index": 0.0349
+  },
+  {
+    "zip": "28027",
+    "density": 311.8,
+    "urban_index": 0.0624
+  },
+  {
+    "zip": "28075",
+    "density": 295.0,
+    "urban_index": 0.059
+  },
+  {
+    "zip": "28081",
+    "density": 319.2,
+    "urban_index": 0.0638
+  },
+  {
+    "zip": "28082",
+    "density": 319.2,
+    "urban_index": 0.0638
+  },
+  {
+    "zip": "28083",
+    "density": 458.6,
+    "urban_index": 0.0917
+  },
+  {
+    "zip": "28107",
+    "density": 50.0,
+    "urban_index": 0.01
+  },
+  {
+    "zip": "28124",
+    "density": 44.9,
+    "urban_index": 0.009
+  },
+  {
+    "zip": "28611",
+    "density": 4.6,
+    "urban_index": 0.0009
+  },
+  {
+    "zip": "28630",
+    "density": 129.0,
+    "urban_index": 0.0258
+  },
+  {
+    "zip": "28633",
+    "density": 9.9,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "28638",
+    "density": 234.5,
+    "urban_index": 0.0469
+  },
+  {
+    "zip": "28645",
+    "density": 55.8,
+    "urban_index": 0.0112
+  },
+  {
+    "zip": "28661",
+    "density": 27.2,
+    "urban_index": 0.0054
+  },
+  {
+    "zip": "28667",
+    "density": 359.2,
+    "urban_index": 0.0718
+  },
+  {
+    "zip": "27921",
+    "density": 25.7,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "27974",
+    "density": 10.8,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "27976",
+    "density": 12.5,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "28511",
+    "density": 32.8,
+    "urban_index": 0.0066
+  },
+  {
+    "zip": "28512",
+    "density": 194.1,
+    "urban_index": 0.0388
+  },
+  {
+    "zip": "28516",
+    "density": 21.0,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "28520",
+    "density": 5.7,
+    "urban_index": 0.0011
+  },
+  {
+    "zip": "28524",
+    "density": 29.6,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "28528",
+    "density": 85.8,
+    "urban_index": 0.0172
+  },
+  {
+    "zip": "28531",
+    "density": 207.9,
+    "urban_index": 0.0416
+  },
+  {
+    "zip": "28553",
+    "density": 142.5,
+    "urban_index": 0.0285
+  },
+  {
+    "zip": "28557",
+    "density": 392.6,
+    "urban_index": 0.0785
+  },
+  {
+    "zip": "28570",
+    "density": 66.5,
+    "urban_index": 0.0133
+  },
+  {
+    "zip": "28575",
+    "density": 203.4,
+    "urban_index": 0.0407
+  },
+  {
+    "zip": "28577",
+    "density": 76.2,
+    "urban_index": 0.0152
+  },
+  {
+    "zip": "28579",
+    "density": 62.6,
+    "urban_index": 0.0125
+  },
+  {
+    "zip": "28581",
+    "density": 9.4,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "28582",
+    "density": 37.7,
+    "urban_index": 0.0075
+  },
+  {
+    "zip": "28589",
+    "density": 6.4,
+    "urban_index": 0.0013
+  },
+  {
+    "zip": "28594",
+    "density": 246.5,
+    "urban_index": 0.0493
+  },
+  {
+    "zip": "27212",
+    "density": 20.6,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27291",
+    "density": 12.6,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "27305",
+    "density": 24.3,
+    "urban_index": 0.0049
+  },
+  {
+    "zip": "27311",
+    "density": 28.4,
+    "urban_index": 0.0057
+  },
+  {
+    "zip": "27314",
+    "density": 15.6,
+    "urban_index": 0.0031
+  },
+  {
+    "zip": "27315",
+    "density": 32.8,
+    "urban_index": 0.0066
+  },
+  {
+    "zip": "27379",
+    "density": 21.1,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "28601",
+    "density": 419.7,
+    "urban_index": 0.0839
+  },
+  {
+    "zip": "28602",
+    "density": 160.6,
+    "urban_index": 0.0321
+  },
+  {
+    "zip": "28603",
+    "density": 160.6,
+    "urban_index": 0.0321
+  },
+  {
+    "zip": "28609",
+    "density": 50.9,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "28610",
+    "density": 95.0,
+    "urban_index": 0.019
+  },
+  {
+    "zip": "28613",
+    "density": 205.5,
+    "urban_index": 0.0411
+  },
+  {
+    "zip": "28650",
+    "density": 102.6,
+    "urban_index": 0.0205
+  },
+  {
+    "zip": "28658",
+    "density": 141.6,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "28673",
+    "density": 89.9,
+    "urban_index": 0.018
+  },
+  {
+    "zip": "28682",
+    "density": 134.3,
+    "urban_index": 0.0269
+  },
+  {
+    "zip": "27207",
+    "density": 17.2,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "27208",
+    "density": 16.6,
+    "urban_index": 0.0033
+  },
+  {
+    "zip": "27213",
+    "density": 20.6,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27228",
+    "density": 115.9,
+    "urban_index": 0.0232
+  },
+  {
+    "zip": "27252",
+    "density": 18.1,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "27256",
+    "density": 130.7,
+    "urban_index": 0.0261
+  },
+  {
+    "zip": "27312",
+    "density": 41.6,
+    "urban_index": 0.0083
+  },
+  {
+    "zip": "27344",
+    "density": 42.0,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "27559",
+    "density": 18.2,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "28781",
+    "density": 4.6,
+    "urban_index": 0.0009
+  },
+  {
+    "zip": "28901",
+    "density": 32.7,
+    "urban_index": 0.0065
+  },
+  {
+    "zip": "28903",
+    "density": 23.4,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28905",
+    "density": 26.8,
+    "urban_index": 0.0054
+  },
+  {
+    "zip": "28906",
+    "density": 21.4,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "27932",
+    "density": 41.0,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "27980",
+    "density": 16.3,
+    "urban_index": 0.0033
+  },
+  {
+    "zip": "28902",
+    "density": 23.4,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28904",
+    "density": 17.3,
+    "urban_index": 0.0035
+  },
+  {
+    "zip": "28909",
+    "density": 40.3,
+    "urban_index": 0.0081
+  },
+  {
+    "zip": "28017",
+    "density": 1562.4,
+    "urban_index": 0.3125
+  },
+  {
+    "zip": "28020",
+    "density": 20.6,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28038",
+    "density": 159.2,
+    "urban_index": 0.0318
+  },
+  {
+    "zip": "28042",
+    "density": 43.3,
+    "urban_index": 0.0087
+  },
+  {
+    "zip": "28073",
+    "density": 85.0,
+    "urban_index": 0.017
+  },
+  {
+    "zip": "28086",
+    "density": 113.7,
+    "urban_index": 0.0227
+  },
+  {
+    "zip": "28089",
+    "density": 385.8,
+    "urban_index": 0.0772
+  },
+  {
+    "zip": "28090",
+    "density": 34.3,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "28114",
+    "density": 44.7,
+    "urban_index": 0.0089
+  },
+  {
+    "zip": "28136",
+    "density": 23.6,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "28150",
+    "density": 101.2,
+    "urban_index": 0.0202
+  },
+  {
+    "zip": "28151",
+    "density": 101.2,
+    "urban_index": 0.0202
+  },
+  {
+    "zip": "28152",
+    "density": 115.5,
+    "urban_index": 0.0231
+  },
+  {
+    "zip": "28169",
+    "density": 119.2,
+    "urban_index": 0.0238
+  },
+  {
+    "zip": "28423",
+    "density": 11.0,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28424",
+    "density": 333.4,
+    "urban_index": 0.0667
+  },
+  {
+    "zip": "28430",
+    "density": 18.0,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "28431",
+    "density": 36.4,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "28432",
+    "density": 21.5,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "28436",
+    "density": 22.5,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28438",
+    "density": 15.1,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "28439",
+    "density": 25.5,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28442",
+    "density": 11.2,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28450",
+    "density": 24.0,
+    "urban_index": 0.0048
+  },
+  {
+    "zip": "28455",
+    "density": 10.8,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28456",
+    "density": 21.9,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "28463",
+    "density": 32.1,
+    "urban_index": 0.0064
+  },
+  {
+    "zip": "28472",
+    "density": 41.9,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "28519",
+    "density": 508.4,
+    "urban_index": 0.1017
+  },
+  {
+    "zip": "28523",
+    "density": 16.9,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "28526",
+    "density": 11.2,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28527",
+    "density": 7.9,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "28532",
+    "density": 54.4,
+    "urban_index": 0.0109
+  },
+  {
+    "zip": "28533",
+    "density": 2564.9,
+    "urban_index": 0.513
+  },
+  {
+    "zip": "28560",
+    "density": 95.1,
+    "urban_index": 0.019
+  },
+  {
+    "zip": "28561",
+    "density": 95.1,
+    "urban_index": 0.019
+  },
+  {
+    "zip": "28562",
+    "density": 90.6,
+    "urban_index": 0.0181
+  },
+  {
+    "zip": "28563",
+    "density": 90.6,
+    "urban_index": 0.0181
+  },
+  {
+    "zip": "28564",
+    "density": 90.6,
+    "urban_index": 0.0181
+  },
+  {
+    "zip": "28586",
+    "density": 24.2,
+    "urban_index": 0.0048
+  },
+  {
+    "zip": "28301",
+    "density": 539.6,
+    "urban_index": 0.1079
+  },
+  {
+    "zip": "28302",
+    "density": 539.6,
+    "urban_index": 0.1079
+  },
+  {
+    "zip": "28303",
+    "density": 712.8,
+    "urban_index": 0.1426
+  },
+  {
+    "zip": "28304",
+    "density": 869.4,
+    "urban_index": 0.1739
+  },
+  {
+    "zip": "28305",
+    "density": 901.8,
+    "urban_index": 0.1804
+  },
+  {
+    "zip": "28306",
+    "density": 223.1,
+    "urban_index": 0.0446
+  },
+  {
+    "zip": "28307",
+    "density": 581.9,
+    "urban_index": 0.1164
+  },
+  {
+    "zip": "28308",
+    "density": 42.3,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28309",
+    "density": 42.3,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28310",
+    "density": 293.2,
+    "urban_index": 0.0586
+  },
+  {
+    "zip": "28311",
+    "density": 355.8,
+    "urban_index": 0.0712
+  },
+  {
+    "zip": "28312",
+    "density": 42.6,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28314",
+    "density": 912.9,
+    "urban_index": 0.1826
+  },
+  {
+    "zip": "28331",
+    "density": 539.1,
+    "urban_index": 0.1078
+  },
+  {
+    "zip": "28342",
+    "density": 92.5,
+    "urban_index": 0.0185
+  },
+  {
+    "zip": "28344",
+    "density": 34.1,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "28348",
+    "density": 289.7,
+    "urban_index": 0.0579
+  },
+  {
+    "zip": "28356",
+    "density": 35.3,
+    "urban_index": 0.0071
+  },
+  {
+    "zip": "28390",
+    "density": 130.4,
+    "urban_index": 0.0261
+  },
+  {
+    "zip": "28391",
+    "density": 57.8,
+    "urban_index": 0.0116
+  },
+  {
+    "zip": "28395",
+    "density": 19.2,
+    "urban_index": 0.0038
+  },
+  {
+    "zip": "27916",
+    "density": 37.2,
+    "urban_index": 0.0074
+  },
+  {
+    "zip": "27917",
+    "density": 16.0,
+    "urban_index": 0.0032
+  },
+  {
+    "zip": "27923",
+    "density": 32.0,
+    "urban_index": 0.0064
+  },
+  {
+    "zip": "27927",
+    "density": 7.9,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "27929",
+    "density": 76.0,
+    "urban_index": 0.0152
+  },
+  {
+    "zip": "27939",
+    "density": 137.9,
+    "urban_index": 0.0276
+  },
+  {
+    "zip": "27941",
+    "density": 65.7,
+    "urban_index": 0.0131
+  },
+  {
+    "zip": "27947",
+    "density": 39.3,
+    "urban_index": 0.0079
+  },
+  {
+    "zip": "27950",
+    "density": 26.1,
+    "urban_index": 0.0052
+  },
+  {
+    "zip": "27956",
+    "density": 28.3,
+    "urban_index": 0.0057
+  },
+  {
+    "zip": "27958",
+    "density": 44.3,
+    "urban_index": 0.0089
+  },
+  {
+    "zip": "27964",
+    "density": 142.1,
+    "urban_index": 0.0284
+  },
+  {
+    "zip": "27965",
+    "density": 12.6,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "27966",
+    "density": 39.7,
+    "urban_index": 0.0079
+  },
+  {
+    "zip": "27973",
+    "density": 13.6,
+    "urban_index": 0.0027
+  },
+  {
+    "zip": "27915",
+    "density": 38.1,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "27920",
+    "density": 140.0,
+    "urban_index": 0.028
+  },
+  {
+    "zip": "27936",
+    "density": 44.9,
+    "urban_index": 0.009
+  },
+  {
+    "zip": "27943",
+    "density": 72.7,
+    "urban_index": 0.0145
+  },
+  {
+    "zip": "27948",
+    "density": 453.6,
+    "urban_index": 0.0907
+  },
+  {
+    "zip": "27949",
+    "density": 176.6,
+    "urban_index": 0.0353
+  },
+  {
+    "zip": "27953",
+    "density": 1.4,
+    "urban_index": 0.0003
+  },
+  {
+    "zip": "27954",
+    "density": 267.0,
+    "urban_index": 0.0534
+  },
+  {
+    "zip": "27959",
+    "density": 73.3,
+    "urban_index": 0.0147
+  },
+  {
+    "zip": "27968",
+    "density": 14.8,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "27972",
+    "density": 66.4,
+    "urban_index": 0.0133
+  },
+  {
+    "zip": "27978",
+    "density": 5.4,
+    "urban_index": 0.0011
+  },
+  {
+    "zip": "27981",
+    "density": 80.4,
+    "urban_index": 0.0161
+  },
+  {
+    "zip": "27982",
+    "density": 99.7,
+    "urban_index": 0.0199
+  },
+  {
+    "zip": "27239",
+    "density": 23.2,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "27292",
+    "density": 105.7,
+    "urban_index": 0.0211
+  },
+  {
+    "zip": "27293",
+    "density": 105.7,
+    "urban_index": 0.0211
+  },
+  {
+    "zip": "27294",
+    "density": 105.7,
+    "urban_index": 0.0211
+  },
+  {
+    "zip": "27295",
+    "density": 112.6,
+    "urban_index": 0.0225
+  },
+  {
+    "zip": "27299",
+    "density": 72.8,
+    "urban_index": 0.0146
+  },
+  {
+    "zip": "27351",
+    "density": 67.7,
+    "urban_index": 0.0135
+  },
+  {
+    "zip": "27360",
+    "density": 201.9,
+    "urban_index": 0.0404
+  },
+  {
+    "zip": "27361",
+    "density": 201.9,
+    "urban_index": 0.0404
+  },
+  {
+    "zip": "27373",
+    "density": 19.4,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "27374",
+    "density": 19.4,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "27006",
+    "density": 85.5,
+    "urban_index": 0.0171
+  },
+  {
+    "zip": "27014",
+    "density": 518.7,
+    "urban_index": 0.1037
+  },
+  {
+    "zip": "27028",
+    "density": 51.8,
+    "urban_index": 0.0104
+  },
+  {
+    "zip": "28325",
+    "density": 230.5,
+    "urban_index": 0.0461
+  },
+  {
+    "zip": "28341",
+    "density": 17.5,
+    "urban_index": 0.0035
+  },
+  {
+    "zip": "28349",
+    "density": 21.3,
+    "urban_index": 0.0043
+  },
+  {
+    "zip": "28398",
+    "density": 32.1,
+    "urban_index": 0.0064
+  },
+  {
+    "zip": "28453",
+    "density": 17.9,
+    "urban_index": 0.0036
+  },
+  {
+    "zip": "28458",
+    "density": 22.5,
+    "urban_index": 0.0045
+  },
+  {
+    "zip": "28464",
+    "density": 41.6,
+    "urban_index": 0.0083
+  },
+  {
+    "zip": "28466",
+    "density": 20.6,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28508",
+    "density": 29.9,
+    "urban_index": 0.006
+  },
+  {
+    "zip": "28518",
+    "density": 32.1,
+    "urban_index": 0.0064
+  },
+  {
+    "zip": "28521",
+    "density": 21.0,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "27503",
+    "density": 36.7,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "27572",
+    "density": 24.6,
+    "urban_index": 0.0049
+  },
+  {
+    "zip": "27701",
+    "density": 1553.7,
+    "urban_index": 0.3107
+  },
+  {
+    "zip": "27702",
+    "density": 1553.7,
+    "urban_index": 0.3107
+  },
+  {
+    "zip": "27703",
+    "density": 296.6,
+    "urban_index": 0.0593
+  },
+  {
+    "zip": "27704",
+    "density": 330.8,
+    "urban_index": 0.0662
+  },
+  {
+    "zip": "27705",
+    "density": 408.1,
+    "urban_index": 0.0816
+  },
+  {
+    "zip": "27706",
+    "density": 408.1,
+    "urban_index": 0.0816
+  },
+  {
+    "zip": "27707",
+    "density": 816.9,
+    "urban_index": 0.1634
+  },
+  {
+    "zip": "27708",
+    "density": 816.9,
+    "urban_index": 0.1634
+  },
+  {
+    "zip": "27709",
+    "density": 1034.5,
+    "urban_index": 0.2069
+  },
+  {
+    "zip": "27710",
+    "density": 1034.5,
+    "urban_index": 0.2069
+  },
+  {
+    "zip": "27711",
+    "density": 1034.5,
+    "urban_index": 0.2069
+  },
+  {
+    "zip": "27712",
+    "density": 230.3,
+    "urban_index": 0.0461
+  },
+  {
+    "zip": "27713",
+    "density": 552.7,
+    "urban_index": 0.1105
+  },
+  {
+    "zip": "27715",
+    "density": 552.7,
+    "urban_index": 0.1105
+  },
+  {
+    "zip": "27717",
+    "density": 552.7,
+    "urban_index": 0.1105
+  },
+  {
+    "zip": "27722",
+    "density": 552.7,
+    "urban_index": 0.1105
+  },
+  {
+    "zip": "27801",
+    "density": 120.7,
+    "urban_index": 0.0241
+  },
+  {
+    "zip": "27802",
+    "density": 120.7,
+    "urban_index": 0.0241
+  },
+  {
+    "zip": "27809",
+    "density": 26.3,
+    "urban_index": 0.0053
+  },
+  {
+    "zip": "27819",
+    "density": 118.0,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "27852",
+    "density": 23.7,
+    "urban_index": 0.0047
+  },
+  {
+    "zip": "27864",
+    "density": 45.7,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27881",
+    "density": 34.7,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27886",
+    "density": 43.2,
+    "urban_index": 0.0086
+  },
+  {
+    "zip": "27009",
+    "density": 64.5,
+    "urban_index": 0.0129
+  },
+  {
+    "zip": "27010",
+    "density": 64.5,
+    "urban_index": 0.0129
+  },
+  {
+    "zip": "27012",
+    "density": 234.4,
+    "urban_index": 0.0469
+  },
+  {
+    "zip": "27023",
+    "density": 165.0,
+    "urban_index": 0.033
+  },
+  {
+    "zip": "27040",
+    "density": 157.6,
+    "urban_index": 0.0315
+  },
+  {
+    "zip": "27045",
+    "density": 142.3,
+    "urban_index": 0.0285
+  },
+  {
+    "zip": "27050",
+    "density": 60.4,
+    "urban_index": 0.0121
+  },
+  {
+    "zip": "27051",
+    "density": 154.8,
+    "urban_index": 0.031
+  },
+  {
+    "zip": "27094",
+    "density": 51.2,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "27098",
+    "density": 51.2,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "27099",
+    "density": 51.2,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "27101",
+    "density": 571.6,
+    "urban_index": 0.1143
+  },
+  {
+    "zip": "27102",
+    "density": 571.6,
+    "urban_index": 0.1143
+  },
+  {
+    "zip": "27103",
+    "density": 691.2,
+    "urban_index": 0.1382
+  },
+  {
+    "zip": "27104",
+    "density": 892.1,
+    "urban_index": 0.1784
+  },
+  {
+    "zip": "27105",
+    "density": 454.0,
+    "urban_index": 0.0908
+  },
+  {
+    "zip": "27106",
+    "density": 606.6,
+    "urban_index": 0.1213
+  },
+  {
+    "zip": "27107",
+    "density": 278.7,
+    "urban_index": 0.0557
+  },
+  {
+    "zip": "27108",
+    "density": 278.7,
+    "urban_index": 0.0557
+  },
+  {
+    "zip": "27109",
+    "density": 5058.8,
+    "urban_index": 1
+  },
+  {
+    "zip": "27110",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27111",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27113",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27114",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27115",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27116",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27117",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27120",
+    "density": 4353.6,
+    "urban_index": 0.8707
+  },
+  {
+    "zip": "27127",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27130",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27150",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27152",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27155",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27157",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27198",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27199",
+    "density": 443.2,
+    "urban_index": 0.0886
+  },
+  {
+    "zip": "27284",
+    "density": 247.1,
+    "urban_index": 0.0494
+  },
+  {
+    "zip": "27285",
+    "density": 247.1,
+    "urban_index": 0.0494
+  },
+  {
+    "zip": "27508",
+    "density": 75.8,
+    "urban_index": 0.0152
+  },
+  {
+    "zip": "27525",
+    "density": 55.7,
+    "urban_index": 0.0111
+  },
+  {
+    "zip": "27549",
+    "density": 38.5,
+    "urban_index": 0.0077
+  },
+  {
+    "zip": "27596",
+    "density": 108.0,
+    "urban_index": 0.0216
+  },
+  {
+    "zip": "28006",
+    "density": 81.4,
+    "urban_index": 0.0163
+  },
+  {
+    "zip": "28012",
+    "density": 283.0,
+    "urban_index": 0.0566
+  },
+  {
+    "zip": "28016",
+    "density": 120.9,
+    "urban_index": 0.0242
+  },
+  {
+    "zip": "28021",
+    "density": 83.9,
+    "urban_index": 0.0168
+  },
+  {
+    "zip": "28032",
+    "density": 514.3,
+    "urban_index": 0.1029
+  },
+  {
+    "zip": "28034",
+    "density": 141.6,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "28035",
+    "density": 141.6,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "28052",
+    "density": 320.2,
+    "urban_index": 0.064
+  },
+  {
+    "zip": "28053",
+    "density": 320.2,
+    "urban_index": 0.064
+  },
+  {
+    "zip": "28054",
+    "density": 700.2,
+    "urban_index": 0.14
+  },
+  {
+    "zip": "28055",
+    "density": 700.2,
+    "urban_index": 0.14
+  },
+  {
+    "zip": "28056",
+    "density": 255.0,
+    "urban_index": 0.051
+  },
+  {
+    "zip": "28077",
+    "density": 318.4,
+    "urban_index": 0.0637
+  },
+  {
+    "zip": "28098",
+    "density": 406.0,
+    "urban_index": 0.0812
+  },
+  {
+    "zip": "28101",
+    "density": 301.0,
+    "urban_index": 0.0602
+  },
+  {
+    "zip": "28120",
+    "density": 251.9,
+    "urban_index": 0.0504
+  },
+  {
+    "zip": "28164",
+    "density": 129.0,
+    "urban_index": 0.0258
+  },
+  {
+    "zip": "27926",
+    "density": 20.7,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "27935",
+    "density": 10.9,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "27937",
+    "density": 19.8,
+    "urban_index": 0.004
+  },
+  {
+    "zip": "27938",
+    "density": 11.4,
+    "urban_index": 0.0023
+  },
+  {
+    "zip": "27946",
+    "density": 10.9,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "27969",
+    "density": 14.8,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "27979",
+    "density": 9.2,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28733",
+    "density": 1.0,
+    "urban_index": 0.0002
+  },
+  {
+    "zip": "28771",
+    "density": 12.2,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "27507",
+    "density": 15.6,
+    "urban_index": 0.0031
+  },
+  {
+    "zip": "27509",
+    "density": 262.4,
+    "urban_index": 0.0525
+  },
+  {
+    "zip": "27522",
+    "density": 65.8,
+    "urban_index": 0.0132
+  },
+  {
+    "zip": "27527",
+    "density": 160.8,
+    "urban_index": 0.0322
+  },
+  {
+    "zip": "27528",
+    "density": 160.8,
+    "urban_index": 0.0322
+  },
+  {
+    "zip": "27565",
+    "density": 29.4,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "27574",
+    "density": 29.6,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "27581",
+    "density": 34.3,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27582",
+    "density": 35.1,
+    "urban_index": 0.007
+  },
+  {
+    "zip": "27888",
+    "density": 20.8,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "28538",
+    "density": 29.0,
+    "urban_index": 0.0058
+  },
+  {
+    "zip": "28554",
+    "density": 336.3,
+    "urban_index": 0.0673
+  },
+  {
+    "zip": "28580",
+    "density": 42.9,
+    "urban_index": 0.0086
+  },
+  {
+    "zip": "27214",
+    "density": 82.6,
+    "urban_index": 0.0165
+  },
+  {
+    "zip": "27233",
+    "density": 53.5,
+    "urban_index": 0.0107
+  },
+  {
+    "zip": "27235",
+    "density": 117.8,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "27249",
+    "density": 83.5,
+    "urban_index": 0.0167
+  },
+  {
+    "zip": "27260",
+    "density": 763.4,
+    "urban_index": 0.1527
+  },
+  {
+    "zip": "27261",
+    "density": 763.4,
+    "urban_index": 0.1527
+  },
+  {
+    "zip": "27262",
+    "density": 702.2,
+    "urban_index": 0.1404
+  },
+  {
+    "zip": "27263",
+    "density": 212.0,
+    "urban_index": 0.0424
+  },
+  {
+    "zip": "27264",
+    "density": 212.0,
+    "urban_index": 0.0424
+  },
+  {
+    "zip": "27265",
+    "density": 428.3,
+    "urban_index": 0.0857
+  },
+  {
+    "zip": "27268",
+    "density": 428.3,
+    "urban_index": 0.0857
+  },
+  {
+    "zip": "27282",
+    "density": 445.4,
+    "urban_index": 0.0891
+  },
+  {
+    "zip": "27283",
+    "density": 46.0,
+    "urban_index": 0.0092
+  },
+  {
+    "zip": "27301",
+    "density": 101.3,
+    "urban_index": 0.0203
+  },
+  {
+    "zip": "27310",
+    "density": 161.2,
+    "urban_index": 0.0322
+  },
+  {
+    "zip": "27313",
+    "density": 94.7,
+    "urban_index": 0.0189
+  },
+  {
+    "zip": "27342",
+    "density": 21.9,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "27357",
+    "density": 71.9,
+    "urban_index": 0.0144
+  },
+  {
+    "zip": "27358",
+    "density": 99.8,
+    "urban_index": 0.02
+  },
+  {
+    "zip": "27377",
+    "density": 107.5,
+    "urban_index": 0.0215
+  },
+  {
+    "zip": "27401",
+    "density": 1363.9,
+    "urban_index": 0.2728
+  },
+  {
+    "zip": "27402",
+    "density": 1363.9,
+    "urban_index": 0.2728
+  },
+  {
+    "zip": "27403",
+    "density": 1406.7,
+    "urban_index": 0.2813
+  },
+  {
+    "zip": "27404",
+    "density": 1406.7,
+    "urban_index": 0.2813
+  },
+  {
+    "zip": "27405",
+    "density": 554.1,
+    "urban_index": 0.1108
+  },
+  {
+    "zip": "27406",
+    "density": 313.8,
+    "urban_index": 0.0628
+  },
+  {
+    "zip": "27407",
+    "density": 588.6,
+    "urban_index": 0.1177
+  },
+  {
+    "zip": "27408",
+    "density": 875.2,
+    "urban_index": 0.175
+  },
+  {
+    "zip": "27409",
+    "density": 310.3,
+    "urban_index": 0.0621
+  },
+  {
+    "zip": "27410",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27411",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27412",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27413",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27415",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27416",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27417",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27419",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27420",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27425",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27427",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27429",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27435",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27438",
+    "density": 618.7,
+    "urban_index": 0.1237
+  },
+  {
+    "zip": "27455",
+    "density": 373.4,
+    "urban_index": 0.0747
+  },
+  {
+    "zip": "27495",
+    "density": 373.4,
+    "urban_index": 0.0747
+  },
+  {
+    "zip": "27497",
+    "density": 373.4,
+    "urban_index": 0.0747
+  },
+  {
+    "zip": "27498",
+    "density": 373.4,
+    "urban_index": 0.0747
+  },
+  {
+    "zip": "27499",
+    "density": 373.4,
+    "urban_index": 0.0747
+  },
+  {
+    "zip": "27823",
+    "density": 16.8,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "27839",
+    "density": 10.8,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "27843",
+    "density": 7.5,
+    "urban_index": 0.0015
+  },
+  {
+    "zip": "27844",
+    "density": 26.7,
+    "urban_index": 0.0053
+  },
+  {
+    "zip": "27850",
+    "density": 15.0,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "27870",
+    "density": 154.8,
+    "urban_index": 0.031
+  },
+  {
+    "zip": "27874",
+    "density": 14.4,
+    "urban_index": 0.0029
+  },
+  {
+    "zip": "27887",
+    "density": 43.2,
+    "urban_index": 0.0086
+  },
+  {
+    "zip": "27890",
+    "density": 108.5,
+    "urban_index": 0.0217
+  },
+  {
+    "zip": "27501",
+    "density": 110.9,
+    "urban_index": 0.0222
+  },
+  {
+    "zip": "27506",
+    "density": 40.0,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "27521",
+    "density": 89.8,
+    "urban_index": 0.018
+  },
+  {
+    "zip": "27543",
+    "density": 41.0,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "27546",
+    "density": 60.7,
+    "urban_index": 0.0121
+  },
+  {
+    "zip": "27552",
+    "density": 9.0,
+    "urban_index": 0.0018
+  },
+  {
+    "zip": "28323",
+    "density": 32.7,
+    "urban_index": 0.0065
+  },
+  {
+    "zip": "28334",
+    "density": 60.0,
+    "urban_index": 0.012
+  },
+  {
+    "zip": "28335",
+    "density": 60.0,
+    "urban_index": 0.012
+  },
+  {
+    "zip": "28339",
+    "density": 72.7,
+    "urban_index": 0.0145
+  },
+  {
+    "zip": "28368",
+    "density": 118.0,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "28716",
+    "density": 42.7,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28721",
+    "density": 35.3,
+    "urban_index": 0.0071
+  },
+  {
+    "zip": "28738",
+    "density": 8.6,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "28745",
+    "density": 341.0,
+    "urban_index": 0.0682
+  },
+  {
+    "zip": "28751",
+    "density": 25.1,
+    "urban_index": 0.005
+  },
+  {
+    "zip": "28785",
+    "density": 18.6,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "28786",
+    "density": 107.5,
+    "urban_index": 0.0215
+  },
+  {
+    "zip": "28710",
+    "density": 16.3,
+    "urban_index": 0.0033
+  },
+  {
+    "zip": "28724",
+    "density": 39.1,
+    "urban_index": 0.0078
+  },
+  {
+    "zip": "28726",
+    "density": 518.9,
+    "urban_index": 0.1038
+  },
+  {
+    "zip": "28727",
+    "density": 518.9,
+    "urban_index": 0.1038
+  },
+  {
+    "zip": "28729",
+    "density": 255.3,
+    "urban_index": 0.0511
+  },
+  {
+    "zip": "28731",
+    "density": 111.2,
+    "urban_index": 0.0222
+  },
+  {
+    "zip": "28732",
+    "density": 149.1,
+    "urban_index": 0.0298
+  },
+  {
+    "zip": "28735",
+    "density": 26.6,
+    "urban_index": 0.0053
+  },
+  {
+    "zip": "28739",
+    "density": 113.9,
+    "urban_index": 0.0228
+  },
+  {
+    "zip": "28742",
+    "density": 42.7,
+    "urban_index": 0.0085
+  },
+  {
+    "zip": "28758",
+    "density": 88.7,
+    "urban_index": 0.0177
+  },
+  {
+    "zip": "28760",
+    "density": 115.1,
+    "urban_index": 0.023
+  },
+  {
+    "zip": "28784",
+    "density": 9.6,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "28790",
+    "density": 29.5,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "28791",
+    "density": 332.6,
+    "urban_index": 0.0665
+  },
+  {
+    "zip": "28792",
+    "density": 125.4,
+    "urban_index": 0.0251
+  },
+  {
+    "zip": "28793",
+    "density": 125.4,
+    "urban_index": 0.0251
+  },
+  {
+    "zip": "27818",
+    "density": 8.5,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "27855",
+    "density": 45.6,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27910",
+    "density": 34.1,
+    "urban_index": 0.0068
+  },
+  {
+    "zip": "27922",
+    "density": 9.5,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "27942",
+    "density": 10.4,
+    "urban_index": 0.0021
+  },
+  {
+    "zip": "27986",
+    "density": 61.0,
+    "urban_index": 0.0122
+  },
+  {
+    "zip": "28376",
+    "density": 101.6,
+    "urban_index": 0.0203
+  },
+  {
+    "zip": "27824",
+    "density": 5.8,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "27826",
+    "density": 7.2,
+    "urban_index": 0.0014
+  },
+  {
+    "zip": "27875",
+    "density": 3.6,
+    "urban_index": 0.0007
+  },
+  {
+    "zip": "27885",
+    "density": 3.0,
+    "urban_index": 0.0006
+  },
+  {
+    "zip": "27960",
+    "density": 42.1,
+    "urban_index": 0.0084
+  },
+  {
+    "zip": "28010",
+    "density": 151.2,
+    "urban_index": 0.0302
+  },
+  {
+    "zip": "28115",
+    "density": 179.9,
+    "urban_index": 0.036
+  },
+  {
+    "zip": "28117",
+    "density": 343.1,
+    "urban_index": 0.0686
+  },
+  {
+    "zip": "28123",
+    "density": 251.9,
+    "urban_index": 0.0504
+  },
+  {
+    "zip": "28166",
+    "density": 115.2,
+    "urban_index": 0.023
+  },
+  {
+    "zip": "28625",
+    "density": 71.4,
+    "urban_index": 0.0143
+  },
+  {
+    "zip": "28634",
+    "density": 32.0,
+    "urban_index": 0.0064
+  },
+  {
+    "zip": "28660",
+    "density": 27.2,
+    "urban_index": 0.0054
+  },
+  {
+    "zip": "28677",
+    "density": 154.3,
+    "urban_index": 0.0309
+  },
+  {
+    "zip": "28687",
+    "density": 13.1,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28688",
+    "density": 13.1,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28689",
+    "density": 14.8,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "28699",
+    "density": 34.7,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "28707",
+    "density": 3.3,
+    "urban_index": 0.0007
+  },
+  {
+    "zip": "28717",
+    "density": 13.0,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28723",
+    "density": 39.1,
+    "urban_index": 0.0078
+  },
+  {
+    "zip": "28725",
+    "density": 60.9,
+    "urban_index": 0.0122
+  },
+  {
+    "zip": "28736",
+    "density": 8.6,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "28779",
+    "density": 58.0,
+    "urban_index": 0.0116
+  },
+  {
+    "zip": "28783",
+    "density": 9.6,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "28788",
+    "density": 95.7,
+    "urban_index": 0.0191
+  },
+  {
+    "zip": "28789",
+    "density": 34.5,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27504",
+    "density": 62.2,
+    "urban_index": 0.0124
+  },
+  {
+    "zip": "27520",
+    "density": 192.3,
+    "urban_index": 0.0385
+  },
+  {
+    "zip": "27524",
+    "density": 36.1,
+    "urban_index": 0.0072
+  },
+  {
+    "zip": "27542",
+    "density": 41.0,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "27555",
+    "density": 458.9,
+    "urban_index": 0.0918
+  },
+  {
+    "zip": "27557",
+    "density": 47.1,
+    "urban_index": 0.0094
+  },
+  {
+    "zip": "27568",
+    "density": 789.4,
+    "urban_index": 0.1579
+  },
+  {
+    "zip": "27569",
+    "density": 38.0,
+    "urban_index": 0.0076
+  },
+  {
+    "zip": "27576",
+    "density": 79.4,
+    "urban_index": 0.0159
+  },
+  {
+    "zip": "27577",
+    "density": 84.9,
+    "urban_index": 0.017
+  },
+  {
+    "zip": "27593",
+    "density": 141.3,
+    "urban_index": 0.0283
+  },
+  {
+    "zip": "28522",
+    "density": 21.0,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "28555",
+    "density": 13.0,
+    "urban_index": 0.0026
+  },
+  {
+    "zip": "28573",
+    "density": 11.2,
+    "urban_index": 0.0022
+  },
+  {
+    "zip": "28585",
+    "density": 8.6,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "27237",
+    "density": 117.8,
+    "urban_index": 0.0236
+  },
+  {
+    "zip": "27330",
+    "density": 71.2,
+    "urban_index": 0.0142
+  },
+  {
+    "zip": "27331",
+    "density": 71.2,
+    "urban_index": 0.0142
+  },
+  {
+    "zip": "27332",
+    "density": 111.2,
+    "urban_index": 0.0222
+  },
+  {
+    "zip": "27505",
+    "density": 40.0,
+    "urban_index": 0.008
+  },
+  {
+    "zip": "28355",
+    "density": 79.5,
+    "urban_index": 0.0159
+  },
+  {
+    "zip": "28501",
+    "density": 74.1,
+    "urban_index": 0.0148
+  },
+  {
+    "zip": "28502",
+    "density": 74.1,
+    "urban_index": 0.0148
+  },
+  {
+    "zip": "28503",
+    "density": 74.1,
+    "urban_index": 0.0148
+  },
+  {
+    "zip": "28504",
+    "density": 67.5,
+    "urban_index": 0.0135
+  },
+  {
+    "zip": "28525",
+    "density": 27.2,
+    "urban_index": 0.0054
+  },
+  {
+    "zip": "28551",
+    "density": 41.2,
+    "urban_index": 0.0082
+  },
+  {
+    "zip": "28572",
+    "density": 23.8,
+    "urban_index": 0.0048
+  },
+  {
+    "zip": "28033",
+    "density": 68.1,
+    "urban_index": 0.0136
+  },
+  {
+    "zip": "28037",
+    "density": 159.2,
+    "urban_index": 0.0318
+  },
+  {
+    "zip": "28080",
+    "density": 71.4,
+    "urban_index": 0.0143
+  },
+  {
+    "zip": "28092",
+    "density": 121.6,
+    "urban_index": 0.0243
+  },
+  {
+    "zip": "28093",
+    "density": 121.6,
+    "urban_index": 0.0243
+  },
+  {
+    "zip": "28168",
+    "density": 45.6,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "28737",
+    "density": 8.6,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "28749",
+    "density": 18.6,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "28752",
+    "density": 48.2,
+    "urban_index": 0.0096
+  },
+  {
+    "zip": "28761",
+    "density": 28.0,
+    "urban_index": 0.0056
+  },
+  {
+    "zip": "28762",
+    "density": 26.5,
+    "urban_index": 0.0053
+  },
+  {
+    "zip": "28734",
+    "density": 34.6,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "28741",
+    "density": 14.2,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "28744",
+    "density": 6.6,
+    "urban_index": 0.0013
+  },
+  {
+    "zip": "28763",
+    "density": 19.0,
+    "urban_index": 0.0038
+  },
+  {
+    "zip": "28775",
+    "density": 11.6,
+    "urban_index": 0.0023
+  },
+  {
+    "zip": "28743",
+    "density": 6.6,
+    "urban_index": 0.0013
+  },
+  {
+    "zip": "28753",
+    "density": 17.1,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "28754",
+    "density": 34.3,
+    "urban_index": 0.0069
+  },
+  {
+    "zip": "27825",
+    "density": 84.8,
+    "urban_index": 0.017
+  },
+  {
+    "zip": "27840",
+    "density": 15.7,
+    "urban_index": 0.0031
+  },
+  {
+    "zip": "27841",
+    "density": 122.8,
+    "urban_index": 0.0246
+  },
+  {
+    "zip": "27846",
+    "density": 12.2,
+    "urban_index": 0.0024
+  },
+  {
+    "zip": "27857",
+    "density": 7.9,
+    "urban_index": 0.0016
+  },
+  {
+    "zip": "27861",
+    "density": 45.5,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27871",
+    "density": 18.5,
+    "urban_index": 0.0037
+  },
+  {
+    "zip": "27892",
+    "density": 30.3,
+    "urban_index": 0.0061
+  },
+  {
+    "zip": "28031",
+    "density": 671.8,
+    "urban_index": 0.1344
+  },
+  {
+    "zip": "28036",
+    "density": 250.6,
+    "urban_index": 0.0501
+  },
+  {
+    "zip": "28070",
+    "density": 255.0,
+    "urban_index": 0.051
+  },
+  {
+    "zip": "28078",
+    "density": 315.5,
+    "urban_index": 0.0631
+  },
+  {
+    "zip": "28104",
+    "density": 370.4,
+    "urban_index": 0.0741
+  },
+  {
+    "zip": "28105",
+    "density": 641.7,
+    "urban_index": 0.1283
+  },
+  {
+    "zip": "28106",
+    "density": 641.7,
+    "urban_index": 0.1283
+  },
+  {
+    "zip": "28126",
+    "density": 25.3,
+    "urban_index": 0.0051
+  },
+  {
+    "zip": "28130",
+    "density": 48.8,
+    "urban_index": 0.0098
+  },
+  {
+    "zip": "28134",
+    "density": 425.8,
+    "urban_index": 0.0852
+  },
+  {
+    "zip": "28201",
+    "density": 92.2,
+    "urban_index": 0.0184
+  },
+  {
+    "zip": "28202",
+    "density": 2396.2,
+    "urban_index": 0.4792
+  },
+  {
+    "zip": "28203",
+    "density": 1316.9,
+    "urban_index": 0.2634
+  },
+  {
+    "zip": "28204",
+    "density": 1071.1,
+    "urban_index": 0.2142
+  },
+  {
+    "zip": "28205",
+    "density": 1434.6,
+    "urban_index": 0.2869
+  },
+  {
+    "zip": "28206",
+    "density": 651.1,
+    "urban_index": 0.1302
+  },
+  {
+    "zip": "28207",
+    "density": 1423.1,
+    "urban_index": 0.2846
+  },
+  {
+    "zip": "28208",
+    "density": 599.4,
+    "urban_index": 0.1199
+  },
+  {
+    "zip": "28209",
+    "density": 1430.7,
+    "urban_index": 0.2861
+  },
+  {
+    "zip": "28210",
+    "density": 1284.5,
+    "urban_index": 0.2569
+  },
+  {
+    "zip": "28211",
+    "density": 1022.0,
+    "urban_index": 0.2044
+  },
+  {
+    "zip": "28212",
+    "density": 1606.9,
+    "urban_index": 0.3214
+  },
+  {
+    "zip": "28213",
+    "density": 1040.8,
+    "urban_index": 0.2082
+  },
+  {
+    "zip": "28214",
+    "density": 409.5,
+    "urban_index": 0.0819
+  },
+  {
+    "zip": "28215",
+    "density": 677.7,
+    "urban_index": 0.1355
+  },
+  {
+    "zip": "28216",
+    "density": 609.4,
+    "urban_index": 0.1219
+  },
+  {
+    "zip": "28217",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28218",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28219",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28220",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28221",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28222",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28223",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28224",
+    "density": 630.8,
+    "urban_index": 0.1262
+  },
+  {
+    "zip": "28226",
+    "density": 965.4,
+    "urban_index": 0.1931
+  },
+  {
+    "zip": "28227",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28228",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28229",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28230",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28231",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28232",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28233",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28234",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28235",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28236",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28237",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28241",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28242",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28243",
+    "density": 495.0,
+    "urban_index": 0.099
+  },
+  {
+    "zip": "28244",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28246",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28247",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28250",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28253",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28254",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28255",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28256",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28258",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28260",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28262",
+    "density": 669.1,
+    "urban_index": 0.1338
+  },
+  {
+    "zip": "28263",
+    "density": 669.1,
+    "urban_index": 0.1338
+  },
+  {
+    "zip": "28265",
+    "density": 669.1,
+    "urban_index": 0.1338
+  },
+  {
+    "zip": "28266",
+    "density": 669.1,
+    "urban_index": 0.1338
+  },
+  {
+    "zip": "28269",
+    "density": 900.1,
+    "urban_index": 0.18
+  },
+  {
+    "zip": "28270",
+    "density": 964.9,
+    "urban_index": 0.193
+  },
+  {
+    "zip": "28272",
+    "density": 964.9,
+    "urban_index": 0.193
+  },
+  {
+    "zip": "28273",
+    "density": 557.3,
+    "urban_index": 0.1115
+  },
+  {
+    "zip": "28274",
+    "density": 557.3,
+    "urban_index": 0.1115
+  },
+  {
+    "zip": "28275",
+    "density": 557.3,
+    "urban_index": 0.1115
+  },
+  {
+    "zip": "28277",
+    "density": 984.4,
+    "urban_index": 0.1969
+  },
+  {
+    "zip": "28278",
+    "density": 261.4,
+    "urban_index": 0.0523
+  },
+  {
+    "zip": "28280",
+    "density": 510.8,
+    "urban_index": 0.1022
+  },
+  {
+    "zip": "28281",
+    "density": 510.8,
+    "urban_index": 0.1022
+  },
+  {
+    "zip": "28282",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28284",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28285",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28287",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28288",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28289",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28290",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28296",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28297",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28299",
+    "density": 0.0,
+    "urban_index": 0.0
+  },
+  {
+    "zip": "28705",
+    "density": 20.6,
+    "urban_index": 0.0041
+  },
+  {
+    "zip": "28765",
+    "density": 19.0,
+    "urban_index": 0.0038
+  },
+  {
+    "zip": "28777",
+    "density": 60.2,
+    "urban_index": 0.012
+  },
+  {
+    "zip": "27209",
+    "density": 33.3,
+    "urban_index": 0.0067
+  },
+  {
+    "zip": "27229",
+    "density": 17.2,
+    "urban_index": 0.0034
+  },
+  {
+    "zip": "27247",
+    "density": 108.4,
+    "urban_index": 0.0217
+  },
+  {
+    "zip": "27306",
+    "density": 13.6,
+    "urban_index": 0.0027
+  },
+  {
+    "zip": "27356",
+    "density": 22.0,
+    "urban_index": 0.0044
+  },
+  {
+    "zip": "27371",
+    "density": 19.4,
+    "urban_index": 0.0039
+  },
+  {
+    "zip": "27242",
+    "density": 15.0,
+    "urban_index": 0.003
+  },
+  {
+    "zip": "27259",
+    "density": 136.3,
+    "urban_index": 0.0273
+  },
+  {
+    "zip": "27281",
+    "density": 23.0,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "27325",
+    "density": 29.4,
+    "urban_index": 0.0059
+  },
+  {
+    "zip": "27376",
+    "density": 52.0,
+    "urban_index": 0.0104
+  },
+  {
+    "zip": "28315",
+    "density": 70.6,
+    "urban_index": 0.0141
+  },
+  {
+    "zip": "28326",
+    "density": 58.6,
+    "urban_index": 0.0117
+  },
+  {
+    "zip": "28327",
+    "density": 31.3,
+    "urban_index": 0.0063
+  },
+  {
+    "zip": "28350",
+    "density": 182.0,
+    "urban_index": 0.0364
+  },
+  {
+    "zip": "28370",
+    "density": 13.8,
+    "urban_index": 0.0028
+  },
+  {
+    "zip": "28373",
+    "density": 64.3,
+    "urban_index": 0.0129
+  },
+  {
+    "zip": "28374",
+    "density": 278.7,
+    "urban_index": 0.0557
+  },
+  {
+    "zip": "28387",
+    "density": 184.8,
+    "urban_index": 0.037
+  },
+  {
+    "zip": "28388",
+    "density": 184.8,
+    "urban_index": 0.037
+  },
+  {
+    "zip": "28394",
+    "density": 45.7,
+    "urban_index": 0.0091
+  },
+  {
+    "zip": "27803",
+    "density": 203.2,
+    "urban_index": 0.0406
+  },
+  {
+    "zip": "27804",
+    "density": 265.3,
+    "urban_index": 0.0531
+  },
+  {
+    "zip": "27807",
+    "density": 51.2,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "27815",
+    "density": 10.1,
+    "urban_index": 0.002
+  },
+  {
+    "zip": "27816",
+    "density": 16.1,
+    "urban_index": 0.0032
+  },
+  {
+    "zip": "27856",
+    "density": 51.0,
+    "urban_index": 0.0102
+  },
+  {
+    "zip": "27868",
+    "density": 12.7,
+    "urban_index": 0.0025
+  },
+  {
+    "zip": "27878",
+    "density": 405.9,
+    "urban_index": 0.0812
+  },
+  {
+    "zip": "27882",
+    "density": 28.9,
+    "urban_index": 0.0058
+  },
+  {
+    "zip": "27891",
+    "density": 14.3,
+    "urban_index": 0.0029
+  },
+  {
+    "zip": "28401",
+    "density": 353.2,
+    "urban_index": 0.0706
+  },
+  {
+    "zip": "28402",
+    "density": 353.2,
+    "urban_index": 0.0706
+  },
+  {
+    "zip": "28403",
+    "density": 989.2,
+    "urban_index": 0.1978
+  },
+  {
+    "zip": "28405",
+    "density": 467.7,
+    "urban_index": 0.0935
+  },
+  {
+    "zip": "28406",
+    "density": 467.7,
+    "urban_index": 0.0935
+  },
+  {
+    "zip": "28407",
+    "density": 467.7,
+    "urban_index": 0.0935
+  },
+  {
+    "zip": "28408",
+    "density": 467.7,
+    "urban_index": 0.0935
+  },
+  {
+    "zip": "28409",
+    "density": 506.8,
+    "urban_index": 0.1014
+  },
+  {
+    "zip": "28410",
+    "density": 506.8,
+    "urban_index": 0.1014
+  },
+  {
+    "zip": "28411",
+    "density": 294.5,
+    "urban_index": 0.0589
+  },
+  {
+    "zip": "28412",
+    "density": 631.8,
+    "urban_index": 0.1264
+  },
+  {
+    "zip": "28428",
+    "density": 452.8,
+    "urban_index": 0.0906
+  },
+  {
+    "zip": "28429",
+    "density": 79.2,
+    "urban_index": 0.0158
+  },
+  {
+    "zip": "28449",
+    "density": 164.2,
+    "urban_index": 0.0328
+  },
+  {
+    "zip": "28480",
+    "density": 326.2,
+    "urban_index": 0.0652
+  },
+  {
+    "zip": "27820",
+    "density": 21.2,
+    "urban_index": 0.0042
+  },
+  {
+    "zip": "27831",
+    "density": 23.0,
+    "urban_index": 0.0046
+  },
+  {
+    "zip": "27832",
+    "density": 36.4,
+    "urban_index": 0.0073
+  },
+  {
+    "zip": "27842",
+    "density": 53.5,
+    "urban_index": 0.0107
+  },
+  {
+    "zip": "27845",
+    "density": 9.3,
+    "urban_index": 0.0019
+  },
+  {
+    "zip": "27853",
+    "density": 6.1,
+    "urban_index": 0.0012
+  },
+  {
+    "zip": "27862",
+    "density": 8.4,
+    "urban_index": 0.0017
+  },
+  {
+    "zip": "27866",
+    "density": 12.7,
+    "urban_index": 0.0025
+  }
+]
