@@ -358,17 +358,18 @@ export default function GardenSelectionStep({
                       <SubtitleText className="text-lg text-foreground mb-1">
                         {garden.name}
                       </SubtitleText>
-                      {/*
-                        Reason: If a garden has no plants, health is not meaningful (health is based on plant tasks).
-                        Only show health percentage if there is at least one plant in the garden.
-                      */}
                       <BodyText className="text-sm text-cream-600 mb-2">
                         {garden.total_plants ?? 0} plant
                         {(garden.total_plants ?? 0) === 1 ? "" : "s"}
-                        {(garden.total_plants ?? 0) > 0 ? (
-                          <> · {garden.health_percentage}% health</>
-                        ) : (
-                          <></>
+                        {(garden.plants_with_overdue_tasks ?? 0) > 0 && (
+                          <>
+                            {" "}
+                            · {garden.plants_with_overdue_tasks} need
+                            {(garden.plants_with_overdue_tasks ?? 0) === 1
+                              ? "s"
+                              : ""}{" "}
+                            care
+                          </>
                         )}
                       </BodyText>
                     </View>

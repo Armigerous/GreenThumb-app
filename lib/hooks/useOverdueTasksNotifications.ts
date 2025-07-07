@@ -12,7 +12,6 @@ export interface OverdueTask {
 export interface GardenNotification {
   garden_id: number;
   garden_name: string;
-  health_impact: number;
   overdue_tasks_count: number;
   tasks: OverdueTask[];
 }
@@ -26,30 +25,32 @@ export function useOverdueTasksNotifications() {
   // Use a ref to track if we've already checked this session
   const hasCheckedRef = useRef(false);
 
-  // Function to fetch garden health impact
-  const fetchGardenHealthImpact = async (showModal: boolean) => {
+  // Function to fetch overdue tasks data
+  const fetchOverdueTasksData = async (showModal: boolean) => {
     try {
       if (!user) return false;
       
-      console.log("Fetching garden health impact...");
+      console.log("Fetching overdue tasks data...");
       
       // Using the function that accepts a user_id parameter
       const { data, error } = await supabase.rpc(
-        'get_garden_health_impact', 
+        'get_overdue_task_notifications', 
         { p_user_id: user.id }
       );
       
       if (error) {
-        console.error("Error fetching garden health impact:", error);
+        console.error("Error fetching overdue tasks data:", error);
         return false;
       }
       
-      console.log("Garden health impact data:", data);
+      console.log("Overdue tasks data:", data);
       
       if (data && data.length > 0) {
         // Process tasks if they are returned as a string
         const processedData = data.map((garden: any) => ({
-          ...garden,
+          garden_id: garden.garden_id,
+          garden_name: garden.garden_name,
+          overdue_tasks_count: garden.overdue_tasks_count,
           tasks: typeof garden.tasks === 'string'
             ? JSON.parse(garden.tasks)
             : garden.tasks || []
@@ -66,7 +67,7 @@ export function useOverdueTasksNotifications() {
       setNotifications([]);
       return false;
     } catch (err) {
-      console.error("Error fetching garden health impact:", err);
+      console.error("Error fetching overdue tasks data:", err);
       return false;
     }
   };
@@ -87,8 +88,8 @@ export function useOverdueTasksNotifications() {
         setLoading(true);
         hasCheckedRef.current = true;
         
-        // Fetch garden health impact data
-        await fetchGardenHealthImpact(true);
+        // Fetch overdue tasks data
+        await fetchOverdueTasksData(true);
       } catch (err) {
         console.error('Unexpected error checking for overdue tasks:', err);
       } finally {
@@ -135,11 +136,11 @@ export function useOverdueTasksNotifications() {
     getGardenOverdueTasksCount,
     checkNotifications: () => {
       hasCheckedRef.current = false; // Reset the check flag
-      return fetchGardenHealthImpact(false); // Don't show modal when manually refreshing
+      return fetchOverdueTasksData(false); // Don't show modal when manually refreshing
     },
     // Add a method to refresh data without showing modal
     refreshOverdueData: () => {
-      return fetchGardenHealthImpact(false);
+      return fetchOverdueTasksData(false);
     }
   };
 } 

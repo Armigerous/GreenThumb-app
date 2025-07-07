@@ -129,9 +129,8 @@ types/
 
 ### Views & Aggregations
 
-- **`user_gardens_dashboard`** - Garden health statistics and task summaries
+- **`user_gardens_dashboard`** - Garden task summaries and plant counts
 - **`plant_full_data`** - Complete plant database with care requirements
-- **`garden_health_stats`** - Plant health percentages by garden
 
 ## 🎨 Key Features Implemented
 
@@ -144,7 +143,7 @@ types/
 
 ### ✅ Home Dashboard
 
-- Real-time garden health overview
+- Real-time garden overview with task summaries
 - Overdue task notifications with celebratory animations
 - Seasonal illustration engine (calm/chaotic states)
 - Quick action shortcuts
@@ -154,7 +153,7 @@ types/
 - Multi-garden support with detailed preferences
 - Environmental condition tracking (soil, light, space)
 - Plant recommendations based on garden conditions
-- Garden health statistics and analytics
+- Plant care task tracking and analytics
 
 ### ✅ Plant Care System
 
@@ -261,7 +260,7 @@ eas submit                 # Submit to app stores
 | Garden Management   | ✅ Complete | Multi-garden support, preferences         |
 | Plant Database      | ✅ Complete | 10,000+ plants with care data             |
 | Task System         | ✅ Complete | Automated generation, completion tracking |
-| Home Dashboard      | ✅ Complete | Health stats, seasonal illustrations      |
+| Home Dashboard      | ✅ Complete | Task summaries, seasonal illustrations    |
 | Calendar View       | ✅ Complete | Visual task management                    |
 | Profile Management  | ✅ Complete | User settings and preferences             |
 | Build Configuration | ✅ Complete | EAS builds ready for stores               |
