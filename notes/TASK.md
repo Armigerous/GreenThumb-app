@@ -799,14 +799,13 @@ Garden conditions are automatically converted to plant database filters includin
 - [ ] Interactive soil pyramid component
 - [ ] Visual representation of soil composition
 - [ ] Educational tooltips for soil types
-
-**INTERVIEW-ENHANCE-013**: Icon improvement in info modals  
-**Status:** 🟢 **ENHANCEMENT** - Visual improvement  
-**Owner:** Design Team  
-**Due:** Post-launch (February 2025)  
-**User Suggestion:** "Replace question marks with exclamation points in info modal circles"  
-**Description:** Info modal icons should use exclamation points instead of question marks  
-**Implementation Ideas:**
+      **INTERVIEW-ENHANCE-013**: Icon improvement in info modals  
+       **Status:** 🟢 **ENHANCEMENT** - Visual improvement  
+       **Owner:** Design Team  
+       **Due:** Post-launch (February 2025)  
+       **User Suggestion:** "Replace question marks with exclamation points in info modal circles"  
+       **Description:** Info modal icons should use exclamation points instead of question marks  
+       **Implementation Ideas:**
 
 - [ ] Update icon library usage
 - [ ] Consistent info icon treatment
@@ -1454,5 +1453,110 @@ Garden conditions are automatically converted to plant database filters includin
 - [ ] Plants tab uses a leaf, flower, or book icon (final choice per design review)
 - [ ] Icon is visually consistent with other tab icons
 - [ ] Icon meets brand and accessibility standards
+
+---
+
+## Dynamic Plant Task Scheduling Plan (2024-06)
+
+### Overview
+
+We are moving to a dynamic, climate-aware plant task scheduling system. All tasks are tied to a specific plant (user_plant_id) and generated when a plant is added to a garden. The system supports both a full-year plan and dynamic rescheduling based on weather and user actions.
+
+### Scheduling Workflow
+
+1. **Full-Year Seeding on Plant Add**
+
+   - When a user adds a plant, generate all expected tasks (watering, fertilizing, pruning, etc.) for the next 12 months using plant data and climate info.
+   - Store all tasks in the `plant_tasks` table with due dates and type.
+
+2. **Rolling Refresh Job**
+
+   - A background job runs daily/hourly, looking ahead 30–60 days.
+   - Regenerates or reschedules tasks in that window based on:
+     - Weather alerts (rain, frost, heat, etc.)
+     - Plant/garden data changes
+   - Archives "stale" tasks (past due and not completed).
+
+3. **User-Driven Overrides**
+
+   - If a user marks a task complete or reschedules it, the system respects this and does not override it in future refreshes.
+
+4. **UI Feedback & Exports**
+   - Calendar view shows both original (planned) and dynamically updated tasks.
+   - Dynamic tasks are visually distinct and include tooltips for context (e.g., "Updated for tomorrow's frost warning").
+   - Users can export upcoming tasks (PDF/CSV).
+
+### Database Changes Required
+
+- Expand allowed `task_type` values in `plant_tasks` (beyond Water/Fertilize/Harvest).
+- Add the following fields to `plant_tasks`:
+  - `archived` (boolean): for auto-archived/stale tasks
+  - `source` (text/enum): 'seeded', 'dynamic', 'user' (tracks origin of task)
+  - `original_due_date` (timestamptz): for rescheduled tasks
+  - `metadata` (jsonb): for weather notes, reschedule reasons, etc.
+- No recurrence field needed (tasks are regenerated as needed).
+
+### Implementation Tasks
+
+- [ ] Update `plant_tasks` table schema (add new fields, expand allowed types)
+- [ ] Implement full-year task seeding logic on plant add
+- [ ] Build rolling refresh background job (daily/hourly)
+- [ ] Implement logic to respect user overrides
+- [ ] Update UI to distinguish planned vs. dynamic tasks
+- [ ] Add export functionality (PDF/CSV)
+- [ ] Document new scheduling logic in `docs/architecture.md` and `docs/technical.md`
+
+// Reason: This plan enables flexible, climate-aware, and user-respecting plant care scheduling, supporting both automation and manual control.
+
+## [Planned] Complete Removal of Garden Health Feature (2024-06)
+
+### Rationale
+
+We are removing the "garden health" feature from the app. This feature previously tracked a score or status for each garden, decreasing when users had overdue tasks. With the move to a more dynamic, flexible, and positive user experience (and dynamic task scheduling), punitive or negative feedback is no longer aligned with our product philosophy. Instead, we will focus on positive reinforcement and clear, actionable feedback for users.
+
+### Scope
+
+This is a **major architectural and UX change**. It will affect the database, backend logic, UI components, hooks, tests, and documentation. All references to garden health must be removed or refactored.
+
+### Task Breakdown
+
+1. **Discovery & Impact Assessment**
+
+   - [ ] Search the entire codebase for all references to garden health (e.g., `gardenHealth`, `garden_health`, `health_score`, `setGardenHealth`, etc.).
+   - [ ] Identify all UI components, hooks, and utilities that display, calculate, or depend on garden health.
+   - [ ] List all database tables and columns related to garden health (likely in `user_gardens` or related tables).
+   - [ ] Find all backend/API logic that updates or returns garden health.
+   - [ ] Review documentation, onboarding, and tests for garden health references.
+
+2. **Planning the Removal**
+
+   - [ ] Plan SQL migrations to drop garden health columns/tables from Supabase.
+   - [ ] Plan refactors/removals for all affected frontend and backend code.
+   - [ ] Decide how to fill any UI/UX gaps left by removing garden health (e.g., replace with positive stats, streaks, or nothing).
+
+3. **Implementation**
+
+   - [ ] Write and apply database migrations to remove garden health fields.
+   - [ ] Refactor or remove all frontend code (components, hooks, context) that uses garden health.
+   - [ ] Remove or update backend logic and API endpoints related to garden health.
+   - [ ] Update or remove tests that check garden health logic.
+   - [ ] Update onboarding, tooltips, and help text to remove garden health references.
+
+4. **Testing & Validation**
+
+   - [ ] Test all user flows where garden health was previously shown or used.
+   - [ ] Ensure no errors, broken UI, or missing feedback.
+   - [ ] Validate that the user experience remains positive and clear.
+
+5. **Documentation & Communication**
+
+   - [ ] Update `README.md`, `docs/architecture.md`, and `docs/technical.md` to remove all references to garden health.
+   - [ ] Add a migration note in `TASK.md` and/or `PLANNING.md` explaining the rationale and what changed.
+
+6. **Release & Monitor**
+   - [ ] Deploy the changes.
+   - [ ] Monitor user feedback for confusion or requests for the old feature.
+
+// Reason: This ensures a clean, positive, and modern user experience, and prevents technical debt or confusion from legacy garden health logic.
 
 ---
