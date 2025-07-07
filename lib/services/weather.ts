@@ -1,6 +1,7 @@
 import { WeatherData, Season, WeatherAndSeasonData } from "@/types/weather";
 import { supabase } from "@/lib/supabaseClient";
 import Constants from "expo-constants";
+import ncZipDensity from "@/assets/data/nc_zip_density_with_index.json";
 
 // Add debug log
 console.log(
@@ -77,3 +78,44 @@ export async function getWeatherAndSeason(
     season,
   };
 }
+
+/**
+ * Fetch elevation (in meters) for a given latitude and longitude using Open-Elevation API (free, no key).
+ * @param latitude number
+ * @param longitude number
+ * @returns Promise<number> Elevation in meters
+ */
+export async function getElevation(latitude: number, longitude: number): Promise<number | null> {
+  try {
+    const response = await fetch(
+      `https://api.open-elevation.com/api/v1/lookup?locations=${latitude},${longitude}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch elevation");
+    const data = await response.json();
+    if (data && data.results && data.results.length > 0) {
+      return data.results[0].elevation;
+    }
+    return null;
+  } catch (err) {
+    console.warn("Elevation fetch error:", err);
+    return null;
+  }
+}
+
+// Build a lookup map for fast access
+const ncZipDensityMap: Record<string, { density: number; urban_index: number }> = {};
+ncZipDensity.forEach((entry: { zip: string; density: number; urban_index: number }) => {
+  ncZipDensityMap[entry.zip] = { density: entry.density, urban_index: entry.urban_index };
+});
+
+/**
+ * Get urban index (0 = rural, 1 = urban) for a given NC ZIP code using local file.
+ * @param zip string - 5-digit ZIP code
+ * @returns number | null
+ */
+export function getUrbanIndexForZip(zip: string): number | null {
+  // Reason: Use local file for instant lookup, avoid normalization math
+  const entry = ncZipDensityMap[zip];
+  return entry ? entry.urban_index : null;
+}
+
