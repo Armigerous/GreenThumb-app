@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import type { Garden, GardenDashboard } from "@/types/garden";
-import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
 
 type GardenDetailHeaderProps = {
@@ -83,24 +82,17 @@ export default function GardenDetailHeader({
             )}
           </View>
 
-          <View className="bg-cream-50 p-3 rounded-lg">
-            <View className="flex-row justify-between items-center mb-2">
-              <SubtitleText className="text-cream-700">
-                Garden Health
-              </SubtitleText>
-              <BodyText className="text-cream-600 text-sm">
-                {dashboardData.health_percentage !== null
-                  ? `${dashboardData.health_percentage}% Healthy`
-                  : "No health data"}
-              </BodyText>
+          {/* Task Summary */}
+          {(dashboardData.upcoming_tasks_count ?? 0) > 0 && (
+            <View className="bg-cream-50 p-3 rounded-lg">
+              <View className="flex-row items-center">
+                <Ionicons name="calendar-outline" size={16} color="#9e9a90" />
+                <BodyText className="text-cream-700 text-sm ml-2">
+                  {dashboardData.upcoming_tasks_count} upcoming {(dashboardData.upcoming_tasks_count ?? 0) === 1 ? 'task' : 'tasks'}
+                </BodyText>
+              </View>
             </View>
-            <AnimatedProgressBar
-              percentage={dashboardData.health_percentage ?? 0}
-              color="#77B860" // brand-500
-              height={8}
-              duration={500}
-            />
-          </View>
+          )}
         </View>
       ) : (
         <View className="bg-cream-50 p-4 rounded-lg">

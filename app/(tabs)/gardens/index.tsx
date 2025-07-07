@@ -37,46 +37,36 @@ export default function GardensScreen() {
   }
 
   /**
-   * Calculate overall health metrics across all gardens
+   * Calculate overall garden statistics
    * @param gardens Array of user's gardens
-   * @returns Object with health statistics including average health percentage
+   * @returns Object with garden and plant statistics
    */
-  const calculateOverallHealth = (gardens: GardenDashboard[] | undefined) => {
+  const calculateOverallStats = (gardens: GardenDashboard[] | undefined) => {
     if (!gardens || gardens.length === 0) return null;
 
     let totalPlantsCount = 0;
-    let totalHealthScores = 0;
-    let totalGardensWithScore = 0;
+    let gardensWithPlants = 0;
+    let totalOverdueTasks = 0;
 
     gardens.forEach((garden) => {
       totalPlantsCount += garden.total_plants || 0;
-
-      // Only include gardens that have plants (health_percentage is not null)
-      if (
-        garden.total_plants &&
-        garden.total_plants > 0 &&
-        garden.health_percentage !== null
-      ) {
-        totalHealthScores += garden.health_percentage || 0;
-        totalGardensWithScore++;
+      
+      if (garden.total_plants && garden.total_plants > 0) {
+        gardensWithPlants++;
       }
+      
+      totalOverdueTasks += garden.plants_with_overdue_tasks || 0;
     });
-
-    // Calculate average health score across all gardens with plants
-    // If no gardens have plants, show neutral state (no percentage)
-    const avgHealthPercentage =
-      totalGardensWithScore > 0
-        ? Math.round(totalHealthScores / totalGardensWithScore)
-        : null;
 
     return {
       totalPlantsCount,
       gardenCount: gardens.length,
-      avgHealthPercentage,
+      gardensWithPlants,
+      plantsNeedingCare: totalOverdueTasks,
     };
   };
 
-  const overallHealth = calculateOverallHealth(gardens);
+  const overallStats = calculateOverallStats(gardens);
 
   // Show loading spinner only for initial data fetch, not during navigation
   if (isLoading) {
@@ -108,8 +98,8 @@ export default function GardensScreen() {
       {/* Only render content when we have data */}
       {gardens && (
         <>
-          {/* Overall Health Summary */}
-          {overallHealth && (
+          {/* Overall Statistics Summary */}
+          {overallStats && (
             <AnimatedTransition delay={250} initialY={10}>
               {/*
                 Stats Row: Evenly distribute 3 cards with consistent spacing and padding.
@@ -123,32 +113,29 @@ export default function GardensScreen() {
                   <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
                     <TitleText className="text-xs mb-1">Gardens</TitleText>
                     <BodyText className="text-xl">
-                      {overallHealth.gardenCount}
+                      {overallStats.gardenCount}
                     </BodyText>
                   </View>
                   <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
                     <TitleText className="text-xs mb-1">Total Plants</TitleText>
                     <BodyText className="text-xl">
-                      {overallHealth.totalPlantsCount}
+                      {overallStats.totalPlantsCount}
                     </BodyText>
                   </View>
                   <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
-                    <TitleText className="text-xs mb-1">Health Score</TitleText>
+                    <TitleText className="text-xs mb-1">Need Care</TitleText>
                     <View className="flex-row items-center">
-                      {overallHealth.avgHealthPercentage !== null ? (
-                        <BodyText
-                          className={`text-xl ${
-                            overallHealth.avgHealthPercentage >= 80
-                              ? "text-brand-600"
-                              : overallHealth.avgHealthPercentage >= 50
-                              ? "text-accent-600"
-                              : "text-destructive"
-                          }`}
-                        >
-                          {overallHealth.avgHealthPercentage}%
-                        </BodyText>
-                      ) : (
-                        <BodyText className="text-xs">No plants yet</BodyText>
+                      <BodyText
+                        className={`text-xl ${
+                          overallStats.plantsNeedingCare === 0
+                            ? "text-brand-600"
+                            : "text-accent-600"
+                        }`}
+                      >
+                        {overallStats.plantsNeedingCare}
+                      </BodyText>
+                      {overallStats.plantsNeedingCare === 0 && (
+                        <Ionicons name="checkmark-circle" size={16} color="#5E994B" className="ml-1" />
                       )}
                     </View>
                   </View>
