@@ -99,26 +99,6 @@ export interface UserPlant {
 }
 
 /**
- * Represents plant care statistics for a garden.
- *
- * This interface maps to the `garden_health_stats` view in the database,
- * which provides aggregate statistics on plant care within a garden.
- * Health is calculated based on task completion, not user-inputted status.
- */
-export interface GardenHealthStats {
-  /** Foreign key referencing the garden these stats apply to */
-  garden_id: number;
-  /** Total number of plants in the garden */
-  total_plants: number;
-  /** Number of plants with overdue tasks */
-  plants_with_overdue_tasks: number;
-  /** Number of plants with upcoming tasks due soon */
-  plants_with_urgent_tasks: number;
-  /** Health percentage based on task completion (0-100) */
-  health_percentage: number;
-}
-
-/**
  * Represents a plant summary from the user_gardens_dashboard view
  */
 interface DashboardPlantSummary {

@@ -22,7 +22,6 @@ interface OverdueTask {
 interface GardenNotification {
   garden_id: number;
   garden_name: string;
-  health_impact: number;
   overdue_tasks_count: number;
   tasks: OverdueTask[];
 }
@@ -145,7 +144,7 @@ export default function OverdueTasksModal({
               <TitleText className="text-xl text-foreground">
                 {gardenId
                   ? filteredNotifications[0]?.garden_name || "Garden"
-                  : "Garden Health Alert"}
+                  : "Overdue Tasks"}
               </TitleText>
             </View>
 
@@ -155,12 +154,10 @@ export default function OverdueTasksModal({
           </View>
 
           {/* Summary information */}
-          <View className="mb-4 bg-red-50 p-3 rounded-lg">
-            <BodyText className="text-red-800 font-medium">
+          <View className="mb-4 bg-yellow-50 p-3 rounded-lg">
+            <BodyText className="text-yellow-800 font-medium">
               {totalOverdueTasks} overdue{" "}
-              {totalOverdueTasks === 1 ? "task" : "tasks"} across{" "}
-              {filteredNotifications.length}{" "}
-              {filteredNotifications.length === 1 ? "garden" : "gardens"}
+              {totalOverdueTasks === 1 ? "task" : "tasks"} need your attention
             </BodyText>
           </View>
 
@@ -170,13 +167,6 @@ export default function OverdueTasksModal({
                 <SubtitleText className="text-foreground text-lg mb-2">
                   {notification.garden_name}
                 </SubtitleText>
-
-                <View className="flex-row items-center mb-2 bg-red-50 p-3 rounded-lg">
-                  <Ionicons name="trending-down" size={20} color="#ef4444" />
-                  <BodyText className="text-red-600 font-medium ml-2">
-                    {notification.health_impact}% health impact
-                  </BodyText>
-                </View>
 
                 <BodyText className="text-sm text-cream-700 font-paragraph mb-2">
                   {notification.overdue_tasks_count}{" "}
@@ -192,11 +182,11 @@ export default function OverdueTasksModal({
                       key={task.task_id}
                       className="flex-row items-center p-2 bg-cream-50 rounded-md mb-2"
                     >
-                      <View className="w-8 h-8 bg-red-100 rounded-lg items-center justify-center mr-2">
+                      <View className="w-8 h-8 bg-yellow-100 rounded-lg items-center justify-center mr-2">
                         <Ionicons
                           name={getTaskIcon(task.task_type)}
                           size={16}
-                          color="#ef4444"
+                          color="#f59e0b"
                         />
                       </View>
                       <View className="flex-1">
@@ -220,7 +210,7 @@ export default function OverdueTasksModal({
                   onPress={() => handleViewGarden(notification.garden_id)}
                 >
                   <BodyText className="text-white text-center font-medium">
-                    {gardenId ? "View Tasks" : "View Gardens"}
+                    {gardenId ? "View Tasks" : "View Garden"}
                   </BodyText>
                 </TouchableOpacity>
               </View>

@@ -2,7 +2,7 @@
 
 > **Launch Date:** August 15, 2025  
 > **Current Status:** Pre-launch development and testing phase  
-> **Last Updated:** July 1, 2025
+> **Last Updated:** July 7, 2025
 
 ---
 
@@ -1456,7 +1456,7 @@ Garden conditions are automatically converted to plant database filters includin
 
 ---
 
-## Dynamic Plant Task Scheduling Plan (2024-06)
+## Dynamic Plant Task Scheduling Plan
 
 ### Overview
 
@@ -1558,5 +1558,39 @@ This is a **major architectural and UX change**. It will affect the database, ba
    - [ ] Monitor user feedback for confusion or requests for the old feature.
 
 // Reason: This ensures a clean, positive, and modern user experience, and prevents technical debt or confusion from legacy garden health logic.
+
+---
+
+## 🌱 Garden Health Removal Implementation (July 7, 2025)
+
+**Status:** ✅ **COMPLETE**
+**Owner:** Development Team
+**Rationale:** Shifting away from "garden health" metric to focus on actionable, task-based plant care. Garden health percentages are now considered a gimmick and have been completely removed to focus on positive, actionable feedback.
+
+### ✅ COMPLETED FRONTEND CHANGES
+
+_All UI, types, queries, and hooks have been refactored to remove all garden health logic. No health scores, percentages, or impact fields remain. All status and feedback are now based on actionable task counts (overdue, upcoming, etc.)._
+
+### ✅ COMPLETED BACKEND CHANGES
+
+- All health-related functions, views, and fields have been dropped from Supabase.
+- The obsolete trigger function `trigger_refresh_garden_health_view` has been removed.
+- No health-related routines, columns, or logic remain in the database.
+
+### ✅ COMPLETED DOCUMENTATION CHANGES
+
+- All documentation, onboarding, and help text have been updated to remove garden health references.
+- Migration note: As of July 2025, all garden health logic, UI, and database routines have been fully removed. The app now focuses on positive, actionable plant care feedback only.
+
+### 🧪 VALIDATION
+
+- All user flows, UI, and API endpoints tested and confirmed to be free of garden health logic.
+- No errors, broken UI, or missing feedback.
+- User experience is positive and clear, with actionable feedback for plant care needs.
+
+---
+
+**Migration Note (2025-07):**
+All garden health logic, UI, and database routines have been fully removed. This includes all health-related functions, views, columns, and documentation. The app now focuses on positive, actionable plant care feedback only.
 
 ---
