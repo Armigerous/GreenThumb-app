@@ -2,7 +2,6 @@ import { GardenDashboard } from "@/types/garden";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
-import AnimatedProgressBar from "../UI/AnimatedProgressBar";
 import CachedImage from "../CachedImage";
 import { Ionicons } from "@expo/vector-icons";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
@@ -11,11 +10,10 @@ import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
 
 /**
  * GardenCard displays summary information about a garden
- * Uses color-coding to indicate the health status of plants
  * Shows indicators for plants needing care and overdue tasks
- * For gardens with no plants, shows "Add plants" instead of health percentage
+ * For gardens with no plants, shows "Add plants"
  * @param garden - The garden data to display
- * @param maxWidth - Optional max width for the health bar (for different layouts)
+ * @param maxWidth - Optional max width for the status area (for different layouts)
  */
 export default function GardenCard({
   garden,
@@ -25,10 +23,6 @@ export default function GardenCard({
   maxWidth?: number;
 }) {
   const router = useRouter();
-
-  // State to control when to start the health bar animation
-  const [startHealthAnimation, setStartHealthAnimation] =
-    useState<boolean>(false);
 
   // State to control the visibility of the garden-specific overdue tasks modal
   const [showOverdueModal, setShowOverdueModal] = useState<boolean>(false);
@@ -40,40 +34,6 @@ export default function GardenCard({
   // Check if this garden has overdue tasks
   const hasOverdueTasks = hasGardenOverdueTasks(garden.garden_id);
   const overdueTasksCount = getGardenOverdueTasksCount(garden.garden_id);
-
-  // Start health bar animation after the card is fully visible
-  useEffect(() => {
-    // Delay to ensure card animations are complete
-    const animationTimer = setTimeout(() => {
-      setStartHealthAnimation(true);
-    }, 600); // 600ms delay to ensure card animations (fade/move) are complete
-
-    return () => clearTimeout(animationTimer);
-  }, []);
-
-  // Reset and restart health animation when garden data changes
-  useEffect(() => {
-    setStartHealthAnimation(false);
-
-    // Small delay to ensure the animation reset is visible
-    const resetTimer = setTimeout(() => {
-      setStartHealthAnimation(true);
-    }, 50);
-
-    return () => clearTimeout(resetTimer);
-  }, [garden.health_percentage]);
-
-  // Determine the garden health status color
-  const getHealthStatusColor = () => {
-    // If no plants, show neutral gray
-    if (!garden.total_plants || garden.health_percentage === null) {
-      return "#484540"; // Darker gray for better contrast
-    }
-    const healthPercentage = Number(garden.health_percentage);
-    if (healthPercentage >= 80) return "#5E994B"; // Darker green for better contrast - brand-600
-    if (healthPercentage >= 50) return "#9e8600"; // Darker amber for better contrast - accent-500
-    return "#E50000"; // Red for critical (already high contrast)
-  };
 
   // Get the first available plant image from the garden
   const getFirstPlantImage = () => {
@@ -92,6 +52,40 @@ export default function GardenCard({
     // Prevent the parent TouchableOpacity from being triggered
     event.stopPropagation();
     setShowOverdueModal(true);
+  };
+
+  // Get garden status message based on task situation
+  const getGardenStatusMessage = () => {
+    if (!garden.total_plants || garden.total_plants === 0) {
+      return "Add plants to get started";
+    }
+    
+    if (garden.plants_with_overdue_tasks > 0) {
+      return `${garden.plants_with_overdue_tasks} ${garden.plants_with_overdue_tasks === 1 ? 'plant needs' : 'plants need'} care`;
+    }
+    
+    if (garden.upcoming_tasks_count > 0) {
+      return `${garden.upcoming_tasks_count} ${garden.upcoming_tasks_count === 1 ? 'task' : 'tasks'} coming up`;
+    }
+    
+    return "All plants healthy";
+  };
+
+  // Get status color based on task situation
+  const getStatusColor = () => {
+    if (!garden.total_plants || garden.total_plants === 0) {
+      return "#9e9a90"; // Neutral gray for no plants
+    }
+    
+    if (garden.plants_with_overdue_tasks > 0) {
+      return "#E50000"; // Red for overdue tasks
+    }
+    
+    if (garden.upcoming_tasks_count > 0) {
+      return "#9e8600"; // Amber for upcoming tasks
+    }
+    
+    return "#5E994B"; // Green for all good
   };
 
   // Determine if we're on the gardens page (maxWidth = 120) vs home page (maxWidth = 90)
@@ -194,35 +188,24 @@ export default function GardenCard({
               </BodyText>
             </View>
 
-            {/* Health Progress Bar and Percentage Side by Side */}
+            {/* Garden Status Message */}
             <View className="flex-row items-center">
-              <View style={{ width: maxWidth }} className="flex-shrink-0">
-                <AnimatedProgressBar
-                  percentage={
-                    startHealthAnimation && garden.health_percentage !== null
-                      ? garden.health_percentage
-                      : 0
-                  }
-                  color={getHealthStatusColor()}
-                  height={8}
-                  duration={600}
+              <View className="flex-row items-center flex-1">
+                <View 
+                  className="w-2 h-2 rounded-full mr-2" 
+                  style={{ backgroundColor: getStatusColor() }}
                 />
+                <BodyText
+                  className={`${
+                    isGardensPage ? "text-sm" : "text-xs"
+                  } text-cream-700 flex-1`}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ color: getStatusColor() }}
+                >
+                  {getGardenStatusMessage()}
+                </BodyText>
               </View>
-              <BodyText
-                className={`$${
-                  isGardensPage
-                    ? "text-sm ml-2 flex-shrink-0"
-                    : "text-xs ml-1 flex-shrink"
-                } text-cream-700`}
-                {...(!isGardensPage && {
-                  numberOfLines: 1,
-                  ellipsizeMode: "tail",
-                })}
-              >
-                {garden.health_percentage !== null
-                  ? `${garden.health_percentage}%`
-                  : "No plants yet"}
-              </BodyText>
             </View>
           </View>
 

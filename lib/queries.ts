@@ -227,7 +227,6 @@ export function useGardenDashboard(userId?: string) {
           total_plants,
           plants_with_overdue_tasks,
           plants_with_urgent_tasks,
-          health_percentage,
           upcoming_tasks,
           upcoming_tasks_count,
           plants

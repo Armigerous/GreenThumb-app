@@ -2,7 +2,7 @@
 
 > **Launch Date:** August 15, 2025  
 > **Current Status:** Pre-launch development and testing phase  
-> **Last Updated:** July 1, 2025
+> **Last Updated:** January 27, 2025
 
 ---
 
@@ -1558,5 +1558,177 @@ This is a **major architectural and UX change**. It will affect the database, ba
    - [ ] Monitor user feedback for confusion or requests for the old feature.
 
 // Reason: This ensures a clean, positive, and modern user experience, and prevents technical debt or confusion from legacy garden health logic.
+
+---
+
+## 🌱 Garden Health Removal Implementation (January 27, 2025)
+
+**Status:** 🔄 **IN PROGRESS** - Frontend changes complete, backend changes needed  
+**Owner:** Development Team  
+**Rationale:** Shifting away from "garden health" metric to focus on actionable, task-based plant care. Garden health percentages are now considered a gimmick and should be completely removed to focus on positive, actionable feedback.
+
+### ✅ COMPLETED FRONTEND CHANGES
+
+**A. UI Components & Screens (Completed)**
+
+1. **✅ components/Gardens/GardenCard.tsx**
+   - Removed health percentage/progress bar display
+   - Removed AnimatedProgressBar import and usage
+   - Replaced health percentage with status messages based on task situation
+   - Added positive status indicators: "All plants healthy", "X plants need care", "X tasks coming up"
+   - Removed color-coding logic for health status
+   - Maintained overdue tasks indicator functionality
+
+2. **✅ components/Gardens/GardenDetailHeader.tsx**
+   - Removed "Garden Health" section and health percentage display
+   - Removed AnimatedProgressBar import and usage
+   - Replaced with task-based summary showing upcoming tasks count
+   - Maintained plants needing care indicator
+
+3. **✅ components/Gardens/Plants/Add/GardenSelectionStep.tsx**
+   - Removed `{garden.health_percentage}% health` from garden list
+   - Replaced with plants needing care count display
+   - Shows "X need care" when plants have overdue tasks
+
+4. **✅ app/(tabs)/gardens/index.tsx**
+   - Removed overall health calculation and "Health Score" card
+   - Replaced with "Need Care" metric showing plants needing attention
+   - Updated stats to focus on positive plant count metrics
+   - Added checkmark icon for zero plants needing care
+
+5. **✅ components/UI/OverdueTasksModal.tsx**
+   - Removed "Garden Health Alert" and health impact references
+   - Removed health_impact field from GardenNotification interface
+   - Changed modal title to "Overdue Tasks"
+   - Updated styling from red (alarming) to yellow (attention-seeking)
+   - Focused modal on actionable overdue tasks only
+
+**B. Types, Data, and Queries (Completed)**
+
+6. **✅ types/garden.ts**
+   - Removed `GardenHealthStats` interface completely
+   - Cleaned up all health_percentage field references
+
+7. **✅ lib/queries.ts**
+   - Removed `health_percentage` from garden dashboard query select statement
+   - Updated to exclude health percentage from fetched data
+
+8. **✅ lib/hooks/useOverdueTasksNotifications.ts**
+   - Removed health impact logic and calculations
+   - Updated GardenNotification interface to remove health_impact field
+   - Renamed function from `fetchGardenHealthImpact` to `fetchOverdueTasksData`
+   - Updated RPC call from `get_garden_health_impact` to `get_overdue_task_notifications`
+   - Focused exclusively on overdue task notifications
+
+**D. Documentation (Completed)**
+
+9. **✅ README.md**
+   - Removed all mentions of garden health, health score, and health percentage
+   - Updated feature descriptions to focus on task-based care
+   - Replaced "Garden health statistics" with "Plant care task tracking"
+   - Updated dashboard description from "health stats" to "task summaries"
+   - Removed `garden_health_stats` view reference
+
+### 🔄 PENDING BACKEND CHANGES
+
+**C. Supabase/Backend (Requires Database Admin)**
+
+The following Supabase changes need to be implemented by a database administrator:
+
+**Functions to Remove/Update:**
+- `get_garden_health_impact` - Remove entirely OR update to remove health_impact field
+- `get_my_garden_health_impact` - Remove entirely OR update to remove health_impact field  
+- `get_user_garden_health_summary` - Remove entirely (no longer needed)
+- `refresh_garden_health_view` - Remove entirely (no longer needed)
+- Update `get_overdue_task_notifications` to remove health_impact field from return type
+
+**Views to Remove/Update:**
+- `garden_health_with_overdue_tasks` - Remove if no longer used OR update to remove health fields
+- `garden_health_stats` - Remove entirely (referenced in comments, may not exist)
+
+**Fields to Remove from Views:**
+- `health_percentage` from `user_gardens_dashboard` view
+- `health_impact` from various function return types
+- `health_impact_score` from function return types
+
+**Types to Update:**
+- Update `types/supabase.ts` after backend changes (will be auto-regenerated)
+- Remove health_percentage from user_gardens_dashboard Row type
+- Remove health_impact from function return types
+
+### 🎯 REPLACEMENT APPROACH IMPLEMENTED
+
+**Positive Feedback Focus:**
+- ✅ Garden status based on actionable tasks, not punitive health scores
+- ✅ "All plants healthy" when no overdue tasks
+- ✅ "X plants need care" when overdue tasks exist  
+- ✅ "X tasks coming up" for upcoming tasks
+- ✅ Green checkmarks and positive colors for good status
+- ✅ Amber/yellow for attention needed (not alarming red)
+
+**No Health Percentages/Scores:**
+- ✅ No numerical health scores anywhere in UI
+- ✅ No color-coding based on health percentages
+- ✅ No progress bars for health status
+- ✅ No health impact calculations
+
+**Overdue/Urgent Task Focus:**
+- ✅ Overdue task indicators remain fully functional
+- ✅ Task-based organization (overdue, due soon, all good)
+- ✅ Positive reinforcement when no tasks overdue
+- ✅ Clear actionable feedback for plant care needs
+
+### 🧪 TESTING REQUIRED
+
+After backend changes are implemented:
+
+- [ ] **Verify API Compatibility**: Ensure all frontend queries work with updated backend
+- [ ] **Test Garden Cards**: Confirm status messages display correctly
+- [ ] **Test Dashboard**: Verify stats show plant counts and care needs, not health scores
+- [ ] **Test Overdue Modal**: Ensure modal shows tasks without health impact data
+- [ ] **Test Garden Detail**: Confirm header shows task summaries instead of health
+- [ ] **Regression Testing**: Ensure no health percentages appear anywhere in app
+- [ ] **User Experience**: Validate positive feedback approach feels encouraging
+
+### 📋 VALIDATION CHECKLIST
+
+**UI Validation:**
+- [ ] No health percentages displayed anywhere
+- [ ] No health scores or health metrics shown
+- [ ] No "Garden Health" labels or sections
+- [ ] All status messages are positive or neutral
+- [ ] Overdue tasks still clearly indicated
+- [ ] Color schemes focus on brand colors, not health status colors
+
+**Backend Validation:**
+- [ ] All health-related functions removed or updated
+- [ ] health_percentage field removed from views
+- [ ] health_impact fields removed from function returns
+- [ ] No health-related database queries or calculations
+
+**Documentation Validation:**
+- [ ] No references to garden health in user-facing text
+- [ ] No mentions of health scores in help documentation
+- [ ] Updated onboarding and tooltips
+- [ ] Backend API documentation updated
+
+### 💡 BUSINESS BENEFITS
+
+**User Experience:**
+- More encouraging and positive plant care experience
+- Focus on actionable tasks rather than abstract scores
+- Eliminates confusion about health calculation methodology
+- Aligns with modern UX best practices for positive reinforcement
+
+**Technical Benefits:**
+- Removes complex health calculation logic
+- Simplifies database queries and views
+- Reduces technical debt from health scoring system
+- Faster load times without health calculations
+
+**Brand Alignment:**
+- Supports nurturing, growth-focused brand personality
+- Eliminates punitive or negative scoring systems
+- Promotes sustainable, stress-free plant care approach
 
 ---
