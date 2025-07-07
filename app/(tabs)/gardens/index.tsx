@@ -111,46 +111,46 @@ export default function GardensScreen() {
           {/* Overall Health Summary */}
           {overallHealth && (
             <AnimatedTransition delay={250} initialY={10}>
-              <View className="flex-row justify-between mb-6 px-2">
-                <View className="flex-1 bg-cream-50 rounded-lg p-3 mx-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
-                    Gardens
-                  </Text>
-                  <Text className="text-xl font-title font-bold text-foreground">
-                    {overallHealth.gardenCount}
-                  </Text>
-                </View>
-                <View className="flex-1 bg-cream-50 rounded-lg p-3 mr-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
-                    Total Plants
-                  </Text>
-                  <Text className="text-xl font-title font-bold text-foreground">
-                    {overallHealth.totalPlantsCount}
-                  </Text>
-                </View>
-
-                <View className="flex-1 bg-cream-50 rounded-lg p-3 ml-2 shadow-sm">
-                  <Text className="text-xs text-cream-600 font-paragraph mb-1">
-                    Health Score
-                  </Text>
-                  <View className="flex-row items-center">
-                    {overallHealth.avgHealthPercentage !== null ? (
-                      <Text
-                        className={`text-xl font-title font-bold ${
-                          overallHealth.avgHealthPercentage >= 80
-                            ? "text-brand-600"
-                            : overallHealth.avgHealthPercentage >= 50
-                            ? "text-accent-600"
-                            : "text-destructive"
-                        }`}
-                      >
-                        {overallHealth.avgHealthPercentage}%
-                      </Text>
-                    ) : (
-                      <Text className="text-xl font-title font-bold text-cream-500">
-                        No plants yet
-                      </Text>
-                    )}
+              {/*
+                Stats Row: Evenly distribute 3 cards with consistent spacing and padding.
+                - Use a single px-4 on the parent for edge padding.
+                - Use flex-row and gap-x-3 for even spacing between cards.
+                - Remove all mx-2, mr-2, ml-2 from cards for consistency.
+                - This ensures the cards feel visually grouped and centered inside the phone.
+              */}
+              <View className="px-4">
+                <View className="flex-row gap-x-3">
+                  <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
+                    <TitleText className="text-xs mb-1">Gardens</TitleText>
+                    <BodyText className="text-xl">
+                      {overallHealth.gardenCount}
+                    </BodyText>
+                  </View>
+                  <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
+                    <TitleText className="text-xs mb-1">Total Plants</TitleText>
+                    <BodyText className="text-xl">
+                      {overallHealth.totalPlantsCount}
+                    </BodyText>
+                  </View>
+                  <View className="flex-1 bg-cream-50 rounded-lg p-3 shadow-sm">
+                    <TitleText className="text-xs mb-1">Health Score</TitleText>
+                    <View className="flex-row items-center">
+                      {overallHealth.avgHealthPercentage !== null ? (
+                        <BodyText
+                          className={`text-xl ${
+                            overallHealth.avgHealthPercentage >= 80
+                              ? "text-brand-600"
+                              : overallHealth.avgHealthPercentage >= 50
+                              ? "text-accent-600"
+                              : "text-destructive"
+                          }`}
+                        >
+                          {overallHealth.avgHealthPercentage}%
+                        </BodyText>
+                      ) : (
+                        <BodyText className="text-xs">No plants yet</BodyText>
+                      )}
+                    </View>
                   </View>
                 </View>
               </View>
@@ -158,7 +158,7 @@ export default function GardensScreen() {
           )}
 
           {/* Gardens List */}
-          <View className="px-4">
+          <View className="px-2 py-4">
             {gardens.length > 0 ? (
               gardens.map((garden, index) => (
                 <AnimatedTransition
