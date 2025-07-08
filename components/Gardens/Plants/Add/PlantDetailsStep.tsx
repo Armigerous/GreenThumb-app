@@ -40,9 +40,7 @@ interface PlantDetailsStepProps {
 // List of cute human names for random selection
 const cuteNames = [
   "Milo",
-  "Daisy",
   "Oliver",
-  "Lily",
   "Charlie",
   "Sophie",
   "Ruby",

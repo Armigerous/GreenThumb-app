@@ -246,6 +246,11 @@ export default function GardenConditionsPage() {
         return;
       }
 
+      // Invalidate the garden filters query so FilterModal updates immediately
+      queryClient.invalidateQueries({
+        queryKey: ["userGardensForFilters", gardenData.user_id],
+      });
+
       // Force invalidate the query to ensure fresh data is fetched
       queryClient.invalidateQueries({
         queryKey: ["gardenDetails", Number(id)],
@@ -344,6 +349,10 @@ export default function GardenConditionsPage() {
               // Invalidate the garden dashboard query cache to trigger a refetch
               queryClient.invalidateQueries({
                 queryKey: ["gardenDashboard", gardenData.user_id],
+              });
+              // Invalidate the garden filters query so FilterModal updates immediately
+              queryClient.invalidateQueries({
+                queryKey: ["userGardensForFilters", gardenData.user_id],
               });
 
               Alert.alert("Success", "Garden deleted successfully");

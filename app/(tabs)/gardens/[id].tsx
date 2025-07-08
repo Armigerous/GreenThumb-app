@@ -405,6 +405,10 @@ const GardenDetails = () => {
               queryClient.invalidateQueries({
                 queryKey: ["gardenDashboard", gardenData.user_id],
               });
+              // Invalidate the garden filters query so FilterModal updates immediately
+              queryClient.invalidateQueries({
+                queryKey: ["userGardensForFilters", gardenData.user_id],
+              });
 
               Alert.alert("Success", "Garden deleted successfully");
               router.push("/(tabs)/gardens");

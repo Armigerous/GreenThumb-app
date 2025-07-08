@@ -20,6 +20,11 @@ import FilterSearchBar from "./FilterModal/FilterSearchBar";
 import QuickFilterTooltip from "./FilterModal/QuickFilterTooltip";
 import GardenInfoTooltip from "./FilterModal/GardenInfoTooltip";
 
+// GreenThumb Filter Modal Note:
+// This modal does NOT use a user_gardens_for_filters join table.
+// All garden-based filters are derived from garden properties via the useGardenFilters hook.
+// Reason: Simpler, more maintainable, and avoids unnecessary indirection.
+
 // Define a type for Feather icon names
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
@@ -307,6 +312,11 @@ export default function FilterModal({
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
+  // Defensive: Only show filter options for gardens that actually exist
+  const validGardenFilterOptions = gardenFilterOptions.filter((option) =>
+    gardens?.some((g) => `garden-${g.id}` === option.id)
+  );
+
   return (
     <Modal
       visible={visible}
@@ -350,8 +360,12 @@ export default function FilterModal({
               {(() => {
                 // Group gardens into rows
                 const rows = [];
-                for (let i = 0; i < gardenFilterOptions.length; i += columns) {
-                  rows.push(gardenFilterOptions.slice(i, i + columns));
+                for (
+                  let i = 0;
+                  i < validGardenFilterOptions.length;
+                  i += columns
+                ) {
+                  rows.push(validGardenFilterOptions.slice(i, i + columns));
                 }
                 return (
                   <ScrollView
@@ -369,6 +383,8 @@ export default function FilterModal({
                           const fullGarden = gardens?.find(
                             (g) => g.id === option.gardenId
                           );
+                          // Defensive: skip rendering if garden is missing
+                          if (!fullGarden) return null;
                           return (
                             <View
                               key={option.id}

@@ -388,8 +388,10 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
           {
             name: formValues.name.trim(),
             user_id: user.id,
-            // Only zip_code is stored for location (optional)
+            // Store location info for weather and analytics
             zip_code: formValues.zip_code || null,
+            city: formValues.city || null, // Store city from ZipCodeInput for analytics and user context
+            county: formValues.county || null, // Store county from ZipCodeInput for analytics and user context
             // Essential growing conditions collected from the form
             light_id: formValues.light_id,
             soil_texture_id: formValues.soil_texture_id,
@@ -415,6 +417,11 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
       // Invalidate the garden dashboard query cache to trigger a refetch
       queryClient.invalidateQueries({
         queryKey: ["gardenDashboard", user.id],
+      });
+
+      // Invalidate the garden filters query so FilterModal updates immediately
+      queryClient.invalidateQueries({
+        queryKey: ["userGardensForFilters", user.id],
       });
 
       // Clear form cache since garden was successfully created

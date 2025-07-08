@@ -5,7 +5,7 @@ import type { Database } from "./supabase";
  * Use these for anything that directly maps to Supabase tables or views.
  * Do NOT redefine these types elsewhere in the codebase.
  */
-export type Garden = Database["public"]["Views"]["user_gardens_full_data"]["Row"];
+export type Garden = Database["public"]["Tables"]["user_gardens_flat"]["Row"];
 export type GardenDashboard = Database["public"]["Views"]["user_gardens_dashboard"]["Row"];
 export type GardenDatabase = Database["public"]["Tables"]["user_gardens"]["Row"];
 export type GardenTaskSummary = Database["public"]["Views"]["garden_tasks_summary"]["Row"];
@@ -132,6 +132,57 @@ export interface UpcomingTask {
   due_date: string;
   /** Whether the task has been completed */
   completed: boolean;
+}
+
+// Patch: If user_gardens_flat is missing from Database["public"]["Tables"], add a minimal type here for type safety.
+// Remove this patch once supabase types are regenerated.
+export {};
+declare global {
+  namespace Database {
+    interface public {
+      Tables: {
+        user_gardens_flat: {
+          Row: {
+            id: number;
+            user_id: string;
+            name: string | null;
+            wants_recommendations: boolean | null;
+            zip_code: string | null;
+            city: string | null;
+            county: string | null;
+            created_at: string | null;
+            updated_at: string | null;
+            growth_rates: any;
+            maintenance_level: string | null;
+            texture_preference: string | null;
+            available_space: string | null;
+            sunlight: string | null;
+            soil_texture: string | null;
+            soil_drainage: any;
+            soil_ph: any;
+            garden_themes: any;
+            wildlife_attractions: any;
+            resistance_challenges: any;
+            problems: any;
+            nc_regions: any;
+            usda_zones: any;
+            flower_colors: any;
+            flower_bloom_times: any;
+            flower_values: any;
+            leaf_colors: any;
+            leaf_feels: any;
+            leaf_values: any;
+            fall_colors: any;
+            habit_forms: any;
+            plant_types: any;
+            design_features: any;
+            landscape_locations: any;
+            plants: any;
+          };
+        };
+      };
+    }
+  }
 }
 
 
