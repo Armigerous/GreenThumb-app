@@ -217,6 +217,29 @@ users (Supabase Auth)
 └── payment_history (1:many)
 ```
 
+### Denormalized Garden Data Table: user_gardens_flat
+
+As of January 2025, the app uses a fully denormalized table, `user_gardens_flat`, to provide fast, always-fresh reads of all user garden data. This table replaces the previous `user_gardens_full_data` materialized view, which was dropped due to staleness and global refresh limitations.
+
+**Purpose:**
+
+- Store all required, lookup-joined data for each user garden in a single row.
+- Enable fast, per-user updates and reads without the need for global refreshes.
+- Simplify frontend/backend logic by providing a single source of truth for garden data.
+
+**Sync Logic:**
+
+- The table is kept in sync via PostgreSQL triggers on the `user_gardens` table.
+- The `trg_upsert_garden_flat` trigger function upserts (inserts/updates) a row in `user_gardens_flat` on every `INSERT` or `UPDATE` to `user_gardens`.
+- The `trg_delete_garden_flat` trigger function deletes the corresponding row from `user_gardens_flat` on `DELETE` from `user_gardens`.
+- Lookup values (e.g., maintenance level, texture, available space, sunlight, soil texture) are resolved in the trigger function for denormalization.
+
+**Rationale:**
+
+- Eliminates the need for materialized view refreshes and stale data.
+- Ensures all reads are always up-to-date and performant.
+- Supports precise, per-user updates and simplifies data access patterns for the app.
+
 ---
 
 ## 📱 Application Structure

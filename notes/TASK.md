@@ -1386,6 +1386,20 @@ Garden conditions are automatically converted to plant database filters includin
 - [ ] Sign in/up page clearly explains password requirements
 - [ ] No user confusion about needing a password to sign up
 
+**INTERVIEW-HIGH-023**: Garden filter modal does not sync with deleted gardens  
+**Status:** 🟡 **HIGH** - UX/data consistency bug  
+**Owner:** Development Team  
+**User Impact:** "When I delete a garden, it still shows up as a filter option until I reload the app."  
+**Description:** The filter modal's garden filter options do not update immediately after a garden is deleted. This causes confusion, as users can attempt to filter by gardens that no longer exist. The filter modal should always reflect the current set of gardens in the database, removing deleted gardens from the filter list right away.
+**Acceptance Criteria:**
+
+- [ ] When a garden is deleted, it is immediately removed from the filter modal's garden filter options
+- [ ] No deleted gardens appear as filter options without a full app reload
+- [ ] Filter modal always reflects the current state of the user's gardens
+- [ ] No errors or stale data when switching filters after a deletion
+- [ ] Solution is tested for both single and multiple garden scenarios
+      // Reason: Ensures data consistency and prevents user confusion by keeping filter options in sync with actual gardens.
+
 ---
 
 ## 🟢 NEW TASKS: UI/UX Improvements (July 2025)
@@ -1731,5 +1745,32 @@ By anchoring all task scheduling to quantitative climate and microclimate metric
 - Ready for use by the new edge function and rolling refresh job.
 
 // Reason: This plan keeps the system focused, maintainable, and user-friendly, while supporting dynamic, climate-aware plant care scheduling.
+
+---
+
+## 🟡 HIGH PRIORITY - DATABASE REFACTOR: Replace Materialized View with Denormalized Table
+
+**DB-REFACTOR-002**: Drop `user_gardens_full_data` materialized view and implement `user_gardens_flat` denormalized table
+**Status:** 🟡 **HIGH** - Data architecture improvement
+**Owner:** Development Team
+**Description:**
+After further research and architectural review, we have determined that the `user_gardens_full_data` materialized view is not the optimal solution for our use case. Instead, we will implement a denormalized table, `user_gardens_flat`, to store all required lookup-joined data for each garden. This will provide fast, always-fresh reads for the app, and allow precise, per-user updates without global refreshes or staleness.
+
+**Progress:**
+
+- [x] `user_gardens_flat` table created with all required denormalized fields
+- [x] All frontend, backend, and edge function code updated to use `user_gardens_flat` instead of the materialized view
+- [x] Triggers and sync logic (`trg_upsert_garden_flat()` and lookup table triggers) implemented
+- [x] Table backfilled with current data
+- [x] Materialized view dropped from database
+- [x] Documentation updated in `docs/architecture.md` and `docs/technical.md`
+- [ ] Performance and data freshness validated
+
+**Next steps:**
+
+- Validate performance and data freshness in the app
+- Mark task complete after validation
+
+// Reason: Triggers and sync logic are now live; documentation is current. Ready for final validation.
 
 ---

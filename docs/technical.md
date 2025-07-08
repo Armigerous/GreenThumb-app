@@ -367,6 +367,34 @@ export const useCreatePlant = () => {
 };
 ```
 
+### Denormalized Garden Data Sync: user_gardens_flat
+
+**Overview:**
+
+- The `user_gardens_flat` table is a denormalized, always-fresh representation of all user garden data, replacing the old `user_gardens_full_data` materialized view.
+- This table is kept in sync using PostgreSQL trigger functions.
+
+**Trigger Functions:**
+
+- `trg_upsert_garden_flat`: Upserts a row in `user_gardens_flat` on every `INSERT` or `UPDATE` to `user_gardens`. It resolves lookup values (e.g., maintenance, texture, available space, sunlight, soil texture) and writes them as flat fields.
+- `trg_delete_garden_flat`: Deletes the corresponding row from `user_gardens_flat` on `DELETE` from `user_gardens`.
+
+**Events:**
+
+- Triggers are attached to `user_gardens` for `INSERT`, `UPDATE`, and `DELETE` events.
+- All changes to user garden data are immediately reflected in the denormalized table.
+
+**Materialized View Removal:**
+
+- The old `user_gardens_full_data` materialized view has been dropped. All code now reads from `user_gardens_flat`.
+
+**Benefits:**
+
+- No more global refreshes or stale data.
+- Fast, per-user reads and updates.
+- Simplified frontend/backend data access.
+- Easy to extend with new fields as needed.
+
 ---
 
 ## 💳 Subscription System

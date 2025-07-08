@@ -55,7 +55,7 @@ export async function getWeatherAndSeason(
 ): Promise<WeatherAndSeasonData> {
   // Fetch garden coordinates from the materialized view
   const { data: garden, error } = await supabase
-    .from("user_gardens_full_data")
+    .from("user_gardens_flat")
     .select("latitude, longitude")
     .eq("id", gardenId)
     .single();

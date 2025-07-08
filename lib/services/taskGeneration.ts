@@ -153,7 +153,7 @@ export async function getCurrentWeatherAndSeason(gardenId: string) {
 
 //     // Get garden data
 //     const { data: garden, error: gardenError } = await supabase
-//       .from("user_gardens_full_data")
+//       .from("user_gardens_flat")
 //       .select("*")
 //       .eq("id", userPlant.garden_id)
 //       .single();

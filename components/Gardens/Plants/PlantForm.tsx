@@ -23,6 +23,7 @@ import {
   ConfirmationStep,
   ErrorMessage,
 } from "./Add";
+import { generatePlantTasks } from "@/lib/services/taskGeneration";
 
 // Props for the plant addition form
 interface PlantFormProps {
@@ -155,12 +156,6 @@ export default function PlantForm({
     setIsSubmitting(true);
     setUploadProgress(10);
     try {
-      // Verify garden ownership
-      if (selectedGarden.user_id !== user.id) {
-        setError("You don't have permission to add plants to this garden");
-        setIsSubmitting(false);
-        return;
-      }
       let plantImageUrl = null;
       // If a custom image was selected, handle it appropriately
       if (image) {
@@ -184,8 +179,8 @@ export default function PlantForm({
       }
       setUploadProgress(70);
       const now = new Date().toISOString();
-      const plantData: UserPlant = {
-        id: `${Math.random().toString(36).substr(2, 9)}-${Date.now()}`,
+      // ID will be generated server-side by Supabase
+      const plantData = {
         garden_id: selectedGarden.garden_id ?? -1,
         plant_id: plant.id ?? -1,
         nickname: nickname.trim(),
@@ -197,7 +192,6 @@ export default function PlantForm({
       setUploadProgress(85);
       // Insert via RPC
       const { data, error: rpcError } = await supabase.rpc("add_user_plant", {
-        p_id: plantData.id,
         p_garden_id: plantData.garden_id,
         p_plant_id: plantData.plant_id,
         p_nickname: plantData.nickname,
@@ -205,7 +199,53 @@ export default function PlantForm({
         p_care_logs: plantData.care_logs,
       });
       if (rpcError) {
-        setError("Failed to add plant to garden. Please try again.");
+        // Enhanced debugging: log the full error object for developer inspection
+        // and display detailed error info in the UI for diagnosis.
+        console.error("Supabase RPC add_user_plant error:", rpcError);
+        setError(
+          `Failed to add plant to garden.\n` +
+            (rpcError.message ? `Message: ${rpcError.message}\n` : "") +
+            (rpcError.details ? `Details: ${rpcError.details}\n` : "") +
+            (rpcError.code ? `Code: ${rpcError.code}\n` : "") +
+            (rpcError.hint ? `Hint: ${rpcError.hint}` : "")
+        );
+        setIsSubmitting(false);
+        return;
+      }
+      // --- Call Edge Function to Generate Tasks ---
+      // Reason: After adding the plant, generate initial care tasks via edge function
+      if (data && data.length > 0) {
+        const newUserPlant = data[0];
+        try {
+          setUploadProgress(90);
+          await generatePlantTasks({
+            id: newUserPlant.id,
+            garden_id: newUserPlant.garden_id,
+            plant_id: newUserPlant.plant_id,
+            nickname: newUserPlant.nickname,
+            created_at: newUserPlant.created_at,
+            updated_at: newUserPlant.updated_at ?? new Date().toISOString(),
+            images: Array.isArray(newUserPlant.images)
+              ? newUserPlant.images
+              : [],
+            care_logs: [],
+          });
+        } catch (edgeError) {
+          // Log and show error if task generation fails
+          console.error("Error generating plant tasks:", edgeError);
+          setError(
+            "Plant was added, but failed to generate care tasks. " +
+              (edgeError instanceof Error
+                ? edgeError.message
+                : JSON.stringify(edgeError))
+          );
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        setError(
+          "Plant was added, but could not retrieve new plant data for task generation."
+        );
         setIsSubmitting(false);
         return;
       }
@@ -219,7 +259,12 @@ export default function PlantForm({
       });
       onSuccess();
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      // Log the error for debugging
+      console.error("Unexpected error in PlantForm handleSubmit:", err);
+      setError(
+        "An unexpected error occurred. " +
+          (err instanceof Error ? err.message : JSON.stringify(err))
+      );
     } finally {
       setIsSubmitting(false);
     }

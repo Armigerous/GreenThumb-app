@@ -123,6 +123,18 @@ export default function PlantDatabaseScreen() {
     [gardenFilterOptions, setActiveFilters]
   );
 
+  // Reset garden filter if the selected garden is deleted
+  useEffect(() => {
+    if (
+      activeGardenFilter &&
+      !gardenFilterOptions.some((g) => g.id === activeGardenFilter)
+    ) {
+      setActiveGardenFilter(null);
+      setActiveFilters("");
+      // Optionally, you could show a toast or info message here
+    }
+  }, [gardenFilterOptions, activeGardenFilter, setActiveFilters]);
+
   return (
     <PageContainer scroll={false} padded={false}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

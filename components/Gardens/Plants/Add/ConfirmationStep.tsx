@@ -194,9 +194,6 @@ export default function ConfirmationStep({
           </View>
         </View>
 
-        {/* Error message if any */}
-        <ErrorMessage message={error} />
-
         {/* Progress indicator during submission */}
         {isSubmitting && (
           <View className="mb-6">
