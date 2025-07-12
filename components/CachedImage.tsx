@@ -29,6 +29,8 @@ interface CachedImageProps {
   cacheKey?: string;
   /** Prevent URL transformation (use exactly as provided) */
   preventTransform?: boolean;
+  /** Accessibility label for screen readers */
+  accessibilityLabel?: string;
 }
 
 // Default fallback image URL
@@ -107,6 +109,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
   rounded = false,
   cacheKey,
   preventTransform = false,
+  accessibilityLabel,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -350,6 +353,7 @@ const CachedImage: React.FC<CachedImageProps> = ({
           onLoadStart={() => setIsLoading(true)}
           onLoad={handleImageLoad}
           onError={handleImageError}
+          accessibilityLabel={accessibilityLabel}
         />
         {isLoading && (
           <View
@@ -372,17 +376,23 @@ const CachedImage: React.FC<CachedImageProps> = ({
 
   // Use Expo Image for better caching in development builds
   return (
-    <View style={[style, rounded && { borderRadius: 8, overflow: "hidden" }]}>
+    <View
+      style={[
+        style,
+        rounded && { borderRadius: 8, overflow: "hidden" },
+        { backgroundColor: isLoading ? "#f3f4f6" : undefined },
+      ]}
+    >
       <ExpoImage
         style={StyleSheet.absoluteFill}
         source={imageUri}
         contentFit={getContentFit()}
         cachePolicy="memory-disk"
-        placeholder={{ backgroundColor: "#f3f4f6" }}
         transition={300}
         onLoadStart={() => setIsLoading(true)}
         onLoad={handleImageLoad}
         onError={handleImageError}
+        accessibilityLabel={accessibilityLabel}
       />
       {isLoading && (
         <View
