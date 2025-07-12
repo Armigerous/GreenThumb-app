@@ -13,6 +13,7 @@ import {
 } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
+import { TASK_TYPE_META } from "@/constants/taskTypes";
 
 interface TaskProps {
   task: TaskWithDetails;
@@ -263,32 +264,6 @@ export function Task({
     return format(date, "MMM d, yyyy");
   };
 
-  const getTaskIcon = (taskType: string): keyof typeof Ionicons.glyphMap => {
-    switch (taskType) {
-      case "Water":
-        return "water";
-      case "Fertilize":
-        return "leaf";
-      case "Harvest":
-        return "cut";
-      default:
-        return "checkmark-circle";
-    }
-  };
-
-  const getTaskColor = (taskType: string): string => {
-    switch (taskType) {
-      case "Water":
-        return "#3b82f6"; // Blue for water
-      case "Fertilize":
-        return "#5E994B"; // Brand green for fertilize
-      case "Harvest":
-        return "#debc00"; // Accent yellow for harvest
-      default:
-        return "#636059"; // Cream-600 for default
-    }
-  };
-
   const dueDate = new Date(task.due_date);
   const plantNickname = task.plant?.nickname || "Unknown Plant";
   const gardenName = task.plant?.garden?.name || "Unknown Garden";
@@ -328,12 +303,14 @@ export function Task({
             <View className="flex-row justify-between items-start">
               <View className="flex-row items-center flex-1">
                 <Ionicons
-                  name={getTaskIcon(task.task_type)}
+                  name={
+                    TASK_TYPE_META[task.task_type]?.icon || "checkmark-circle"
+                  }
                   size={18}
                   color={
                     isOverdue && !isCompleted
                       ? "#ef4444"
-                      : getTaskColor(task.task_type)
+                      : TASK_TYPE_META[task.task_type]?.color || "#636059"
                   }
                   style={{ marginRight: 6 }}
                 />
@@ -348,7 +325,10 @@ export function Task({
                     }`}
                     style={{ opacity: textOpacity }}
                   >
-                    {task.task_type} {plantNickname}
+                    {/* Use label for clarity and future i18n */}
+                    {TASK_TYPE_META[task.task_type]?.label ||
+                      task.task_type}{" "}
+                    {plantNickname}
                   </Animated.Text>
 
                   {/* Animated strikethrough line */}

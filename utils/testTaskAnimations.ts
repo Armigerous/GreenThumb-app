@@ -5,45 +5,57 @@
  * system's animations and state management work correctly.
  */
 
-import { TaskWithDetails } from "@/types/garden";
+import { TaskWithDetails, TaskType } from "@/types/garden";
 
-// Mock task data for testing
+// Define ALL_TASK_TYPES at the top for use in all mock generators
+export const ALL_TASK_TYPES: TaskType[] = [
+  "Water",
+  "Fertilize",
+  "Prune",
+  "Inspect",
+  "Mulch",
+  "Weed",
+  "Amend Soil",
+  "Propagate",
+  "Transplant",
+  "Log",
+  "Winterize",
+];
+
 export const createMockTask = (id: number, overrideProps?: Partial<TaskWithDetails>): TaskWithDetails => ({
   id,
   user_plant_id: `plant-${id}`,
-  task_type: "Water" as const,
+  // Reason: Cycle through all 11 task types for comprehensive UI testing
+  task_type: ALL_TASK_TYPES[id % ALL_TASK_TYPES.length],
   due_date: new Date().toISOString(),
   completed: false,
   plant: {
-    nickname: `Test Plant ${id}`,
-    garden: {
-      name: `Test Garden ${id}`,
-    },
+    nickname: `Plant ${id}`,
+    garden: { name: `Garden ${id % 3}` },
   },
   ...overrideProps,
 });
 
 // Create a batch of mock overdue tasks
 export const createMockOverdueTasks = (count: number): TaskWithDetails[] => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  return Array.from({ length: count }, (_, index) =>
-    createMockTask(index + 1, {
-      due_date: yesterday.toISOString(),
-      task_type: index % 3 === 0 ? "Water" : index % 3 === 1 ? "Fertilize" : "Harvest",
+  return Array.from({ length: count }, (_, i) =>
+    createMockTask(i, {
+      completed: false,
+      due_date: new Date(Date.now() - 86400000 * (i + 1)).toISOString(),
+      // Cycle through all task types
+      task_type: ALL_TASK_TYPES[i % ALL_TASK_TYPES.length],
     })
   );
 };
 
 // Create mock today's tasks
 export const createMockTodaysTasks = (count: number): TaskWithDetails[] => {
-  const today = new Date();
-  
-  return Array.from({ length: count }, (_, index) =>
-    createMockTask(index + 100, {
-      due_date: today.toISOString(),
-      task_type: index % 3 === 0 ? "Water" : index % 3 === 1 ? "Fertilize" : "Harvest",
+  return Array.from({ length: count }, (_, i) =>
+    createMockTask(i, {
+      completed: false,
+      due_date: new Date().toISOString(),
+      // Cycle through all task types
+      task_type: ALL_TASK_TYPES[i % ALL_TASK_TYPES.length],
     })
   );
 };

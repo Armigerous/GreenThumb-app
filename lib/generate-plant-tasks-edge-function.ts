@@ -62,6 +62,13 @@ const addMonths = (d: Date, n: number): Date => {
 };
 const formatUTC = (d: Date): string => d.toISOString();
 const midOfMonth = (m: number, y: number): Date => new Date(Date.UTC(y, m, 15, 10, 0, 0));
+// Utility: Convert day-of-year (DOY) to Date in a given year
+function doyToDate(doy: number, year: number): Date {
+  // January 1st is DOY 1
+  const date = new Date(Date.UTC(year, 0, 1));
+  date.setUTCDate(date.getUTCDate() + doy - 1);
+  return date;
+}
 
 // --- Supabase Client ---
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -73,13 +80,44 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Task Generators (with microclimate baked in) ---
 function generateWaterTasks(up: any, plant: any, garden: any, climate: any, today: Date, microAdj: number) {
-  const maintenance = plant.maintenance?.[0] ?? "Medium";
-  const baseInterval = WATER_INTERVALS[maintenance] ?? WATER_INTERVALS.Medium;
-  const monthKey = (today.getUTCMonth() + 1).toString();
-  const rain = climate.avg_monthly_rainfall[monthKey] ?? 5;
-  const soilType = garden.soil_texture ?? "Loam";
-  let interval = baseInterval + (rain < 4 ? 1 : rain > 6 ? -1 : 0) + (soilType === "Sand" ? 1 : 0);
+  // --- Robust Logging for Supabase Edge Function ---
+  console.log(`[EdgeFn] generateWaterTasks: plant_id=${plant.id}, garden_id=${garden.id}`);
+  console.log(`[EdgeFn] Raw plant.maintenance=`, JSON.stringify(plant.maintenance), "type=", typeof plant.maintenance);
+  console.log(`[EdgeFn] Raw garden=`, JSON.stringify(garden));
+  console.log(`[EdgeFn] Raw climate=`, JSON.stringify(climate));
+
+  let maintenance = plant.maintenance?.[0] ?? "Medium";
+  console.log(`[EdgeFn] Computed maintenance=`, maintenance);
+
+  if (!["Low", "Medium", "High"].includes(maintenance)) {
+    // Reason: Defensive fallback for unexpected maintenance values
+    console.warn(
+      `[EdgeFn] Unexpected maintenance value for plant_id=${plant.id}:`,
+      maintenance,
+      "plant.maintenance=",
+      JSON.stringify(plant.maintenance)
+    );
+    maintenance = "Medium";
+  }
+  const baseInterval = WATER_INTERVALS[maintenance];
+
+  // --- Updated: Use avg_annual_precip_mm from nc_climate_county ---
+  // Estimate monthly rainfall as avg_annual_precip_mm / 12 (mm)
+  // If missing, fallback to 1200mm/year (100mm/month)
+  if (typeof climate.avg_annual_precip_mm !== "number") {
+    console.error(`[EdgeFn] plant_id=${plant.id} garden_id=${garden.id} ERROR: climate.avg_annual_precip_mm is missing or not a number. climate=`, JSON.stringify(climate));
+  }
+  const avgAnnualPrecip = climate.avg_annual_precip_mm ?? 1200;
+  const avgMonthlyRain = avgAnnualPrecip / 12;
+  console.log(`[EdgeFn] avgAnnualPrecip=`, avgAnnualPrecip, `avgMonthlyRain=`, avgMonthlyRain);
+
+  // Use rainfall to adjust interval: if <80mm/month, +1 day; if >120mm/month, -1 day
+  if (typeof garden.soil_texture !== "string") {
+    console.warn(`[EdgeFn] plant_id=${plant.id} garden_id=${garden.id} WARNING: garden.soil_texture is missing or not a string. garden=`, JSON.stringify(garden));
+  }
+  let interval = baseInterval + (avgMonthlyRain < 80 ? 1 : avgMonthlyRain > 120 ? -1 : 0) + (garden.soil_texture === "Sand" ? 1 : 0);
   interval = Math.max(1, interval);
+  console.log(`[EdgeFn] Computed interval=`, interval);
   const tasks = [];
   let wDate = addDays(today, interval + microAdj);
   while (wDate <= addDays(today, 365)) {
@@ -174,8 +212,21 @@ function generateInspectTasks(up: any, plant: any, today: Date, microAdj: number
   return tasks;
 }
 function generateMulchTasks(up: any, climate: any, today: Date, microAdj: number) {
-  const frostStart = new Date(`${today.getUTCFullYear()}-${climate.last_frost}T00:00:00.000Z`);
-  const frostEnd = new Date(`${today.getUTCFullYear()}-${climate.first_frost}T00:00:00.000Z`);
+  // Use last_spring_frost_doy and first_fall_frost_doy (day-of-year fields)
+  const year = today.getUTCFullYear();
+  const { last_spring_frost_doy, first_fall_frost_doy } = climate;
+  if (typeof last_spring_frost_doy !== "number" || typeof first_fall_frost_doy !== "number") {
+    console.error(`[EdgeFn] generateMulchTasks: Missing or invalid frost DOY values for climate:`, JSON.stringify(climate));
+    return [];
+  }
+  const frostStart = doyToDate(last_spring_frost_doy, year);
+  const frostEnd = doyToDate(first_fall_frost_doy, year);
+  // Log computed dates for debugging
+  console.log(`[EdgeFn] generateMulchTasks: frostStart=`, frostStart.toISOString(), `frostEnd=`, frostEnd.toISOString());
+  if (isNaN(frostStart.getTime()) || isNaN(frostEnd.getTime())) {
+    console.error(`[EdgeFn] generateMulchTasks: Computed invalid frost dates. frostStart=`, frostStart, `frostEnd=`, frostEnd);
+    return [];
+  }
   return [
     {
       user_plant_id: up.id,
@@ -286,14 +337,21 @@ Deno.serve(async (req: Request) => {
       .single();
     if (gErr || !garden) throw new Error("Garden not found");
 
-    // Fetch climate data
-    const countyId = garden.county_id ?? 1;
+    // Fetch climate data from the materialized view using county_name
+    // Reason: Use denormalized materialized view for performance and reliability in edge functions
+    const countyName: string = garden.county; // user_gardens_flat.county is the county name
     const { data: climate, error: cErr } = await supabase
-      .from("nc_climate_county")
+      .from("nc_climate_county_flat")
       .select("*")
-      .eq("county_id", countyId)
+      .eq("county_name", countyName)
       .single();
-    if (cErr || !climate) throw new Error("Climate data not found");
+    if (cErr || !climate) throw new Error("Climate data not found for county: " + countyName);
+
+    // --- Log all fetched data for traceability ---
+    console.log(`[EdgeFn] Handler: up=`, JSON.stringify(up));
+    console.log(`[EdgeFn] Handler: plant=`, JSON.stringify(plant));
+    console.log(`[EdgeFn] Handler: garden=`, JSON.stringify(garden));
+    console.log(`[EdgeFn] Handler: climate=`, JSON.stringify(climate));
 
     // Generate and validate tasks
     const today = new Date();
@@ -313,7 +371,7 @@ Deno.serve(async (req: Request) => {
     });
   } catch (e: any) {
     // Log and return full error details for debugging
-    console.error("Edge Function Error:", e);
+    console.error("[EdgeFn] Error:", e, e?.stack);
     return new Response(JSON.stringify({
       error: e.message,
       stack: e.stack,

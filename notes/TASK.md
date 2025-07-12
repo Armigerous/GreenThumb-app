@@ -1748,29 +1748,32 @@ By anchoring all task scheduling to quantitative climate and microclimate metric
 
 ---
 
-## 🟡 HIGH PRIORITY - DATABASE REFACTOR: Replace Materialized View with Denormalized Table
+### Calendar Page UI Updates
 
-**DB-REFACTOR-002**: Drop `user_gardens_full_data` materialized view and implement `user_gardens_flat` denormalized table
-**Status:** 🟡 **HIGH** - Data architecture improvement
-**Owner:** Development Team
-**Description:**
-After further research and architectural review, we have determined that the `user_gardens_full_data` materialized view is not the optimal solution for our use case. Instead, we will implement a denormalized table, `user_gardens_flat`, to store all required lookup-joined data for each garden. This will provide fast, always-fresh reads for the app, and allow precise, per-user updates without global refreshes or staleness.
+**CAL-UI-001**: Add daily summary panel to Calendar page  
+**Status:** 🟢 NEW  
+**Owner:** Design & Development Team  
+**Description:** Add a daily summary panel at the top of the Calendar page. This panel should summarize key events and adjustments for the selected day, including:
 
-**Progress:**
+- Dynamic task rescheduling (from `metadata.adjustments` in plant tasks)
+- Types and counts of adjustments (e.g., "2 tasks moved up due to heat wave")
+- Weather summary for the day (icon, temperature, notable events)
+- Number of tasks due, completed, and overdue for the day
+- Explanations for any major changes (e.g., "watering moved up due to forecasted heat")
+- Visual indicators for adjustment types (e.g., icons for rain, frost, heat)
 
-- [x] `user_gardens_flat` table created with all required denormalized fields
-- [x] All frontend, backend, and edge function code updated to use `user_gardens_flat` instead of the materialized view
-- [x] Triggers and sync logic (`trg_upsert_garden_flat()` and lookup table triggers) implemented
-- [x] Table backfilled with current data
-- [x] Materialized view dropped from database
-- [x] Documentation updated in `docs/architecture.md` and `docs/technical.md`
-- [ ] Performance and data freshness validated
+**Acceptance Criteria:**
 
-**Next steps:**
+- [ ] Daily summary panel appears at the top of the Calendar page
+- [ ] Panel displays dynamic task adjustments for the selected day, using `metadata.adjustments`
+- [ ] Weather summary is shown for the day (icon, temperature, event)
+- [ ] Task counts (due, completed, overdue) are accurate and update as tasks are completed
+- [ ] Explanations for adjustments are clear and concise
+- [ ] Visual indicators/icons for adjustment types are present
+- [ ] Panel design matches brand guidelines and is responsive
+- [ ] No performance impact on calendar navigation
+- [ ] Fully tested for days with and without adjustments
 
-- Validate performance and data freshness in the app
-- Mark task complete after validation
-
-// Reason: Triggers and sync logic are now live; documentation is current. Ready for final validation.
+// Reason: This feature surfaces the value of dynamic, climate-aware scheduling and gives users actionable context for their daily plant care, increasing transparency and engagement.
 
 ---

@@ -61,29 +61,31 @@ export function TasksSection({
     return null;
   };
 
-  // Get summary for when there are no tasks today
+  // Update getNoTasksSummary to include a 'type' property for color/tone logic
   const getNoTasksSummary = () => {
     if (allOverdueTasks.length > 0) {
       return {
         icon: "alert-circle-outline" as const,
-        color: "#ef4444",
+        color: "#E50000", // destructive
         text: `You have ${allOverdueTasks.length} overdue ${
           allOverdueTasks.length === 1 ? "task" : "tasks"
         }`,
         action: "View Overdue",
-        actionColor: "#ef4444",
+        actionColor: "#E50000",
+        type: "warning" as const,
       };
     }
 
     if (upcomingTasksCount > 0) {
       return {
         icon: "calendar-outline" as const,
-        color: "#3b82f6",
+        color: "#5E994B", // brand-600
         text: `${upcomingTasksCount} ${
           upcomingTasksCount === 1 ? "task" : "tasks"
         } coming up tomorrow`,
         action: "View Upcoming",
-        actionColor: "#3b82f6",
+        actionColor: "#5E994B",
+        type: "info" as const,
       };
     }
 
@@ -255,19 +257,32 @@ export function TasksSection({
           <View className="bg-white rounded-xl p-6 items-center border border-brand-100 shadow-sm">
             {getNoTasksSummary() ? (
               <>
+                {/* TODO: Replace Ionicon with pastel-gouache illustration per BRAND_IDENTITY.md */}
                 <Ionicons
                   name={getNoTasksSummary()!.icon}
                   size={32}
                   color={getNoTasksSummary()!.color}
                 />
                 <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
-                  No tasks for today
+                  {/* Brand-compliant, nurturing message */}
+                  {getNoTasksSummary()!.type === "info"
+                    ? "You’re all caught up for today!"
+                    : getNoTasksSummary()!.type === "warning"
+                    ? "You have overdue tasks to catch up on."
+                    : "Your plants are thriving—no care needed today."}
                 </BodyText>
                 <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
-                  {getNoTasksSummary()!.text}
+                  {/* More outcome-focused, positive message */}
+                  {getNoTasksSummary()!.type === "info"
+                    ? `${
+                        getNoTasksSummary()!.text
+                      } — check your calendar for what’s next!`
+                    : getNoTasksSummary()!.type === "warning"
+                    ? "Let’s get your plants the care they need."
+                    : "Enjoy your garden and check back tomorrow for new tasks."}
                 </BodyText>
                 <TouchableOpacity
-                  className="px-4 py-2 bg-white rounded-lg border border-red-300"
+                  className="px-4 py-2 bg-white rounded-lg border"
                   style={{
                     borderColor: getNoTasksSummary()!.color,
                   }}
@@ -275,7 +290,7 @@ export function TasksSection({
                 >
                   <BodyText
                     style={{
-                      color: getNoTasksSummary()!.actionColor,
+                      color: getNoTasksSummary()!.color,
                     }}
                     className="font-paragraph font-medium"
                   >
@@ -285,34 +300,19 @@ export function TasksSection({
               </>
             ) : (
               <>
+                {/* On-brand positive empty state */}
+                {/* TODO: Replace Ionicon with pastel-gouache illustration per BRAND_IDENTITY.md */}
                 <Ionicons
                   name="checkmark-circle-outline"
                   size={32}
                   color="#5E994B"
                 />
                 <BodyText className="text-base font-paragraph text-cream-700 mt-2 text-center mb-2">
-                  All done for today!
+                  Your plants are thriving—no care needed today.
                 </BodyText>
-
-                {/* Personalized call-to-action */}
-                {(() => {
-                  const suggestion = getPersonalizedSuggestion();
-                  return (
-                    <>
-                      <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
-                        {suggestion.text}
-                      </BodyText>
-                      <TouchableOpacity
-                        className="px-4 py-2 bg-brand-600 rounded-lg"
-                        onPress={() => safeNavigate(suggestion.route)}
-                      >
-                        <BodyText className="text-white font-paragraph font-medium">
-                          {suggestion.action}
-                        </BodyText>
-                      </TouchableOpacity>
-                    </>
-                  );
-                })()}
+                <BodyText className="text-sm font-paragraph text-cream-600 text-center mb-3">
+                  Enjoy your garden and check back tomorrow for new tasks.
+                </BodyText>
               </>
             )}
           </View>

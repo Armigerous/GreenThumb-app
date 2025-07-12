@@ -32,14 +32,15 @@ export default function GardenCard({
     useOverdueTasksNotifications();
 
   // Check if this garden has overdue tasks
-  const hasOverdueTasks = hasGardenOverdueTasks(garden.garden_id);
-  const overdueTasksCount = getGardenOverdueTasksCount(garden.garden_id);
+  const hasOverdueTasks = hasGardenOverdueTasks(garden.garden_id ?? 0); // Reason: Ensure garden_id is always a number
+  const overdueTasksCount = getGardenOverdueTasksCount(garden.garden_id ?? 0); // Reason: Ensure garden_id is always a number
 
   // Get the first available plant image from the garden
   const getFirstPlantImage = () => {
-    if (garden.plants && garden.plants.length > 0) {
-      for (const plant of garden.plants) {
-        if (plant.images && plant.images.length > 0) {
+    if (garden.plants && (garden.plants as unknown as Array<any>).length > 0) {
+      for (const plant of garden.plants as unknown as Array<any>) {
+        // Reason: Ensure plant.images is an array before checking length
+        if (Array.isArray(plant.images) && plant.images.length > 0) {
           return plant.images[0];
         }
       }
@@ -54,41 +55,73 @@ export default function GardenCard({
     setShowOverdueModal(true);
   };
 
-  // Get garden status message based on task situation
+  // Get garden status message based on actionable dashboard fields
   const getGardenStatusMessage = () => {
+    // 1. No plants
     if (!garden.total_plants || garden.total_plants === 0) {
       return "Add plants to get started";
     }
-
-    if (garden.plants_with_overdue_tasks > 0) {
-      return `${garden.plants_with_overdue_tasks} ${
-        garden.plants_with_overdue_tasks === 1 ? "plant needs" : "plants need"
-      } care`;
+    // 2. Overdue tasks
+    if ((garden.plants_with_overdue_tasks ?? 0) > 0) {
+      return (
+        `${garden.plants_with_overdue_tasks} ` +
+        ((garden.plants_with_overdue_tasks ?? 0) === 1
+          ? "plant needs"
+          : "plants need") +
+        " care"
+      );
     }
-
-    if (garden.upcoming_tasks_count > 0) {
-      return `${garden.upcoming_tasks_count} ${
-        garden.upcoming_tasks_count === 1 ? "task" : "tasks"
-      } coming up`;
+    // 3. Urgent tasks (due today or next 2 days, not overdue)
+    if ((garden.plants_with_urgent_tasks ?? 0) > 0) {
+      return (
+        `${garden.plants_with_urgent_tasks} ` +
+        ((garden.plants_with_urgent_tasks ?? 0) === 1
+          ? "plant needs"
+          : "plants need") +
+        " attention soon"
+      );
     }
-
-    return "All plants healthy";
+    // 4. Otherwise, if there are upcoming tasks, show the next one
+    // Reason: This gives a gentle heads-up without overwhelming the user
+    if (
+      (garden.upcoming_tasks_count ?? 0) > 0 &&
+      Array.isArray(garden.upcoming_tasks) &&
+      garden.upcoming_tasks.length > 0
+    ) {
+      const nextTask = garden.upcoming_tasks[0];
+      // Type guard: ensure nextTask is an object with due_date and task_type
+      if (
+        nextTask &&
+        typeof nextTask === "object" &&
+        "due_date" in nextTask &&
+        "task_type" in nextTask &&
+        typeof nextTask.due_date === "string" &&
+        typeof nextTask.task_type === "string"
+      ) {
+        const dueDate = new Date(nextTask.due_date);
+        const formattedDate = dueDate.toLocaleDateString(undefined, {
+          month: "long",
+          day: "numeric",
+        });
+        return `Next: ${nextTask.task_type} on ${formattedDate}`;
+      }
+    }
+    // 5. No actionable or upcoming tasks: show nothing
+    return "";
   };
+
+  // Only show the status dot if there is a status message
+  const showStatusDot = !!getGardenStatusMessage();
 
   // Get status color based on task situation
   const getStatusColor = () => {
-    if (!garden.total_plants || garden.total_plants === 0) {
+    // Reason: Only show red for overdue, green for healthy, neutral for no plants
+    if (!(garden.total_plants ?? 0) || (garden.total_plants ?? 0) === 0) {
       return "#9e9a90"; // Neutral gray for no plants
     }
-
-    if (garden.plants_with_overdue_tasks > 0) {
+    if ((garden.plants_with_overdue_tasks ?? 0) > 0) {
       return "#E50000"; // Red for overdue tasks
     }
-
-    if (garden.upcoming_tasks_count > 0) {
-      return "#9e8600"; // Amber for upcoming tasks
-    }
-
     return "#5E994B"; // Green for all good
   };
 
@@ -134,7 +167,7 @@ export default function GardenCard({
           )}
 
           <View className="flex-1 px-2 flex-col justify-between min-w-0">
-            {/* Garden Name and Alert Badges */}
+            {/* Garden Name (no overdue dot) */}
             <View className="flex-1">
               <View className="flex-row justify-between items-start mb-1">
                 <View className="flex-row items-center flex-1 min-w-0 mr-2">
@@ -147,37 +180,21 @@ export default function GardenCard({
                   >
                     {garden.name}
                   </TitleText>
-                  {/* Overdue Task Indicator Dot */}
-                  {hasOverdueTasks && (
+                  {/* Overdue Task Indicator Dot (square badge, top right) */}
+                  {hasOverdueTasks && overdueTasksCount > 0 && (
                     <TouchableOpacity
                       onPress={handleOverdueIndicatorPress}
                       hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                       className="ml-1 flex-shrink-0"
                     >
-                      <View className="w-3 h-3 relative">
-                        {overdueTasksCount > 0 && (
-                          <View className="absolute -top-1 -right-1 bg-destructive w-4 h-4 items-center justify-center rounded-md">
-                            <Text className="text-[8px] text-cream-50 font-bold">
-                              {overdueTasksCount > 9 ? "9+" : overdueTasksCount}
-                            </Text>
-                          </View>
-                        )}
+                      <View className="w-4 h-4 bg-destructive items-center justify-center rounded-md">
+                        <Text className="text-[8px] text-cream-50 font-bold">
+                          {overdueTasksCount > 9 ? "9+" : overdueTasksCount}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   )}
                 </View>
-                {/* Plants Needing Care Badge */}
-                {garden.plants_with_overdue_tasks > 0 && (
-                  <View className="bg-accent-200 rounded-full px-2 py-0.5 flex-shrink-0">
-                    <BodyText
-                      className={`${
-                        isGardensPage ? "text-xs" : "text-[10px]"
-                      } text-accent-800 font-medium`}
-                    >
-                      {garden.plants_with_overdue_tasks} needs care
-                    </BodyText>
-                  </View>
-                )}
               </View>
 
               {/* Plant Count */}
@@ -185,20 +202,21 @@ export default function GardenCard({
                 className={`${
                   isGardensPage ? "text-sm" : "text-xs"
                 } text-cream-700 ${isGardensPage ? "mb-2" : "mb-1"}`}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
-                {garden.total_plants === 1
+                {(garden.total_plants ?? 0) === 1
                   ? "1 Plant"
-                  : `${garden.total_plants} Plants`}
+                  : `${garden.total_plants ?? 0} Plants`}
               </BodyText>
-            </View>
-
-            {/* Garden Status Message */}
-            <View className="flex-row items-center">
+              {/* Garden Status Message and Dot */}
               <View className="flex-row items-center flex-1">
-                <View
-                  className="w-2 h-2 rounded-full mr-2"
-                  style={{ backgroundColor: getStatusColor() }}
-                />
+                {showStatusDot && (
+                  <View
+                    className="w-2 h-2 rounded-full mr-2"
+                    style={{ backgroundColor: getStatusColor() }}
+                  />
+                )}
                 <BodyText
                   className={`${
                     isGardensPage ? "text-sm" : "text-xs"
@@ -212,22 +230,14 @@ export default function GardenCard({
               </View>
             </View>
           </View>
-
-          {/* Navigation arrow - Only shown on gardens page */}
-          {isGardensPage && (
-            <View className="justify-center ml-2 flex-shrink-0">
-              <Ionicons name="arrow-forward" size={22} color="#9e9a90" />
-            </View>
-          )}
         </View>
       </TouchableOpacity>
-
       {/* Garden-specific overdue tasks modal */}
       <OverdueTasksModal
         isVisible={showOverdueModal}
         onClose={() => setShowOverdueModal(false)}
         notifications={notifications}
-        gardenId={garden.garden_id}
+        gardenId={garden.garden_id ?? 0}
       />
     </>
   );

@@ -30,6 +30,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { TASK_TYPE_META } from "@/constants/taskTypes";
+import CareTaskLegendModal from "@/components/UI/CareTaskLegendModal";
 
 export default function CalendarScreen() {
   const { user } = useUser();
@@ -75,6 +77,9 @@ export default function CalendarScreen() {
 
   // Add a state to track day change loading separately
   const [isDayChanging, setIsDayChanging] = useState(false);
+
+  // Add state for legend modal
+  const [isLegendVisible, setIsLegendVisible] = useState(false);
 
   // Helper function to prefetch tasks for a specific date
   const prefetchTasksForDate = useCallback(
@@ -592,7 +597,9 @@ export default function CalendarScreen() {
       {/* Header */}
       <View className="px-5 pt-5">
         <View className="flex-row justify-between items-center mb-4">
-          <TitleText className="text-3xl">Calendar of Care</TitleText>
+          <View className="flex-row items-center">
+            <TitleText className="text-3xl">Calendar of Care</TitleText>
+          </View>
           <TouchableOpacity
             onPress={() => setIsMonthPickerVisible(true)}
             className="flex-row items-center bg-brand-50 px-3 py-1 rounded-lg border border-brand-100"
@@ -696,10 +703,24 @@ export default function CalendarScreen() {
       </View>
 
       {/* Tasks Section */}
-      <View className="px-5 mb-4">
-        <SubtitleText className="text-lg text-foreground">
-          Care Tasks
-        </SubtitleText>
+      <View className="px-5 mb-4 flex-row items-center justify-between">
+        <View className="flex-row items-center">
+          <SubtitleText className="text-lg text-foreground">
+            Care Tasks
+          </SubtitleText>
+          <TouchableOpacity
+            onPress={() => setIsLegendVisible(true)}
+            className="ml-2 p-1"
+            accessibilityLabel="What are Care Tasks?"
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color="#5E994B"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView className="flex-1 px-5">
@@ -773,6 +794,15 @@ export default function CalendarScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Task Info Modal (Care Tasks + Legend) */}
+      {/*
+        Reason: The Care Task Legend modal is now extracted to its own component for maintainability and to fix accidental dismiss issues. It is imported as CareTaskLegendModal below.
+      */}
+      <CareTaskLegendModal
+        visible={isLegendVisible}
+        onClose={() => setIsLegendVisible(false)}
+      />
     </PageContainer>
   );
 }

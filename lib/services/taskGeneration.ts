@@ -6,8 +6,21 @@ import { getWeatherAndSeason } from "./weather";
 // Define the task schema using Zod
 const TaskSchema = z.object({
   user_plant_id: z.string().describe("The UUID of the user's plant"),
+  // Reason: Updated to support all 11 core task types for validation
   task_type: z
-    .enum(["Water", "Fertilize", "Harvest"])
+    .enum([
+      "Water",
+      "Fertilize",
+      "Prune",
+      "Inspect",
+      "Mulch",
+      "Weed",
+      "Amend Soil",
+      "Propagate",
+      "Transplant",
+      "Log",
+      "Winterize"
+    ])
     .describe("Type of care task"),
   due_date: z.string().describe("Due date in YYYY-MM-DD HH:mm:ss+00 format"),
   completed: z.boolean().describe("Whether the task is completed"),
