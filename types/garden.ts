@@ -41,11 +41,31 @@ export interface PlantCareLog {
 }
 
 /**
+ * Union type for all supported plant task types (Supabase canonical)
+ *
+ * Reason: This must match the allowed values in the plant_tasks table and backend logic.
+ */
+export type TaskType =
+  | "Water"
+  | "Fertilize"
+  | "Prune"
+  | "Inspect"
+  | "Mulch"
+  | "Weed"
+  | "Amend Soil"
+  | "Propagate"
+  | "Transplant"
+  | "Log"
+  | "Winterize";
+
+/**
  * Represents a task for maintaining a specific plant.
  *
  * This interface maps to the `plant_tasks` table, which tracks essential care tasks
  * such as watering, fertilizing, and harvesting. These tasks are automatically generated
  * based on plant data from `user_plants` and `PlantData`.
+ *
+ * Reason: Updated to support all 11 core task types as per Supabase schema and scheduling plan.
  */
 export interface PlantTask {
   /** Unique identifier for the plant task (primary key) */
@@ -53,7 +73,7 @@ export interface PlantTask {
   /** Foreign key referencing the specific plant instance in `user_plants` */
   user_plant_id: UUID;
   /** Type of task to be performed */
-  task_type: "Water" | "Fertilize" | "Harvest";
+  task_type: TaskType;
   /** The due date for the task */
   due_date: string;
   /** Whether the task has been completed */

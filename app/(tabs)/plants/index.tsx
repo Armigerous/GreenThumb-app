@@ -131,7 +131,7 @@ export default function PlantDatabaseScreen() {
     ) {
       setActiveGardenFilter(null);
       setActiveFilters("");
-      // Optionally, you could show a toast or info message here
+      // No user-facing message needed
     }
   }, [gardenFilterOptions, activeGardenFilter, setActiveFilters]);
 

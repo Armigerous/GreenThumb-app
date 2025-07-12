@@ -23,11 +23,25 @@ import {
   LocationStep,
   StyleStep,
 } from "./NewGardenFormSteps";
+import { ncCountyNameToIdMap } from "@/constants/ncCounties";
 
 type GardenFormProps = {
   onSuccess: () => void;
   onCancel: () => void;
 };
+
+// Utility to normalize county names for lookup
+function normalizeCountyName(raw: string): string {
+  // Remove 'County' (case-insensitive, with/without whitespace)
+  let name = raw.replace(/county$/i, "").trim();
+  // Convert to title case (handles multi-word counties)
+  name = name
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+  return name;
+}
 
 export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
   const { user } = useUser();
@@ -70,6 +84,7 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
     zip_code: "", // Used for weather data, optional
     city: "", // Used for display, not stored in database
     county: "", // Used for display, not stored in database
+    county_id: null as number | null, // Store county_id for DB, not county name
 
     // Step 3: Essential growing conditions (5 required fields)
     light_id: null as number | null, // Essential for plant selection (single selection)
@@ -259,13 +274,33 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
     city?: string;
     county?: string;
   }) => {
+    // Debug: Log the raw county value
+    console.log("Raw county from API:", locationData.county);
+
     // Set initial location info
     setFormValues((prev) => {
+      // Look up county_id from county name using the local mapping
+      let countyId: number | null = null;
+      let countyName = locationData.county || "";
+      if (countyName) {
+        // Normalize for lookup: remove 'County', trim, and title case
+        const normalized = normalizeCountyName(countyName);
+        // Debug: Log the normalized county value
+        console.log("Normalized county for lookup:", normalized);
+        countyId = ncCountyNameToIdMap[normalized] ?? null;
+        if (countyId === null && normalized) {
+          console.warn(
+            `County name '${normalized}' not found in ncCountyNameToIdMap.`
+          );
+        }
+        countyName = normalized; // Store normalized for display
+      }
       const newFormValues = {
         ...prev,
         zip_code: locationData.zipCode,
         city: locationData.city || "",
-        county: locationData.county || "",
+        county: countyName, // For display only (now normalized)
+        county_id: countyId, // For DB storage
         elevation: null,
         urban_index: null,
       };
@@ -391,7 +426,8 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
             // Store location info for weather and analytics
             zip_code: formValues.zip_code || null,
             city: formValues.city || null, // Store city from ZipCodeInput for analytics and user context
-            county: formValues.county || null, // Store county from ZipCodeInput for analytics and user context
+            // Store county_id instead of county name (see nc_counties table)
+            county_id: formValues.county_id,
             // Essential growing conditions collected from the form
             light_id: formValues.light_id,
             soil_texture_id: formValues.soil_texture_id,
@@ -550,6 +586,7 @@ export default function GardenForm({ onSuccess, onCancel }: GardenFormProps) {
                           zip_code: "",
                           city: "",
                           county: "",
+                          county_id: null,
                           light_id: null,
                           soil_texture_id: null,
                           available_space_to_plant_id: null,
