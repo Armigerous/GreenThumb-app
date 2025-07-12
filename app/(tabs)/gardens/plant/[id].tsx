@@ -1,9 +1,13 @@
 import CachedImage from "@/components/CachedImage";
+import AddCareLogModal from "@/components/Gardens/Plants/AddCareLogModal";
+import EditPlantModal from "@/components/Gardens/Plants/EditPlantModal";
+import PlantHeader from "@/components/Gardens/Plants/PlantHeader";
+import PlantIdentityCard from "@/components/Gardens/Plants/PlantIdentityCard";
+import TaskSummaryGrid from "@/components/Gardens/Plants/TaskSummaryGrid";
 import { TaskList } from "@/components/TaskList";
-import CollapsibleSection from "@/components/UI/CollapsibleSection";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
-import SubmitButton from "@/components/UI/SubmitButton";
+import { BodyText, TitleText } from "@/components/UI/Text";
 import { useUserPlantDetails } from "@/lib/queries";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -12,22 +16,13 @@ import {
   TaskWithDetails,
   UserPlant,
 } from "@/types/garden";
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { differenceInDays, format, isValid, parseISO } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState, useEffect } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import EditPlantModal from "@/components/Gardens/Plants/EditPlantModal";
-import AddJournalEntryModal from "@/components/Gardens/Plants/AddCareLogModal";
-import { useUser } from "@clerk/clerk-expo";
+import { useEffect, useState } from "react";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 
 // Define task time period types for better type safety
 type TaskTimePeriod =
@@ -58,11 +53,27 @@ export default function UserPlantDetailScreen() {
 
   // Fetch plant details using our custom hook
   const {
-    data: plantData,
+    data: plantDataRaw,
     isLoading,
     error,
     refetch,
   } = useUserPlantDetails(id);
+
+  // Type: UserPlant merged with global/garden fields
+  type UserPlantWithExtras = UserPlant & {
+    scientific_name?: string;
+    garden_name?: string;
+    common_names?: string[];
+    light_requirements?: string[];
+    soil_drainage?: string[];
+    soil_texture?: string[];
+    usda_zones?: string[];
+    // Add any other merged fields here
+    [key: string]: any;
+  };
+
+  // Cast plantData to merged type for clarity
+  const plantData = plantDataRaw as UserPlantWithExtras;
 
   // State for task tab navigation
   const [activeTaskTab, setActiveTaskTab] = useState<TaskTimePeriod>("today");
@@ -71,6 +82,116 @@ export default function UserPlantDetailScreen() {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  // Get tasks for this plant and convert to TaskWithDetails
+  const plantTasks =
+    plantData && Array.isArray(plantData.plant_tasks)
+      ? plantData.plant_tasks
+      : [];
+  const tasksWithDetails = plantTasks.map(
+    (task: PlantTask): TaskWithDetails => ({
+      ...task,
+      plant: {
+        nickname: plantData?.nickname || "",
+        garden: {
+          name: plantData?.garden_name || "",
+        },
+      },
+    })
+  );
+
+  // Group tasks by time period
+  const groupTasksByTime = (tasks: TaskWithDetails[]) => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const nextWeek = new Date(now);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(0, 0, 0, 0);
+
+    const nextWeekEnd = new Date(nextWeek);
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
+
+    const thisMonth = new Date(now);
+    thisMonth.setMonth(thisMonth.getMonth() + 1);
+    thisMonth.setHours(0, 0, 0, 0);
+
+    // Initialize all groups with empty arrays
+    const groups: Record<TaskTimePeriod, TaskWithDetails[]> = {
+      missed: [],
+      today: [],
+      tomorrow: [],
+      this_week: [],
+      next_week: [],
+      this_month: [],
+      later: [],
+    };
+
+    return tasks.reduce(
+      (
+        groups: Record<TaskTimePeriod, TaskWithDetails[]>,
+        task: TaskWithDetails
+      ) => {
+        const dueDate = new Date(task.due_date);
+        let group: TaskTimePeriod = "later";
+
+        // Check if task is missed (due date is before today and not completed)
+        if (dueDate < now && !task.completed) {
+          group = "missed";
+        } else if (dueDate <= now) {
+          group = "today";
+        } else if (dueDate <= tomorrow) {
+          group = "tomorrow";
+        } else if (dueDate <= nextWeek) {
+          group = "this_week";
+        } else if (dueDate <= nextWeekEnd) {
+          group = "next_week";
+        } else if (dueDate <= thisMonth) {
+          group = "this_month";
+        }
+
+        groups[group].push(task);
+        return groups;
+      },
+      groups
+    );
+  };
+
+  // Default empty groupedTasks object
+  const defaultGroupedTasks: Record<TaskTimePeriod, TaskWithDetails[]> = {
+    missed: [],
+    today: [],
+    tomorrow: [],
+    this_week: [],
+    next_week: [],
+    this_month: [],
+    later: [],
+  };
+
+  const groupedTasks = plantData
+    ? groupTasksByTime(tasksWithDetails)
+    : defaultGroupedTasks;
+  const timePeriodsWithTasks = plantData
+    ? Object.entries(groupedTasks)
+        .filter(([_, tasks]) => tasks.length > 0)
+        .map(([period]) => period as TaskTimePeriod)
+    : [];
+
+  // Always call hooks at the top level
+  useEffect(() => {
+    if (
+      timePeriodsWithTasks.length > 0 &&
+      !timePeriodsWithTasks.includes(activeTaskTab)
+    ) {
+      if (timePeriodsWithTasks.includes("missed")) {
+        setActiveTaskTab("missed");
+      } else {
+        setActiveTaskTab(timePeriodsWithTasks[0]);
+      }
+    }
+  }, [timePeriodsWithTasks]);
 
   // Handle back navigation
   const handleBack = () => {
@@ -175,110 +296,48 @@ export default function UserPlantDetailScreen() {
     console.log("Image pressed:", imageUrl);
   };
 
-  // Get tasks for this plant and convert to TaskWithDetails
-  const plantTasks = (plantData as UserPlant)?.plant_tasks || [];
-  const tasksWithDetails = plantTasks.map(
-    (task: PlantTask): TaskWithDetails => ({
-      ...task,
-      plant: {
-        nickname: plantData?.nickname || "",
-        garden: {
-          name: plantData?.garden_name || "",
-        },
-      },
-    })
-  );
-
-  // Group tasks by time period
-  const groupTasksByTime = (tasks: TaskWithDetails[]) => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-
-    const nextWeek = new Date(now);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    nextWeek.setHours(0, 0, 0, 0);
-
-    const nextWeekEnd = new Date(nextWeek);
-    nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
-
-    const thisMonth = new Date(now);
-    thisMonth.setMonth(thisMonth.getMonth() + 1);
-    thisMonth.setHours(0, 0, 0, 0);
-
-    // Initialize all groups with empty arrays
-    const groups: Record<TaskTimePeriod, TaskWithDetails[]> = {
-      missed: [],
-      today: [],
-      tomorrow: [],
-      this_week: [],
-      next_week: [],
-      this_month: [],
-      later: [],
-    };
-
-    return tasks.reduce(
-      (
-        groups: Record<TaskTimePeriod, TaskWithDetails[]>,
-        task: TaskWithDetails
-      ) => {
-        const dueDate = new Date(task.due_date);
-        let group: TaskTimePeriod = "later";
-
-        // Check if task is missed (due date is before today and not completed)
-        if (dueDate < now && !task.completed) {
-          group = "missed";
-        } else if (dueDate <= now) {
-          group = "today";
-        } else if (dueDate <= tomorrow) {
-          group = "tomorrow";
-        } else if (dueDate <= nextWeek) {
-          group = "this_week";
-        } else if (dueDate <= nextWeekEnd) {
-          group = "next_week";
-        } else if (dueDate <= thisMonth) {
-          group = "this_month";
-        }
-
-        groups[group].push(task);
-        return groups;
-      },
-      groups
+  // Loading state
+  if (isLoading) {
+    return (
+      <PageContainer scroll={false} animate={false}>
+        <LoadingSpinner message="Loading plant details..." />
+      </PageContainer>
     );
-  };
+  }
 
-  // Group all tasks by time period
-  const groupedTasks = groupTasksByTime(tasksWithDetails);
+  // Error state
+  if (error || !plantData) {
+    // Show debug info if available
+    const debugInfo = plantData?.debugInfo || {};
+    return (
+      <PageContainer>
+        <View className="pt-5 px-5">
+          <BodyText className="text-destructive text-lg">
+            Error loading plant details. Please try again.
+          </BodyText>
+          {debugInfo && (
+            <View className="mt-4 bg-cream-100 p-3 rounded">
+              <BodyText className="text-foreground font-bold mb-2">
+                Debug Info:
+              </BodyText>
+              <BodyText className="text-xs text-foreground">
+                {JSON.stringify(debugInfo, null, 2)}
+              </BodyText>
+            </View>
+          )}
+        </View>
+      </PageContainer>
+    );
+  }
 
-  // Get all time periods that have tasks
-  const timePeriodsWithTasks = Object.entries(groupedTasks)
-    .filter(([_, tasks]) => tasks.length > 0)
-    .map(([period]) => period as TaskTimePeriod);
-
-  // Use useEffect to handle tab selection logic
-  useEffect(() => {
-    // Only set default tab on initial load or when tasks change, not when user manually selects a tab
-    if (
-      timePeriodsWithTasks.length > 0 &&
-      !timePeriodsWithTasks.includes(activeTaskTab)
-    ) {
-      // If there are missed tasks, default to that tab
-      if (timePeriodsWithTasks.includes("missed")) {
-        setActiveTaskTab("missed");
-      } else {
-        // Otherwise default to the first available tab
-        setActiveTaskTab(timePeriodsWithTasks[0]);
-      }
-    }
-  }, [timePeriodsWithTasks]);
-
+  // All code below this point is guaranteed to have plantData defined!
   // Find the next upcoming task
   const nextUpcomingTask = tasksWithDetails
     .sort(
-      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      (a: TaskWithDetails, b: TaskWithDetails) =>
+        new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
     )
-    .find((task) => {
+    .find((task: TaskWithDetails) => {
       // Get today's date at midnight (start of day)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -293,18 +352,18 @@ export default function UserPlantDetailScreen() {
 
   // Get the last care log
   const getLastCareLog = () => {
-    const typedPlantData = plantData as UserPlant;
-    if (!typedPlantData?.care_logs || typedPlantData.care_logs.length === 0) {
+    const careLogs = Array.isArray(plantData?.care_logs)
+      ? plantData.care_logs
+      : [];
+    if (careLogs.length === 0) {
       return null;
     }
-
     // Sort care logs by date (newest first)
-    const sortedLogs = [...typedPlantData.care_logs].sort(
+    const sortedLogs = [...careLogs].sort(
       (a: PlantCareLog, b: PlantCareLog) =>
         new Date(b.taken_care_at).getTime() -
         new Date(a.taken_care_at).getTime()
     );
-
     return sortedLogs[0];
   };
 
@@ -381,339 +440,126 @@ export default function UserPlantDetailScreen() {
 
   const careStatus = getCurrentCareStatus();
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <PageContainer scroll={false} animate={false}>
-        <LoadingSpinner message="Loading plant details..." />
-      </PageContainer>
-    );
-  }
-
-  // Error state
-  if (error || !plantData) {
-    return (
-      <PageContainer>
-        <View className="pt-5 px-5">
-          <Text className="text-destructive text-lg">
-            Error loading plant details. Please try again.
-          </Text>
-        </View>
-      </PageContainer>
-    );
-  }
-
   return (
     <PageContainer scroll={false} padded={false} safeArea={false}>
       {/* Fixed Header */}
-      <View className="pt-safe">
-        <View className="flex-row justify-between items-center px-5">
-          <SubmitButton
-            onPress={handleBack}
-            iconName="arrow-back"
-            iconPosition="left"
-            type="outline"
-            color="secondary"
-          >
-            Back
-          </SubmitButton>
-
-          <SubmitButton
-            onPress={() => setIsEditModalVisible(true)}
-            iconName="create-outline"
-            iconPosition="left"
-          >
-            Edit
-          </SubmitButton>
-        </View>
-      </View>
+      {/* Use PlantHeader component for navigation and edit actions */}
+      <PlantHeader
+        onBack={handleBack}
+        onEdit={() => setIsEditModalVisible(true)}
+      />
 
       <View className="flex-1">
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <View className="px-5 py-4">
+          <View className="px-4 py-3">
             {/* 1. Plant Identity Card */}
-            <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
-              {/* Plant Image */}
-              <View className="w-full h-[250px]">
-                {plantData?.images && plantData.images.length > 0 ? (
-                  <CachedImage
-                    uri={plantData.images[0]}
-                    style={{ width: "100%", height: "100%" }}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View className="w-full h-full bg-cream-100 items-center justify-center">
-                    <Ionicons name="leaf-outline" size={64} color="#9e9a90" />
-                  </View>
-                )}
-              </View>
-
-              {/* Plant Info */}
-              <View className="p-5">
-                <View className="flex-row justify-between items-start mb-4">
-                  <View className="flex-1">
-                    <Text className="text-2xl font-bold text-foreground">
-                      {plantData.nickname}
-                    </Text>
-                    <Text className="text-cream-600 text-base mt-1">
-                      {plantData.scientific_name}
-                    </Text>
-                  </View>
-
-                  {/* Health Status */}
-                  <View
-                    className={`rounded-full px-3 py-1.5 flex-row items-center ${careStatus.bg}`}
-                  >
-                    <Text className="text-lg mr-1">{careStatus.emoji}</Text>
-                    <Text
-                      className="text-sm font-medium"
-                      style={{ color: careStatus.color }}
-                    >
-                      {careStatus.text}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Garden Context */}
-                <View className="flex-row items-center mb-4">
-                  <Ionicons name="flower-outline" size={18} color="#5E994B" />
-                  <Text className="text-foreground ml-2">
-                    In {plantData.garden_name}
-                  </Text>
-                </View>
-
-                {/* Last Care & Next Task */}
-                <View className="flex-row justify-between">
-                  <View className="flex-1 mr-2">
-                    <Text className="text-cream-600 text-sm">Last Entry</Text>
-                    <Text className="text-foreground font-medium">
-                      {lastCareLog
-                        ? `${formatDate(lastCareLog.taken_care_at)}`
-                        : "No entries yet"}
-                    </Text>
-                  </View>
-
-                  {nextTask && (
-                    <View className="flex-1 ml-2">
-                      <Text className="text-cream-600 text-sm">Next Task</Text>
-                      <Text className="text-foreground font-medium">
-                        {nextTask.task_type} {formatDate(nextTask.due_date)}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </View>
+            {/* Use PlantIdentityCard for main plant info */}
+            <PlantIdentityCard
+              plantData={plantData}
+              careStatus={careStatus}
+              lastCareLog={lastCareLog}
+              nextTask={nextTask}
+              formatDate={formatDate}
+            />
 
             {/* Add Entry Button */}
             <View className="mb-6">
               <TouchableOpacity
-                className="bg-primary rounded-xl py-3 px-4 items-center flex-row justify-center"
+                className="bg-brand-600 rounded-xl py-3 px-4 items-center flex-row justify-center"
                 onPress={() => setIsJournalModalVisible(true)}
+                accessibilityLabel="Add Journal Entry"
               >
-                <Ionicons name="journal-outline" size={20} color="#ffffff" />
-                <Text className="text-white font-medium ml-2">
+                <Ionicons name="journal-outline" size={20} color="#fffefa" />
+                <BodyText className="text-primary-foreground font-paragraph-semibold ml-2">
                   Add Journal Entry
-                </Text>
+                </BodyText>
               </TouchableOpacity>
             </View>
 
-            {/* Journal Entry Modal */}
-            <AddJournalEntryModal
+            {/* AddCareLogModal is the canonical modal for journal/care log entries */}
+            <AddCareLogModal
               isVisible={isJournalModalVisible}
               onClose={() => setIsJournalModalVisible(false)}
               onSubmit={handleAddCareLog}
             />
 
             {/* 3. Tasks Section */}
-            <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
-              <View className="p-5 border-b border-cream-100">
+            <View className="bg-cream-50 rounded-2xl shadow-sm overflow-hidden p-4">
+              <View className="p-4 border-b border-cream-300">
                 <View className="flex-row items-center">
                   <Ionicons
                     name="checkmark-circle-outline"
                     size={20}
-                    color="#059669"
+                    className="text-brand-600"
                   />
-                  <Text className="text-foreground font-medium ml-2.5 text-base">
+                  <TitleText className="text-foreground ml-2.5 text-base">
                     Tasks
-                  </Text>
+                  </TitleText>
                 </View>
               </View>
 
-              <View className="p-5">
-                {/* Task Summary */}
+              <View className="px-4">
+                {/* Task Summary & Navigation (now interactive grid) */}
                 {tasksWithDetails.length > 0 && (
-                  <View className="mb-4 bg-cream-50 rounded-xl p-4">
-                    <Text className="text-sm font-medium text-foreground mb-2">
-                      Task Summary
-                    </Text>
-                    <View className="flex-row flex-wrap">
-                      {Object.entries(groupedTasks).map(([period, tasks]) => {
-                        if (tasks.length === 0) return null;
-
-                        // Get the appropriate icon for each period
-                        const getPeriodIcon = (
-                          period: string
-                        ): keyof typeof Ionicons.glyphMap => {
-                          switch (period) {
-                            case "missed":
-                              return "alert-circle";
-                            case "today":
-                              return "today";
-                            case "tomorrow":
-                              return "calendar";
-                            case "this_week":
-                              return "calendar-outline";
-                            case "next_week":
-                              return "calendar-number";
-                            case "this_month":
-                              return "calendar-number-outline";
-                            default:
-                              return "time";
-                          }
-                        };
-
-                        // Get the appropriate color for each period
-                        const getPeriodColor = (period: string): string => {
-                          switch (period) {
-                            case "missed":
-                              return "#ef4444"; // red-500
-                            case "today":
-                              return "#f97316"; // orange-500
-                            case "tomorrow":
-                              return "#f97316"; // orange-500
-                            case "this_week":
-                              return "#eab308"; // yellow-500
-                            case "next_week":
-                              return "#10b981"; // emerald-500
-                            case "this_month":
-                              return "#3b82f6"; // blue-500
-                            default:
-                              return "#6b7280"; // gray-500
-                          }
-                        };
-
-                        return (
-                          <View
-                            key={period}
-                            className="w-1/2 mb-2 flex-row items-center"
-                          >
-                            <View
-                              className="w-6 h-6 rounded-full items-center justify-center mr-2"
-                              style={{
-                                backgroundColor: `${getPeriodColor(period)}20`,
-                              }}
-                            >
-                              <Ionicons
-                                name={getPeriodIcon(period)}
-                                size={14}
-                                color={getPeriodColor(period)}
-                              />
-                            </View>
-                            <Text className="text-sm text-cream-700">
-                              {period === "missed" && "Missed: "}
-                              {period === "today" && "Today: "}
-                              {period === "tomorrow" && "Tomorrow: "}
-                              {period === "this_week" && "This Week: "}
-                              {period === "next_week" && "Next Week: "}
-                              {period === "this_month" && "This Month: "}
-                              {period === "later" && "Later: "}
-                              <Text className="font-medium ml-1">
-                                {tasks.length}
-                              </Text>
-                            </Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  </View>
-                )}
-
-                {/* Task Tab Navigation */}
-                {timePeriodsWithTasks.length > 0 && (
-                  <View className="mb-4">
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      className="flex-row"
-                    >
-                      {timePeriodsWithTasks.map((period) => (
-                        <TouchableOpacity
-                          key={period}
-                          onPress={() => setActiveTaskTab(period)}
-                          className={`mr-2 px-4 py-2 rounded-full ${
-                            activeTaskTab === period
-                              ? period === "missed"
-                                ? "bg-red-500"
-                                : "bg-brand-500"
-                              : "bg-cream-100"
-                          }`}
-                        >
-                          <Text
-                            className={`text-sm font-medium ${
-                              activeTaskTab === period
-                                ? "text-white"
-                                : "text-cream-700"
-                            }`}
-                          >
-                            {period === "missed" && "Missed"}
-                            {period === "today" && "Today"}
-                            {period === "tomorrow" && "Tomorrow"}
-                            {period === "this_week" && "This Week"}
-                            {period === "next_week" && "Next Week"}
-                            {period === "this_month" && "This Month"}
-                            {period === "later" && "Later"}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
+                  <View className="mb-4 bg-cream-50 rounded-xl p-3">
+                    {/*
+                      Reason: Use TaskSummaryGrid for a responsive, branded, interactive summary.
+                      Each pill is a button that sets the active period.
+                    */}
+                    <TaskSummaryGrid
+                      groupedTasks={groupedTasks}
+                      activePeriod={activeTaskTab}
+                      onSelectPeriod={setActiveTaskTab}
+                    />
                   </View>
                 )}
 
                 {/* Task List for Active Tab */}
                 <View className="space-y-6">
                   {tasksWithDetails.length === 0 ? (
-                    <View className="py-6 items-center">
+                    <View className="py-6 items-center min-h-[44px]">
                       <Ionicons
                         name="checkmark-circle-outline"
                         size={32}
-                        color="#9e9a90"
+                        className="text-cream-400"
                       />
-                      <Text className="text-cream-600 mt-2 text-center">
-                        No tasks for this plant
-                      </Text>
+                      <BodyText className="text-cream-600 mt-2 text-center">
+                        No tasks for this plant yet – you’re all caught up!
+                      </BodyText>
                     </View>
                   ) : groupedTasks[activeTaskTab]?.length > 0 ? (
                     <TaskList
-                      tasks={groupedTasks[activeTaskTab]}
+                      tasks={groupedTasks[activeTaskTab].map(
+                        (task: TaskWithDetails) => task
+                      )}
                       showGardenName={false}
                       queryKey={["userPlantDetails", id]}
                     />
                   ) : (
-                    <View className="py-6 items-center">
+                    <View className="py-6 items-center min-h-[44px]">
                       <Ionicons
                         name="checkmark-circle-outline"
                         size={32}
-                        color="#9e9a90"
+                        className="text-cream-400"
                       />
-                      <Text className="text-cream-600 mt-2 text-center">
-                        No tasks for this period
-                      </Text>
+                      <BodyText className="text-cream-600 mt-2 text-center">
+                        No tasks for this period – enjoy a little break!
+                      </BodyText>
                     </View>
                   )}
 
                   {/* All Tasks Completed Message */}
                   {plantTasks.length > 0 &&
-                    plantTasks.every((task) => task.completed) && (
-                      <View className="py-6 items-center">
+                    plantTasks.every((task: PlantTask) => task.completed) && (
+                      <View className="py-6 items-center min-h-[44px]">
                         <Ionicons
                           name="checkmark-circle"
                           size={32}
-                          color="#059669"
+                          className="text-brand-600"
                         />
-                        <Text className="text-cream-600 mt-2 text-center">
-                          All tasks completed! Great job!
-                        </Text>
+                        <BodyText className="text-cream-600 mt-2 text-center">
+                          All tasks completed! Your plant is thriving!
+                        </BodyText>
                       </View>
                     )}
                 </View>
@@ -721,20 +567,25 @@ export default function UserPlantDetailScreen() {
             </View>
 
             {/* 4. Care History Timeline */}
-            <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
-              <View className="p-5 border-b border-cream-100">
+            <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6 p-4 mt-6">
+              <View className="p-4 border-b border-cream-100">
                 <View className="flex-row items-center">
-                  <Ionicons name="time-outline" size={20} color="#059669" />
-                  <Text className="text-foreground font-medium ml-2.5 text-base">
+                  <Ionicons
+                    name="time-outline"
+                    size={20}
+                    className="text-brand-600"
+                  />
+                  <TitleText className="text-foreground ml-2.5 text-base">
                     Plant Journal
-                  </Text>
+                  </TitleText>
                 </View>
               </View>
 
-              <View className="p-5">
-                {plantData?.care_logs && plantData.care_logs.length > 0 ? (
+              <View className="p-4">
+                {Array.isArray(plantData?.care_logs) &&
+                plantData.care_logs.length > 0 ? (
                   <View>
-                    {plantData.care_logs
+                    {(plantData.care_logs as PlantCareLog[])
                       .sort(
                         (a: PlantCareLog, b: PlantCareLog) =>
                           new Date(b.taken_care_at).getTime() -
@@ -750,21 +601,21 @@ export default function UserPlantDetailScreen() {
                               <Ionicons
                                 name="journal-outline"
                                 size={16}
-                                color="#059669"
+                                color="#5E994B"
                               />
                             </View>
 
                             <View className="flex-1">
                               <View className="flex-row justify-between items-start">
-                                <Text className="text-cream-600 text-sm">
+                                <BodyText className="text-cream-600 text-sm">
                                   {formatDate(log.taken_care_at)}
-                                </Text>
+                                </BodyText>
                               </View>
 
                               {log.care_notes && (
-                                <Text className="text-foreground mt-1">
+                                <BodyText className="text-foreground mt-1">
                                   {log.care_notes}
-                                </Text>
+                                </BodyText>
                               )}
 
                               {log.image && log.image.length > 0 && (
@@ -773,6 +624,7 @@ export default function UserPlantDetailScreen() {
                                     uri={log.image}
                                     style={{ width: "100%", height: 150 }}
                                     resizeMode="cover"
+                                    accessibilityLabel="Journal entry photo"
                                   />
                                 </View>
                               )}
@@ -788,51 +640,10 @@ export default function UserPlantDetailScreen() {
                       size={32}
                       color="#9e9a90"
                     />
-                    <Text className="text-cream-600 mt-2 text-center">
-                      No journal entries yet
-                    </Text>
+                    <BodyText className="text-cream-600 mt-2 text-center">
+                      No journal entries yet – your plant’s story starts here!
+                    </BodyText>
                   </View>
-                )}
-              </View>
-            </View>
-
-            {/* 5. Progress Photos */}
-            <View className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
-              <View className="p-5 border-b border-cream-100">
-                <View className="flex-row items-center">
-                  <Ionicons name="images-outline" size={20} color="#059669" />
-                  <Text className="text-foreground font-medium ml-2.5 text-base">
-                    Progress Photos
-                  </Text>
-                </View>
-              </View>
-
-              <View className="p-5">
-                {plantData?.images && plantData.images.length > 0 ? (
-                  <View className="flex-row flex-wrap gap-2">
-                    {plantData.images.map(
-                      (
-                        image: { url: string; created_at: string },
-                        index: number
-                      ) => (
-                        <TouchableOpacity
-                          key={index}
-                          onPress={() => handleImagePress(image.url)}
-                          className="w-[calc(50%-4px)] aspect-square rounded-lg overflow-hidden"
-                        >
-                          <CachedImage
-                            uri={image.url}
-                            style={{ width: "100%", height: "100%" }}
-                            resizeMode="cover"
-                          />
-                        </TouchableOpacity>
-                      )
-                    )}
-                  </View>
-                ) : (
-                  <Text className="text-gray-500 italic">
-                    No progress photos yet
-                  </Text>
                 )}
               </View>
             </View>

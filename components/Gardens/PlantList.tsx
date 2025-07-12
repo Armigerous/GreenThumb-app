@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-} from "react-native";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CachedImage from "@/components/CachedImage";
 import type { UserPlant } from "@/types/garden";
@@ -16,6 +10,7 @@ interface PlantListProps {
   onEditPlant: (plant: UserPlant) => void;
   onWaterPlant: (plant: UserPlant) => void;
   onDeletePlant: (plant: UserPlant) => void;
+  onAddPlant?: () => void; // Optional handler for empty state add button
 }
 
 /**
@@ -31,6 +26,7 @@ const PlantList: React.FC<PlantListProps> = ({
   onEditPlant,
   onWaterPlant,
   onDeletePlant,
+  onAddPlant,
 }) => {
   // Helper to get care status for a plant
   const getCareStatus = (plant: UserPlant) => {
@@ -84,52 +80,57 @@ const PlantList: React.FC<PlantListProps> = ({
     const careStatus = getCareStatus(item);
     return (
       <View
-        style={[
-          styles.card,
-          { opacity: 0.95, marginTop: index === 0 ? 0 : 12 },
-        ]}
+        className={`bg-white rounded-2xl shadow-sm shadow-neutral-800/10 ${
+          index === 0 ? "mt-0" : "mt-3"
+        } opacity-95`}
         accessible
         accessibilityRole="button"
         accessibilityLabel={`View details for ${item.nickname}`}
       >
         <TouchableOpacity
-          style={styles.cardContent}
+          className="flex-row items-center p-4"
           onPress={() => onPlantPress(item)}
         >
           {/* Plant Image */}
           {item.images?.[0] ? (
             <CachedImage
               uri={item.images[0]}
-              style={styles.image}
+              // Reason: CachedImage does not accept className, so we use style for Tailwind-like sizing
+              style={{ width: 48, height: 48, borderRadius: 24 }}
               resizeMode="cover"
               rounded={true}
             />
           ) : (
-            <View style={styles.placeholderImage}>
+            <View className="w-12 h-12 rounded-full bg-brand-50 items-center justify-center">
               <Ionicons name="leaf-outline" size={24} color="#9e9a90" />
             </View>
           )}
           {/* Plant Info */}
-          <View style={styles.infoSection}>
-            <Text style={styles.nickname}>{item.nickname}</Text>
-            <View style={styles.careRow}>
+          <View className="flex-1 ml-3.5">
+            <Text className="text-lg text-neutral-900 font-mali-bold mb-0.5">
+              {item.nickname}
+            </Text>
+            <View className="flex-row items-center">
               <Ionicons
                 name={careStatus.icon}
                 size={16}
                 color={careStatus.color}
               />
-              <Text style={[styles.careText, { color: careStatus.color }]}>
+              <Text
+                className="text-xs font-nunito-semibold ml-1.5"
+                style={{ color: careStatus.color }}
+              >
                 {careStatus.text}
               </Text>
             </View>
           </View>
           {/* Actions */}
-          <View style={styles.actions}>
+          <View className="flex-row items-center ml-2.5">
             <TouchableOpacity
               onPress={() => onEditPlant(item)}
               accessibilityRole="button"
               accessibilityLabel={`Edit ${item.nickname}`}
-              style={styles.actionBtn}
+              className="ml-2 p-1.5 rounded-full bg-brand-50"
             >
               <Ionicons name="create-outline" size={18} color="#5E994B" />
             </TouchableOpacity>
@@ -137,7 +138,7 @@ const PlantList: React.FC<PlantListProps> = ({
               onPress={() => onWaterPlant(item)}
               accessibilityRole="button"
               accessibilityLabel={`Water ${item.nickname}`}
-              style={styles.actionBtn}
+              className="ml-2 p-1.5 rounded-full bg-brand-50"
             >
               <Ionicons name="water" size={18} color="#3F6933" />
             </TouchableOpacity>
@@ -145,7 +146,7 @@ const PlantList: React.FC<PlantListProps> = ({
               onPress={() => onDeletePlant(item)}
               accessibilityRole="button"
               accessibilityLabel={`Delete ${item.nickname}`}
-              style={styles.actionBtn}
+              className="ml-2 p-1.5 rounded-full bg-destructive-50"
             >
               <Ionicons name="trash-outline" size={18} color="#E50000" />
             </TouchableOpacity>
@@ -158,73 +159,47 @@ const PlantList: React.FC<PlantListProps> = ({
   return (
     <FlatList
       data={plants}
+      className="pb-4 flex-1"
       renderItem={renderPlant}
       keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
       showsVerticalScrollIndicator={false}
+      ListEmptyComponent={
+        <View className="items-center mt-8 mb-6">
+          <Ionicons
+            name="leaf-outline"
+            size={64}
+            color="#77B860"
+            style={{ marginBottom: 12 }}
+          />
+          <Text className="text-2xl text-neutral-900 font-mali-bold mb-2">
+            Your Garden Awaits
+          </Text>
+          <Text className="text-base text-neutral-400 font-nunito-regular mb-4 text-center max-w-xs">
+            Add your first plant to start your gardening journey. Track growth,
+            care schedules, and watch them thrive!
+          </Text>
+          {onAddPlant && (
+            <TouchableOpacity
+              onPress={onAddPlant}
+              className="flex-row items-center bg-brand-600 rounded-full py-2.5 px-5"
+              accessibilityRole="button"
+              accessibilityLabel="Plant Something New"
+            >
+              <Ionicons
+                name="add-circle-outline"
+                size={22}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text className="text-white font-nunito-bold text-base">
+                Plant Something New
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      }
     />
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    shadowColor: "#333333",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 2,
-    marginBottom: 0,
-  },
-  cardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  image: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  placeholderImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#F5F5E6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  infoSection: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  nickname: {
-    fontSize: 17,
-    color: "#2e2c29",
-    fontFamily: "Mali-Bold",
-    marginBottom: 2,
-  },
-  careRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  careText: {
-    fontSize: 13,
-    fontFamily: "Nunito-SemiBold",
-    marginLeft: 5,
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  actionBtn: {
-    marginLeft: 8,
-    padding: 6,
-    borderRadius: 16,
-    backgroundColor: "#F5F5E6",
-  },
-});
 
 export default PlantList;

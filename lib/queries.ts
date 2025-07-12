@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPlantCards, searchPlants, getPlantDetails } from "./supabaseApi";
 import type { ApiResponse, PlantCardData, PlantFullDataUI } from "@/types/plant";
-import type { Garden, GardenDashboard, PlantTask, TaskWithDetails, GardenTaskSummary } from "@/types/garden";
+import type { Garden, GardenDashboard, PlantTask, TaskWithDetails, GardenTaskSummary, PlantCareLog } from "@/types/garden";
 import { useEffect } from "react";
 import {
   shouldUpdateCache,
@@ -299,24 +299,33 @@ export function useUserPlantDetails(userPlantId: string) {
     queryFn: async () => {
       if (!userPlantId) throw new Error("User plant ID is required");
 
-      // First fetch the user plant data
-      const { data: userPlant, error: userPlantError } = await supabase
-        .from("user_plants")
-        .select(`
-          id,
-          garden_id,
-          plant_id,
-          nickname,
-          images,
-          created_at,
-          updated_at
-        `)
-        .eq("id", userPlantId)
-        .single();
+      const debugInfo: Record<string, { status: string; error: string | null }> = {};
 
-      if (userPlantError) {
-        console.error("Error fetching user plant:", userPlantError);
-        throw new Error(userPlantError.message);
+      // Fetch the user plant data
+      let userPlant = null;
+      let userPlantError = null;
+      try {
+        const res = await supabase
+          .from("user_plants")
+          .select(`
+            id,
+            garden_id,
+            plant_id,
+            nickname,
+            images,
+            created_at,
+            updated_at
+          `)
+          .eq("id", userPlantId)
+          .single();
+        userPlant = res.data;
+        userPlantError = res.error;
+        if (userPlantError) throw userPlantError;
+        debugInfo.userPlant = { status: "success", error: null };
+        console.log("[DEBUG] userPlant fetched:", userPlant);
+      } catch (err: any) {
+        debugInfo.userPlant = { status: "error", error: err?.message || String(err) };
+        console.error("[DEBUG] Error fetching userPlant:", err);
       }
 
       if (!userPlant) {
@@ -324,96 +333,111 @@ export function useUserPlantDetails(userPlantId: string) {
       }
 
       // Fetch care logs from the plant_care_logs table
-      const { data: careLogs, error: careLogsError } = await supabase
-        .from("plant_care_logs")
-        .select(`
-          id,
-          user_plant_id,
-          image,
-          care_notes,
-          taken_care_at
-        `)
-        .eq("user_plant_id", userPlantId)
-        .order("taken_care_at", { ascending: false });
-
-      if (careLogsError) {
-        console.error("Error fetching plant care logs:", careLogsError);
+      let careLogs: PlantCareLog[] = [];
+      try {
+        const res = await supabase
+          .from("plant_care_logs")
+          .select(`
+            id,
+            user_plant_id,
+            image,
+            care_notes,
+            taken_care_at
+          `)
+          .eq("user_plant_id", userPlantId)
+          .order("taken_care_at", { ascending: false });
+        careLogs = res.data || [];
+        if (res.error) throw res.error;
+        debugInfo.careLogs = { status: "success", error: null };
+        console.log("[DEBUG] careLogs fetched:", careLogs);
+      } catch (err: any) {
+        debugInfo.careLogs = { status: "error", error: err?.message || String(err) };
+        console.error("[DEBUG] Error fetching careLogs:", err);
       }
 
-      // Fetch tasks from the garden_tasks_summary view
-      const { data: tasks, error: tasksError } = await supabase
-        .from("garden_tasks_summary")
-        .select(`
-          task_id,
-          task_type,
-          due_date,
-          completed
-        `)
-        .eq("plant_id", userPlantId)
-        .order("due_date", { ascending: true });
-
-      if (tasksError) {
-        console.error("Error fetching plant tasks:", tasksError);
+      // Fetch tasks from the plant_tasks table (user-specific)
+      let plantTasks: PlantTask[] = [];
+      try {
+        const res = await supabase
+          .from("plant_tasks")
+          .select(`
+            id,
+            user_plant_id,
+            task_type,
+            due_date,
+            completed
+          `)
+          .eq("user_plant_id", userPlantId)
+          .order("due_date", { ascending: true });
+        plantTasks = res.data || [];
+        if (res.error) throw res.error;
+        debugInfo.plantTasks = { status: "success", error: null };
+        console.log("[DEBUG] plantTasks fetched:", plantTasks);
+      } catch (err: any) {
+        debugInfo.plantTasks = { status: "error", error: err?.message || String(err) };
+        console.error("[DEBUG] Error fetching plantTasks:", err);
       }
 
-      // Now get the garden information for this plant
-      const { data: garden, error: gardenError } = await supabase
-        .from("user_gardens")
-        .select("name")
-        .eq("id", userPlant.garden_id)
-        .single();
-
-      if (gardenError) {
-        console.error("Error fetching garden:", gardenError);
+      // Get the garden information for this plant
+      let garden = null;
+      try {
+        const res = await supabase
+          .from("user_gardens")
+          .select("name")
+          .eq("id", userPlant.garden_id)
+          .single();
+        garden = res.data;
+        if (res.error) throw res.error;
+        debugInfo.garden = { status: "success", error: null };
+        console.log("[DEBUG] garden fetched:", garden);
+      } catch (err: any) {
+        debugInfo.garden = { status: "error", error: err?.message || String(err) };
+        console.error("[DEBUG] Error fetching garden:", err);
       }
 
       // Get general plant information
-      const { data: plantInfo, error: plantInfoError } = await supabase
-        .from("plant_full_data")
-        .select(`
-          scientific_name,
-          common_names,
-          light_requirements,
-          soil_drainage,
-          soil_texture,
-          usda_zones
-        `)
-        .eq("id", userPlant.plant_id)
-        .single();
-
-      if (plantInfoError) {
-        console.error("Error fetching plant info:", plantInfoError);
+      let plantInfo = null;
+      try {
+        const res = await supabase
+          .from("plant_full_data")
+          .select(`
+            scientific_name,
+            common_names,
+            light_requirements,
+            soil_drainage,
+            soil_texture,
+            usda_zones
+          `)
+          .eq("id", userPlant.plant_id)
+          .single();
+        plantInfo = res.data;
+        if (res.error) throw res.error;
+        debugInfo.plantInfo = { status: "success", error: null };
+        console.log("[DEBUG] plantInfo fetched:", plantInfo);
+      } catch (err: any) {
+        debugInfo.plantInfo = { status: "error", error: err?.message || String(err) };
+        console.error("[DEBUG] Error fetching plantInfo:", err);
       }
 
-      // Transform tasks to match the PlantTask interface
-      const plantTasks = tasks?.map(task => ({
-        id: task.task_id,
-        user_plant_id: userPlantId,
-        task_type: task.task_type,
-        due_date: task.due_date,
-        completed: task.completed
-      })) || [];
-
-      // Combine and transform the data
+      // Merge all data into a single object for the UI
       return {
         ...userPlant,
-        care_logs: careLogs || [],
         plant_tasks: plantTasks,
-        garden_name: garden?.name || 'Unknown Garden',
-        scientific_name: plantInfo?.scientific_name || 'Unknown Species',
-        common_names: plantInfo?.common_names || [],
-        added_date: userPlant.created_at,
-        water_requirements: "Water when the top inch of soil is dry.",
-        light_requirements: plantInfo?.light_requirements || "Needs adequate light",
-        soil_requirements: [
-          ...(plantInfo?.soil_texture || []),
-          ...(plantInfo?.soil_drainage || [])
-        ].join(", ") || "Well-draining soil mix",
-        temperature_requirements: plantInfo?.usda_zones?.join(", ") || "Check plant hardiness zone"
+        care_logs: careLogs,
+        // Merge in plantInfo and garden fields for direct access in the UI
+        scientific_name: plantInfo?.scientific_name ?? "",
+        garden_name: garden?.name ?? "",
+        // Optionally, add more plantInfo fields if needed
+        common_names: plantInfo?.common_names ?? [],
+        light_requirements: plantInfo?.light_requirements ?? [],
+        soil_drainage: plantInfo?.soil_drainage ?? [],
+        soil_texture: plantInfo?.soil_texture ?? [],
+        usda_zones: plantInfo?.usda_zones ?? [],
+        debugInfo,
       };
     },
     enabled: !!userPlantId,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes to avoid showing outdated information
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
 

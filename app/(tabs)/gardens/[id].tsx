@@ -32,6 +32,7 @@ import RecommendedPlantsSection from "@/components/Gardens/RecommendedPlantsSect
 import { BodyText } from "@/components/Gardens";
 import { useGardenFilters } from "@/lib/hooks/useGardenFilters";
 import TabNavigation from "@/components/UI/TabNavigation";
+import type { PlantTask } from "@/types/garden";
 
 // Get screen width for responsive sizing
 const screenWidth = Dimensions.get("window").width;
@@ -133,10 +134,9 @@ const GardenDetails = () => {
       recommendedData?.results as
         | import("@/types/plant").PlantCardData[]
         | undefined
-    )?.map((plant) => ({
+    )?.map((plant: import("@/types/plant").PlantCardData) => ({
       id: plant.id,
       slug: plant.slug,
-      scientific_slug: plant.scientific_slug,
       scientific_name: plant.scientific_name,
       common_name: plant.common_name,
       first_image: plant.first_image,
@@ -454,52 +454,55 @@ const GardenDetails = () => {
 
   // Extract dashboard data if available
   const dashboardData = gardenData.dashboard;
-  const plants =
-    dashboardData?.plants?.map(
-      (plant) =>
-        ({
-          ...plant,
-          garden_id: gardenData.id,
-          created_at: new Date().toISOString(), // Use current date as fallback
-          updated_at: new Date().toISOString(), // Use current date as fallback
-          care_logs: [], // Initialize empty care logs
-          plant_tasks: [], // Initialize empty tasks
-        } as UserPlant)
-    ) || [];
+  const plants: UserPlant[] = Array.isArray(dashboardData?.plants)
+    ? dashboardData.plants.map(
+        (plant: any) =>
+          ({
+            ...plant,
+            garden_id: gardenData.id,
+            created_at: new Date().toISOString(), // Use current date as fallback
+            updated_at: new Date().toISOString(), // Use current date as fallback
+            care_logs: [], // Initialize empty care logs
+            plant_tasks: [], // Initialize empty tasks
+          } as UserPlant)
+      )
+    : [];
 
   // Group plants by actual care urgency based on task timing, not just existence of tasks
-  const plantsWithOverdueTasks = plants.filter((plant) => {
+  const plantsWithOverdueTasks = plants.filter((plant: UserPlant) => {
     if (!plant.plant_tasks || plant.plant_tasks.length === 0) return false;
     const now = new Date();
     return plant.plant_tasks.some(
-      (task) => !task.completed && new Date(task.due_date) < now
+      (task: PlantTask) => !task.completed && new Date(task.due_date) < now
     );
   });
 
-  const plantsWithUrgentTasks = plants.filter((plant) => {
+  const plantsWithUrgentTasks = plants.filter((plant: UserPlant) => {
     if (!plant.plant_tasks || plant.plant_tasks.length === 0) return false;
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(23, 59, 59, 999); // End of tomorrow
 
-    const incompleteTasks = plant.plant_tasks.filter((task) => !task.completed);
+    const incompleteTasks = plant.plant_tasks.filter(
+      (task: PlantTask) => !task.completed
+    );
     if (incompleteTasks.length === 0) return false;
 
     // Check if already categorized as overdue
     const hasOverdue = incompleteTasks.some(
-      (task) => new Date(task.due_date) < now
+      (task: PlantTask) => new Date(task.due_date) < now
     );
     if (hasOverdue) return false; // Don't double-count overdue plants
 
     // Check if has tasks due today or tomorrow
-    return incompleteTasks.some((task) => {
+    return incompleteTasks.some((task: PlantTask) => {
       const taskDate = new Date(task.due_date);
       return taskDate >= now && taskDate <= tomorrow;
     });
   });
 
-  const plantsWithRegularTasks = plants.filter((plant) => {
+  const plantsWithRegularTasks = plants.filter((plant: UserPlant) => {
     if (!plant.plant_tasks || plant.plant_tasks.length === 0) return true;
 
     const now = new Date();
@@ -507,17 +510,19 @@ const GardenDetails = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(23, 59, 59, 999);
 
-    const incompleteTasks = plant.plant_tasks.filter((task) => !task.completed);
+    const incompleteTasks = plant.plant_tasks.filter(
+      (task: PlantTask) => !task.completed
+    );
     if (incompleteTasks.length === 0) return true;
 
     // Check if has any overdue tasks
     const hasOverdue = incompleteTasks.some(
-      (task) => new Date(task.due_date) < now
+      (task: PlantTask) => new Date(task.due_date) < now
     );
     if (hasOverdue) return false;
 
     // Check if has any urgent tasks (due today/tomorrow)
-    const hasUrgent = incompleteTasks.some((task) => {
+    const hasUrgent = incompleteTasks.some((task: PlantTask) => {
       const taskDate = new Date(task.due_date);
       return taskDate >= now && taskDate <= tomorrow;
     });
@@ -529,10 +534,11 @@ const GardenDetails = () => {
 
   // Check if garden has growing conditions
   const hasConditions = Boolean(
-    (gardenData.sunlight && gardenData.sunlight.length > 0) ||
-      (gardenData.soil_texture && gardenData.soil_texture.length > 0) ||
-      (gardenData.soil_ph_ranges && gardenData.soil_ph_ranges.length > 0) ||
-      (gardenData.soil_drainage && gardenData.soil_drainage.length > 0)
+    (typeof gardenData.sunlight === "string" &&
+      gardenData.sunlight.length > 0) ||
+      (typeof gardenData.soil_texture === "string" &&
+        gardenData.soil_texture.length > 0) ||
+      gardenData.soil_drainage
   );
 
   // Note: Plant status field removed - using task-based care indicators instead
@@ -740,7 +746,7 @@ const GardenDetails = () => {
 
       {/* Hero Section: Welcome, stats, main CTA */}
       <HeroSection
-        gardenName={gardenData.name}
+        gardenName={gardenData.name || ""}
         gardenMessage={(() => {
           const totalPlants = dashboardData?.total_plants || 0;
           const plantsNeedingCare =
@@ -771,83 +777,54 @@ const GardenDetails = () => {
       <View className="flex-1 px-6">
         {activeTab === "plants" ? (
           // My Plants Tab: Show plant list or empty state, scrollable
-          <ScrollView
-            className="px-6 pb-8 flex-grow"
-            showsVerticalScrollIndicator={false}
-          >
-            {plants.length > 0 ? (
-              <PlantList
-                plants={plants}
-                onPlantPress={handlePlantPress}
-                onEditPlant={handleEditPlant}
-                onWaterPlant={handleWaterPlant}
-                onDeletePlant={(plant) => {
-                  Alert.alert(
-                    "Delete Plant",
-                    `Are you sure you want to delete ${plant.nickname}?`,
-                    [
-                      { text: "Cancel", style: "cancel" },
-                      {
-                        text: "Delete",
-                        style: "destructive",
-                        onPress: async () => {
-                          try {
-                            if (plant.images && plant.images.length > 0) {
-                              const imageDeletionPromises = plant.images.map(
-                                (imageUrl: string) =>
-                                  deleteImageFromStorage(imageUrl)
-                              );
-                              await Promise.all(imageDeletionPromises);
-                            }
-                            const { error } = await supabase
-                              .from("user_plants")
-                              .delete()
-                              .eq("id", plant.id);
-                            if (error) throw error;
-                            queryClient.invalidateQueries({
-                              queryKey: ["gardenDetails", gardenData.id],
-                            });
-                            queryClient.invalidateQueries({
-                              queryKey: ["gardenDashboard", gardenData.user_id],
-                            });
-                            refetch();
-                          } catch (err) {
-                            Alert.alert(
-                              "Error",
-                              "Could not delete plant. Please try again."
-                            );
-                          }
-                        },
-                      },
-                    ]
-                  );
-                }}
-              />
-            ) : (
-              <View className="items-center mt-8 mb-6">
-                <Ionicons
-                  name="leaf-outline"
-                  size={64}
-                  color="#77B860"
-                  className="mb-3"
-                />
-                <Text className="text-[22px] text-foreground font-mali-bold mb-2">
-                  Your Garden Awaits
-                </Text>
-                <Text className="text-[#9e9a90] font-nunito-regular text-base mb-4 text-center max-w-[320px]">
-                  Add your first plant to start your gardening journey. Track
-                  growth, care schedules, and watch them thrive!
-                </Text>
-                <SubmitButton
-                  onPress={handleAddPlant}
-                  iconName="add-circle-outline"
-                  iconPosition="left"
-                >
-                  Plant Something New
-                </SubmitButton>
-              </View>
-            )}
-          </ScrollView>
+          <PlantList
+            plants={plants}
+            onPlantPress={handlePlantPress}
+            onEditPlant={handleEditPlant}
+            onWaterPlant={handleWaterPlant}
+            onDeletePlant={(plant) => {
+              Alert.alert(
+                "Delete Plant",
+                `Are you sure you want to delete ${plant.nickname}?`,
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        if (plant.images && plant.images.length > 0) {
+                          const imageDeletionPromises = plant.images.map(
+                            (imageUrl: string) =>
+                              deleteImageFromStorage(imageUrl)
+                          );
+                          await Promise.all(imageDeletionPromises);
+                        }
+                        const { error } = await supabase
+                          .from("user_plants")
+                          .delete()
+                          .eq("id", plant.id);
+                        if (error) throw error;
+                        queryClient.invalidateQueries({
+                          queryKey: ["gardenDetails", gardenData.id],
+                        });
+                        queryClient.invalidateQueries({
+                          queryKey: ["gardenDashboard", gardenData.user_id],
+                        });
+                        refetch();
+                      } catch (err) {
+                        Alert.alert(
+                          "Error",
+                          "Could not delete plant. Please try again."
+                        );
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+            onAddPlant={handleAddPlant}
+          />
         ) : (
           // Recommendations Tab: Show recommended plants, scrollable
           <RecommendedPlantsSection
