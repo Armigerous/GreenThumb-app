@@ -52,7 +52,6 @@ export type TaskType =
   | "Inspect"
   | "Mulch"
   | "Weed"
-  | "Amend Soil"
   | "Propagate"
   | "Transplant"
   | "Log"

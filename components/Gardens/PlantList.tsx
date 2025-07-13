@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CachedImage from "@/components/CachedImage";
 import type { UserPlant } from "@/types/garden";
+import { TitleText, BodyText, Text as BrandText } from "@/components/UI/Text";
+import SubmitButton from "@/components/UI/SubmitButton";
 
 interface PlantListProps {
   plants: UserPlant[];
   onPlantPress: (plant: UserPlant) => void;
-  onEditPlant: (plant: UserPlant) => void;
-  onWaterPlant: (plant: UserPlant) => void;
+  onAddJournalEntry: (plant: UserPlant) => void; // Handler for journal entry action
   onDeletePlant: (plant: UserPlant) => void;
   onAddPlant?: () => void; // Optional handler for empty state add button
 }
@@ -23,8 +24,7 @@ interface PlantListProps {
 const PlantList: React.FC<PlantListProps> = ({
   plants,
   onPlantPress,
-  onEditPlant,
-  onWaterPlant,
+  onAddJournalEntry,
   onDeletePlant,
   onAddPlant,
 }) => {
@@ -33,7 +33,7 @@ const PlantList: React.FC<PlantListProps> = ({
     if (!plant.plant_tasks || plant.plant_tasks.length === 0) {
       return {
         text: "All caught up",
-        color: "#77B860",
+        color: "#77B860", // brand-500
         icon: "checkmark-circle" as const,
       };
     }
@@ -42,7 +42,7 @@ const PlantList: React.FC<PlantListProps> = ({
     if (incompleteTasks.length === 0) {
       return {
         text: "All caught up",
-        color: "#77B860",
+        color: "#77B860", // brand-500
         icon: "checkmark-circle" as const,
       };
     }
@@ -53,7 +53,7 @@ const PlantList: React.FC<PlantListProps> = ({
     if (dueDate < now) {
       return {
         text: `${mostUrgent.task_type} overdue`,
-        color: "#dc2626",
+        color: "#E50000", // destructive
         icon:
           mostUrgent.task_type === "Water"
             ? ("water" as const)
@@ -64,7 +64,7 @@ const PlantList: React.FC<PlantListProps> = ({
     } else {
       return {
         text: `${mostUrgent.task_type} due soon`,
-        color: "#d97706",
+        color: "#ffd900", // accent-200
         icon:
           mostUrgent.task_type === "Water"
             ? ("water" as const)
@@ -80,7 +80,7 @@ const PlantList: React.FC<PlantListProps> = ({
     const careStatus = getCareStatus(item);
     return (
       <View
-        className={`bg-white rounded-2xl shadow-sm shadow-neutral-800/10 ${
+        className={`bg-cream-50 rounded-2xl shadow-sm shadow-neutral-800/10 ${
           index === 0 ? "mt-0" : "mt-3"
         } opacity-95`}
         accessible
@@ -107,48 +107,48 @@ const PlantList: React.FC<PlantListProps> = ({
           )}
           {/* Plant Info */}
           <View className="flex-1 ml-3.5">
-            <Text className="text-lg text-neutral-900 font-mali-bold mb-0.5">
+            <TitleText className="text-lg text-cream-800 mb-0.5">
               {item.nickname}
-            </Text>
+            </TitleText>
             <View className="flex-row items-center">
               <Ionicons
                 name={careStatus.icon}
                 size={16}
                 color={careStatus.color}
               />
-              <Text
-                className="text-xs font-nunito-semibold ml-1.5"
+              <BodyText
+                className="text-xs font-paragraph-semibold ml-1.5"
                 style={{ color: careStatus.color }}
               >
                 {careStatus.text}
-              </Text>
+              </BodyText>
             </View>
           </View>
-          {/* Actions */}
+          {/* Actions: Only Journal and Delete buttons remain. Hit area is at least 44x44px. */}
           <View className="flex-row items-center ml-2.5">
+            {/* Journal Button: Soft rectangular (pill) style for better touch and visual comfort */}
             <TouchableOpacity
-              onPress={() => onEditPlant(item)}
+              onPress={() => onAddJournalEntry(item)}
               accessibilityRole="button"
-              accessibilityLabel={`Edit ${item.nickname}`}
-              className="ml-2 p-1.5 rounded-full bg-brand-50"
+              accessibilityLabel={`Add journal entry for ${item.nickname}`}
+              className="ml-2 rounded-xl bg-brand-50 flex-row items-center justify-center px-4 py-2"
+              style={{ minWidth: 44, minHeight: 44 }}
             >
-              <Ionicons name="create-outline" size={18} color="#5E994B" />
+              <Ionicons name="journal-outline" size={20} color="#5E994B" />
+              {/* Optionally, add a text label for clarity: */}
+              {/* <BodyText className="ml-2 text-brand-600 text-sm font-paragraph-semibold">Journal</BodyText> */}
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => onWaterPlant(item)}
-              accessibilityRole="button"
-              accessibilityLabel={`Water ${item.nickname}`}
-              className="ml-2 p-1.5 rounded-full bg-brand-50"
-            >
-              <Ionicons name="water" size={18} color="#3F6933" />
-            </TouchableOpacity>
+            {/* Delete Button: Soft rectangular (pill) style for better touch and visual comfort */}
             <TouchableOpacity
               onPress={() => onDeletePlant(item)}
               accessibilityRole="button"
               accessibilityLabel={`Delete ${item.nickname}`}
-              className="ml-2 p-1.5 rounded-full bg-destructive-50"
+              className="ml-2 rounded-xl bg-destructive/10 flex-row items-center justify-center px-4 py-2"
+              style={{ minWidth: 44, minHeight: 44 }}
             >
-              <Ionicons name="trash-outline" size={18} color="#E50000" />
+              <Ionicons name="trash-outline" size={20} color="#E50000" />
+              {/* Optionally, add a text label for clarity: */}
+              {/* <BodyText className="ml-2 text-destructive text-sm font-paragraph-semibold">Delete</BodyText> */}
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -168,33 +168,27 @@ const PlantList: React.FC<PlantListProps> = ({
           <Ionicons
             name="leaf-outline"
             size={64}
-            color="#77B860"
+            color="#77B860" // brand-500
             style={{ marginBottom: 12 }}
           />
-          <Text className="text-2xl text-neutral-900 font-mali-bold mb-2">
+          <TitleText className="text-2xl text-cream-800 mb-2">
             Your Garden Awaits
-          </Text>
-          <Text className="text-base text-neutral-400 font-nunito-regular mb-4 text-center max-w-xs">
+          </TitleText>
+          <BodyText className="text-base text-cream-600 mb-4 text-center max-w-xs">
             Add your first plant to start your gardening journey. Track growth,
             care schedules, and watch them thrive!
-          </Text>
+          </BodyText>
           {onAddPlant && (
-            <TouchableOpacity
+            <SubmitButton
               onPress={onAddPlant}
-              className="flex-row items-center bg-brand-600 rounded-full py-2.5 px-5"
-              accessibilityRole="button"
-              accessibilityLabel="Plant Something New"
+              color="primary"
+              iconName="add-circle-outline"
+              iconPosition="left"
+              size="md"
+              className="mt-2"
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={22}
-                color="#fff"
-                style={{ marginRight: 8 }}
-              />
-              <Text className="text-white font-nunito-bold text-base">
-                Plant Something New
-              </Text>
-            </TouchableOpacity>
+              Plant Something New
+            </SubmitButton>
           )}
         </View>
       }

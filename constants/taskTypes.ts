@@ -48,12 +48,6 @@ export const TASK_TYPE_META: Record<TaskType, TaskTypeMeta> = {
     color: "#16A34A", // Green (distinct from fertilize)
     description: "Remove unwanted plants from your garden.",
   },
-  "Amend Soil": {
-    label: "Amend Soil",
-    icon: "flask",
-    color: "#B45309", // Amber (soil chemistry)
-    description: "Add nutrients or conditioners to improve soil quality.",
-  },
   Propagate: {
     label: "Propagate",
     icon: "git-branch",

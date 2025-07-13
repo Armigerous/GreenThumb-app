@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import ImagePicker from "./ImagePicker";
 import { BodyText, TitleText } from "@/components/UI/Text";
+import { getRandomPlantNickname } from "@/utils/plantNicknames";
 
 /**
  * PlantDetailsStep component for customizing plant details
@@ -37,51 +38,6 @@ interface PlantDetailsStepProps {
   onNext: () => void;
 }
 
-// List of cute human names for random selection
-const cuteNames = [
-  "Milo",
-  "Oliver",
-  "Charlie",
-  "Sophie",
-  "Ruby",
-  "Bella",
-  "Toby",
-  "Emma",
-  "Lucy",
-  "Finn",
-  "Rosie",
-  "Lola",
-  "Zoe",
-  "Tommy",
-  "Chloe",
-  "Leo",
-  "Ellie",
-  "Felix",
-  "Poppy",
-  "Buddy",
-  "Molly",
-  "Oscar",
-  "Teddy",
-  "Penny",
-  "Jasper",
-  "Chorizo",
-  "Monday",
-  "Colby",
-  "Brie",
-  "Cheddar",
-  "Gracie Moon",
-  "Moonpie",
-  "Pumpkin",
-  "Chunky",
-  "Bubbles",
-  "Heath",
-];
-
-const getRandomCuteName = () => {
-  const randomIndex = Math.floor(Math.random() * cuteNames.length);
-  return cuteNames[randomIndex];
-};
-
 export default function PlantDetailsStep({
   plant,
   nickname,
@@ -101,7 +57,7 @@ export default function PlantDetailsStep({
 
   // Function to set a random nickname
   const handleRandomizeName = () => {
-    setNickname(getRandomCuteName());
+    setNickname(getRandomPlantNickname());
   };
 
   // Handler for image selection that tracks upload status
@@ -119,7 +75,7 @@ export default function PlantDetailsStep({
           </TitleText>
           <BodyText className=" mb-6">
             {/* Reason: Conversational, outcome-focused, plain language (BRAND_IDENTITY.md) */}
-            Give your plant a name and a photo. It's more fun that way!
+            Give your plant a name and a photo. It&apos;s more fun that way!
           </BodyText>
 
           {/* Nickname Input with Randomize button */}
