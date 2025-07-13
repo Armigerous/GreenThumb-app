@@ -51,9 +51,9 @@ export function useOverdueTasksNotifications() {
           garden_id: garden.garden_id,
           garden_name: garden.garden_name,
           overdue_tasks_count: garden.overdue_tasks_count,
-          tasks: typeof garden.tasks === 'string'
-            ? JSON.parse(garden.tasks)
-            : garden.tasks || []
+          tasks: typeof garden.overdue_tasks === 'string'
+            ? JSON.parse(garden.overdue_tasks)
+            : garden.overdue_tasks || []
         }));
         
         setNotifications(processedData);
