@@ -21,6 +21,7 @@ import { TaskWithDetails } from "@/types/garden";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { TaskCompletionCelebration } from "@/components/UI/TaskCompletionCelebration";
 import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
+import type { OverdueTask } from "@/lib/hooks/useOverdueTasksNotifications";
 import { useCurrentSeason } from "@/lib/hooks/useCurrentSeason";
 import {
   HomeHeader,
@@ -144,18 +145,18 @@ export default function Page() {
 
       notifications.forEach((garden) => {
         if (garden.tasks && garden.tasks.length > 0) {
-          garden.tasks.forEach((task) => {
-            // Convert notification task format to TaskWithDetails format
+          garden.tasks.forEach((task: OverdueTask) => {
+            // Map OverdueTask (from Supabase) to TaskWithDetails for UI compatibility
             overdueTasksFromNotifications.push({
-              id: task.task_id,
-              user_plant_id: "", // Add required property with empty string as placeholder UUID
+              id: task.task_id, // Supabase returns task_id
+              user_plant_id: "", // Not available in notification, set as empty string
               task_type: toTaskType(task.task_type),
               due_date: task.due_date,
               completed: false, // All tasks in notifications are uncompleted
               plant: {
-                nickname: task.plant_nickname,
+                nickname: task.plant_nickname, // Directly from Supabase
                 garden: {
-                  name: garden.garden_name,
+                  name: garden.garden_name, // From parent garden notification
                 },
               },
             });
