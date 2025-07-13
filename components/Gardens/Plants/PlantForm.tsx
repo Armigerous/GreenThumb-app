@@ -24,6 +24,7 @@ import {
   ErrorMessage,
 } from "./Add";
 import { generatePlantTasks } from "@/lib/services/taskGeneration";
+import { getRandomPlantNickname } from "@/utils/plantNicknames";
 
 // Props for the plant addition form
 interface PlantFormProps {
@@ -80,23 +81,7 @@ export default function PlantForm({
   // Set default nickname from plant name when plant data loads ONLY if nickname is empty
   useEffect(() => {
     if (plant && nickname === "") {
-      const randomNames = [
-        "Milo",
-        "Daisy",
-        "Oliver",
-        "Lily",
-        "Charlie",
-        "Sophie",
-        "Ruby",
-        "Bella",
-        "Toby",
-        "Emma",
-        "Lucy",
-        "Finn",
-      ];
-      const randomName =
-        randomNames[Math.floor(Math.random() * randomNames.length)];
-      setNickname(randomName);
+      setNickname(getRandomPlantNickname());
     }
   }, [plant]);
 

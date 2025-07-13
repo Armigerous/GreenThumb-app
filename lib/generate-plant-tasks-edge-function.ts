@@ -1,21 +1,19 @@
-// Supabase Edge Function: Generate Plant Tasks
-// This file is intended for deployment as a Supabase Edge Function (Deno runtime).
-// The imports below are valid in the Supabase Edge environment.
-// @ts-expect-error Supabase Edge import
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+// Supabase Edge Function: Generate Plant Tasks (Climate‑Aware v2)
+// Deno runtime – deploy with `supabase functions deploy generate-plant-tasks`
+// ---------------------------------------------------------------------------
+// 2025‑07‑08  ‑  Fully rewritten according to NC climate research + user specs
+// ---------------------------------------------------------------------------
 // @ts-expect-error Supabase Edge import
 import { createClient } from "npm:@supabase/supabase-js@2";
 // @ts-expect-error Supabase Edge import
 import { z } from "npm:zod";
-
-// --- CORS Headers ---
+// --- CORS ------------------------------------------------------------------
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
-
-// --- Zod Schemas ---
+// --- Schemas ---------------------------------------------------------------
 const UserPlantSchema = z.object({
   id: z.string(),
   garden_id: z.number(),
@@ -31,6 +29,7 @@ const TasksArray = z.object({
       "Fertilize",
       "Harvest",
       "Prune",
+      "Weed",
       "Inspect",
       "Mulch",
       "Propagate",
@@ -41,86 +40,122 @@ const TasksArray = z.object({
     completed: z.boolean()
   }))
 });
-
-// --- Constants ---
-const WATER_INTERVALS = { Low: 7, Medium: 4, High: 2 };
-const FERTILIZE_BUFFER_DAYS = 10;
-const FERTILIZE_FREQ_MONTHS = { Fast: 1, Slow: 3 };
+// --- Constants -------------------------------------------------------------
+const WATER_INTERVALS = {
+  Low: 7,
+  Medium: 4,
+  High: 2
+};
+const FERTILIZE_BUFFER_DAYS = 10; // safety buffer for mulch + prune ops
+const FERTILIZE_FREQ_MONTHS = {
+  Fast: 1,
+  Slow: 3
+};
 const LOG_INTERVAL_DAYS = 7;
-const INSPECT_INTERVAL_DAYS = { Default: 14, WithProblems: 7 };
+const INSPECT_INTERVAL_DAYS = {
+  Default: 14,
+  WithProblems: 7
+};
+// Region‑based first‑fertilize delay after last frost (days)
+const FIRST_FEED_DELAY: Record<string, number> = {
+  none: 0,
+  Coastal: 14,
+  Mountains: 28,
+  Piedmont: 21
+}; // 'none' fallback
 
-// --- Date Utilities ---
-const addDays = (d: Date, n: number): Date => {
+const WEED_INTERVAL_DAYS: Record<string, number> = {
+  Low: 21,
+  Medium: 14,
+  High: 7
+};
+
+// --- Date helpers ----------------------------------------------------------
+const addDays = (d, n)=>{
   const dt = new Date(d);
   dt.setUTCDate(dt.getUTCDate() + n);
   return dt;
 };
-const addMonths = (d: Date, n: number): Date => {
+const addMonths = (d, n)=>{
   const dt = new Date(d);
   dt.setUTCMonth(dt.getUTCMonth() + n);
   return dt;
 };
-const formatUTC = (d: Date): string => d.toISOString();
-const midOfMonth = (m: number, y: number): Date => new Date(Date.UTC(y, m, 15, 10, 0, 0));
-// Utility: Convert day-of-year (DOY) to Date in a given year
-function doyToDate(doy: number, year: number): Date {
-  // January 1st is DOY 1
+const formatUTC = (d)=>d.toISOString();
+const midOfMonth = (m, y)=>new Date(Date.UTC(y, m, 15, 10));
+// Convert day‑of‑year (DOY) → Date in `year` (UTC)
+function doyToDate(doy, year) {
   const date = new Date(Date.UTC(year, 0, 1));
   date.setUTCDate(date.getUTCDate() + doy - 1);
   return date;
 }
-
-// --- Supabase Client ---
+// Seasonal windows derived from frost DOY values
+function getSeasonWindows(climate, year) {
+  const last = doyToDate(climate.last_spring_frost_doy, year);
+  const first = doyToDate(climate.first_fall_frost_doy, year);
+  return {
+    springCool: [
+      addDays(last, -45),
+      addDays(last, 30)
+    ],
+    warm: [
+      addDays(last, 31),
+      addDays(first, -45)
+    ],
+    fallCool: [
+      addDays(first, -44),
+      addDays(first, 15)
+    ],
+    dormant: [
+      addDays(first, 16),
+      addDays(last, -46 + 365)
+    ] // Nov‑Jan
+  };
+}
+// --- Default Climate Fallback ----------------------------------------------
+/**
+ * DEFAULT_CLIMATE is used for gardens without location info (no zip/county).
+ * Values represent a typical NC Piedmont climate, safe for generic task gen.
+ */
+const DEFAULT_CLIMATE = {
+  region: "Piedmont",
+  county_name: "Default",
+  last_spring_frost_doy: 110, // ~April 20
+  first_fall_frost_doy: 300,  // ~Oct 27
+  avg_annual_precip_mm: 1200,
+  zone_min: "7a",
+  zone_max: "8a"
+};
+// --- Supabase client -------------------------------------------------------
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing required environment variables");
-}
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Missing env vars");
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-// --- Task Generators (with microclimate baked in) ---
-function generateWaterTasks(up: any, plant: any, garden: any, climate: any, today: Date, microAdj: number) {
-  // --- Robust Logging for Supabase Edge Function ---
-  console.log(`[EdgeFn] generateWaterTasks: plant_id=${plant.id}, garden_id=${garden.id}`);
-  console.log(`[EdgeFn] Raw plant.maintenance=`, JSON.stringify(plant.maintenance), "type=", typeof plant.maintenance);
-  console.log(`[EdgeFn] Raw garden=`, JSON.stringify(garden));
-  console.log(`[EdgeFn] Raw climate=`, JSON.stringify(climate));
-
+// --- Task Generators -------------------------------------------------------
+// Util to decide if a date falls inside a window
+const within = (d, w)=>d >= w[0] && d <= w[1];
+function generateWaterTasks(up, plant, garden, climate, windows, today, microAdj) {
   let maintenance = plant.maintenance?.[0] ?? "Medium";
-  console.log(`[EdgeFn] Computed maintenance=`, maintenance);
-
-  if (!["Low", "Medium", "High"].includes(maintenance)) {
-    // Reason: Defensive fallback for unexpected maintenance values
-    console.warn(
-      `[EdgeFn] Unexpected maintenance value for plant_id=${plant.id}:`,
-      maintenance,
-      "plant.maintenance=",
-      JSON.stringify(plant.maintenance)
-    );
-    maintenance = "Medium";
-  }
-  const baseInterval = WATER_INTERVALS[maintenance];
-
-  // --- Updated: Use avg_annual_precip_mm from nc_climate_county ---
-  // Estimate monthly rainfall as avg_annual_precip_mm / 12 (mm)
-  // If missing, fallback to 1200mm/year (100mm/month)
-  if (typeof climate.avg_annual_precip_mm !== "number") {
-    console.error(`[EdgeFn] plant_id=${plant.id} garden_id=${garden.id} ERROR: climate.avg_annual_precip_mm is missing or not a number. climate=`, JSON.stringify(climate));
-  }
-  const avgAnnualPrecip = climate.avg_annual_precip_mm ?? 1200;
+  if (![
+    "Low",
+    "Medium",
+    "High"
+  ].includes(maintenance)) maintenance = "Medium";
+  let interval = WATER_INTERVALS[maintenance];
+  const avgAnnualPrecip = typeof climate.avg_annual_precip_mm === "number" ? climate.avg_annual_precip_mm : 1200;
   const avgMonthlyRain = avgAnnualPrecip / 12;
-  console.log(`[EdgeFn] avgAnnualPrecip=`, avgAnnualPrecip, `avgMonthlyRain=`, avgMonthlyRain);
-
-  // Use rainfall to adjust interval: if <80mm/month, +1 day; if >120mm/month, -1 day
-  if (typeof garden.soil_texture !== "string") {
-    console.warn(`[EdgeFn] plant_id=${plant.id} garden_id=${garden.id} WARNING: garden.soil_texture is missing or not a string. garden=`, JSON.stringify(garden));
-  }
-  let interval = baseInterval + (avgMonthlyRain < 80 ? 1 : avgMonthlyRain > 120 ? -1 : 0) + (garden.soil_texture === "Sand" ? 1 : 0);
+  if (avgMonthlyRain < 80) interval += 1;
+  else if (avgMonthlyRain > 120) interval -= 1;
+  if (garden.soil_texture === "Sand") interval += 1;
+  // Extra evapotranspiration hit in warm window (esp. coast sands)
+  const extraSummer = within(today, windows.warm) ? climate.region === "Coastal" ? 2 : 1 : 0;
+  interval += extraSummer;
+  if (!within(today, windows.warm)) interval += -1; // cooler seasons slightly slower drying
   interval = Math.max(1, interval);
-  console.log(`[EdgeFn] Computed interval=`, interval);
   const tasks = [];
   let wDate = addDays(today, interval + microAdj);
-  while (wDate <= addDays(today, 365)) {
+  const end = addDays(today, 365);
+  while(wDate <= end){
     tasks.push({
       user_plant_id: up.id,
       task_type: "Water",
@@ -131,19 +166,25 @@ function generateWaterTasks(up: any, plant: any, garden: any, climate: any, toda
   }
   return tasks;
 }
-function generateFertilizeTasks(up: any, plant: any, climate: any, today: Date, microAdj: number) {
-  const frostStart = new Date(`${today.getUTCFullYear()}-${climate.last_frost}T00:00:00.000Z`);
-  const frostEnd = new Date(`${today.getUTCFullYear()}-${climate.first_frost}T00:00:00.000Z`);
+function generateFertilizeTasks(up, plant, climate, windows, today, microAdj) {
   const freqMonths = plant.growth_rate === "Fast" ? FERTILIZE_FREQ_MONTHS.Fast : FERTILIZE_FREQ_MONTHS.Slow;
+  // region-specific delay after last frost
+  const regionDelay = FIRST_FEED_DELAY[climate.region] ?? 14;
+  let fDate = addDays(windows.springCool[0], regionDelay);
+  // 🔑  Skip any fertilize dates that are already in the past
+  while(fDate <= today){
+    fDate = addMonths(fDate, freqMonths);
+  }
+  const end = addDays(today, 365);
   const tasks = [];
-  let fDate = addMonths(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1, 10)), 1);
-  while (fDate <= addDays(today, 365)) {
-    if (fDate >= addDays(frostStart, FERTILIZE_BUFFER_DAYS) && fDate <= addDays(frostEnd, -FERTILIZE_BUFFER_DAYS)) {
-      const adj = addDays(fDate, microAdj);
+  const isCoolSeason = Boolean(plant.prefers_cool);
+  while(fDate <= end){
+    // Skip cool-season plants during hot summer window
+    if (!(isCoolSeason && within(fDate, windows.warm))) {
       tasks.push({
         user_plant_id: up.id,
         task_type: "Fertilize",
-        due_date: formatUTC(adj),
+        due_date: formatUTC(addDays(fDate, microAdj)),
         completed: false
       });
     }
@@ -151,10 +192,10 @@ function generateFertilizeTasks(up: any, plant: any, climate: any, today: Date, 
   }
   return tasks;
 }
-function generateHarvestTasks(up: any, plant: any, today: Date, microAdj: number) {
+function generateHarvestTasks(up, plant, today, microAdj) {
   const tasks = [];
-  for (const m of plant.fruit_display_harvest_time ?? []) {
-    const monthIdx = new Date(Date.parse(m + " 1, 2000")).getUTCMonth();
+  for (const m of plant.fruit_display_harvest_time ?? []){
+    const monthIdx = new Date(Date.parse(`${m} 1, 2000`)).getUTCMonth();
     const base = midOfMonth(monthIdx, today.getUTCFullYear());
     const adjDate = addDays(base, microAdj);
     if (adjDate > today) tasks.push({
@@ -166,26 +207,33 @@ function generateHarvestTasks(up: any, plant: any, today: Date, microAdj: number
   }
   return tasks;
 }
-function generatePruneTasks(up: any, plant: any, climate: any, today: Date, microAdj: number) {
-  const frostStart = new Date(`${today.getUTCFullYear()}-${climate.last_frost}T00:00:00.000Z`);
-  const frostEnd = new Date(`${today.getUTCFullYear()}-${climate.first_frost}T00:00:00.000Z`);
-  const zone = climate.zone ?? 7;
+function generatePruneTasks(up, plant, climate, windows, today, microAdj) {
   const tasks = [];
-  for (const bt of plant.flower_bloom_time ?? []) {
-    const monthIdx = new Date(Date.parse(bt + " 1, 2000")).getUTCMonth();
-    const base = addDays(midOfMonth(monthIdx, today.getUTCFullYear()), 7);
-    if (base >= frostStart) {
-      const adjDate = addDays(base, microAdj);
+  const year = today.getUTCFullYear();
+  // Post‑bloom prune (+7 days after bloom month mid‑point)
+  for (const bt of plant.flower_bloom_time ?? []){
+    const monthIdx = new Date(Date.parse(`${bt} 1, 2000`)).getUTCMonth();
+    const base = addDays(midOfMonth(monthIdx, year), 7);
+    if (within(base, windows.warm) && base > today) {
       tasks.push({
         user_plant_id: up.id,
         task_type: "Prune",
-        due_date: formatUTC(adjDate),
+        due_date: formatUTC(addDays(base, microAdj)),
         completed: false
       });
     }
   }
-  if (zone >= 7) {
-    const base = addDays(frostEnd, -30);
+  // Pre‑frost prune for zone >= 7 – use zone_min/zone_max as text
+  // If either zone_min or zone_max starts with '7' or higher, allow pre-frost prune
+  const zoneMin = typeof climate.zone_min === "string" ? climate.zone_min : "7a";
+  const zoneMax = typeof climate.zone_max === "string" ? climate.zone_max : "7a";
+  // Helper to extract numeric part from zone string
+  const getZoneNumber = (z: string) => parseInt(z, 10);
+  const zoneMinNum = getZoneNumber(zoneMin);
+  const zoneMaxNum = getZoneNumber(zoneMax);
+  const zoneThreshold = 7;
+  if (zoneMinNum >= zoneThreshold || zoneMaxNum >= zoneThreshold) {
+    const base = addDays(doyToDate(climate.first_fall_frost_doy, year), -30);
     if (base > today) tasks.push({
       user_plant_id: up.id,
       task_type: "Prune",
@@ -193,14 +241,29 @@ function generatePruneTasks(up: any, plant: any, climate: any, today: Date, micr
       completed: false
     });
   }
+  // Dormant structural prune (Dec‑Jan for most counties)
+  const dormantCenter = midOfMonth(0, year + 1); // Jan 15 next year
+  if (dormantCenter > today && within(dormantCenter, windows.dormant)) {
+    tasks.push({
+      user_plant_id: up.id,
+      task_type: "Prune",
+      due_date: formatUTC(addDays(dormantCenter, microAdj)),
+      completed: false
+    });
+  }
   return tasks;
 }
-function generateInspectTasks(up: any, plant: any, today: Date, microAdj: number) {
+function generateInspectTasks(up, plant, windows, today, microAdj) {
   const hasProblems = Boolean(plant.problems?.length);
-  const interval = hasProblems ? INSPECT_INTERVAL_DAYS.WithProblems : INSPECT_INTERVAL_DAYS.Default;
+  const endHighDisease = addDays(new Date(Date.UTC(today.getUTCFullYear(), 8, 30)), 0); // 30 Sept
+  const interval = hasProblems ? INSPECT_INTERVAL_DAYS.WithProblems : within(today, [
+    windows.warm[0],
+    endHighDisease
+  ]) ? 10 : INSPECT_INTERVAL_DAYS.Default;
   const tasks = [];
   let iDate = addDays(today, interval + microAdj);
-  while (iDate <= addDays(today, 365)) {
+  const end = addDays(today, 365);
+  while(iDate <= end){
     tasks.push({
       user_plant_id: up.id,
       task_type: "Inspect",
@@ -211,54 +274,67 @@ function generateInspectTasks(up: any, plant: any, today: Date, microAdj: number
   }
   return tasks;
 }
-function generateMulchTasks(up: any, climate: any, today: Date, microAdj: number) {
-  // Use last_spring_frost_doy and first_fall_frost_doy (day-of-year fields)
-  const year = today.getUTCFullYear();
-  const { last_spring_frost_doy, first_fall_frost_doy } = climate;
-  if (typeof last_spring_frost_doy !== "number" || typeof first_fall_frost_doy !== "number") {
-    console.error(`[EdgeFn] generateMulchTasks: Missing or invalid frost DOY values for climate:`, JSON.stringify(climate));
-    return [];
-  }
-  const frostStart = doyToDate(last_spring_frost_doy, year);
-  const frostEnd = doyToDate(first_fall_frost_doy, year);
-  // Log computed dates for debugging
-  console.log(`[EdgeFn] generateMulchTasks: frostStart=`, frostStart.toISOString(), `frostEnd=`, frostEnd.toISOString());
-  if (isNaN(frostStart.getTime()) || isNaN(frostEnd.getTime())) {
-    console.error(`[EdgeFn] generateMulchTasks: Computed invalid frost dates. frostStart=`, frostStart, `frostEnd=`, frostEnd);
-    return [];
-  }
-  return [
-    {
-      user_plant_id: up.id,
-      task_type: "Mulch",
-      due_date: formatUTC(addDays(addDays(frostStart, FERTILIZE_BUFFER_DAYS), microAdj)),
-      completed: false
-    },
-    {
-      user_plant_id: up.id,
-      task_type: "Mulch",
-      due_date: formatUTC(addDays(addDays(frostEnd, -FERTILIZE_BUFFER_DAYS), microAdj)),
-      completed: false
-    }
-  ];
-}
-function generatePropagateTasks(up: any, plant: any, climate: any, today: Date, microAdj: number) {
-  const zone = climate.zone ?? 7;
+function generateMulchTasks(up, garden, climate, windows, today, microAdj) {
   const tasks = [];
-  for (const method of plant.propagation ?? []) {
-    let offset = method === "Division" ? 15 : 60;
-    if (zone <= 6) offset += 21;
-    tasks.push({
+  // Spring application
+  const spring = addDays(doyToDate(climate.last_spring_frost_doy, today.getUTCFullYear()), FERTILIZE_BUFFER_DAYS);
+  if (spring > today) tasks.push({
+    user_plant_id: up.id,
+    task_type: "Mulch",
+    due_date: formatUTC(addDays(spring, microAdj)),
+    completed: false
+  });
+  // Fall application
+  const fall = addDays(doyToDate(climate.first_fall_frost_doy, today.getUTCFullYear()), -FERTILIZE_BUFFER_DAYS);
+  if (fall > today) tasks.push({
+    user_plant_id: up.id,
+    task_type: "Mulch",
+    due_date: formatUTC(addDays(fall, microAdj)),
+    completed: false
+  });
+  // Summer top‑up for coastal sandy soils
+  if (climate.region === "Coastal" && garden.soil_texture === "Sand") {
+    const summer = new Date(Date.UTC(today.getUTCFullYear(), 6, 15, 10)); // 15 July
+    if (summer > today && within(summer, windows.warm)) {
+      tasks.push({
+        user_plant_id: up.id,
+        task_type: "Mulch",
+        due_date: formatUTC(addDays(summer, microAdj)),
+        completed: false
+      });
+    }
+  }
+  return tasks;
+}
+function generatePropagateTasks(up, plant, windows, today, microAdj) {
+  const tasks = [];
+  for (const method of plant.propagation ?? []){
+    let targetWindow;
+    switch(method){
+      case "Division":
+        targetWindow = windows.springCool;
+        break;
+      case "Cuttings":
+        targetWindow = windows.warm;
+        break;
+      default:
+        targetWindow = windows.fallCool;
+    }
+    // Choose mid‑point of window
+    const mid = new Date((targetWindow[0].getTime() + targetWindow[1].getTime()) / 2);
+    if (mid > today) tasks.push({
       user_plant_id: up.id,
       task_type: "Propagate",
-      due_date: formatUTC(addDays(addDays(today, offset), microAdj)),
+      due_date: formatUTC(addDays(mid, microAdj)),
       completed: false
     });
   }
   return tasks;
 }
-function generateTransplantTasks(up: any, today: Date, microAdj: number) {
-  const base = addDays(new Date(up.created_at), 28);
+function generateTransplantTasks(up, windows, today, microAdj) {
+  let base = addDays(new Date(up.created_at), 28);
+  if (base < windows.springCool[0]) base = windows.springCool[0];
+  if (base > windows.warm[1]) base = addDays(windows.springCool[0], 365); // push to next spring
   return [
     {
       user_plant_id: up.id,
@@ -268,10 +344,11 @@ function generateTransplantTasks(up: any, today: Date, microAdj: number) {
     }
   ];
 }
-function generateLogTasks(up: any, today: Date, microAdj: number) {
+function generateLogTasks(up, windows, today, microAdj) {
   const tasks = [];
   let lDate = addDays(today, LOG_INTERVAL_DAYS + microAdj);
-  while (lDate <= addDays(today, 365)) {
+  const end = addDays(today, 365);
+  while(lDate <= end){
     tasks.push({
       user_plant_id: up.id,
       task_type: "Log",
@@ -282,95 +359,106 @@ function generateLogTasks(up: any, today: Date, microAdj: number) {
   }
   return tasks;
 }
-function dedupeTasks(tasks: any[]): any[] {
-  return tasks.filter((t, i, a) =>
-    i === a.findIndex((u) =>
-      u.user_plant_id === t.user_plant_id &&
-      u.task_type === t.task_type &&
-      u.due_date === t.due_date
-    )
-  );
-}
-async function generateTasks(up: any, plant: any, garden: any, climate: any, today: Date): Promise<any[]> {
-  // compute microclimate adjustment once
-  const elevFt = garden.elevation_ft || 0;
-  const urbanIdx = garden.urban_index || 0;
-  const elevationAdj = elevFt / 1000 * 3;
-  const urbanAdj = urbanIdx * 5;
-  const microAdj = elevationAdj + urbanAdj;
-  const all = [
-    ...generateWaterTasks(up, plant, garden, climate, today, microAdj),
-    ...generateFertilizeTasks(up, plant, climate, today, microAdj),
-    ...generateHarvestTasks(up, plant, today, microAdj),
-    ...generatePruneTasks(up, plant, climate, today, microAdj),
-    ...generateInspectTasks(up, plant, today, microAdj),
-    ...generateMulchTasks(up, climate, today, microAdj),
-    ...generatePropagateTasks(up, plant, climate, today, microAdj),
-    ...generateTransplantTasks(up, today, microAdj),
-    ...generateLogTasks(up, today, microAdj)
-  ];
-  return dedupeTasks(all);
+
+function generateWeedTasks(up, garden, windows, today, microAdj) {
+  // Determine interval from maintenance level (default to Medium)
+  const maintenance = ["Low","Medium","High"].includes(garden.maintenance_level)
+    ? garden.maintenance_level
+    : "Medium";
+  let interval = WEED_INTERVAL_DAYS[maintenance];
+  
+  // Optionally speed up weeding during peak growing season
+  if (within(today, windows.warm)) {
+    interval = Math.max(3, Math.floor(interval * 0.75));
+  }
+  
+  const tasks = [];
+  let wDate = addDays(today, interval + microAdj);
+  const end = addDays(today, 365);
+
+  while (wDate <= end) {
+    tasks.push({
+      user_plant_id: up.id,
+      task_type: "Weed",
+      due_date: formatUTC(wDate),
+      completed: false
+    });
+    wDate = addDays(wDate, interval);
+  }
+  return tasks;
 }
 
-// --- Edge Function Handler ---
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+function dedupeTasks(tasks) {
+  return tasks.filter((t, i, a)=>i === a.findIndex((u)=>u.user_plant_id === t.user_plant_id && u.task_type === t.task_type && u.due_date === t.due_date));
+}
+async function generateTasks(up, plant, garden, climate, today) {
+  // Micro‑adjustment (elevation + urban heat island)
+  const microAdj = (garden.elevation_ft || 0) / 1000 * 3 + (garden.urban_index || 0) * 5;
+  const windows = getSeasonWindows(climate, today.getUTCFullYear());
+  const all = [
+    ...generateWaterTasks(up, plant, garden, climate, windows, today, microAdj),
+    ...generateFertilizeTasks(up, plant, climate, windows, today, microAdj),
+    ...generateHarvestTasks(up, plant, today, microAdj),
+    ...generatePruneTasks(up, plant, climate, windows, today, microAdj),
+    ...generateInspectTasks(up, plant, windows, today, microAdj),
+    ...generateMulchTasks(up, garden, climate, windows, today, microAdj),
+    ...generatePropagateTasks(up, plant, windows, today, microAdj),
+    ...generateTransplantTasks(up, windows, today, microAdj),
+    ...generateLogTasks(up, windows, today, microAdj),
+    ...generateWeedTasks(up, garden, windows, today, microAdj)
+  ];
+  // Sort chronologically
+  return dedupeTasks(all).sort((a, b)=>a.due_date.localeCompare(b.due_date));
+}
+// --- Edge handler ----------------------------------------------------------
+Deno.serve(async (req)=>{
+  if (req.method === "OPTIONS") return new Response("ok", {
+    headers: corsHeaders
+  });
   try {
     const { userPlant } = await req.json();
     const up = UserPlantSchema.parse(userPlant);
-
-    // Fetch plant data
-    const { data: plant, error: pErr } = await supabase
-      .from("plant_full_data")
-      .select("*")
-      .eq("id", up.plant_id)
-      .single();
+    // Fetch plant
+    const { data: plant, error: pErr } = await supabase.from("plant_full_data").select("*").eq("id", up.plant_id).single();
     if (pErr || !plant) throw new Error("Plant not found");
-
-    // Fetch garden data
-    const { data: garden, error: gErr } = await supabase
-      .from("user_gardens_flat")
-      .select("*")
-      .eq("id", up.garden_id)
-      .single();
+    // Fetch garden
+    const { data: garden, error: gErr } = await supabase.from("user_gardens_flat").select("*").eq("id", up.garden_id).single();
     if (gErr || !garden) throw new Error("Garden not found");
-
-    // Fetch climate data from the materialized view using county_name
-    // Reason: Use denormalized materialized view for performance and reliability in edge functions
-    const countyName: string = garden.county; // user_gardens_flat.county is the county name
-    const { data: climate, error: cErr } = await supabase
-      .from("nc_climate_county_flat")
-      .select("*")
-      .eq("county_name", countyName)
-      .single();
-    if (cErr || !climate) throw new Error("Climate data not found for county: " + countyName);
-
-    // --- Log all fetched data for traceability ---
-    console.log(`[EdgeFn] Handler: up=`, JSON.stringify(up));
-    console.log(`[EdgeFn] Handler: plant=`, JSON.stringify(plant));
-    console.log(`[EdgeFn] Handler: garden=`, JSON.stringify(garden));
-    console.log(`[EdgeFn] Handler: climate=`, JSON.stringify(climate));
-
-    // Generate and validate tasks
+    // --- Climate fallback logic ---
+    // If garden.county is missing, use DEFAULT_CLIMATE
+    let climate;
+    if (garden.county) {
+      const { data: c, error: cErr } = await supabase.from("nc_climate_county_flat").select("*").eq("county_name", garden.county).single();
+      if (cErr || !c) climate = DEFAULT_CLIMATE; // fallback if fetch fails
+      else climate = c;
+    } else {
+      climate = DEFAULT_CLIMATE;
+    }
     const today = new Date();
-    const tasks = await generateTasks(up, plant, garden, climate, today);
-    const valid = TasksArray.parse({ tasks });
-
-    // Insert tasks into plant_tasks table
-    const { data: inserted, error: iErr } = await supabase
-      .from("plant_tasks")
-      .insert(valid.tasks)
-      .select();
-    if (iErr) throw iErr;
-
-    // Success response
-    return new Response(JSON.stringify({ tasks: inserted }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    // --- Fallbacks for garden fields ---
+    // These are used throughout task generation logic
+    const safeGarden = {
+      ...garden,
+      soil_texture: garden.soil_texture ?? "Loam",
+      elevation_ft: garden.elevation_ft ?? 0,
+      urban_index: garden.urban_index ?? 0,
+      maintenance_level: garden.maintenance_level ?? "Medium"
+    };
+    const tasks = await generateTasks(up, plant, safeGarden, climate, today);
+    const valid = TasksArray.parse({
+      tasks
     });
-  } catch (e: any) {
-    // Log and return full error details for debugging
+    const { data: inserted, error: iErr } = await supabase.from("plant_tasks").insert(valid.tasks).select();
+    if (iErr) throw iErr;
+    return new Response(JSON.stringify({
+      tasks: inserted
+    }), {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json"
+      }
+    });
+  } catch (e) {
     console.error("[EdgeFn] Error:", e, e?.stack);
     return new Response(JSON.stringify({
       error: e.message,
@@ -380,7 +468,10 @@ Deno.serve(async (req: Request) => {
       hint: e.hint
     }), {
       status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json"
+      }
     });
   }
-}); 
+});
