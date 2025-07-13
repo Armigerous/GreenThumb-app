@@ -119,7 +119,7 @@ function getSeasonWindows(climate, year) {
  */
 const DEFAULT_CLIMATE = {
   region: "Piedmont",
-  county_name: "Default",
+  county_name: "Wake",
   last_spring_frost_doy: 110, // ~April 20
   first_fall_frost_doy: 300,  // ~Oct 27
   avg_annual_precip_mm: 1200,
