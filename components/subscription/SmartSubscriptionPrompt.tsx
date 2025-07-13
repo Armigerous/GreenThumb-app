@@ -259,7 +259,7 @@ export function SmartSubscriptionPrompt({
 
               <TouchableOpacity
                 onPress={handleDismiss}
-                className="bg-cream-200 rounded-full p-2 opacity-70"
+                className="bg-cream-200 rounded-xl p-2 opacity-70"
               >
                 <Ionicons name="close" size={18} color="#2e2c29" />
               </TouchableOpacity>
@@ -267,7 +267,7 @@ export function SmartSubscriptionPrompt({
 
             <View className="px-6 pb-6">
               {/* Feature icon */}
-              <View className="self-center bg-brand-100 rounded-full p-4 mb-6">
+              <View className="self-center bg-brand-100 rounded-xl p-4 mb-6">
                 <Ionicons name={brandMessage.icon} size={32} color="#5E994B" />
               </View>
 
@@ -275,7 +275,7 @@ export function SmartSubscriptionPrompt({
               <View className="space-y-4 mb-6">
                 {brandMessage.benefits.map((benefit, index) => (
                   <View key={index} className="flex-row items-start">
-                    <View className="bg-brand-500 rounded-full p-1 mr-3 mt-1">
+                    <View className="bg-brand-500 rounded-xl p-1 mr-3 mt-1">
                       <Ionicons name="checkmark" size={12} color="white" />
                     </View>
                     <BodyText className="flex-1 text-cream-800 leading-relaxed">

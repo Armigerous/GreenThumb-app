@@ -5,13 +5,10 @@
  * add-ons, and payment history in the Stripe integration.
  */
 
+// SubscriptionPlan type is always sourced from Supabase's generated types for accuracy.
+// If the DB schema changes, regenerate types and this will stay up to date.
 import type { Database } from "./supabase";
 
-/**
- * --- DB-ALIGNED TYPES (canonical, from Supabase) ---
- * Use these for anything that directly maps to Supabase tables or views.
- * Do NOT redefine these types elsewhere in the codebase.
- */
 export type SubscriptionPlan = Database["public"]["Tables"]["subscription_plans"]["Row"];
 export type SubscriptionAddon = Database["public"]["Tables"]["subscription_addons"]["Row"];
 export type UserSubscription = Database["public"]["Tables"]["user_subscriptions"]["Row"];
