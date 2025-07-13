@@ -33,6 +33,7 @@ import { useUsageSummary } from "@/lib/usageLimits";
 import { PaywallBanner } from "@/components/subscription/PaywallPrompt";
 import { SmartSubscriptionPrompt } from "@/components/subscription/SmartSubscriptionPrompt";
 import { WelcomeSubscriptionBanner } from "@/components/subscription/WelcomeSubscriptionBanner";
+import type { TaskType } from "@/types/garden";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android") {
@@ -43,6 +44,29 @@ if (Platform.OS === "android") {
 
 // Add this after imports and before the component
 const CELEBRATION_DURATION = 4000; // 4 seconds
+
+// Helper to map string to TaskType
+const allowedTaskTypes: TaskType[] = [
+  "Water",
+  "Fertilize",
+  "Prune",
+  "Inspect",
+  "Mulch",
+  "Weed",
+  "Propagate",
+  "Transplant",
+  "Log",
+  "Winterize",
+];
+function toTaskType(taskType: string | null): TaskType {
+  if (!taskType) return "Log";
+  const normalized =
+    taskType.charAt(0).toUpperCase() + taskType.slice(1).toLowerCase();
+  if (allowedTaskTypes.includes(normalized as TaskType)) {
+    return normalized as TaskType;
+  }
+  return "Log";
+}
 
 export default function Page() {
   const { user } = useUser();
@@ -107,6 +131,8 @@ export default function Page() {
     notifications,
     checkNotifications,
     loading: notificationsLoading,
+    showModal,
+    setShowModal,
   } = useOverdueTasksNotifications();
   const hasCheckedNotificationsRef = useRef(false);
 
@@ -123,7 +149,7 @@ export default function Page() {
             overdueTasksFromNotifications.push({
               id: task.task_id,
               user_plant_id: "", // Add required property with empty string as placeholder UUID
-              task_type: task.task_type as "Water" | "Fertilize" | "Harvest",
+              task_type: toTaskType(task.task_type),
               due_date: task.due_date,
               completed: false, // All tasks in notifications are uncompleted
               plant: {

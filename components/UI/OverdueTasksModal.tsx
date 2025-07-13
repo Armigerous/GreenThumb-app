@@ -61,12 +61,14 @@ export default function OverdueTasksModal({
     }
   }, [isVisible, notifications, gardenId]);
 
-  // Filter notifications if a garden ID is provided
-  const filteredNotifications = gardenId
-    ? notifications.filter(
-        (notification) => notification.garden_id === gardenId
-      )
-    : notifications;
+  // Filter notifications if a garden ID is provided, and exclude gardens with zero overdue tasks
+  const filteredNotifications = (
+    gardenId
+      ? notifications.filter(
+          (notification) => notification.garden_id === gardenId
+        )
+      : notifications
+  ).filter((notification) => notification.overdue_tasks_count > 0);
 
   // Handle navigation to a specific garden
   const handleViewGarden = (gardenId: number) => {

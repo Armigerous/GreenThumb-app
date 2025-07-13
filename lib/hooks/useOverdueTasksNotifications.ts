@@ -1,6 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
+import { useAtom } from "jotai";
+import { hasShownOverdueModalAtom } from "@/atoms/session";
 
 export interface OverdueTask {
   task_id: number;
@@ -21,9 +23,7 @@ export function useOverdueTasksNotifications() {
   const [notifications, setNotifications] = useState<GardenNotification[]>([]);
   const [showModal, setShowModal] = useState(false);
   const { user, isLoaded: isUserLoaded } = useUser();
-  
-  // Use a ref to track if we've already checked this session
-  const hasCheckedRef = useRef(false);
+  const [hasShownModal, setHasShownModal] = useAtom(hasShownOverdueModalAtom);
 
   // Function to fetch overdue tasks data
   const fetchOverdueTasksData = async (showModal: boolean) => {
@@ -57,8 +57,9 @@ export function useOverdueTasksNotifications() {
         }));
         
         setNotifications(processedData);
-        if (showModal) {
+        if (showModal && !hasShownModal) {
           setShowModal(true);
+          setHasShownModal(true);
         }
         return true;
       }
@@ -75,19 +76,12 @@ export function useOverdueTasksNotifications() {
   useEffect(() => {
     async function checkOverdueNotifications() {
       try {
-        // Avoid checking multiple times in the same session
-        if (hasCheckedRef.current) {
-          return;
-        }
-        
-        // Only proceed if the user is loaded
-        if (!isUserLoaded || !user) {
+        // Only proceed if the user is loaded and modal hasn't been shown this session
+        if (!isUserLoaded || !user || hasShownModal) {
           return;
         }
         
         setLoading(true);
-        hasCheckedRef.current = true;
-        
         // Fetch overdue tasks data
         await fetchOverdueTasksData(true);
       } catch (err) {
@@ -98,10 +92,10 @@ export function useOverdueTasksNotifications() {
     }
 
     // Check for notifications when the component mounts and user is loaded
-    if (isUserLoaded && user) {
+    if (isUserLoaded && user && !hasShownModal) {
       checkOverdueNotifications();
     }
-  }, [isUserLoaded, user]);
+  }, [isUserLoaded, user, hasShownModal]);
 
   /**
    * Checks if a specific garden has any overdue tasks
@@ -135,7 +129,7 @@ export function useOverdueTasksNotifications() {
     hasGardenOverdueTasks,
     getGardenOverdueTasksCount,
     checkNotifications: () => {
-      hasCheckedRef.current = false; // Reset the check flag
+      // Resetting the modal for manual refresh is not allowed for session-global logic
       return fetchOverdueTasksData(false); // Don't show modal when manually refreshing
     },
     // Add a method to refresh data without showing modal
