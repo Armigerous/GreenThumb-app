@@ -19,7 +19,17 @@ import {
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { differenceInDays, format, isValid, parseISO } from "date-fns";
+import {
+  differenceInDays,
+  format,
+  isValid,
+  parseISO,
+  startOfDay,
+  endOfDay,
+  addDays,
+  addWeeks,
+  addMonths,
+} from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
@@ -103,20 +113,13 @@ export default function UserPlantDetailScreen() {
   // Group tasks by time period
   const groupTasksByTime = (tasks: TaskWithDetails[]) => {
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-
-    const nextWeek = new Date(now);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    nextWeek.setHours(0, 0, 0, 0);
-
-    const nextWeekEnd = new Date(nextWeek);
-    nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
-
-    const thisMonth = new Date(now);
-    thisMonth.setMonth(thisMonth.getMonth() + 1);
-    thisMonth.setHours(0, 0, 0, 0);
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+    const tomorrowStart = startOfDay(addDays(now, 1));
+    const tomorrowEnd = endOfDay(addDays(now, 1));
+    const thisWeekEnd = endOfDay(addWeeks(todayStart, 1));
+    const nextWeekEnd = endOfDay(addWeeks(todayStart, 2));
+    const thisMonthEnd = endOfDay(addMonths(todayStart, 1));
 
     // Initialize all groups with empty arrays
     const groups: Record<TaskTimePeriod, TaskWithDetails[]> = {
@@ -137,21 +140,19 @@ export default function UserPlantDetailScreen() {
         const dueDate = new Date(task.due_date);
         let group: TaskTimePeriod = "later";
 
-        // Check if task is missed (due date is before today and not completed)
-        if (dueDate < now && !task.completed) {
+        if (dueDate < todayStart && !task.completed) {
           group = "missed";
-        } else if (dueDate <= now) {
+        } else if (dueDate >= todayStart && dueDate <= todayEnd) {
           group = "today";
-        } else if (dueDate <= tomorrow) {
+        } else if (dueDate >= tomorrowStart && dueDate <= tomorrowEnd) {
           group = "tomorrow";
-        } else if (dueDate <= nextWeek) {
+        } else if (dueDate > todayEnd && dueDate <= thisWeekEnd) {
           group = "this_week";
-        } else if (dueDate <= nextWeekEnd) {
+        } else if (dueDate > thisWeekEnd && dueDate <= nextWeekEnd) {
           group = "next_week";
-        } else if (dueDate <= thisMonth) {
+        } else if (dueDate > nextWeekEnd && dueDate <= thisMonthEnd) {
           group = "this_month";
         }
-
         groups[group].push(task);
         return groups;
       },
