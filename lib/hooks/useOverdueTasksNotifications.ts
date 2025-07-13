@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
 import { useAtom } from "jotai";
-import { hasShownOverdueModalAtom } from "@/atoms/session";
+import { hasShownOverdueModalAtom, overdueNotificationsAtom } from "@/atoms/session";
 
 export interface OverdueTask {
   task_id: number;
@@ -20,33 +20,25 @@ export interface GardenNotification {
 
 export function useOverdueTasksNotifications() {
   const [loading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState<GardenNotification[]>([]);
   const [showModal, setShowModal] = useState(false);
   const { user, isLoaded: isUserLoaded } = useUser();
   const [hasShownModal, setHasShownModal] = useAtom(hasShownOverdueModalAtom);
+  const [notifications, setNotifications] = useAtom(overdueNotificationsAtom);
 
-  // Function to fetch overdue tasks data
-  const fetchOverdueTasksData = async (showModal: boolean) => {
+  // Fetch overdue tasks data (no showModal argument)
+  const fetchOverdueTasksData = async () => {
     try {
       if (!user) return false;
-      
-      console.log("Fetching overdue tasks data...");
-      
-      // Using the function that accepts a user_id parameter
       const { data, error } = await supabase.rpc(
-        'get_overdue_task_notifications', 
+        'get_overdue_task_notifications',
         { p_user_id: user.id }
       );
-      
       if (error) {
         console.error("Error fetching overdue tasks data:", error);
+        setNotifications([]);
         return false;
       }
-      
-      console.log("Overdue tasks data:", data);
-      
       if (data && data.length > 0) {
-        // Process tasks if they are returned as a string
         const processedData = data.map((garden: any) => ({
           garden_id: garden.garden_id,
           garden_name: garden.garden_name,
@@ -55,47 +47,36 @@ export function useOverdueTasksNotifications() {
             ? JSON.parse(garden.overdue_tasks)
             : garden.overdue_tasks || []
         }));
-        
         setNotifications(processedData);
-        if (showModal && !hasShownModal) {
-          setShowModal(true);
-          setHasShownModal(true);
-        }
         return true;
       }
-      
-      // If no data, clear notifications
       setNotifications([]);
       return false;
     } catch (err) {
       console.error("Error fetching overdue tasks data:", err);
+      setNotifications([]);
       return false;
     }
   };
 
+  // On initial mount, fetch overdue notifications
   useEffect(() => {
-    async function checkOverdueNotifications() {
-      try {
-        // Only proceed if the user is loaded and modal hasn't been shown this session
-        if (!isUserLoaded || !user || hasShownModal) {
-          return;
-        }
-        
-        setLoading(true);
-        // Fetch overdue tasks data
-        await fetchOverdueTasksData(true);
-      } catch (err) {
-        console.error('Unexpected error checking for overdue tasks:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    // Check for notifications when the component mounts and user is loaded
     if (isUserLoaded && user && !hasShownModal) {
-      checkOverdueNotifications();
+      setLoading(true);
+      fetchOverdueTasksData().finally(() => setLoading(false));
     }
   }, [isUserLoaded, user, hasShownModal]);
+
+  // Show modal only once per app open, and only if there are overdue tasks
+  useEffect(() => {
+    if (
+      !hasShownModal &&
+      notifications.some((n) => n.overdue_tasks_count > 0)
+    ) {
+      setShowModal(true);
+      setHasShownModal(true);
+    }
+  }, [notifications, hasShownModal, setHasShownModal]);
 
   /**
    * Checks if a specific garden has any overdue tasks
@@ -129,12 +110,11 @@ export function useOverdueTasksNotifications() {
     hasGardenOverdueTasks,
     getGardenOverdueTasksCount,
     checkNotifications: () => {
-      // Resetting the modal for manual refresh is not allowed for session-global logic
-      return fetchOverdueTasksData(false); // Don't show modal when manually refreshing
+      // Manual refresh does not show modal
+      return fetchOverdueTasksData();
     },
-    // Add a method to refresh data without showing modal
     refreshOverdueData: () => {
-      return fetchOverdueTasksData(false);
+      return fetchOverdueTasksData();
     }
   };
 } 

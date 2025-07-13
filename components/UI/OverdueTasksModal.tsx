@@ -50,6 +50,26 @@ export default function OverdueTasksModal({
 }: OverdueTasksModalProps) {
   const router = useRouter();
 
+  // Debug: Log notifications and filteredNotifications
+  // eslint-disable-next-line no-console
+  console.log("OverdueTasksModal notifications:", notifications);
+
+  // Filter notifications if a garden ID is provided, and exclude gardens with zero overdue tasks
+  const filteredNotifications = (
+    gardenId
+      ? notifications.filter(
+          (notification) => notification.garden_id === gardenId
+        )
+      : notifications
+  ).filter((notification) => notification.overdue_tasks_count > 0);
+
+  // Debug: Log filteredNotifications
+  // eslint-disable-next-line no-console
+  console.log(
+    "OverdueTasksModal filteredNotifications:",
+    filteredNotifications
+  );
+
   // Log when the modal becomes visible or notifications change
   useEffect(() => {
     if (isVisible) {
@@ -60,15 +80,6 @@ export default function OverdueTasksModal({
       }
     }
   }, [isVisible, notifications, gardenId]);
-
-  // Filter notifications if a garden ID is provided, and exclude gardens with zero overdue tasks
-  const filteredNotifications = (
-    gardenId
-      ? notifications.filter(
-          (notification) => notification.garden_id === gardenId
-        )
-      : notifications
-  ).filter((notification) => notification.overdue_tasks_count > 0);
 
   // Handle navigation to a specific garden
   const handleViewGarden = (gardenId: number) => {
