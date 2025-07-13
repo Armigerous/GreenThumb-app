@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import CachedImage from "../CachedImage";
 import { Ionicons } from "@expo/vector-icons";
-import { useOverdueTasksNotifications } from "@/lib/hooks/useOverdueTasksNotifications";
-import OverdueTasksModal from "../UI/OverdueTasksModal";
 import { Text, TitleText, SubtitleText, BodyText } from "../UI/Text";
 
 /**
@@ -24,17 +22,6 @@ export default function GardenCard({
 }) {
   const router = useRouter();
 
-  // State to control the visibility of the garden-specific overdue tasks modal
-  const [showOverdueModal, setShowOverdueModal] = useState<boolean>(false);
-
-  // Access the overdue tasks notifications hook
-  const { hasGardenOverdueTasks, getGardenOverdueTasksCount, notifications } =
-    useOverdueTasksNotifications();
-
-  // Check if this garden has overdue tasks
-  const hasOverdueTasks = hasGardenOverdueTasks(garden.garden_id ?? 0); // Reason: Ensure garden_id is always a number
-  const overdueTasksCount = getGardenOverdueTasksCount(garden.garden_id ?? 0); // Reason: Ensure garden_id is always a number
-
   // Get the first available plant image from the garden
   const getFirstPlantImage = () => {
     if (garden.plants && (garden.plants as unknown as Array<any>).length > 0) {
@@ -46,13 +33,6 @@ export default function GardenCard({
       }
     }
     return null;
-  };
-
-  // Handle the overdue task indicator being pressed
-  const handleOverdueIndicatorPress = (event: any) => {
-    // Prevent the parent TouchableOpacity from being triggered
-    event.stopPropagation();
-    setShowOverdueModal(true);
   };
 
   // Get garden status message based on actionable dashboard fields
@@ -180,20 +160,6 @@ export default function GardenCard({
                   >
                     {garden.name}
                   </TitleText>
-                  {/* Overdue Task Indicator Dot (square badge, top right) */}
-                  {hasOverdueTasks && overdueTasksCount > 0 && (
-                    <TouchableOpacity
-                      onPress={handleOverdueIndicatorPress}
-                      hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                      className="ml-1 flex-shrink-0"
-                    >
-                      <View className="w-4 h-4 bg-destructive items-center justify-center rounded-md">
-                        <Text className="text-[8px] text-cream-50 font-bold">
-                          {overdueTasksCount > 9 ? "9+" : overdueTasksCount}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  )}
                 </View>
               </View>
 
@@ -232,13 +198,6 @@ export default function GardenCard({
           </View>
         </View>
       </TouchableOpacity>
-      {/* Garden-specific overdue tasks modal */}
-      <OverdueTasksModal
-        isVisible={showOverdueModal}
-        onClose={() => setShowOverdueModal(false)}
-        notifications={notifications}
-        gardenId={garden.garden_id ?? 0}
-      />
     </>
   );
 }
