@@ -22,6 +22,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import { SubscriptionPlan } from "@/types/subscription";
+import { useStripe } from "@/lib/stripe/useStripe";
 
 // Stripe publishable key from environment
 const STRIPE_PUBLISHABLE_KEY =
@@ -31,7 +32,6 @@ function CheckoutContent() {
   const router = useRouter();
   const { user } = useUser();
   const { plan: planId } = useLocalSearchParams<{ plan: string }>();
-  const { useStripe } = require("@stripe/stripe-react-native");
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   // --- Stripe deep link handler: listen for Stripe returnURL and navigate to success ---
