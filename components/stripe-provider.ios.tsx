@@ -1,6 +1,7 @@
 import { StripeProvider } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
+import React from "react";
 
 const merchantId = Constants.expoConfig?.plugins?.find(
   (p) => p[0] === "@stripe/stripe-react-native"
@@ -10,7 +11,6 @@ if (!merchantId) {
   throw new Error("Missing Expo config for @stripe/stripe-react-native");
 }
 
-// Prefer Expo Constants for publishable key, fallback to process.env
 const publishableKey =
   Constants.expoConfig?.extra?.stripePublishableKey ||
   process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
