@@ -341,9 +341,9 @@ function CheckoutContent() {
 }
 
 export default function CheckoutScreen() {
-  // Dynamically require the platform-specific ExpoStripeProvider
+  // Update the dynamic require to use the new lib/stripe/ExpoStripeProvider path
   const ExpoStripeProvider =
-    require("../../components/stripe-provider").default;
+    require("../../lib/stripe/ExpoStripeProvider").default;
   if (!STRIPE_PUBLISHABLE_KEY) {
     return (
       <PageContainer>
