@@ -8,7 +8,6 @@
  * - Success/error handling
  */
 
-import ExpoStripeProvider from "@/components/stripe-provider";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
 import { PageContainer } from "@/components/UI/PageContainer";
 import SubmitButton from "@/components/UI/SubmitButton";
@@ -18,7 +17,6 @@ import { useSubscriptionPlans } from "@/lib/subscriptionQueries";
 import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useStripe } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -33,6 +31,7 @@ function CheckoutContent() {
   const router = useRouter();
   const { user } = useUser();
   const { plan: planId } = useLocalSearchParams<{ plan: string }>();
+  const { useStripe } = require("@stripe/stripe-react-native");
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   // --- Stripe deep link handler: listen for Stripe returnURL and navigate to success ---
@@ -342,6 +341,9 @@ function CheckoutContent() {
 }
 
 export default function CheckoutScreen() {
+  // Dynamically require the platform-specific ExpoStripeProvider
+  const ExpoStripeProvider =
+    require("../../components/stripe-provider").default;
   if (!STRIPE_PUBLISHABLE_KEY) {
     return (
       <PageContainer>
