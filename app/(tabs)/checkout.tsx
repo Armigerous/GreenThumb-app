@@ -8,33 +8,22 @@
  * - Success/error handling
  */
 
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import ExpoStripeProvider from "@/components/stripe-provider";
+import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { PageContainer } from "@/components/UI/PageContainer";
+import SubmitButton from "@/components/UI/SubmitButton";
+import { BodyText, TitleText } from "@/components/UI/Text";
+import { formatPrice } from "@/lib/stripe";
+import { useSubscriptionPlans } from "@/lib/subscriptionQueries";
+import { supabase } from "@/lib/supabaseClient";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
-import { PageContainer } from "@/components/UI/PageContainer";
-import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
-import { TitleText, BodyText, Text as BrandText } from "@/components/UI/Text";
-import SubmitButton from "@/components/UI/SubmitButton";
-import {
-  useSubscriptionPlans,
-  // useCreateSubscription, // Removed: not used
-} from "@/lib/subscriptionQueries";
-import { formatPrice } from "@/lib/stripe";
-import { SubscriptionPlan } from "@/types/subscription";
-import ExpoStripeProvider from "@/components/stripe-provider";
-import { supabase } from "@/lib/supabaseClient";
+import { useStripe } from "@stripe/stripe-react-native";
 import Constants from "expo-constants";
-// Removed: import { isApplePaySupported } from "@stripe/stripe-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
+import { SubscriptionPlan } from "@/types/subscription";
 
 // Stripe publishable key from environment
 const STRIPE_PUBLISHABLE_KEY =
@@ -79,8 +68,6 @@ function CheckoutContent() {
     Constants.expoConfig?.plugins?.find(
       (p) => p[0] === "@stripe/stripe-react-native"
     )?.[1].merchantIdentifier || "merchant.com.tugraerenk.greenthumb"; // fallback for safety
-
-  // --- Removed Apple Pay support check (isApplePaySupported) as it is not available in this Stripe version ---
 
   // Initialize payment sheet
   useEffect(() => {
