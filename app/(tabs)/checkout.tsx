@@ -23,12 +23,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { PageContainer } from "@/components/UI/PageContainer";
 import { LoadingSpinner } from "@/components/UI/LoadingSpinner";
+import { TitleText, BodyText, Text as BrandText } from "@/components/UI/Text";
+import SubmitButton from "@/components/UI/SubmitButton";
 import {
   useSubscriptionPlans,
-  useCreateSubscription,
+  // useCreateSubscription, // Removed: not used
 } from "@/lib/subscriptionQueries";
 import { formatPrice } from "@/lib/stripe";
 import { SubscriptionPlan } from "@/types/subscription";
+import ExpoStripeProvider from "@/components/stripe-provider";
+import { supabase } from "@/lib/supabaseClient";
+import Constants from "expo-constants";
+// Removed: import { isApplePaySupported } from "@stripe/stripe-react-native";
 
 // Stripe publishable key from environment
 const STRIPE_PUBLISHABLE_KEY =
@@ -40,6 +46,22 @@ function CheckoutContent() {
   const { plan: planId } = useLocalSearchParams<{ plan: string }>();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
+  // --- Stripe deep link handler: listen for Stripe returnURL and navigate to success ---
+  React.useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      if (event.url.startsWith("greenthumb://stripe-redirect")) {
+        // Reason: Stripe redirected back to the app after payment (3D Secure, etc.)
+        // Navigate to the subscription success screen
+        router.replace("/subscription-success");
+      }
+    };
+    const subscription = require("expo-linking").addEventListener(
+      "url",
+      handleDeepLink
+    );
+    return () => subscription.remove();
+  }, [router]);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSheetInitialized, setPaymentSheetInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(
@@ -48,9 +70,17 @@ function CheckoutContent() {
 
   const { data: subscriptionPlans, isLoading: isLoadingPlans } =
     useSubscriptionPlans();
-  const createSubscriptionMutation = useCreateSubscription();
+  // Remove: createSubscriptionMutation, old API fetches
 
   const selectedPlan = subscriptionPlans?.find((p) => p.id === planId);
+
+  // Get merchantIdentifier from Expo config (required for Apple Pay)
+  const merchantIdentifier =
+    Constants.expoConfig?.plugins?.find(
+      (p) => p[0] === "@stripe/stripe-react-native"
+    )?.[1].merchantIdentifier || "merchant.com.tugraerenk.greenthumb"; // fallback for safety
+
+  // --- Removed Apple Pay support check (isApplePaySupported) as it is not available in this Stripe version ---
 
   // Initialize payment sheet
   useEffect(() => {
@@ -64,6 +94,7 @@ function CheckoutContent() {
     }
   }, [selectedPlan, user, paymentSheetInitialized, initializationError]);
 
+  // Replace initializePaymentSheet with new logic
   const initializePaymentSheet = async () => {
     if (!selectedPlan || !user) return;
 
@@ -71,41 +102,45 @@ function CheckoutContent() {
       setIsProcessing(true);
       setInitializationError(null);
 
-      // Create subscription setup intent on your backend
-      const response = await fetch("/api/create-subscription-setup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          planId: selectedPlan.id,
-          userId: user.id,
-          userEmail: user.emailAddresses[0]?.emailAddress,
-        }),
+      // Debug: Log the payload
+      console.log("Invoking Edge Function with:", {
+        planId: selectedPlan.id,
+        userId: user.id,
+        userEmail: user.emailAddresses[0]?.emailAddress,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const { data, error } = await supabase.functions.invoke(
+        "create-subscription",
+        {
+          body: {
+            planId: selectedPlan.id,
+            userId: user.id,
+            userEmail: user.emailAddresses[0]?.emailAddress,
+          },
+        }
+      );
+
+      // Debug: Log the raw response
+      console.log("Edge Function response:", { data, error });
+
+      if (error || !data?.clientSecret) {
+        // Debug: Log error details
+        console.error("Edge Function error:", error);
+        throw new Error(error?.message || "Failed to create subscription");
       }
 
-      const { setupIntent, ephemeralKey, customer } = await response.json();
+      const clientSecret = data.clientSecret;
 
-      const { error } = await initPaymentSheet({
+      // --- Pass merchantIdentifier to enable Apple Pay ---
+      // Note: merchantIdentifier is only needed on StripeProvider, not here.
+      const { error: initError } = await initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "GreenThumb",
-        customerId: customer,
-        customerEphemeralKeySecret: ephemeralKey,
-        setupIntentClientSecret: setupIntent,
-        allowsDelayedPaymentMethods: true,
-        defaultBillingDetails: {
-          name: user.fullName || "",
-          email: user.emailAddresses[0]?.emailAddress || "",
-        },
-        returnURL: "greenthumb://checkout-success",
+        returnURL: "greenthumb://stripe-redirect", // Reason: Required for Stripe to redirect back to the app after 3D Secure or external payment methods
       });
 
-      if (error) {
-        console.error("Payment sheet initialization error:", error);
-        setInitializationError(error.message);
+      if (initError) {
+        setInitializationError(initError.message);
         Alert.alert(
           "Setup Error",
           "Failed to initialize payment. Please try again."
@@ -114,19 +149,18 @@ function CheckoutContent() {
         setPaymentSheetInitialized(true);
       }
     } catch (error) {
-      console.error("Payment initialization error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       setInitializationError(errorMessage);
-      Alert.alert(
-        "Setup Error",
-        "Failed to initialize payment. Please try again."
-      );
+      Alert.alert("Setup Error", errorMessage);
+      // Debug: Log the caught error
+      console.error("initializePaymentSheet caught error:", error);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // Refactor handlePayment: remove second API call, just show success after payment
   const handlePayment = async () => {
     if (!selectedPlan || !user || !paymentSheetInitialized) {
       Alert.alert("Error", "Payment not ready. Please try again.");
@@ -139,16 +173,17 @@ function CheckoutContent() {
       const { error } = await presentPaymentSheet();
 
       if (error) {
-        console.error("Payment error:", error);
         if (error.code === "Canceled") {
-          // User canceled, don't show error
+          // Reason: User cancellation is not an error; do not log or alert.
           return;
         } else {
+          // Reason: Only log and alert for real payment errors
+          console.error("Payment error:", error);
           Alert.alert("Payment Failed", error.message);
         }
       } else {
-        // Payment method saved successfully, now create subscription
-        await createSubscriptionOnServer();
+        // Payment succeeded! Navigate to success screen or poll Supabase for status
+        router.replace("/subscription-success");
       }
     } catch (error) {
       console.error("Payment processing error:", error);
@@ -158,43 +193,7 @@ function CheckoutContent() {
     }
   };
 
-  const createSubscriptionOnServer = async () => {
-    if (!selectedPlan || !user) return;
-
-    try {
-      setIsProcessing(true);
-
-      // Create subscription on your backend
-      const response = await fetch("/api/create-subscription", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          planId: selectedPlan.id,
-          userId: user.id,
-          userEmail: user.emailAddresses[0]?.emailAddress,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const { subscription } = await response.json();
-
-      // Navigate to success screen
-      router.replace(`/subscription-success?subscription=${subscription.id}`);
-    } catch (error) {
-      console.error("Subscription creation error:", error);
-      Alert.alert(
-        "Subscription Error",
-        "Payment method was saved but there was an issue creating your subscription. Please contact support."
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  // Remove createSubscriptionOnServer (no longer needed)
 
   const retryInitialization = () => {
     setInitializationError(null);
@@ -214,15 +213,17 @@ function CheckoutContent() {
     return (
       <PageContainer>
         <View className="flex-1 justify-center items-center">
-          <Text className="text-lg text-muted-foreground mb-4">
+          <BodyText className="text-lg text-muted-foreground mb-4">
             No plan selected
-          </Text>
-          <TouchableOpacity
+          </BodyText>
+          <SubmitButton
             onPress={() => router.back()}
-            className="bg-green-600 rounded-xl py-3 px-6"
+            color="primary"
+            width="auto"
+            size="md"
           >
-            <Text className="text-white font-semibold">Go Back</Text>
-          </TouchableOpacity>
+            Go Back
+          </SubmitButton>
         </View>
       </PageContainer>
     );
@@ -237,46 +238,48 @@ function CheckoutContent() {
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
 
-          <Text className="text-3xl font-bold text-foreground mb-2">
+          <TitleText className="text-3xl text-foreground mb-2">
             Complete Your Purchase
-          </Text>
-          <Text className="text-lg text-muted-foreground">
+          </TitleText>
+          <BodyText className="text-lg text-muted-foreground">
             Secure payment powered by Stripe
-          </Text>
+          </BodyText>
         </View>
 
         {/* Plan Summary */}
         <View className="px-5 mb-8">
-          <View className="bg-white border border-gray-200 rounded-xl p-6">
-            <Text className="text-xl font-bold text-foreground mb-4">
+          <View className="bg-cream-50 border border-cream-200 rounded-xl p-6">
+            <TitleText className="text-xl text-foreground mb-4">
               Order Summary
-            </Text>
+            </TitleText>
 
-            <View className="space-y-3">
+            <View className="gap-3">
               <View className="flex-row justify-between items-center">
-                <Text className="text-foreground font-medium">
+                <BodyText className="text-foreground font-medium">
                   {selectedPlan.name}
-                </Text>
-                <Text className="text-foreground font-semibold">
+                </BodyText>
+                <BodyText className="text-foreground font-semibold">
                   {formatPrice(selectedPlan.price_cents)}
-                </Text>
+                </BodyText>
               </View>
 
               <View className="flex-row justify-between items-center">
-                <Text className="text-muted-foreground">Billing cycle</Text>
-                <Text className="text-muted-foreground">
+                <BodyText className="text-muted-foreground">
+                  Billing cycle
+                </BodyText>
+                <BodyText className="text-muted-foreground">
                   {selectedPlan.interval_type === "year" ? "Annual" : "Monthly"}
-                </Text>
+                </BodyText>
               </View>
 
-              <View className="border-t border-gray-200 pt-3">
+              <View className="border-t border-cream-200 pt-3">
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-lg font-bold text-foreground">
+                  <BodyText className="text-lg font-bold text-foreground">
                     Total
-                  </Text>
-                  <Text className="text-lg font-bold text-foreground">
+                  </BodyText>
+                  <BodyText className="text-lg font-bold text-foreground">
                     {formatPrice(selectedPlan.price_cents)}
-                  </Text>
+                  </BodyText>
                 </View>
               </View>
             </View>
@@ -286,70 +289,64 @@ function CheckoutContent() {
         {/* Initialization Error */}
         {initializationError && (
           <View className="px-5 mb-8">
-            <View className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <View className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
               <View className="flex-row items-center mb-2">
-                <Ionicons name="alert-circle" size={20} color="#dc2626" />
-                <Text className="text-red-800 font-semibold ml-2">
+                <Ionicons name="alert-circle" size={20} color="#E50000" />
+                <BodyText className="text-destructive font-semibold ml-2">
                   Setup Failed
-                </Text>
+                </BodyText>
               </View>
-              <Text className="text-red-700 text-sm mb-3">
+              <BodyText className="text-destructive text-sm mb-3">
                 {initializationError}
-              </Text>
-              <TouchableOpacity
+              </BodyText>
+              <SubmitButton
                 onPress={retryInitialization}
-                className="bg-red-600 rounded-lg py-2 px-4"
+                color="destructive"
+                width="auto"
+                size="md"
               >
-                <Text className="text-white text-center font-medium">
-                  Try Again
-                </Text>
-              </TouchableOpacity>
+                Try Again
+              </SubmitButton>
             </View>
           </View>
         )}
 
         {/* Payment Button */}
         <View className="px-5 mb-8">
-          <TouchableOpacity
+          <SubmitButton
             onPress={handlePayment}
-            disabled={
+            isDisabled={
               isProcessing || !paymentSheetInitialized || !!initializationError
             }
-            className={`rounded-xl py-4 px-6 ${
-              isProcessing || !paymentSheetInitialized || !!initializationError
-                ? "bg-gray-300"
-                : "bg-green-600"
-            }`}
+            isLoading={isProcessing}
+            color="primary"
+            width="full"
+            size="lg"
+            loadingLabel="Processing..."
           >
-            {isProcessing ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white text-center font-semibold text-lg">
-                {paymentSheetInitialized
-                  ? `Subscribe Now - ${formatPrice(selectedPlan.price_cents)}`
-                  : "Setting up payment..."}
-              </Text>
-            )}
-          </TouchableOpacity>
+            {paymentSheetInitialized
+              ? `Subscribe Now - ${formatPrice(selectedPlan.price_cents)}`
+              : "Setting up payment..."}
+          </SubmitButton>
 
-          <Text className="text-center text-muted-foreground text-sm mt-4">
+          <BodyText className="text-center text-muted-foreground text-sm mt-4">
             Your subscription will start immediately after payment
-          </Text>
+          </BodyText>
         </View>
 
         {/* Security Notice */}
         <View className="px-5 mb-8">
-          <View className="bg-gray-50 rounded-xl p-4">
+          <View className="bg-brand-100 rounded-xl p-4">
             <View className="flex-row items-center mb-2">
-              <Ionicons name="shield-checkmark" size={16} color="#059669" />
-              <Text className="text-foreground font-medium ml-2">
+              <Ionicons name="shield-checkmark" size={16} color="#5E994B" />
+              <BodyText className="text-foreground font-medium ml-2">
                 Secure Payment
-              </Text>
+              </BodyText>
             </View>
-            <Text className="text-muted-foreground text-sm">
+            <BodyText className="text-muted-foreground text-sm">
               Your payment information is encrypted and processed securely by
               Stripe. We never store your payment details.
-            </Text>
+            </BodyText>
           </View>
         </View>
       </ScrollView>
@@ -362,20 +359,20 @@ export default function CheckoutScreen() {
     return (
       <PageContainer>
         <View className="flex-1 justify-center items-center">
-          <Text className="text-lg text-red-600 mb-4">
+          <BodyText className="text-lg text-destructive mb-4">
             Payment system not configured
-          </Text>
-          <Text className="text-muted-foreground text-center">
+          </BodyText>
+          <BodyText className="text-muted-foreground text-center">
             Please contact support if this error persists.
-          </Text>
+          </BodyText>
         </View>
       </PageContainer>
     );
   }
 
   return (
-    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+    <ExpoStripeProvider>
       <CheckoutContent />
-    </StripeProvider>
+    </ExpoStripeProvider>
   );
 }

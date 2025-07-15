@@ -1,8 +1,11 @@
 /**
- * React Query hooks for subscription management
+ * React Query hooks for subscription management (READ-ONLY)
+ *
+ * All subscription creation/cancellation is now handled by Edge Functions and Stripe webhooks.
+ * These hooks only fetch data for display.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { 
   SubscriptionPlan, 
@@ -79,8 +82,6 @@ export function usePricingDisplay() {
 
 /**
  * Fetch user's current subscription (with add-ons joined)
- *
- * Reason: We need a composite object for UI that includes add-ons, not just the base UserSubscription.
  */
 export function useUserSubscription(userId?: string) {
   return useQuery<UserSubscriptionWithAddons | null, Error>({
@@ -136,8 +137,6 @@ export function useUserSubscription(userId?: string) {
 
 /**
  * Fetch subscription summary for dashboard
- *
- * Reason: Use the composite UserSubscriptionWithAddons type for the subscription property.
  */
 export function useSubscriptionSummary(userId?: string) {
   const { data: subscription, ...subscriptionQuery } = useUserSubscription(userId);
@@ -215,142 +214,5 @@ export function usePaymentHistory(userId?: string) {
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
-}
-
-/**
- * Create a new subscription
- */
-export function useCreateSubscription() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (subscriptionData: Partial<UserSubscription>) => {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .insert([subscriptionData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating subscription:', error);
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch subscription queries
-      queryClient.invalidateQueries({ queryKey: ['userSubscription', data.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptionSummary', data.user_id] });
-    },
-  });
-}
-
-/**
- * Update subscription status
- */
-export function useUpdateSubscription() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ 
-      subscriptionId, 
-      updates 
-    }: { 
-      subscriptionId: string; 
-      updates: Partial<UserSubscription> 
-    }) => {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .update(updates)
-        .eq('id', subscriptionId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating subscription:', error);
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch subscription queries
-      queryClient.invalidateQueries({ queryKey: ['userSubscription', data.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptionSummary', data.user_id] });
-    },
-  });
-}
-
-/**
- * Cancel subscription
- */
-export function useCancelSubscription() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ 
-      subscriptionId, 
-      cancelAtPeriodEnd = true 
-    }: { 
-      subscriptionId: string; 
-      cancelAtPeriodEnd?: boolean 
-    }) => {
-      const updates = {
-        cancel_at_period_end: cancelAtPeriodEnd,
-        ...(cancelAtPeriodEnd ? {} : { 
-          status: 'canceled' as const, 
-          canceled_at: new Date().toISOString() 
-        })
-      };
-
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .update(updates)
-        .eq('id', subscriptionId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error canceling subscription:', error);
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      // Invalidate and refetch subscription queries
-      queryClient.invalidateQueries({ queryKey: ['userSubscription', data.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptionSummary', data.user_id] });
-    },
-  });
-}
-
-/**
- * Add payment history record
- */
-export function useAddPaymentHistory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (paymentData: Partial<PaymentHistory>) => {
-      const { data, error } = await supabase
-        .from('payment_history')
-        .insert([paymentData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding payment history:', error);
-        throw new Error(error.message);
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      // Invalidate payment history query
-      queryClient.invalidateQueries({ queryKey: ['paymentHistory', data.user_id] });
-    },
   });
 } 

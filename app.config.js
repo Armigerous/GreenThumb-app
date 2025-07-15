@@ -27,11 +27,21 @@ module.exports = {
           organization: process.env.SENTRY_ORG,
         },
       ],
-      "expo-router",
+      [
+        "expo-router",
+        // Removed 'origin' to disable web support and make the app mobile-only
+      ],
       "expo-splash-screen",
       "expo-updates",
       "expo-asset",
       "expo-web-browser",
+      [
+        "@stripe/stripe-react-native",
+        {
+          publishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+          merchantIdentifier: "merchant.com.tugraerenk.greenthumb",
+        },
+      ],
       [
         "expo-image-picker",
         {
@@ -81,6 +91,7 @@ module.exports = {
       package: "com.tugraerenk.greenthumb",
     },
     web: {
+      output: "server",
       favicon: "./assets/images/logo.png",
     },
 
@@ -89,9 +100,9 @@ module.exports = {
 
     // Extra configuration including environment variables
     extra: {
-      router: {
-        origin: false,
-      },
+      // router: {
+      //   origin: "https://greenthumb.expo.app", // Removed to disable web support
+      // },
       eas: {
         projectId: "5b3f0f1a-b3f6-4765-9be3-9be62ab4b53c",
       },

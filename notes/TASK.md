@@ -1777,3 +1777,137 @@ By anchoring all task scheduling to quantitative climate and microclimate metric
 // Reason: This feature surfaces the value of dynamic, climate-aware scheduling and gives users actionable context for their daily plant care, increasing transparency and engagement.
 
 ---
+
+## SUBSCRIPTION & PAYMENT ARCHITECTURE (2025+)
+
+> All Stripe API calls (customer, subscription, payment, webhook) are now handled by Supabase Edge Functions. There are no `/api` routes, no server code in the app, and no Stripe secrets exposed to the client. The app calls a single Edge Function (`create-subscription`) to create the subscription and receive the PaymentIntent client secret, which is used to initialize the Stripe PaymentSheet. Stripe webhooks are handled by another Edge Function, which keeps Supabase in sync. No SetupIntent/Ephemeral Key is needed unless payment method management UI is required. This is Stripe's recommended, most secure, and most efficient mobile subscription flow.
+
+---
+
+## Detailed Stripe Subscription Flow & Manual Testing Guide (2025+)
+
+This guide provides a comprehensive, step-by-step process for implementing, verifying, and manually testing the GreenThumb subscription checkout and payment system using Supabase Edge Functions and Stripe. All team members (devs, QA, PMs) should follow this for implementation, review, and release.
+
+---
+
+### 1. User Flow Overview
+
+1. User opens the Pricing screen and selects a subscription plan.
+2. User clicks the CTA and is navigated to the Checkout screen.
+3. App calls the `create-subscription` Supabase Edge Function with `{ planId, userId, userEmail }`.
+4. Edge Function creates/retrieves Stripe Customer, creates Subscription, and returns the PaymentIntent `client_secret`.
+5. App initializes and presents the Stripe PaymentSheet using the `client_secret`.
+6. User enters payment info and completes payment.
+7. Stripe processes payment and triggers webhooks.
+8. Supabase Edge Function webhook updates the database (`user_subscriptions`, `payment_history`, etc.).
+9. App queries Supabase for up-to-date subscription status and shows confirmation/success.
+
+---
+
+### 2. Implementation Steps (Dev)
+
+#### A. Pricing & Checkout Screens
+
+- [ ] Ensure Pricing screen fetches plans from Supabase and passes selected plan ID to Checkout.
+- [ ] On Checkout screen mount, call `supabase.functions.invoke('create-subscription', { planId, userId, userEmail })`.
+- [ ] Receive `{ clientSecret, subscriptionId }` from Edge Function.
+- [ ] Initialize Stripe PaymentSheet with `clientSecret`.
+- [ ] Present PaymentSheet to user.
+- [ ] On success, navigate to success/confirmation screen.
+- [ ] On failure/cancel, show appropriate error or allow retry.
+
+#### B. Edge Function: create-subscription
+
+- [ ] Receives `{ planId, userId, userEmail }`.
+- [ ] Finds or creates Stripe Customer.
+- [ ] Creates Stripe Subscription with `payment_behavior: default_incomplete` and expands `latest_invoice.payment_intent`.
+- [ ] Returns `{ clientSecret, subscriptionId }`.
+
+#### C. Edge Function: stripe-webhook
+
+- [ ] Handles Stripe events: `invoice.payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, etc.
+- [ ] Updates Supabase tables (`user_subscriptions`, `payment_history`, etc.) accordingly.
+- [ ] Handles error cases (e.g., payment failed, subscription canceled).
+
+#### D. App: Subscription Status
+
+- [ ] After payment, app queries Supabase for subscription status.
+- [ ] UI updates to reflect active/canceled/past_due status.
+
+---
+
+### 3. Manual Testing Steps (QA/Dev)
+
+#### A. Happy Path (Success)
+
+1. [ ] Open app, go to Pricing, select a plan, and proceed to Checkout.
+2. [ ] Confirm Checkout screen loads and calls Edge Function (network tab: 200 OK, response includes `clientSecret`).
+3. [ ] PaymentSheet initializes and displays.
+4. [ ] Enter valid test card (e.g., 4242 4242 4242 4242, any future date, any CVC/ZIP).
+5. [ ] Complete payment. PaymentSheet should show success.
+6. [ ] App navigates to success/confirmation screen.
+7. [ ] In Stripe Dashboard, verify new customer, subscription, and payment are created.
+8. [ ] In Supabase, verify `user_subscriptions` and `payment_history` are updated (status: active, correct plan, correct user ID).
+9. [ ] App UI reflects premium status (features unlocked, no more upgrade prompts).
+
+#### B. Payment Failure
+
+1. [ ] Repeat steps above, but use a Stripe test card that triggers failure (e.g., 4000 0000 0000 9995 for "insufficient funds").
+2. [ ] PaymentSheet should show error, allow retry.
+3. [ ] App should not show success; user remains on Checkout.
+4. [ ] In Stripe Dashboard, verify failed payment attempt.
+5. [ ] In Supabase, verify no active subscription is created.
+
+#### C. User Cancels Payment
+
+1. [ ] On PaymentSheet, tap "Cancel" or close the sheet.
+2. [ ] App should remain on Checkout, allow retry or plan change.
+3. [ ] No subscription or payment should be created in Stripe or Supabase.
+
+#### D. Network Failure
+
+1. [ ] Disable network before clicking "Subscribe" or during PaymentSheet.
+2. [ ] App should show error, allow retry.
+3. [ ] No partial subscription or payment should be created.
+
+#### E. Webhook/DB Sync
+
+1. [ ] After successful payment, check Stripe Dashboard for webhook delivery (should be 2xx, no errors).
+2. [ ] In Supabase, verify DB is updated within a few seconds of payment.
+3. [ ] If webhook fails, fix and retry delivery from Stripe Dashboard.
+
+#### F. Edge Cases
+
+- [ ] Try subscribing with an email already used for another Stripe customer (should dedupe, not error).
+- [ ] Try subscribing to a plan that is inactive or missing in Supabase (should show error, not allow purchase).
+- [ ] Try double-submitting the checkout (should not create duplicate subscriptions).
+
+---
+
+### 4. What to Verify After Each Step
+
+- [ ] Stripe Dashboard: Customer, Subscription, PaymentIntent, Invoice all created and linked.
+- [ ] Supabase: `user_subscriptions` and `payment_history` tables updated with correct user ID, plan, status, and Stripe IDs.
+- [ ] App UI: Premium features unlocked, correct status shown, no upgrade prompts for active users.
+- [ ] Webhook logs: No errors, all events processed.
+
+---
+
+### 5. Troubleshooting & Debugging
+
+- [ ] If payment fails, check Stripe logs for error code and message.
+- [ ] If webhook fails, check Supabase Edge Function logs and retry from Stripe Dashboard.
+- [ ] If DB not updated, check webhook delivery and Edge Function logic.
+- [ ] If app UI does not update, check Supabase query and subscription status.
+
+---
+
+### 6. Release Checklist
+
+- [ ] All manual test cases above pass on both iOS and Android.
+- [ ] Stripe Dashboard and Supabase DB are in sync after every test.
+- [ ] No secrets or sensitive logic in the app or client code.
+- [ ] All error and edge cases are handled gracefully in the UI.
+- [ ] Documentation and onboarding for new devs/QA is up to date.
+
+---

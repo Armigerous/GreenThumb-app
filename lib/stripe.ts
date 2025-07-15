@@ -1,3 +1,4 @@
+// All Stripe API and webhook logic is handled by Edge Functions. This file is for UI helpers only.
 /**
  * Stripe configuration and helper functions for GreenThumb app
  */
