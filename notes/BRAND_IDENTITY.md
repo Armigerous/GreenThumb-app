@@ -875,6 +875,130 @@ NativeWind provides responsive text sizing that scales appropriately across devi
 
 ---
 
+Prompt to use to create same style art:
+
+```
+{
+  "style_name": "GreenThumb Pastel‑Gouache",
+  "purpose": "Ensure every new illustration for The GreenThumb brand follows the same nostalgic, children’s‑storybook aesthetic.",
+  "core_principles": [
+    "Soft gouache + watercolor look on lightly‑toothed cold‑press paper",
+    "Single season‑tinted wash; very low global contrast; gentle highlight bloom",
+    "Muted pastel palette (never pure white or jet black)",
+    "Rounded silhouettes with no hard outlines; edges feather into background",
+    "Visible paper grain (≈35 % overlay) and subtle pigment speckles (≈5 %)",
+    "Cozy, gentle, memory‑like mood suitable for a five‑year‑old audience"
+  ],
+  "medium": {
+    "canvas_texture": "cold‑press paper grain",
+    "working_resolution_dpi": 300,
+    "base_resolution_min": "4096×2730",
+    "layering": [
+      "Watery wash layer (Multiply, 100 %)",
+      "Gouache detail layer (Normal, 100 %)",
+      "Paper grain overlay (Multiply, 35 %)",
+      "Speckle dust layer (Screen, 5‑8 %)"
+    ]
+  },
+  "palette": {
+    "season_washes": {
+      "spring": "#F7E9AA",
+      "summer": "#CDE3B4",
+      "autumn": "#E6B06A",
+      "winter": "#AFC5D6"
+    },
+    "accents": {
+      "red": "#E26B5A",
+      "green": "#769E6E",
+      "brown": "#8C6F55"
+    },
+    "shadow_neutral": "#5E5B5A",
+    "saturation_shift_percent": 10,
+    "value_shift_percent": 5
+  },
+  "lighting": {
+    "dominant_wash_usage": "scene‑wide color grade; shadows inherit wash hue",
+    "highlight_handling": "soft bloom, no pure white",
+    "contrast_level": "low"
+  },
+  "edges": {
+    "outline_style": "implied with darker local color, never inked",
+    "edge_softness": "Gaussian‑like feather, radius ≈2‑4 px @4K"
+  },
+  "texture": {
+    "paper_grain_opacity": 0.35,
+    "speckle_strength": 0.05,
+    "speckle_distribution": "random scatter, 1 px diameter, 900 scatter"
+  },
+  "character_model_sheet": {
+    "head_to_body_ratio": 0.25,
+    "eye_shape": "bean or dot; no pupils unless needed",
+    "mouth_shape": "small curved line / wedge",
+    "animal_rules": "anatomically plausible with light anthropomorphism"
+  },
+  "composition": {
+    "rule_of_thirds": true,
+    "vignette": "natural framing (branches, snow flurries, fences)",
+    "planes": 3,
+    "depth_of_field": {
+      "foreground_blur_percent": 10,
+      "background_saturation_drop_percent": 35
+    }
+  },
+  "brush_presets": [
+    {
+      "name": "Round Gouache",
+      "size_px": "30‑60",
+      "opacity_jitter_percent": "0‑25"
+    },
+    {
+      "name": "Watery Wash",
+      "flow_percent": 10,
+      "wet_edge_percent": 40
+    },
+    {
+      "name": "Speckle Scatter",
+      "size_px": 1,
+      "scatter": 900,
+      "flow_percent": 2
+    }
+  ],
+  "ai_prompt_blueprint": {
+    "positive_prompt": "A [subject] in the GreenThumb Pastel‑Gouache style: soft gouache + watercolor on textured cold‑press paper, nostalgic pastel palette dominated by [season wash color], diffused back‑lighting with gentle bloom, rounded forms, no hard outlines, visible brush granulation and paper grain overlay, whimsical child‑friendly proportions, cozy and serene mood, low contrast, vignette composition, subtle pigment speckles",
+    "negative_prompt": "vector, neon, photorealism, comic ink, hard edges, modern plastic props",
+    "default_params": {
+      "aspect_ratio": "3:2",
+      "version": "v6",
+      "style": "raw"
+    }
+  },
+  "motion_guidelines": {
+    "frame_rate_fps": 12,
+    "animation_curve": "ease‑in‑ease‑out cubic",
+    "particle_effects": {
+      "max_rate_pps": 15,
+      "opacity": 0.4
+    },
+    "loop_duration_seconds": "3‑5"
+  },
+  "usage_guardrails": {
+    "dark_theme_handling": "shift wash hue deeper, keep pastel softness; never switch to black background",
+    "close_up_rule": "add grain, avoid sharp lines",
+    "ui_icon_rule": "2‑layer gouache blobs, retain palette; avoid flat vectors"
+  },
+  "quality_checklist": [
+    "Reads instantly as gouache‑watercolor painting",
+    "Muted, sun‑aged palette with zero pure white/black",
+    "Rounded, feathered edges with no crisp outlines",
+    "Visible paper grain and light speckles present",
+    "Overall mood feels cozy, nostalgic, low‑contrast",
+    "Suitable for a five‑year‑old audience"
+  ]
+}
+```
+
+---
+
 _Last Updated: January 2025_
 _Document Owner: Brand & Design Team_
 _Review Cycle: Quarterly with annual comprehensive review_
