@@ -62,12 +62,6 @@ function CheckoutContent() {
 
   const selectedPlan = subscriptionPlans?.find((p) => p.id === planId);
 
-  // Get merchantIdentifier from Expo config (required for Apple Pay)
-  const merchantIdentifier =
-    Constants.expoConfig?.plugins?.find(
-      (p) => p[0] === "@stripe/stripe-react-native"
-    )?.[1].merchantIdentifier || "merchant.com.tugraerenk.greenthumb"; // fallback for safety
-
   // Initialize payment sheet
   useEffect(() => {
     if (
