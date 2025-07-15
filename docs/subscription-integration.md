@@ -1,3 +1,64 @@
+# 🚀 Stripe Subscription Checkout Architecture (2025+)
+
+## Overview
+
+GreenThumb now uses a **mobile-first, secure, and efficient subscription checkout flow** powered by Supabase Edge Functions and Stripe. All payment and subscription logic is handled by Edge Functions—no `/api` routes, no server code in the app, and no Stripe secrets exposed to the client.
+
+## How It Works
+
+1. **User selects a plan in the app.**
+2. **App calls a Supabase Edge Function (`create-subscription`)** with `{ planId, userId, userEmail }`.
+3. **Edge Function:**
+   - Finds or creates a Stripe Customer for the user.
+   - Creates a Stripe Subscription with `payment_behavior: default_incomplete` and expands `latest_invoice.payment_intent`.
+   - Returns the PaymentIntent `client_secret` and subscription ID to the app.
+4. **App presents the Stripe PaymentSheet** using the returned `client_secret`.
+5. **User completes payment.**
+6. **Stripe triggers webhooks** (e.g., `invoice.payment_succeeded`, `customer.subscription.created`).
+7. **A Supabase Edge Function webhook** updates the database (`user_subscriptions`, `payment_history`, etc.) to reflect the latest Stripe state.
+8. **App queries Supabase** for up-to-date subscription status.
+
+## Why This Is Best
+
+- **No SetupIntent/Ephemeral Key required** for simple subscription checkout (unless you want in-app payment method management UI).
+- **All secrets and business logic** are in Edge Functions, not the app.
+- **Minimal roundtrips:** Only one backend call before payment.
+- **Stripe’s recommended approach** for mobile subscriptions.
+- **Easy to extend** (add Apple Pay, manage cards, etc. later).
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant SupabaseEdgeFn as Supabase Edge Function
+    participant Stripe
+    participant SupabaseDB as Supabase DB
+
+    User->>App: Selects plan, clicks Subscribe
+    App->>SupabaseEdgeFn: create-subscription (planId, userId, userEmail)
+    SupabaseEdgeFn->>Stripe: Create/Retrieve Customer
+    SupabaseEdgeFn->>Stripe: Create Subscription (default_incomplete)
+    SupabaseEdgeFn->>Stripe: Expand latest_invoice.payment_intent
+    SupabaseEdgeFn-->>App: Return clientSecret, subscriptionId
+
+    App->>Stripe: Present PaymentSheet (clientSecret)
+    User->>App: Completes payment
+
+    Stripe->>SupabaseEdgeFn: Webhook (payment_succeeded, etc.)
+    SupabaseEdgeFn->>SupabaseDB: Update subscription/payment status
+
+    App->>SupabaseDB: Query subscription status
+    App-->>User: Show success/management screen
+```
+
+## Optional: Payment Method Management
+
+- If you want to let users manage their saved cards (add/remove), add an Edge Function to create an Ephemeral Key and UI for that. For most subscription apps, the above is the fastest, most secure, and Stripe-recommended flow.
+
+---
+
 # 🔄 Subscription Integration Guide
 
 ## Overview

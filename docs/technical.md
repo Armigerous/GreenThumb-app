@@ -397,524 +397,62 @@ export const useCreatePlant = () => {
 
 ---
 
-## 💳 Subscription System
+## 💳 Stripe Subscription Integration (2025+)
 
-### Stripe Integration Setup
+GreenThumb now uses a **Supabase Edge Function-based Stripe integration** for all subscription and payment flows. All Stripe API calls (customer, subscription, payment, webhook) are handled by Edge Functions—no `/api` routes, no server code in the app, and no Stripe secrets exposed to the client.
 
-```typescript
-// lib/stripe.ts
-import Stripe from "stripe";
+### How It Works
 
-// Server-side Stripe instance (for API routes)
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
+1. **User selects a plan in the app.**
+2. **App calls a Supabase Edge Function (`create-subscription`)** with `{ planId, userId, userEmail }`.
+3. **Edge Function:**
+   - Finds or creates a Stripe Customer for the user.
+   - Creates a Stripe Subscription with `payment_behavior: default_incomplete` and expands `latest_invoice.payment_intent`.
+   - Returns the PaymentIntent `client_secret` and subscription ID to the app.
+4. **App presents the Stripe PaymentSheet** using the returned `client_secret`.
+5. **User completes payment.**
+6. **Stripe triggers webhooks** (e.g., `invoice.payment_succeeded`, `customer.subscription.created`).
+7. **A Supabase Edge Function webhook** updates the database (`user_subscriptions`, `payment_history`, etc.) to reflect the latest Stripe state.
+8. **App queries Supabase** for up-to-date subscription status.
 
-// Client-side configuration
-export const stripeConfig = {
-  publishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-  merchantIdentifier: "merchant.com.greenthumb.app",
-  urlScheme: "greenthumb",
-};
+### Why This Is Best
 
-// Price formatting utilities
-export const formatPrice = (cents: number, currency = "USD"): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(cents / 100);
-};
+- **No SetupIntent/Ephemeral Key required** for simple subscription checkout (unless you want in-app payment method management UI).
+- **All secrets and business logic** are in Edge Functions, not the app.
+- **Minimal roundtrips:** Only one backend call before payment.
+- **Stripe’s recommended approach** for mobile subscriptions.
+- **Easy to extend** (add Apple Pay, manage cards, etc. later).
 
-// Calculate savings for annual plans
-export const calculateSavings = (annualPrice: number, monthlyPrice: number) => {
-  const monthlyTotal = monthlyPrice * 12;
-  const savings = monthlyTotal - annualPrice;
-  const percentage = Math.round((savings / monthlyTotal) * 100);
-  return { savings, percentage };
-};
+### Sequence Diagram
 
-// Plan recommendation logic
-export const getPlanBadge = (plan: SubscriptionPlan): string | null => {
-  if (plan.billing_period === "annual") return "Most Popular";
-  if (plan.billing_period === "6_month") return "Best Value";
-  return null;
-};
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant SupabaseEdgeFn as Supabase Edge Function
+    participant Stripe
+    participant SupabaseDB as Supabase DB
 
-// Date formatting for subscriptions
-export const formatDate = (date: string | Date): string => {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(date));
-};
+    User->>App: Selects plan, clicks Subscribe
+    App->>SupabaseEdgeFn: create-subscription (planId, userId, userEmail)
+    SupabaseEdgeFn->>Stripe: Create/Retrieve Customer
+    SupabaseEdgeFn->>Stripe: Create Subscription (default_incomplete)
+    SupabaseEdgeFn->>Stripe: Expand latest_invoice.payment_intent
+    SupabaseEdgeFn-->>App: Return clientSecret, subscriptionId
+
+    App->>Stripe: Present PaymentSheet (clientSecret)
+    User->>App: Completes payment
+
+    Stripe->>SupabaseEdgeFn: Webhook (payment_succeeded, etc.)
+    SupabaseEdgeFn->>SupabaseDB: Update subscription/payment status
+
+    App->>SupabaseDB: Query subscription status
+    App-->>User: Show success/management screen
 ```
 
-### Payment Processing Implementation
+### Optional: Payment Method Management
 
-```typescript
-// api/create-payment-intent.ts
-import { stripe } from "@/lib/stripe";
-import { supabase } from "@/lib/supabase";
-
-export default async function handler(req: Request) {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
-  try {
-    const { planId, userId } = await req.json();
-
-    // Validate input
-    if (!planId || !userId) {
-      return new Response("Missing required fields", { status: 400 });
-    }
-
-    // Get plan details from database
-    const { data: plan, error: planError } = await supabase
-      .from("subscription_plans")
-      .select("*")
-      .eq("id", planId)
-      .single();
-
-    if (planError || !plan) {
-      return new Response("Plan not found", { status: 404 });
-    }
-
-    // Get or create Stripe customer
-    let customer;
-    const { data: existingSubscription } = await supabase
-      .from("user_subscriptions")
-      .select("stripe_customer_id")
-      .eq("user_id", userId)
-      .single();
-
-    if (existingSubscription?.stripe_customer_id) {
-      customer = await stripe.customers.retrieve(
-        existingSubscription.stripe_customer_id
-      );
-    } else {
-      // Get user email for customer creation
-      const { data: user } = await supabase.auth.admin.getUserById(userId);
-
-      customer = await stripe.customers.create({
-        email: user.user?.email,
-        metadata: { userId },
-      });
-    }
-
-    // Create payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: plan.price_cents,
-      currency: "usd",
-      customer: customer.id,
-      metadata: {
-        planId,
-        userId,
-        planName: plan.name,
-      },
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
-
-    // Create ephemeral key for mobile
-    const ephemeralKey = await stripe.ephemeralKeys.create(
-      { customer: customer.id },
-      { apiVersion: "2023-10-16" }
-    );
-
-    return Response.json({
-      clientSecret: paymentIntent.client_secret,
-      ephemeralKey: ephemeralKey.secret,
-      customerId: customer.id,
-      publishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-    });
-  } catch (error) {
-    console.error("Payment intent creation failed:", error);
-    return new Response("Internal server error", { status: 500 });
-  }
-}
-```
-
-### Subscription React Query Hooks
-
-```typescript
-// lib/subscriptionQueries.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  SubscriptionPlan,
-  UserSubscription,
-  CreateSubscriptionData,
-  PricingDisplay,
-} from "@/types/subscription";
-
-// Fetch all available subscription plans
-export const useSubscriptionPlans = () => {
-  return useQuery({
-    queryKey: ["subscription-plans"],
-    queryFn: async (): Promise<SubscriptionPlan[]> => {
-      const { data, error } = await supabase
-        .from("subscription_plans")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
-};
-
-// Get pricing display with calculated savings and badges
-export const usePricingDisplay = () => {
-  const { data: plans, ...rest } = useSubscriptionPlans();
-
-  const pricingDisplay: PricingDisplay[] =
-    plans?.map((plan) => {
-      const monthlyPlan = plans.find((p) => p.billing_period === "monthly");
-      const savings = monthlyPlan
-        ? calculateSavings(plan.price_cents, monthlyPlan.price_cents)
-        : null;
-
-      return {
-        ...plan,
-        badge: getPlanBadge(plan),
-        savings: savings?.savings || 0,
-        savingsPercentage: savings?.percentage || 0,
-        monthlyEquivalent: Math.round(
-          plan.price_cents /
-            (plan.billing_period === "annual"
-              ? 12
-              : plan.billing_period === "6_month"
-              ? 6
-              : 1)
-        ),
-      };
-    }) || [];
-
-  return {
-    data: pricingDisplay,
-    ...rest,
-  };
-};
-
-// Get current user's subscription
-export const useUserSubscription = () => {
-  const { user } = useAuth();
-
-  return useQuery({
-    queryKey: ["user-subscription", user?.id],
-    queryFn: async (): Promise<UserSubscription | null> => {
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .select(
-          `
-          *,
-          subscription_plans (*)
-        `
-        )
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .single();
-
-      if (error && error.code !== "PGRST116") throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-};
-
-// Create new subscription
-export const useCreateSubscription = () => {
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
-
-  return useMutation({
-    mutationFn: async (subscriptionData: CreateSubscriptionData) => {
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .insert({
-          ...subscriptionData,
-          user_id: user?.id,
-        })
-        .select(
-          `
-          *,
-          subscription_plans (*)
-        `
-        )
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
-    },
-  });
-};
-
-// Cancel subscription
-export const useCancelSubscription = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (subscriptionId: string) => {
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .update({
-          cancel_at_period_end: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", subscriptionId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-subscription"] });
-    },
-  });
-};
-
-// Create payment intent
-export const useCreatePaymentIntent = () => {
-  return useMutation({
-    mutationFn: async ({ planId }: { planId: string }) => {
-      const response = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ planId }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create payment intent");
-      }
-
-      return response.json();
-    },
-  });
-};
-```
-
-### Stripe Payment Sheet Implementation
-
-```typescript
-// components/subscription/PaymentSheet.tsx
-import React, { useState } from "react";
-import { Alert } from "react-native";
-import { useStripe } from "@stripe/stripe-react-native";
-import { Button } from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import {
-  useCreatePaymentIntent,
-  useCreateSubscription,
-} from "@/lib/subscriptionQueries";
-import { SubscriptionPlan } from "@/types/subscription";
-
-interface PaymentSheetProps {
-  plan: SubscriptionPlan;
-  onSuccess: () => void;
-  onError: (error: string) => void;
-}
-
-export const PaymentSheet = ({
-  plan,
-  onSuccess,
-  onError,
-}: PaymentSheetProps) => {
-  const [loading, setLoading] = useState(false);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const createPaymentIntent = useCreatePaymentIntent();
-  const createSubscription = useCreateSubscription();
-
-  const handlePayment = async () => {
-    try {
-      setLoading(true);
-
-      // Create payment intent
-      const paymentIntentData = await createPaymentIntent.mutateAsync({
-        planId: plan.id,
-      });
-
-      // Initialize payment sheet
-      const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: "GreenThumb",
-        customerId: paymentIntentData.customerId,
-        customerEphemeralKeySecret: paymentIntentData.ephemeralKey,
-        paymentIntentClientSecret: paymentIntentData.clientSecret,
-        allowsDelayedPaymentMethods: true,
-        defaultBillingDetails: {
-          name: "GreenThumb User",
-        },
-        returnURL: "greenthumb://payment-success",
-      });
-
-      if (initError) {
-        throw new Error(initError.message);
-      }
-
-      // Present payment sheet
-      const { error: paymentError } = await presentPaymentSheet();
-
-      if (paymentError) {
-        if (paymentError.code === "Canceled") {
-          // User canceled payment
-          return;
-        }
-        throw new Error(paymentError.message);
-      }
-
-      // Payment successful - create subscription record
-      await createSubscription.mutateAsync({
-        plan_id: plan.id,
-        stripe_customer_id: paymentIntentData.customerId,
-        status: "active",
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(
-          Date.now() +
-            (plan.billing_period === "annual"
-              ? 365
-              : plan.billing_period === "6_month"
-              ? 183
-              : 30) *
-              24 *
-              60 *
-              60 *
-              1000
-        ).toISOString(),
-      });
-
-      onSuccess();
-    } catch (error) {
-      console.error("Payment failed:", error);
-      onError(error instanceof Error ? error.message : "Payment failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button onPress={handlePayment} disabled={loading} className="w-full">
-      {loading ? (
-        <LoadingSpinner size="small" color="white" />
-      ) : (
-        `Complete Purchase - ${formatPrice(plan.price_cents)}`
-      )}
-    </Button>
-  );
-};
-```
-
-### Subscription Status Management
-
-```typescript
-// components/subscription/SubscriptionStatus.tsx
-import React from "react";
-import { View, Text } from "react-native";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import {
-  useUserSubscription,
-  useCancelSubscription,
-} from "@/lib/subscriptionQueries";
-import { formatDate, formatPrice } from "@/lib/stripe";
-
-export const SubscriptionStatus = () => {
-  const { data: subscription, isLoading } = useUserSubscription();
-  const cancelSubscription = useCancelSubscription();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!subscription) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Text className="text-muted-foreground mb-4">
-            No active subscription
-          </Text>
-          <Button onPress={() => router.push("/subscription/pricing")}>
-            View Plans
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const handleCancel = async () => {
-    try {
-      await cancelSubscription.mutateAsync(subscription.id);
-      Alert.alert(
-        "Subscription Canceled",
-        "Your subscription will remain active until the end of your current billing period."
-      );
-    } catch (error) {
-      Alert.alert("Error", "Failed to cancel subscription. Please try again.");
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex-row items-center justify-between">
-          <Text>{subscription.subscription_plans.name}</Text>
-          <Badge
-            variant={subscription.status === "active" ? "default" : "secondary"}
-          >
-            {subscription.status}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        <View className="flex-row justify-between">
-          <Text className="text-muted-foreground">Price</Text>
-          <Text className="font-semibold">
-            {formatPrice(subscription.subscription_plans.price_cents)}/
-            {subscription.subscription_plans.billing_period}
-          </Text>
-        </View>
-
-        <View className="flex-row justify-between">
-          <Text className="text-muted-foreground">Next billing date</Text>
-          <Text>{formatDate(subscription.current_period_end)}</Text>
-        </View>
-
-        {subscription.cancel_at_period_end && (
-          <View className="bg-yellow-50 p-3 rounded-lg">
-            <Text className="text-yellow-800 text-sm">
-              Your subscription will end on{" "}
-              {formatDate(subscription.current_period_end)}
-            </Text>
-          </View>
-        )}
-
-        {!subscription.cancel_at_period_end && (
-          <Button
-            variant="outline"
-            onPress={handleCancel}
-            disabled={cancelSubscription.isPending}
-          >
-            Cancel Subscription
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-```
+- If you want to let users manage their saved cards (add/remove), add an Edge Function to create an Ephemeral Key and UI for that. For most subscription apps, the above is the fastest, most secure, and Stripe-recommended flow.
 
 ---
 
