@@ -3,7 +3,6 @@
  * Stripe configuration and helper functions for GreenThumb app
  */
 
-import { StripeProvider } from '@stripe/stripe-react-native';
 import Constants from 'expo-constants';
 
 // Get Stripe publishable key from environment

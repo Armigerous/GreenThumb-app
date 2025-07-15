@@ -1614,40 +1614,15 @@ export const debugSubscription = {
 };
 ```
 
-### Testing Utilities
-
-```typescript
-// __tests__/utils/testUtils.tsx
-import React from "react";
-import { render } from "@testing-library/react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { StripeProvider } from "@stripe/stripe-react-native";
-
-export const createTestWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <StripeProvider publishableKey="pk_test_mock">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>{children}</AuthProvider>
-      </QueryClientProvider>
-    </StripeProvider>
-  );
-};
-
 export const renderWithProviders = (ui: React.ReactElement) => {
-  return render(ui, { wrapper: createTestWrapper() });
+return render(ui, { wrapper: createTestWrapper() });
 };
+
 ```
 
 ---
 
-**📝 Technical Guide Version:** 2.0  
-**🗓️ Last Updated:** January 14, 2025  
+**📝 Technical Guide Version:** 2.0
+**🗓️ Last Updated:** January 14, 2025
 **👥 Maintained by:** GreenThumb Development Team
+```
