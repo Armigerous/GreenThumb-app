@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { Database } from "@/supabase/supabase.schema";
+import { Database } from "@/types/supabase";
 import * as SecureStore from "expo-secure-store";
 
 // Use environment variables for Supabase configuration
@@ -17,10 +17,11 @@ export const setTokenProvider = (provider: GetTokenFn) => {
   getTokenProvider = provider;
 };
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-  auth: {
-    storage: {
+// Device check for SecureStore usage (works in Expo/React Native, not in Node.js/EAS build)
+const isDevice = typeof window !== "undefined" && typeof navigator !== "undefined" && !!navigator.product;
+
+const secureStoreAdapter = isDevice
+  ? {
       async getItem(key: string) {
         return SecureStore.getItemAsync(key);
       },
@@ -30,7 +31,19 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
       async removeItem(key: string) {
         await SecureStore.deleteItemAsync(key);
       },
-    },
+    }
+  : {
+      async getItem() {
+        return null;
+      },
+      async setItem() {},
+      async removeItem() {},
+    };
+
+// Create a single supabase client for interacting with your database
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+  auth: {
+    storage: secureStoreAdapter,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -72,3 +85,5 @@ export const setSupabaseToken = async (
     await supabase.auth.signOut();
   }
 };
+
+// Reason: This device-only guard prevents SecureStore from being called in Node.js/EAS build environments, avoiding build-time errors.
