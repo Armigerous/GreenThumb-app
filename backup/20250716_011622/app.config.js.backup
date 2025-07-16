@@ -26,7 +26,7 @@ module.exports = {
           project: process.env.SENTRY_PROJECT || "greenthumb",
           organization: process.env.SENTRY_ORG || "eren-kahveci",
           // Enable source map upload for better error tracking
-          uploadSourceMaps: false,
+          uploadSourceMaps: true,
         },
       ],
       [

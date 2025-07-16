@@ -193,6 +193,21 @@ eas submit                 # Submit to app stores
 - **Database Connection:** Ensure environment variables are correctly configured
 - **Build Issues:** Clear cache with `npx expo start --clear`
 
+### iOS Build Issues
+
+If you encounter Sentry-related build failures when building for iOS:
+
+```bash
+# Run the Sentry fix script
+./scripts/fix-sentry-build.sh
+
+# Or manually set environment variables
+export SENTRY_DISABLE_AUTO_UPLOAD=true
+export SENTRY_ALLOW_FAILURE=true
+```
+
+This disables Sentry's automatic source map upload during build, which can cause build failures if the Sentry configuration is incomplete.
+
 ### Development Guidelines
 
 - **Authentication:** Always use `requesting_user_id()` in RLS policies, never `auth.uid()`
