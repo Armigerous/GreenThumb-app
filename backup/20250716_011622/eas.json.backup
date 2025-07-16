@@ -34,17 +34,6 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
-        "SENTRY_ALLOW_FAILURE": "true"
-      }
-    },
-    "production-with-sourcemaps": {
-      "autoIncrement": true,
-      "channel": "production",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "env": {
         "SENTRY_ORG": "eren-kahveci",
         "SENTRY_PROJECT": "greenthumb",
         "SENTRY_URL": "https://sentry.io/",
