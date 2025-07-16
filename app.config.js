@@ -90,10 +90,11 @@ module.exports = {
       },
       package: "com.tugraerenk.greenthumb",
     },
-    web: {
-      output: "server",
-      favicon: "./assets/images/logo.png",
-    },
+    // Web configuration removed to prevent SSR build issues during mobile builds
+    // web: {
+    //   output: "server",
+    //   favicon: "./assets/images/logo.png",
+    // },
 
     // Asset patterns
     assetBundlePatterns: ["**/*"],
