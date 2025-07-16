@@ -7,7 +7,6 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint"
   },
@@ -69,7 +68,6 @@
     "moti": "^0.30.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
-    "react-dom": "19.0.0",
     "react-native": "0.79.5",
     "react-native-calendars": "^1.1310.0",
     "react-native-css-interop": "^0.1.22",
@@ -79,7 +77,6 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
-    "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
     "stream-browserify": "^3.0.0",
     "stripe": "^17.7.0",
