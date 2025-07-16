@@ -11,9 +11,6 @@ module.exports = function (api) {
       ],
       "nativewind/babel",
     ],
-    plugins: [
-      "@babel/plugin-transform-react-jsx",
-      "react-native-reanimated/plugin",
-    ],
+    plugins: ["react-native-reanimated/plugin"],
   };
 };

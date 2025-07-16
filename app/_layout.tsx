@@ -107,6 +107,7 @@ const queryClient = new QueryClient({
 function RootNavigator() {
   const { isSignedIn, isLoaded, userId } = useAuth();
   const [navigationReady, setNavigationReady] = useState(false);
+  const [startupError, setStartupError] = useState<string | null>(null); // Track startup errors
   const segments = useSegments();
 
   // Determine if the current route is an auth route
@@ -118,9 +119,11 @@ function RootNavigator() {
       "🔍 Root Navigator: Auth state - isLoaded:",
       isLoaded,
       "isSignedIn:",
-      isSignedIn
+      isSignedIn,
+      "userId:",
+      userId
     );
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, userId]);
 
   // Set user context in Sentry when authentication state changes
   useEffect(() => {
@@ -211,18 +214,49 @@ function RootNavigator() {
     }
   }, [isSignedIn, userId]);
 
-  // Add a small delay to prevent immediate redirects that cause loops
+  // Robust readiness: navigationReady is set only when both isLoaded and userId are available
   useEffect(() => {
-    if (isLoaded) {
-      const timer = setTimeout(() => {
-        setNavigationReady(true);
-      }, 200); // Increased delay to prevent race conditions
-      return () => clearTimeout(timer);
+    if (isLoaded && (isSignedIn ? !!userId : true)) {
+      setNavigationReady(true);
+    } else {
+      setNavigationReady(false);
     }
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn, userId]);
+
+  // Timeout fallback: show error if readiness not achieved in 5 seconds
+  useEffect(() => {
+    if (!navigationReady) {
+      const timer = setTimeout(() => {
+        if (!navigationReady) {
+          setStartupError(
+            "Startup is taking longer than expected. Please check your network connection or try restarting the app."
+          );
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setStartupError(null);
+    }
+  }, [navigationReady]);
 
   // Show loading spinner while auth state is being determined
   if (!isLoaded || !navigationReady) {
+    if (startupError) {
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20 }}>
+            {startupError}
+          </Text>
+        </View>
+      );
+    }
     console.log("⏳ Root Navigator: Auth state loading...");
     return <LoadingSpinner message="Loading..." />;
   }
