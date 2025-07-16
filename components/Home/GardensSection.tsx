@@ -63,21 +63,14 @@ export function GardensSection({
                 {/* New Garden Card */}
                 <View className="flex-1 min-w-[45%] mb-4 h-[90px]">
                   <TouchableOpacity
-                    className="flex-1 h-full border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm"
-                    style={{
-                      shadowColor: "#77B860",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 2,
-                      elevation: 1,
-                    }}
+                    className="flex-1 h-full border border-dashed border-primary rounded-xl p-4 items-center justify-center shadow-sm bg-transparent"
                     onPress={() => safeNavigate("/(tabs)/gardens/new")}
                   >
-                    <View className="items-center">
-                      <View className="w-10 h-8 items-center justify-center mb-2">
+                    <View className="items-center bg-transparent">
+                      <View className="w-10 h-8 items-center justify-center mb-2 bg-transparent">
                         <Ionicons name="add" size={24} color="#5E994B" />
                       </View>
-                      <BodyText className="text-primary font-medium">
+                      <BodyText className="text-primary font-medium bg-transparent">
                         New Garden
                       </BodyText>
                     </View>
@@ -86,24 +79,17 @@ export function GardensSection({
               </>
             ) : (
               <TouchableOpacity
-                className="w-full border border-dashed border-cream-300 rounded-xl p-6 items-center shadow-sm"
-                style={{
-                  shadowColor: "#77B860",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 1,
-                }}
+                className="w-full border border-dashed border-cream-300 rounded-xl p-6 items-center shadow-sm bg-transparent"
                 onPress={() => safeNavigate("/(tabs)/gardens/new")}
               >
-                <View className="items-center">
-                  <View className="w-12 h-12 items-center justify-center mb-3">
+                <View className="items-center bg-transparent">
+                  <View className="w-12 h-12 items-center justify-center mb-3 bg-transparent">
                     <Ionicons name="add" size={28} color="#5E994B" />
                   </View>
-                  <BodyText className="text-brand-600 font-medium mb-1">
+                  <BodyText className="text-brand-600 font-medium mb-1 bg-transparent">
                     Create Your First Garden
                   </BodyText>
-                  <BodyText className="text-sm text-cream-700 text-center">
+                  <BodyText className="text-sm text-cream-700 text-center bg-transparent">
                     Start your plant journey today
                   </BodyText>
                 </View>

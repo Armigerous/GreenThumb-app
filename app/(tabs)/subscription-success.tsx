@@ -7,12 +7,10 @@
  * - Quick access to key features
  */
 
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { PageContainer } from "@/components/UI/PageContainer";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function SubscriptionSuccessScreen() {
   const router = useRouter();
