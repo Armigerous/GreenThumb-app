@@ -9,10 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Sentry from "@sentry/react-native";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import {
-  checkSupabaseStorage,
-  checkRequestingUserIdFunction,
-} from "@/utils/initSupabase";
+import { SupabaseHealthCheck } from "@/components/SupabaseHealthCheck";
 import Constants from "expo-constants";
 import {
   useFonts,
@@ -107,7 +104,6 @@ const queryClient = new QueryClient({
 function RootNavigator() {
   const { isSignedIn, isLoaded, userId } = useAuth();
   const [navigationReady, setNavigationReady] = useState(false);
-  const [startupError, setStartupError] = useState<string | null>(null); // Track startup errors
   const segments = useSegments();
 
   // Determine if the current route is an auth route
@@ -146,117 +142,17 @@ function RootNavigator() {
     }
   }, [isSignedIn, isLoaded, userId]);
 
-  // Initialize Supabase storage check when user is signed in
+  // Simplified readiness check - only depends on auth state
   useEffect(() => {
-    if (isSignedIn && Platform.OS !== "web") {
-      try {
-        // Check Supabase storage buckets and RLS function - add delay to ensure auth is ready
-        let storageChecked = false;
-        let rlsFunctionChecked = false;
-
-        // Session variable to disable developer notices for this session
-        const storageNoticesDisabled = { current: false };
-
-        // First check the requesting_user_id function
-        setTimeout(() => {
-          if (!rlsFunctionChecked) {
-            checkRequestingUserIdFunction()
-              .then((userId) => {
-                rlsFunctionChecked = true;
-                console.log("RLS function check complete, user ID:", userId);
-              })
-              .catch((error) => {
-                console.error("Failed to check RLS function:", error);
-                if (sentryInitialized) {
-                  Sentry.captureException(error, {
-                    tags: { component: "RLS_function_check" },
-                    extra: { userId: userId },
-                  });
-                }
-              });
-          }
-        }, 2000);
-
-        // Then check storage buckets
-        setTimeout(() => {
-          if (!storageChecked && !storageNoticesDisabled.current) {
-            checkSupabaseStorage()
-              .then((isReady) => {
-                storageChecked = true;
-                console.log("Storage check complete, bucket ready:", isReady);
-
-                // If the check says the bucket is ready (or might be), disable future alerts
-                if (isReady) {
-                  storageNoticesDisabled.current = true;
-                  console.log("Storage notices disabled for this session");
-                }
-              })
-              .catch((error) => {
-                console.error("Failed to check Supabase storage:", error);
-                if (sentryInitialized) {
-                  Sentry.captureException(error, {
-                    tags: { component: "supabase_storage_check" },
-                    extra: { userId: userId },
-                  });
-                }
-              });
-          }
-        }, 4000); // Increase delay to ensure RLS function check completes first
-      } catch (error) {
-        console.error("Error setting up storage services:", error);
-        if (sentryInitialized) {
-          Sentry.captureException(error as Error, {
-            tags: { component: "storage_services_setup" },
-            extra: { userId: userId },
-          });
-        }
-      }
-    }
-  }, [isSignedIn, userId]);
-
-  // Robust readiness: navigationReady is set only when both isLoaded and userId are available
-  useEffect(() => {
-    if (isLoaded && (isSignedIn ? !!userId : true)) {
+    if (isLoaded) {
       setNavigationReady(true);
     } else {
       setNavigationReady(false);
     }
-  }, [isLoaded, isSignedIn, userId]);
-
-  // Timeout fallback: show error if readiness not achieved in 5 seconds
-  useEffect(() => {
-    if (!navigationReady) {
-      const timer = setTimeout(() => {
-        if (!navigationReady) {
-          setStartupError(
-            "Startup is taking longer than expected. Please check your network connection or try restarting the app."
-          );
-        }
-      }, 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setStartupError(null);
-    }
-  }, [navigationReady]);
+  }, [isLoaded]);
 
   // Show loading spinner while auth state is being determined
   if (!isLoaded || !navigationReady) {
-    if (startupError) {
-      return (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20 }}>
-            {startupError}
-          </Text>
-        </View>
-      );
-    }
     console.log("⏳ Root Navigator: Auth state loading...");
     return <LoadingSpinner message="Loading..." />;
   }
@@ -272,7 +168,12 @@ function RootNavigator() {
   console.log(
     "✅ Root Navigator: Navigation ready - allowing router to handle routing"
   );
-  return <Slot />;
+  return (
+    <>
+      <SupabaseHealthCheck />
+      <Slot />
+    </>
+  );
 }
 
 function RootLayout() {
