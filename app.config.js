@@ -11,10 +11,15 @@ module.exports = {
 
     // Splash screen configuration
     splash: {
-      image: "./assets/images/logo.png",
+      image: "./assets/images/logo-transparent.png",
       imageWidth: 200,
       resizeMode: "contain",
       backgroundColor: "#fff8e8",
+      // Add these properties for better splash screen handling
+      dark: {
+        image: "./assets/images/logo-transparent.png",
+        backgroundColor: "#1a1a1a",
+      },
     },
 
     // Plugin configurations
@@ -84,6 +89,9 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.tugraerenk.greenthumb",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
