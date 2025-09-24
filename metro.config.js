@@ -12,7 +12,6 @@ config.resolver.unstable_enablePackageExports = false;
 
 // Additional Metro resolver optimizations to prevent NativeWind bundling loops
 config.resolver.platforms = ['ios', 'android', 'native', 'web'];
-config.resolver.sourceExts = ['js', 'json', 'ts', 'tsx', 'jsx'];
 
 // Increase Metro's max workers and add timeout to prevent hanging
 config.maxWorkers = 2;

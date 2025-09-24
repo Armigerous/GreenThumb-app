@@ -42,6 +42,8 @@ module.exports = {
       "expo-updates",
       "expo-asset",
       "expo-web-browser",
+      "expo-font",
+      "expo-secure-store",
       [
         "@stripe/stripe-react-native",
         {
