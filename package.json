@@ -97,6 +97,7 @@
 		"@sentry/cli": "^2.40.0",
 		"@types/jest": "^29.5.12",
 		"@types/react": "~19.1.13",
+		"@types/react-native": "^0.73.0",
 		"@types/react-test-renderer": "^19.0.0",
 		"@types/uuid": "^10.0.0",
 		"babel-preset-expo": "^54.0.3",
