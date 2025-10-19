@@ -2,12 +2,19 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
-  Animated,
   Image,
   LayoutAnimation,
   Platform,
   UIManager,
 } from "react-native";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { TaskWithDetails } from "@/types/garden";
 import { Task } from "./Task";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,16 +29,16 @@ if (Platform.OS === "android") {
 
 // Friendly messages for empty state
 const EMPTY_STATE_MESSAGES: string[] = [
-  "Your garden's all good today 🌞",
-  "Today's a rest day for your plants.",
-  "Everything's thriving — no care needed.",
-  "Looks like your plants are in chill mode 🌿",
-  "No tasks today — your garden's in harmony.",
-  "Your plants are soaking up the good vibes ✨",
-  "All quiet in the garden — enjoy the peace.",
-  "Nothing to do — nature's handling it today.",
-  "Your care paid off — everything's happy 🌼",
-  "Sun's out, soil's right — all is well.",
+  "Your garden is doing great today - everything feels balanced.",
+  "Today is a gentle rest day for your plants.",
+  "Everything is thriving, so no extra care is needed right now.",
+  "Looks like your plants are in cozy chill mode.",
+  "No tasks today - your garden is in harmony.",
+  "Your plants are soaking up the good vibes you've set.",
+  "All quiet in the garden - enjoy the peace.",
+  "Nothing on the list - nature is handling it today.",
+  "Your care paid off and every plant is content.",
+  "Sun is out, soil is right - everything is humming along.",
 ];
 
 interface TaskListProps {
@@ -43,6 +50,7 @@ interface TaskListProps {
   className?: string;
   queryKey?: string[];
   isOverdue?: boolean;
+  removeOnComplete?: boolean;
 }
 
 export function TaskList({
@@ -54,6 +62,7 @@ export function TaskList({
   className = "",
   queryKey,
   isOverdue = false,
+  removeOnComplete = true,
 }: TaskListProps) {
   // Simplified state management - only track removing tasks for UI feedback
   const [removingTaskIds, setRemovingTaskIds] = useState<Set<number>>(
@@ -64,15 +73,13 @@ export function TaskList({
     "single"
   );
 
-  // Animation references
-  const emptyStateOpacity = useRef(new Animated.Value(0)).current;
-  const emptyStateScale = useRef(new Animated.Value(0.95)).current;
-  const celebrationOpacity = useRef(new Animated.Value(0)).current;
-  const celebrationScale = useRef(new Animated.Value(0.3)).current;
+  const emptyStateOpacity = useSharedValue(0);
+  const emptyStateScale = useSharedValue(0.95);
+  const celebrationOpacity = useSharedValue(0);
+  const celebrationScale = useSharedValue(0.3);
 
   // Refs for managing state
   const celebrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitialized = useRef(false);
   const pendingRemovals = useRef<Set<number>>(new Set());
 
   const queryClient = useQueryClient();
@@ -84,125 +91,105 @@ export function TaskList({
     ]
   ).current;
 
-  // Initialize empty state if needed
-  useEffect(() => {
-    if (!isInitialized.current) {
-      isInitialized.current = true;
-      if (tasks.length === 0) {
-        showEmptyState();
-      }
-    }
-  }, [tasks.length]);
-
-  // Show empty state animation
   const showEmptyState = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(emptyStateOpacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.spring(emptyStateScale, {
-        toValue: 1,
-        friction: 8,
-        tension: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    emptyStateOpacity.value = withTiming(1, {
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+    });
+    emptyStateScale.value = withSpring(1, {
+      damping: 16,
+      stiffness: 360,
+    });
   }, [emptyStateOpacity, emptyStateScale]);
 
-  // Hide empty state animation
   const hideEmptyState = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(emptyStateOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(emptyStateScale, {
-        toValue: 0.95,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    emptyStateOpacity.value = withTiming(0, {
+      duration: 180,
+      easing: Easing.in(Easing.cubic),
+    });
+    emptyStateScale.value = withTiming(0.95, {
+      duration: 180,
+      easing: Easing.inOut(Easing.cubic),
+    });
   }, [emptyStateOpacity, emptyStateScale]);
 
-  // Show celebration animation with proper sizing
+  const hideCelebration = useCallback(() => {
+    if (celebrationTimer.current) {
+      clearTimeout(celebrationTimer.current);
+      celebrationTimer.current = null;
+    }
+
+    celebrationOpacity.value = withTiming(
+      0,
+      { duration: 200, easing: Easing.in(Easing.cubic) },
+      (finished) => {
+        if (finished) {
+          runOnJS(setCelebrationVisible)(false);
+        }
+      }
+    );
+    celebrationScale.value = withTiming(0.3, {
+      duration: 200,
+      easing: Easing.in(Easing.cubic),
+    });
+  }, [celebrationOpacity, celebrationScale]);
+
   const showCelebration = useCallback(
     (type: "single" | "all") => {
       setCelebrationType(type);
       setCelebrationVisible(true);
 
-      // Reset animation values
-      celebrationOpacity.setValue(0);
-      celebrationScale.setValue(0.3);
+      celebrationOpacity.value = 0;
+      celebrationScale.value = 0.3;
 
-      // Animate in
-      Animated.parallel([
-        Animated.timing(celebrationOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(celebrationScale, {
-          toValue: 1,
-          friction: 7,
-          tension: 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      celebrationOpacity.value = withTiming(1, {
+        duration: 220,
+        easing: Easing.out(Easing.cubic),
+      });
+      celebrationScale.value = withSpring(1, {
+        stiffness: 340,
+        damping: 18,
+        mass: 0.72,
+      });
 
-      // Clear existing timer
       if (celebrationTimer.current) {
         clearTimeout(celebrationTimer.current);
       }
 
-      // Auto-hide celebration
-      celebrationTimer.current = setTimeout(
-        () => {
-          hideCelebration();
-        },
-        type === "all" ? 2500 : 1500
-      );
-    },
-    [celebrationOpacity, celebrationScale]
-  );
+      celebrationTimer.current = setTimeout(() => {
+        hideCelebration();
+      }, type === "all" ? 2600 : 1800);
+    }, [celebrationOpacity, celebrationScale, hideCelebration]);
 
-  // Hide celebration animation
-  const hideCelebration = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(celebrationOpacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(celebrationScale, {
-        toValue: 0.3,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setCelebrationVisible(false);
-    });
-  }, [celebrationOpacity, celebrationScale]);
+  const emptyStateAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: emptyStateOpacity.value,
+    transform: [{ scale: emptyStateScale.value }],
+  }));
+
+  const celebrationAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: celebrationOpacity.value,
+    transform: [{ scale: celebrationScale.value }],
+  }));
+
 
   // Handle task completion with proper state management
   const handleTaskComplete = useCallback(
     (taskId: number, completed: boolean) => {
       if (!completed) return; // Only handle completion, not unchecking
 
-      // Prevent duplicate processing
+      if (!removeOnComplete) {
+        onToggleComplete?.(taskId, completed);
+        showCelebration("single");
+        return;
+      }
+
       if (pendingRemovals.current.has(taskId)) {
         return;
       }
 
-      // Add to pending removals to prevent race conditions
       pendingRemovals.current.add(taskId);
-
-      // Add to removing array for UI feedback
       setRemovingTaskIds((prev) => new Set([...prev, taskId]));
 
-      // Count remaining tasks (excluding the one being removed and any pending removals)
       const remainingTasks = tasks.filter(
         (task: TaskWithDetails) =>
           task.id !== taskId &&
@@ -210,41 +197,35 @@ export function TaskList({
           !pendingRemovals.current.has(task.id)
       );
 
-      // Show appropriate celebration
       if (remainingTasks.length === 0) {
-        // This was the last task - delay celebration to let parent state update
-        setTimeout(() => showCelebration("all"), 400);
+        setTimeout(() => showCelebration("all"), 320);
       } else {
-        // Regular task completion
         setTimeout(() => showCelebration("single"), 200);
       }
 
-      // Notify parent immediately
       onToggleComplete?.(taskId, completed);
 
-      // Configure smooth layout animation for container resize
       LayoutAnimation.configureNext({
-        duration: 400,
+        duration: 360,
         create: {
           type: LayoutAnimation.Types.easeInEaseOut,
           property: LayoutAnimation.Properties.opacity,
-          duration: 300,
+          duration: 260,
         },
         update: {
           type: LayoutAnimation.Types.spring,
-          springDamping: 0.85,
+          springDamping: 0.84,
           initialVelocity: 0.1,
           property: LayoutAnimation.Properties.scaleXY,
-          duration: 400,
+          duration: 360,
         },
         delete: {
           type: LayoutAnimation.Types.easeInEaseOut,
           property: LayoutAnimation.Properties.opacity,
-          duration: 250,
+          duration: 220,
         },
       });
 
-      // Clean up removing state after animation
       setTimeout(() => {
         setRemovingTaskIds((prev) => {
           const newSet = new Set(prev);
@@ -252,9 +233,9 @@ export function TaskList({
           return newSet;
         });
         pendingRemovals.current.delete(taskId);
-      }, 400);
+      }, 360);
     },
-    [tasks, removingTaskIds, onToggleComplete, showCelebration]
+    [removeOnComplete, tasks, removingTaskIds, onToggleComplete, showCelebration]
   );
 
   // Cleanup on unmount
@@ -269,15 +250,20 @@ export function TaskList({
   // Filter out tasks that are being removed for display
   const visibleTasks = tasks.filter((task) => !removingTaskIds.has(task.id));
 
-  // Show empty state if no visible tasks
+  useEffect(() => {
+    if (visibleTasks.length === 0) {
+      showEmptyState();
+    } else {
+      hideEmptyState();
+    }
+  }, [visibleTasks.length, showEmptyState, hideEmptyState]);
+
+  // Show animated empty state when no tasks remain
   if (visibleTasks.length === 0) {
     return (
       <Animated.View
         className="bg-background p-6 items-center rounded-xl"
-        style={{
-          opacity: emptyStateOpacity,
-          transform: [{ scale: emptyStateScale }],
-        }}
+        style={emptyStateAnimatedStyle}
       >
         <Image
           source={require("@/assets/images/no-tasks.png")}
@@ -321,7 +307,7 @@ export function TaskList({
                   showGardenName={false}
                   queryKey={queryKey}
                   isOverdue={isOverdue}
-                  isRemoving={removingTaskIds.has(task.id)}
+                  isRemoving={removeOnComplete && removingTaskIds.has(task.id)}
                   onRemovalComplete={() => {}} // No longer needed
                 />
                 {index < gardenTasks.length - 1 && (
@@ -355,7 +341,7 @@ export function TaskList({
             showGardenName={showGardenName}
             queryKey={queryKey}
             isOverdue={isOverdue}
-            isRemoving={removingTaskIds.has(task.id)}
+            isRemoving={removeOnComplete && removingTaskIds.has(task.id)}
             onRemovalComplete={() => {}} // No longer needed
           />
           {index < tasksToShow.length - 1 && (
@@ -388,12 +374,10 @@ export function TaskList({
     return (
       <Animated.View
         className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center rounded-xl z-50"
-        style={{
-          opacity: celebrationOpacity,
-          transform: [{ scale: celebrationScale }],
+        style={[celebrationAnimatedStyle, {
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           minHeight: isSmallContainer ? 80 : 100, // Even smaller for single task containers
-        }}
+        }]}
       >
         {celebrationType === "all" ? (
           <View
@@ -458,3 +442,35 @@ export function TaskList({
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

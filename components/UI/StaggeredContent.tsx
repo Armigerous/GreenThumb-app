@@ -1,95 +1,74 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, Easing, ViewStyle } from "react-native";
+import React, { useEffect } from "react";
+import Animated, {
+	Easing,
+	type WithTimingConfig,
+	useAnimatedStyle,
+	useSharedValue,
+	withDelay,
+	withTiming,
+} from "react-native-reanimated";
+import { ViewStyle } from "react-native";
 
 interface StaggeredContentProps {
-  children: React.ReactNode;
-  index?: number;
-  staggerInterval?: number;
-  baseDelay?: number;
-  duration?: number;
-  enabled?: boolean;
-  initialY?: number;
-  style?: ViewStyle;
-  className?: string;
+	children: React.ReactNode;
+	index?: number;
+	staggerInterval?: number;
+	baseDelay?: number;
+	duration?: number;
+	enabled?: boolean;
+	initialY?: number;
+	style?: ViewStyle;
+	className?: string;
 }
 
 /**
  * A component for creating smooth, staggered animations for content sections.
  * This component handles the timing and coordination of animations to ensure
  * a fluid, professional feeling when loading multiple elements.
- *
- * @param children - The content to be animated
- * @param index - The position of this element in a sequence (0-based)
- * @param staggerInterval - The time between staggered animations (default: 40ms)
- * @param baseDelay - Initial delay before any animations start (default: 100ms)
- * @param duration - Animation duration (default: 500ms)
- * @param enabled - Whether animations are enabled (default: true)
- * @param initialY - Initial Y offset for the slide up animation (default: 15)
- * @param style - Additional styles to apply
- * @param className - Tailwind classes to apply
  */
 export function StaggeredContent({
-  children,
-  index = 0,
-  staggerInterval = 40,
-  baseDelay = 100,
-  duration = 500,
-  enabled = true,
-  initialY = 15,
-  style = {},
-  className = "",
+	children,
+	index = 0,
+	staggerInterval = 40,
+	baseDelay = 100,
+	duration = 500,
+	enabled = true,
+	initialY = 15,
+	style = {},
+	className = "",
 }: StaggeredContentProps) {
-  const translateY = useRef(new Animated.Value(initialY)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+	const translateY = useSharedValue(0);
+	const opacity = useSharedValue(1);
 
-  useEffect(() => {
-    if (enabled) {
-      // Calculate staggered delay
-      const delay = baseDelay + index * staggerInterval;
+	useEffect(() => {
+		if (!enabled) {
+			translateY.value = 0;
+			opacity.value = 1;
+			return;
+		}
 
-      // Reset values when component remounts or enabled changes
-      translateY.setValue(initialY);
-      opacity.setValue(0);
+		const delay = baseDelay + index * staggerInterval;
 
-      // Use a spring animation for translateY for more natural movement
-      const animations = [
-        Animated.spring(translateY, {
-          toValue: 0,
-          friction: 8,
-          tension: 40,
-          delay,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration,
-          delay,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ];
+		translateY.value = initialY;
+		opacity.value = 0;
 
-      // Start animations in parallel
-      Animated.parallel(animations).start();
-    } else {
-      // If animations are disabled, immediately show content
-      translateY.setValue(0);
-      opacity.setValue(1);
-    }
-  }, [enabled, initialY, baseDelay, staggerInterval, index, duration]);
+		const timingConfig: WithTimingConfig = {
+			duration,
+			easing: Easing.out(Easing.cubic),
+		};
 
-  return (
-    <Animated.View
-      className={className}
-      style={[
-        {
-          opacity,
-          transform: [{ translateY }],
-        },
-        style,
-      ]}
-    >
-      {children}
-    </Animated.View>
-  );
+		translateY.value = withDelay(delay, withTiming(0, timingConfig));
+		opacity.value = withDelay(delay, withTiming(1, timingConfig));
+	}, [enabled, baseDelay, index, initialY, staggerInterval, duration, opacity, translateY]);
+
+	const animatedStyle = useAnimatedStyle(() => ({
+		opacity: opacity.value,
+		transform: [{ translateY: translateY.value }],
+	}));
+
+	return (
+		<Animated.View className={className} style={[animatedStyle, style]}>
+			{children}
+		</Animated.View>
+	);
 }

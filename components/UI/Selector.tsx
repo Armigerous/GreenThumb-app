@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -8,9 +17,8 @@ import {
   TouchableWithoutFeedback,
   BackHandler,
   Platform,
-  Animated,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+
 import HelpIcon from "./HelpIcon";
 import { BodyText, TitleText } from "./Text";
 
@@ -44,32 +52,44 @@ export default function Selector<
   helpExplanation,
 }: SelectorProps<T, U>) {
   const [modalVisible, setModalVisible] = useState(false);
-  const slideAnim = React.useRef(new Animated.Value(0)).current;
+  const slideProgress = useSharedValue(0);
 
   // Handle closing the modal
-  const handleClose = () => {
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setModalVisible(false);
-    });
-  };
+  const handleClose = useCallback(() => {
+    slideProgress.value = withTiming(
+      0,
+      {
+        duration: 260,
+        easing: Easing.in(Easing.cubic),
+      },
+      (finished) => {
+        if (finished) {
+          runOnJS(setModalVisible)(false);
+        }
+      }
+    );
+  }, [slideProgress]);
 
   // Handle opening the modal
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     setModalVisible(true);
-    Animated.timing(slideAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
+    slideProgress.value = 0;
+    slideProgress.value = withTiming(1, {
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [slideProgress]);
+
+  const modalAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: (1 - slideProgress.value) * 600,
+      },
+    ],
+  }));
 
   // Add effect to handle back button press and outside taps
   useEffect(() => {
-    // For Android, handle back button press
     if (Platform.OS === "android") {
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -84,7 +104,9 @@ export default function Selector<
 
       return () => backHandler.remove();
     }
-  }, [modalVisible]);
+
+    return undefined;
+  }, [modalVisible, handleClose]);
 
   // Get the display value for the selector
   const getDisplayValue = () => {
@@ -191,16 +213,7 @@ export default function Selector<
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
               <Animated.View
                 className="bg-cream-50 rounded-t-xl max-h-[80%]"
-                style={{
-                  transform: [
-                    {
-                      translateY: slideAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [600, 0],
-                      }),
-                    },
-                  ],
-                }}
+                style={modalAnimatedStyle}
               >
                 {/* Modal header */}
                 <View className="flex-row items-center p-4 border-b border-cream-300">

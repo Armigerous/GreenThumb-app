@@ -11,8 +11,17 @@ import {
   isToday,
   isTomorrow,
 } from "date-fns";
-import { useEffect, useRef, useState } from "react";
-import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { TASK_TYPE_META } from "@/constants/taskTypes";
 
 interface TaskProps {
@@ -41,67 +50,75 @@ export function Task({
     useState(false);
   const queryClient = useQueryClient();
 
-  // Animation values - simpler, more reliable
-  const checkboxScale = useRef(new Animated.Value(1)).current;
-  const taskOpacity = useRef(new Animated.Value(1)).current;
-  const taskTranslateX = useRef(new Animated.Value(0)).current;
-  const strikethroughWidth = useRef(
-    new Animated.Value(isCompleted ? 100 : 0)
-  ).current;
-  const textOpacity = useRef(new Animated.Value(isCompleted ? 0.6 : 1)).current;
+  const checkboxScale = useSharedValue(1);
+  const taskOpacity = useSharedValue(1);
+  const taskTranslateX = useSharedValue(0);
+  const strikethroughProgress = useSharedValue(isCompleted ? 1 : 0);
+  const textOpacity = useSharedValue(isCompleted ? 0.6 : 1);
+  const [titleWidth, setTitleWidth] = useState(0);
 
-  // Update local state when task prop changes
+  const animateCompletion = useCallback(
+    (completed: boolean) => {
+      checkboxScale.value = withSequence(
+        withTiming(0.88, {
+          duration: 90,
+          easing: Easing.out(Easing.quad),
+        }),
+        withSpring(1, {
+          mass: 0.55,
+          stiffness: 420,
+          damping: 22,
+        })
+      );
+      strikethroughProgress.value = withTiming(completed ? 1 : 0, {
+        duration: 180,
+        easing: Easing.out(Easing.cubic),
+      });
+      textOpacity.value = withTiming(completed ? 0.6 : 1, {
+        duration: 180,
+        easing: Easing.out(Easing.cubic),
+      });
+    },
+    [checkboxScale, strikethroughProgress, textOpacity]
+  );
+
   useEffect(() => {
     if (task.completed !== isCompleted && !isProcessing) {
       setIsCompleted(task.completed);
-      // Update visual state without animation for external changes
-      strikethroughWidth.setValue(task.completed ? 100 : 0);
-      textOpacity.setValue(task.completed ? 0.6 : 1);
+      animateCompletion(task.completed);
     }
-  }, [task.completed, isCompleted, isProcessing]);
+  }, [task.completed, isCompleted, isProcessing, animateCompletion]);
 
-  // Handle removal animation
   useEffect(() => {
-    if (isRemoving) {
-      // Start removal animation
-      Animated.sequence([
-        // Quick celebration bounce
-        Animated.timing(checkboxScale, {
-          toValue: 1.2,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(checkboxScale, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        // Then slide out
-        Animated.parallel([
-          Animated.timing(taskTranslateX, {
-            toValue: 300,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(taskOpacity, {
-            toValue: 0,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start(() => {
-        // Notify parent that removal animation is complete
-        onRemovalComplete?.(task.id);
+    if (!isRemoving) {
+      taskOpacity.value = withTiming(1, {
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
       });
+      taskTranslateX.value = withTiming(0, {
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+      });
+      return;
     }
-  }, [
-    isRemoving,
-    task.id,
-    onRemovalComplete,
-    checkboxScale,
-    taskTranslateX,
-    taskOpacity,
-  ]);
+
+    taskOpacity.value = withTiming(0, {
+      duration: 200,
+      easing: Easing.in(Easing.cubic),
+    });
+    taskTranslateX.value = withTiming(
+      16,
+      {
+        duration: 200,
+        easing: Easing.in(Easing.cubic),
+      },
+      (finished) => {
+        if (finished && onRemovalComplete) {
+          runOnJS(onRemovalComplete)(task.id);
+        }
+      }
+    );
+  }, [isRemoving, onRemovalComplete, task.id, taskOpacity, taskTranslateX]);
 
   // Simplified task completion mutation
   const toggleTaskMutation = useMutation({
@@ -180,40 +197,26 @@ export function Task({
     },
   });
 
-  // Smooth completion animation
-  const animateCompletion = (completed: boolean) => {
-    // Checkbox feedback animation
-    Animated.sequence([
-      Animated.timing(checkboxScale, {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.spring(checkboxScale, {
-        toValue: 1,
-        friction: 8,
-        tension: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: taskOpacity.value,
+    transform: [{ translateX: taskTranslateX.value }],
+  }));
 
-    // Text and strikethrough animation
-    Animated.parallel([
-      Animated.timing(strikethroughWidth, {
-        toValue: completed ? 100 : 0,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-      Animated.timing(textOpacity, {
-        toValue: completed ? 0.6 : 1,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
+  const checkboxAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkboxScale.value }],
+  }));
+
+  const textAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  const strikethroughAnimatedStyle = useAnimatedStyle(() => ({
+    width: titleWidth * strikethroughProgress.value,
+    opacity: strikethroughProgress.value,
+  }));
 
   const handleToggle = () => {
-    if (isProcessing || isRemoving) return;
+    if (isProcessing || isRemoving || isCompleted) return;
 
     const newCompletedState = !isCompleted;
 
@@ -269,17 +272,12 @@ export function Task({
   const gardenName = task.plant?.garden?.name || "Unknown Garden";
 
   return (
-    <Animated.View
-      style={{
-        opacity: taskOpacity,
-        transform: [{ translateX: taskTranslateX }],
-      }}
-    >
+    <Animated.View style={containerAnimatedStyle}>
       <TouchableOpacity
         onPress={handleToggle}
         className="p-4"
         activeOpacity={0.7}
-        disabled={isProcessing || isRemoving}
+        disabled={isProcessing || isRemoving || isCompleted}
       >
         <View className="flex-row items-center">
           {/* Checkbox */}
@@ -291,7 +289,7 @@ export function Task({
                 ? "bg-red-100 border border-red-300"
                 : "bg-white border border-cream-300"
             }`}
-            style={{ transform: [{ scale: checkboxScale }] }}
+            style={checkboxAnimatedStyle}
           >
             {isCompleted && (
               <Ionicons name="checkmark" size={16} color="white" />
@@ -317,36 +315,38 @@ export function Task({
 
                 {/* Text with animated strikethrough */}
                 <View style={{ position: "relative", flex: 1 }}>
-                  <Animated.Text
-                    className={`text-base font-paragraph font-medium ${
-                      isOverdue && !isCompleted
-                        ? "text-red-700"
-                        : "text-foreground"
-                    }`}
-                    style={{ opacity: textOpacity }}
-                  >
-                    {/* Use label for clarity and future i18n */}
-                    {TASK_TYPE_META[task.task_type]?.label ||
-                      task.task_type}{" "}
-                    {plantNickname}
-                  </Animated.Text>
+                  <Animated.View style={textAnimatedStyle}>
+                    <Text
+                      className={`text-base font-paragraph font-medium ${
+                        isOverdue && !isCompleted
+                          ? "text-red-700"
+                          : "text-foreground"
+                      }`}
+                      onLayout={(event) => {
+                      const { width } = event.nativeEvent.layout;
+                      if (width !== titleWidth) {
+                        setTitleWidth(width);
+                      }
+                      }}
+                    >
+                      {TASK_TYPE_META[task.task_type]?.label || task.task_type}{" "}
+                      {plantNickname}
+                    </Text>
+                  </Animated.View>
 
-                  {/* Animated strikethrough line */}
                   <Animated.View
-                    style={{
-                      position: "absolute",
-                      width: strikethroughWidth.interpolate({
-                        inputRange: [0, 100],
-                        outputRange: ["0%", "100%"],
-                      }),
-                      height: 1,
-                      backgroundColor: isOverdue ? "#ef4444" : "#6b7280",
-                      top: "50%",
-                      opacity: strikethroughWidth.interpolate({
-                        inputRange: [0, 100],
-                        outputRange: [0, 0.8],
-                      }),
-                    }}
+                    pointerEvents="none"
+                    style={[
+                      {
+                        position: "absolute",
+                        height: 1,
+                        backgroundColor: isOverdue ? "#ef4444" : "#6b7280",
+                        top: "50%",
+                        opacity: 0.8,
+                        left: 0,
+                      },
+                      strikethroughAnimatedStyle,
+                    ]}
                   />
                 </View>
               </View>
@@ -389,3 +389,10 @@ export function Task({
     </Animated.View>
   );
 }
+
+
+
+
+
+
+

@@ -1,21 +1,13 @@
-import { View, Text, Animated, useWindowDimensions } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import { useMemo, useRef, useEffect } from "react";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { BodyText } from "./Text";
 
-/**
- * ProgressIndicator component for multi-step flows
- *
- * Displays a visual indicator of progress through a multi-step process.
- * Shows progress bar, step markers, and textual labels for each step.
- * Includes animation effects and proper alignment between bars and labels.
- *
- * @param currentStep - The current active step (1-based index)
- * @param totalSteps - Total number of steps in the flow
- * @param stepLabels - Array of labels for each step
- * @param animate - Whether to animate progress transitions (defaults to true)
- * @param accentColor - Optional custom accent color for active elements
- * @param inactiveColor - Optional custom color for inactive elements
- */
 interface ProgressIndicatorProps {
   currentStep: number;
   totalSteps: number;
@@ -33,46 +25,57 @@ export default function ProgressIndicator({
   accentColor = "primary",
   inactiveColor = "cream-50",
 }: ProgressIndicatorProps) {
-  // Get window dimensions to calculate optimal label width
   const { width } = useWindowDimensions();
 
-  // Animation value for progress bar width
-  const progressAnim = useRef(new Animated.Value(0)).current;
+  const progressValue = useSharedValue(0);
+  const previousStepRef = useRef<number | null>(null);
 
-  // Calculate progress percentage (0 to 1)
   const progressPercentage = useMemo(() => {
+    if (totalSteps <= 1) {
+      return 0;
+    }
     return (currentStep - 1) / (totalSteps - 1);
   }, [currentStep, totalSteps]);
 
-  // Validate that we have the correct number of labels
   if (stepLabels.length !== totalSteps) {
     console.warn(
       `ProgressIndicator: Expected ${totalSteps} step labels but got ${stepLabels.length}`
     );
   }
 
-  // Handle animation when currentStep changes
   useEffect(() => {
-    if (animate) {
-      Animated.timing(progressAnim, {
-        toValue: progressPercentage,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      progressAnim.setValue(progressPercentage);
-    }
-  }, [currentStep, progressPercentage, animate, progressAnim]);
+    const previousStep = previousStepRef.current;
+    const target = Math.max(0, Math.min(progressPercentage, 1));
 
-  // Constants for precise calculations
-  const CIRCLE_SIZE = 12; // 3w x 3h = 12px diameter
+    if (!animate) {
+      progressValue.value = target;
+    } else {
+      const isBackwardSkip =
+        previousStep !== null && currentStep < previousStep;
+
+      progressValue.value = withTiming(target, {
+        duration: isBackwardSkip ? 220 : 360,
+        easing: isBackwardSkip
+          ? Easing.out(Easing.quad)
+          : Easing.out(Easing.cubic),
+      });
+    }
+
+    previousStepRef.current = currentStep;
+  }, [animate, currentStep, progressPercentage, progressValue]);
+
+  const progressStyle = useAnimatedStyle(() => {
+    const value = Math.max(0, Math.min(1, progressValue.value));
+    return {
+      width: `${value * 100}%`,
+    };
+  });
+
+  const CIRCLE_SIZE = 12;
   const CIRCLE_RADIUS = CIRCLE_SIZE / 2;
 
-  // Calculate optimal label width based on total steps and screen width
-  // Account for padding (8px on each side) and some spacing between labels
-  const availableWidth = width - 16; // 8px padding on each side
+  const availableWidth = width - 16;
   const optimalLabelWidth = useMemo(() => {
-    // For 2 steps, we want wider labels. For 3+ steps, we need narrower labels
     if (totalSteps <= 2) return Math.min(120, availableWidth / 2);
     if (totalSteps === 3) return Math.min(100, availableWidth / 3);
     return Math.min(90, availableWidth / totalSteps);
@@ -80,25 +83,16 @@ export default function ProgressIndicator({
 
   return (
     <View className="mb-6 py-4">
-      {/* Progress container - contains both the bar and indicators */}
       <View className="mb-3 relative">
-        {/* Base progress bar (inactive) */}
         <View
           className={`h-1.5 w-full bg-${inactiveColor} rounded-full border border-${accentColor}`}
         />
 
-        {/* Animated progress overlay */}
         <Animated.View
           className={`h-1.5 bg-${accentColor} rounded-full absolute top-0 left-0`}
-          style={{
-            width: progressAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0%", "100%"],
-            }),
-          }}
+          style={progressStyle}
         />
 
-        {/* Step indicators aligned with the bar */}
         <View
           className="flex-row absolute top-0 w-full"
           style={{ transform: [{ translateY: -3 }] }}
@@ -108,7 +102,6 @@ export default function ProgressIndicator({
             const isFirst = index === 0;
             const isLast = index === totalSteps - 1;
 
-            // Calculate position percentage for exact alignment
             const position = isFirst
               ? 0
               : isLast
@@ -131,14 +124,12 @@ export default function ProgressIndicator({
         </View>
       </View>
 
-      {/* Step labels with precise alignment */}
       <View className="relative my-1">
         {stepLabels.map((label, index) => {
           const isActive = index + 1 <= currentStep;
           const isFirst = index === 0;
           const isLast = index === totalSteps - 1;
 
-          // Calculate position percentage for exact alignment with indicators
           const position = isFirst
             ? 0
             : isLast
