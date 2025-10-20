@@ -1,72 +1,72 @@
 {
-  "cli": {
-    "version": ">= 16.10.1",
-    "appVersionSource": "remote"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "channel": "development",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
-        "SENTRY_ALLOW_FAILURE": "true"
-      }
-    },
-    "preview": {
-      "distribution": "internal",
-      "channel": "preview",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
-        "SENTRY_ALLOW_FAILURE": "true"
-      }
-    },
-    "production": {
-      "autoIncrement": true,
-      "channel": "production",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
-        "SENTRY_ALLOW_FAILURE": "true"
-      }
-    },
-    "production-with-sourcemaps": {
-      "autoIncrement": true,
-      "channel": "production",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
-      "env": {
-        "SENTRY_ORG": "eren-kahveci",
-        "SENTRY_PROJECT": "greenthumb",
-        "SENTRY_URL": "https://sentry.io/",
-        "SENTRY_AUTH_TOKEN": "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",
-        "SENTRY_RELEASE_NAME": "greenthumb-ios",
-        "SENTRY_DIST": "1",
-        "SENTRY_UPLOAD_SOURCE_MAPS": "true"
-      }
-    },
-    "apk": {
-      "android": {
-        "buildType": "apk"
-      },
-      "distribution": "internal",
-      "channel": "apk",
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
-        "SENTRY_ALLOW_FAILURE": "true"
-      }
-    }
-  },
-  "submit": {
-    "production": {}
-  }
+	"cli": {
+		"version": ">= 16.10.1",
+		"appVersionSource": "remote"
+	},
+	"build": {
+		"development": {
+			"developmentClient": true,
+			"distribution": "internal",
+			"channel": "development",
+			"ios": {
+				"resourceClass": "m-medium"
+			},
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true",
+				"SENTRY_ALLOW_FAILURE": "true"
+			}
+		},
+		"preview": {
+			"distribution": "internal",
+			"channel": "preview",
+			"ios": {
+				"resourceClass": "m-medium"
+			},
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true",
+				"SENTRY_ALLOW_FAILURE": "true"
+			}
+		},
+		"production": {
+			"autoIncrement": true,
+			"channel": "production",
+			"ios": {
+				"resourceClass": "m-medium"
+			},
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true",
+				"SENTRY_ALLOW_FAILURE": "true"
+			}
+		},
+		"production-with-sourcemaps": {
+			"autoIncrement": true,
+			"channel": "production",
+			"ios": {
+				"resourceClass": "m-medium"
+			},
+			"env": {
+				"SENTRY_ORG": "eren-kahveci",
+				"SENTRY_PROJECT": "greenthumb",
+				"SENTRY_URL": "https://sentry.io/",
+				"SENTRY_AUTH_TOKEN": "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",
+				"SENTRY_RELEASE_NAME": "greenthumb-ios",
+				"SENTRY_DIST": "1",
+				"SENTRY_UPLOAD_SOURCE_MAPS": "true"
+			}
+		},
+		"apk": {
+			"android": {
+				"buildType": "apk"
+			},
+			"distribution": "internal",
+			"channel": "apk",
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true",
+				"SENTRY_ALLOW_FAILURE": "true"
+			}
+		}
+	},
+	"submit": {
+		"production": {}
+	}
 }

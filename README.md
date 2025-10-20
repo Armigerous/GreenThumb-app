@@ -63,7 +63,7 @@ git clone <repository-url>
 cd GreenThumb-app
 
 # Install dependencies
-npm install
+pnpm install
 
 # Set up environment variables
 cp .env.example .env
@@ -172,13 +172,13 @@ types/
 
 ```bash
 # Development
-npm start                   # Start Expo development server
-npm run android            # Run on Android emulator
-npm run ios                # Run on iOS simulator
+pnpm start                 # Start Expo development server
+pnpm run android           # Run on Android emulator
+pnpm run ios               # Run on iOS simulator
 
 # Testing & Quality
-npm run test               # Run Jest tests
-npm run lint               # ESLint code checking
+pnpm run test              # Run Jest tests
+pnpm run lint              # ESLint code checking
 
 # Building
 eas build --platform all   # Build for iOS and Android
@@ -189,7 +189,7 @@ eas submit                 # Submit to app stores
 
 ### Common Issues
 
-- **Clerk + Supabase Integration:** See [`docs/troubleshooting-clerk-supabase.md`](docs/troubleshooting-clerk-supabase.md) for UUID validation errors
+- **Clerk + Supabase Integration:** Follow the development guidelines below for UUID validation errors
 - **Database Connection:** Ensure environment variables are correctly configured
 - **Build Issues:** Clear cache with `npx expo start --clear`
 
@@ -213,85 +213,6 @@ This disables Sentry's automatic source map upload during build, which can cause
 - **Authentication:** Always use `requesting_user_id()` in RLS policies, never `auth.uid()`
 - **User IDs:** Clerk user IDs are TEXT strings, not UUIDs
 - **Database Schema:** All `user_id` columns must be `TEXT NOT NULL`
-
-## 📅 App Store Launch Plan - January 27, 2025
-
-### 🚨 URGENT: User Interview Findings (January 14, 2025)
-
-**Critical bugs identified** that must be fixed before launch:
-
-- 🔴 **Database not scrollable** - Core functionality broken
-- 🔴 **Database filters non-functional** - Filter buttons cause errors
-- 🔴 **Garden completion status mismatch** - Data integrity issue
-
-**Documentation:**
-
-- **Quick Reference:** `notes/USER_INTERVIEW_SUMMARY.md`
-- **Full Analysis:** `docs/user_feedback.md`
-- **Task Tracking:** `notes/TASK.md` → "USER INTERVIEW FINDINGS" section
-
-### 🔥 Critical Pre-Launch Tasks
-
-#### High Priority (Complete by Jan 16-17)
-
-- [ ] **Fix database scrolling** - Users must be able to scroll through plant database
-- [ ] **Fix database filters** - Filter functionality must work without errors
-- [ ] **Fix garden completion status** - Ensure data consistency between creation and edit flows
-
-#### High Priority (Complete by Jan 18-19)
-
-- [ ] **Fix typography inconsistency** - Quick actions must match brand guidelines
-- [ ] **Fix layout bugs** - Long text should not break UI or hide buttons
-- [ ] **Fix selection logic** - Prevent invalid option combinations in garden setup
-
-#### Medium Priority (Complete by Jan 20)
-
-- [ ] **Fix animation bugs** - Resolve useNativeDriver warnings in task completion
-- [ ] **App Store assets** - Screenshots, app icon, store descriptions
-- [ ] **Beta testing** - Deploy to TestFlight/Play Console for final testing
-- [ ] **Privacy policy & terms** - Required legal documents
-- [ ] **App Store metadata** - Keywords, descriptions, categories
-
-#### Medium Priority (Complete by Jan 25)
-
-- [ ] **Performance optimization** - Memory usage and startup time
-- [ ] **Error tracking** - Sentry integration for crash reporting
-- [ ] **Analytics** - User behavior tracking setup
-- [ ] **Push notification setup** - For task reminders
-- [ ] **Onboarding polish** - First-time user experience
-
-#### Nice to Have (Post-launch)
-
-- [ ] **Plant identification** - Camera-based plant recognition
-- [ ] **Weather integration** - Automatic task adjustment based on weather
-- [ ] **Social features** - Plant care tips sharing
-- [ ] **Premium subscription** - Advanced features and unlimited gardens
-
-### 📊 Current Status
-
-| Feature             | Status      | Notes                                     |
-| ------------------- | ----------- | ----------------------------------------- |
-| Authentication      | ✅ Complete | Smooth animations, secure flow            |
-| Garden Management   | ✅ Complete | Multi-garden support, preferences         |
-| Plant Database      | ✅ Complete | 10,000+ plants with care data             |
-| Task System         | ✅ Complete | Automated generation, completion tracking |
-| Home Dashboard      | ✅ Complete | Task summaries, seasonal illustrations    |
-| Calendar View       | ✅ Complete | Visual task management                    |
-| Profile Management  | ✅ Complete | User settings and preferences             |
-| Build Configuration | ✅ Complete | EAS builds ready for stores               |
-
-### 🚨 Known Issues
-
-1. **Task Animation Bug** - useNativeDriver warnings on task completion
-
-   - **Impact**: Visual glitches during task updates
-   - **Priority**: High (affects user experience)
-   - **ETA**: Fix by Jan 20
-
-2. **Documentation Gaps** - Architecture and technical docs incomplete
-   - **Impact**: Developer productivity
-   - **Priority**: Medium
-   - **ETA**: Complete by Jan 22
 
 ## 🔐 Security & Privacy
 
@@ -325,15 +246,13 @@ eas submit --platform android
 
 ## 📚 Additional Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) - App architecture and patterns
-- [`docs/technical.md`](docs/technical.md) - Implementation details and conventions
-- [`tasks/tasks.md`](tasks/tasks.md) - Development task tracking
-- [`notes/PLANNING.md`](notes/PLANNING.md) - Business strategy and roadmap
+- [`ai/rules/`](ai/rules/) - Development guidelines and best practices
+- [`components/`](components/) - Component documentation and examples
 
 ## 🤝 Contributing
 
-1. Follow the established patterns in `docs/architecture.md`
-2. Update task status in `tasks/tasks.md`
+1. Follow the established patterns in the codebase
+2. Use the `/help` commands for task management
 3. Maintain type safety - no `any` types
 4. Test on both iOS and Android
 5. Update documentation for significant changes
